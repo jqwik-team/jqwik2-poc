@@ -1,0 +1,45 @@
+plugins {
+	id 'java'
+}
+
+repositories {
+	mavenCentral()
+	maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots' }
+}
+
+ext {
+	jqwikVersion = '1.7.3'
+	assertJVersion = '3.24.1'
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
+}
+
+compileTestJava {
+	options.compilerArgs += '-parameters'
+	options.encoding = 'UTF-8'
+}
+
+test {
+	useJUnitPlatform()
+
+	include '**/*Properties.class'
+	include '**/*Test.class'
+	include '**/*Tests.class'
+
+	// testLogging.events = ["passed", "failed", "skipped"]
+    // testLogging.showStandardStreams = true
+}
+
+dependencies {
+	testImplementation("net.jqwik:jqwik:${jqwikVersion}")
+
+	// Fluent assertions library
+	testImplementation("org.assertj:assertj-core:${assertJVersion}")
+}
+
+wrapper {
+	gradleVersion = '8.1.1'
+}
