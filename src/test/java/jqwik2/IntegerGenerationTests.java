@@ -6,9 +6,9 @@ class IntegerGenerationTests {
 
 	@Example
 	void generateRandomly() {
-		RandomInteger randomInteger = new RandomInteger();
+		IntegerGenerator randomInteger = new IntegerGenerator();
 
-		RandomSource randomSource = new DefaultRandomSource();
+		GenerationSource randomSource = new RandomSource();
 
 		for (int i = 0; i < 10; i++) {
 			System.out.println(randomInteger.value(randomSource));
@@ -17,9 +17,9 @@ class IntegerGenerationTests {
 
 	@Example
 	void generateWithFixedSource() {
-		RandomInteger randomInteger = new RandomInteger();
+		IntegerGenerator randomInteger = new IntegerGenerator();
 
-		RandomSource randomSource = new FixedRandomSource(0, 1, -1, Integer.MAX_VALUE, Integer.MIN_VALUE);
+		GenerationSource randomSource = new FixedGenerationSource(0, 1, -1, Integer.MAX_VALUE, Integer.MIN_VALUE);
 
 		for (int i = 0; i < 10; i++) {
 			System.out.println(randomInteger.value(randomSource));

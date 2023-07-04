@@ -1,10 +1,10 @@
 package jqwik2;
 
-public class FixedRandomSource implements RandomSource {
+public class FixedGenerationSource implements GenerationSource {
 	private final int[] stream;
 	private int position = 0;
 
-	public FixedRandomSource(int... stream) {
+	public FixedGenerationSource(int... stream) {
 		this.stream = stream;
 	}
 
