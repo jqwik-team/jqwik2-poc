@@ -9,7 +9,7 @@ public class FixedGenerationSource implements GenerationSource {
 	}
 
 	@Override
-	public int[] next(int count) {
+	public int[] next(int count, int min, int max) {
 		int[] ints = new int[count];
 		for (int i = 0; i < count; i++) {
 			ints[i] = stream[position++];

@@ -7,7 +7,6 @@ public class RandomSource implements GenerationSource {
 
 	final RandomGenerator random;
 
-
 	public RandomSource() {
 		this(new Random().nextLong());
 	}
@@ -17,7 +16,8 @@ public class RandomSource implements GenerationSource {
 	}
 
 	@Override
-	public int[] next(int count) {
-		return random.ints(count).limit(count).toArray();
+	public int[] next(int count, int min, int max) {
+		int bound = Math.max(max + 1, Integer.MAX_VALUE); // Warning is wrong because int overflow possible
+		return random.ints(count, min, bound).limit(count).toArray();
 	}
 }
