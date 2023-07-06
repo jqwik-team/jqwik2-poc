@@ -17,7 +17,7 @@ public class RandomSource implements GenerationSource {
 
 	@Override
 	public int[] next(int count, int min, int max) {
-		int bound = Math.max(max + 1, Integer.MAX_VALUE); // Warning is wrong because int overflow possible
+		int bound = Math.min(max + 1, Integer.MAX_VALUE); // Warning is wrong because int overflow possible
 		return random.ints(count, min, bound).limit(count).toArray();
 	}
 }
