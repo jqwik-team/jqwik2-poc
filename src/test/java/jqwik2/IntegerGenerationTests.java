@@ -1,7 +1,6 @@
 package jqwik2;
 
-import net.jqwik.api.Example;
-import net.jqwik.api.Group;
+import net.jqwik.api.*;
 
 class IntegerGenerationTests {
 
@@ -37,6 +36,20 @@ class IntegerGenerationTests {
 			System.out.println(randomInteger.value(randomSource));
 		}
 	}
+
+
+	@Example
+	@Disabled("exhaustive generation is not implemented yet")
+	void exhaustiveGeneration() {
+		IntegerGenerator integerGenerator = new IntegerGenerator(-3, 5);
+		ExhaustiveGenerationSource exhaustiveSource = new ExhaustiveGenerationSource();
+
+		for (int i = 0; i < 5; i++) {
+			System.out.println(integerGenerator.value(exhaustiveSource));
+		}
+
+	}
+
 
 	@Group
 	class WithEdgeCases {
