@@ -12,7 +12,8 @@ public class RandomSource implements GenerationSource {
 	}
 
 	public RandomSource(long seed) {
-		this.random = new SplittableRandom(seed);
+		this.random = new Random(seed); // To make performance comparable to jqwik1
+		// this.random = new SplittableRandom(seed);
 	}
 
 	@Override
