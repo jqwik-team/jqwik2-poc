@@ -1,4 +1,6 @@
 package jqwik2;
 
-public record GeneratedValue<T>(T value) {
+import java.util.*;
+
+public record GeneratedValue<T>(T value, List<Integer> seeds) {
 }

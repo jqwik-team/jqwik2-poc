@@ -1,5 +1,7 @@
 package jqwik2;
 
+import java.util.*;
+
 public class IntegerGenerator implements ValueGenerator<Integer> {
 
 	private final int min;
@@ -16,6 +18,7 @@ public class IntegerGenerator implements ValueGenerator<Integer> {
 
 	@Override
 	public GeneratedValue<Integer> generate(GenerationSource source) {
-		return new GeneratedValue<>(source.next(1, min, max)[0]);
+		int value = source.next(1, min, max)[0];
+		return new GeneratedValue<>(value, List.of(value));
 	}
 }

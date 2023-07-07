@@ -17,11 +17,15 @@ public class ListGenerator<T> implements ValueGenerator<List<T>> {
 	@Override
 	public GeneratedValue<List<T>> generate(GenerationSource source) {
 		List<T> value = new ArrayList<>();
+		List<Integer> seeds = new ArrayList<>();
 		int length = source.next(1, minLength, maxLength)[0];
+		seeds.add(length);
 		for (int i = 0; i < length; i++) {
-			value.add(elementGenerator.generate(source).value());
+			GeneratedValue<T> element = elementGenerator.generate(source);
+			value.add(element.value());
+			seeds.addAll(element.seeds());
 		}
-		return new GeneratedValue<>(value);
+		return new GeneratedValue<>(value, seeds);
 	}
 
 }

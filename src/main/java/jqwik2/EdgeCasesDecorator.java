@@ -1,5 +1,7 @@
 package jqwik2;
 
+import java.util.*;
+
 public class EdgeCasesDecorator<T> implements ValueGenerator<T> {
 
 	private final ValueGenerator<T> baseGenerator;
@@ -13,16 +15,23 @@ public class EdgeCasesDecorator<T> implements ValueGenerator<T> {
 
 	@Override
 	public GeneratedValue<T> generate(GenerationSource source) {
-		boolean useEdgeCases = source.next(1, 0, 1)[0] == 1;
+		int useEdgeCasesSeed = source.next(1, 0, 1)[0];
+		List<Integer> seeds = new ArrayList<>();
+		seeds.add(useEdgeCasesSeed);
+
+		boolean useEdgeCases = useEdgeCasesSeed == 1;
+		GeneratedValue<T> generated = null;
 		if (useEdgeCases) {
-			return new GeneratedValue<>(edgeCase(source));
+			generated = edgeCase(source);
 		} else {
-			return baseGenerator.generate(source);
+			generated = baseGenerator.generate(source);
 		}
+		seeds.addAll(generated.seeds());
+		return new GeneratedValue<>(generated.value(), seeds);
 	}
 
-	private T edgeCase(GenerationSource source) {
+	private GeneratedValue<T> edgeCase(GenerationSource source) {
 		int selectedIndex = source.next(1, 0, edgeCases.length - 1)[0];
-		return edgeCases[selectedIndex];
+		return new GeneratedValue<>(edgeCases[selectedIndex], List.of(selectedIndex));
 	}
 }
