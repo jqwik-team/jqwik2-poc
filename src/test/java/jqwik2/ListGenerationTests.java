@@ -14,7 +14,7 @@ public class ListGenerationTests {
 		GenerationSource randomSource = new RandomSource();
 
 		for (int i = 0; i < 10; i++) {
-			System.out.println(randomList.value(randomSource));
+			System.out.println(randomList.generate(randomSource));
 		}
 	}
 
@@ -26,7 +26,7 @@ public class ListGenerationTests {
 
 		int count = 100000;
 
-		time(count, () -> randomList.value(randomSource));
+		time(count, () -> randomList.generate(randomSource));
 
 		RandomGenerator<List<Integer>> generator = Arbitraries.integers().between(-10, 100)
 															  .list().ofMinSize(0).ofMaxSize(5)

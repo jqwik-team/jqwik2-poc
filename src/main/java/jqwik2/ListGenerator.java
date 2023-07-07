@@ -15,12 +15,13 @@ public class ListGenerator<T> implements ValueGenerator<List<T>> {
 	}
 
 	@Override
-	public List<T> value(GenerationSource source) {
+	public GeneratedValue<List<T>> generate(GenerationSource source) {
 		List<T> value = new ArrayList<>();
 		int length = source.next(1, minLength, maxLength)[0];
 		for (int i = 0; i < length; i++) {
-			value.add(elementGenerator.value(source));
+			value.add(elementGenerator.generate(source).value());
 		}
-		return value;
+		return new GeneratedValue<>(value);
 	}
+
 }

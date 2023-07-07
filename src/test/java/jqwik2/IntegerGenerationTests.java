@@ -11,7 +11,7 @@ class IntegerGenerationTests {
 		GenerationSource randomSource = new RandomSource();
 
 		for (int i = 0; i < 10; i++) {
-			System.out.println(randomInteger.value(randomSource));
+			System.out.println(randomInteger.generate(randomSource));
 		}
 	}
 
@@ -22,7 +22,7 @@ class IntegerGenerationTests {
 		GenerationSource randomSource = new FixedGenerationSource(0, 1, -1, Integer.MAX_VALUE, Integer.MIN_VALUE);
 
 		for (int i = 0; i < 10; i++) {
-			System.out.println(randomInteger.value(randomSource));
+			System.out.println(randomInteger.generate(randomSource));
 		}
 	}
 
@@ -33,7 +33,7 @@ class IntegerGenerationTests {
 		GenerationSource randomSource = new RandomSource();
 
 		for (int i = 0; i < 10; i++) {
-			System.out.println(randomInteger.value(randomSource));
+			System.out.println(randomInteger.generate(randomSource));
 		}
 	}
 
@@ -45,7 +45,7 @@ class IntegerGenerationTests {
 		ExhaustiveGenerationSource exhaustiveSource = new ExhaustiveGenerationSource();
 
 		for (int i = 0; i < 5; i++) {
-			System.out.println(integerGenerator.value(exhaustiveSource));
+			System.out.println(integerGenerator.generate(exhaustiveSource));
 		}
 
 	}
@@ -61,7 +61,7 @@ class IntegerGenerationTests {
 			EdgeCasesDecorator<Integer> integerGenerator = new EdgeCasesDecorator<>(baseGenerator, 0, 1, -1, 100, -10);
 
 			for (int i = 0; i < 10; i++) {
-				System.out.println(integerGenerator.value(new RandomSource()));
+				System.out.println(integerGenerator.generate(new RandomSource()));
 			}
 		}
 
@@ -80,7 +80,7 @@ class IntegerGenerationTests {
 			);
 
 			for (int i = 0; i < 5; i++) {
-				System.out.println(integerGenerator.value(randomSource));
+				System.out.println(integerGenerator.generate(randomSource));
 			}
 		}
 

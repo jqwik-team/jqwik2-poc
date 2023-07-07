@@ -12,12 +12,12 @@ public class EdgeCasesDecorator<T> implements ValueGenerator<T> {
 	}
 
 	@Override
-	public T value(GenerationSource source) {
+	public GeneratedValue<T> generate(GenerationSource source) {
 		boolean useEdgeCases = source.next(1, 0, 1)[0] == 1;
 		if (useEdgeCases) {
-			return edgeCase(source);
+			return new GeneratedValue<>(edgeCase(source));
 		} else {
-			return baseGenerator.value(source);
+			return baseGenerator.generate(source);
 		}
 	}
 
