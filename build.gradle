@@ -38,6 +38,9 @@ dependencies {
 
 	// Fluent assertions library
 	testImplementation("org.assertj:assertj-core:${assertJVersion}")
+
+	// To work around annoying bug in "IntelliJ's test runner"
+	testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.1")
 }
 
 wrapper {

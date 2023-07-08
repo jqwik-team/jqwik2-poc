@@ -27,11 +27,11 @@ public class EdgeCasesDecorator<T> implements ValueGenerator<T> {
 			generated = baseGenerator.generate(source);
 		}
 		seeds.addAll(generated.seeds());
-		return new GeneratedValue<>(generated.value(), seeds);
+		return new GeneratedValue<>(generated.value(), this, seeds);
 	}
 
 	private GeneratedValue<T> edgeCase(GenerationSource source) {
 		int selectedIndex = source.next(1, 0, edgeCases.length - 1)[0];
-		return new GeneratedValue<>(edgeCases[selectedIndex], List.of(selectedIndex));
+		return new GeneratedValue<>(edgeCases[selectedIndex], this, List.of(selectedIndex));
 	}
 }

@@ -2,6 +2,8 @@ package jqwik2;
 
 import net.jqwik.api.*;
 
+import java.util.*;
+
 class IntegerGenerationTests {
 
 	@Example
@@ -19,7 +21,7 @@ class IntegerGenerationTests {
 	void generateWithFixedSource() {
 		IntegerGenerator randomInteger = new IntegerGenerator();
 
-		GenerationSource randomSource = new FixedGenerationSource(0, 1, -1, Integer.MAX_VALUE, Integer.MIN_VALUE);
+		GenerationSource randomSource = new FixedGenerationSource(List.of(0, 1, -1, Integer.MAX_VALUE, Integer.MIN_VALUE));
 
 		for (int i = 0; i < 10; i++) {
 			System.out.println(randomInteger.generate(randomSource));
@@ -71,13 +73,13 @@ class IntegerGenerationTests {
 
 			EdgeCasesDecorator<Integer> integerGenerator = new EdgeCasesDecorator<>(baseGenerator, 0, 1, -1, 100, -10);
 
-			GenerationSource randomSource = new FixedGenerationSource(
+			GenerationSource randomSource = new FixedGenerationSource(List.of(
 				1, 0,
 				1, 1,
 				1, 2,
 				1, 3,
 				1, 4
-			);
+			));
 
 			for (int i = 0; i < 5; i++) {
 				System.out.println(integerGenerator.generate(randomSource));

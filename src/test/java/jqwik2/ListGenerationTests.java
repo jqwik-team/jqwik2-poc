@@ -19,6 +19,22 @@ public class ListGenerationTests {
 	}
 
 	@Example
+	void regenerateValue() {
+		IntegerGenerator randomInteger = new IntegerGenerator(-10, 100);
+		ListGenerator<Integer> randomList = new ListGenerator<>(randomInteger, 0, 5);
+
+		GenerationSource randomSource = new RandomSource();
+
+		for (int i = 0; i < 10; i++) {
+			GeneratedValue<List<Integer>> generated = randomList.generate(randomSource);
+			GeneratedValue<List<Integer>> regenerated = generated.regenerate();
+
+			System.out.println("gen  : " + generated.value());
+			System.out.println("regen: " + regenerated.value());
+		}
+	}
+
+	@Example
 	void performance() {
 		IntegerGenerator randomInteger = new IntegerGenerator(-10, 100);
 		ListGenerator<Integer> randomList = new ListGenerator<>(randomInteger, 0, 5);
