@@ -6,11 +6,13 @@ import java.util.List;
 public class EdgeCasesDecorator<T> implements ValueGenerator<T> {
 
 	private final ValueGenerator<T> baseGenerator;
-	private final T[] edgeCases;
+	private final List<T> edgeCases;
 
-	@SafeVarargs
-	public EdgeCasesDecorator(ValueGenerator<T> baseGenerator, T... edgeCases) {
+	public EdgeCasesDecorator(ValueGenerator<T> baseGenerator, List<T> edgeCases) {
 		this.baseGenerator = baseGenerator;
+		if (edgeCases.isEmpty()) {
+			throw new IllegalArgumentException("Edge cases must not be empty");
+		}
 		this.edgeCases = edgeCases;
 	}
 
@@ -31,7 +33,7 @@ public class EdgeCasesDecorator<T> implements ValueGenerator<T> {
 	}
 
 	private GeneratedValue<T> edgeCase(GenerationSource source) {
-		int selectedIndex = source.next(1, 0, edgeCases.length - 1)[0];
-		return new GeneratedValue<>(edgeCases[selectedIndex], this, List.of(selectedIndex));
+		int selectedIndex = source.next(1, 0, edgeCases.size() - 1)[0];
+		return new GeneratedValue<>(edgeCases.get(selectedIndex), this, List.of(selectedIndex));
 	}
 }

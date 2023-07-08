@@ -25,7 +25,6 @@ public class ListGenerator<T> implements ValueGenerator<List<T>> {
 			GeneratedValue<T> element = elementGenerator.generate(source);
 			value.add(element.value());
 			elements.add(element);
-			// seeds.addAll(element.seeds());
 		}
 		return new GeneratedValue<>(value, this, seeds, elements);
 	}

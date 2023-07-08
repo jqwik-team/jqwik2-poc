@@ -60,7 +60,10 @@ class IntegerGenerationTests {
 		void generateRandomlyWithEdgeCases() {
 			IntegerGenerator baseGenerator = new IntegerGenerator(-10, 100);
 
-			EdgeCasesDecorator<Integer> integerGenerator = new EdgeCasesDecorator<>(baseGenerator, 0, 1, -1, 100, -10);
+			EdgeCasesDecorator<Integer> integerGenerator = new EdgeCasesDecorator<>(
+				baseGenerator,
+				List.of(0, 1, -1, 100, -10)
+			);
 
 			for (int i = 0; i < 10; i++) {
 				System.out.println(integerGenerator.generate(new RandomSource()));
@@ -71,7 +74,10 @@ class IntegerGenerationTests {
 		void generateOnlyEdgeCasesWithFixedSource() {
 			IntegerGenerator baseGenerator = new IntegerGenerator(-10, 100);
 
-			EdgeCasesDecorator<Integer> integerGenerator = new EdgeCasesDecorator<>(baseGenerator, 0, 1, -1, 100, -10);
+			EdgeCasesDecorator<Integer> integerGenerator = new EdgeCasesDecorator<>(
+				baseGenerator,
+				List.of(0, 1, -1, 100, -10)
+			);
 
 			GenerationSource randomSource = new FixedGenerationSource(List.of(
 				1, 0,

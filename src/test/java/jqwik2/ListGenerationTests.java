@@ -35,6 +35,28 @@ public class ListGenerationTests {
 	}
 
 	@Example
+	void generateRandomlyWithEdgeCases() {
+		IntegerGenerator randomInteger = new IntegerGenerator(-10, 100);
+		ListGenerator<Integer> randomList = new ListGenerator<>(randomInteger, 0, 5);
+
+		List<List<Integer>> edgeCases = List.of(
+			List.of(),
+			List.of(0),
+			List.of(-1),
+			List.of(1)
+		);
+
+		EdgeCasesDecorator<List<Integer>> listGenerator = new EdgeCasesDecorator<>(
+			randomList,
+			edgeCases
+		);
+
+		for (int i = 0; i < 10; i++) {
+			System.out.println(listGenerator.generate(new RandomSource()));
+		}
+	}
+
+	@Example
 	void performance() {
 		IntegerGenerator randomInteger = new IntegerGenerator(-10, 100);
 		ListGenerator<Integer> randomList = new ListGenerator<>(randomInteger, 0, 5);

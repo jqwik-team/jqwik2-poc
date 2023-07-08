@@ -50,7 +50,7 @@ public final class GeneratedValue<T> {
 
 	@Override
 	public String toString() {
-		return "(%s, %s)".formatted(value, baseSeeds);
+		return "(%s, %s)".formatted(value, seeds().toList());
 	}
 
 }
