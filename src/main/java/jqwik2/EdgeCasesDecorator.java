@@ -1,6 +1,7 @@
 package jqwik2;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EdgeCasesDecorator<T> implements ValueGenerator<T> {
 
@@ -26,8 +27,7 @@ public class EdgeCasesDecorator<T> implements ValueGenerator<T> {
 		} else {
 			generated = baseGenerator.generate(source);
 		}
-		seeds.addAll(generated.seeds());
-		return new GeneratedValue<>(generated.value(), this, seeds);
+		return new GeneratedValue<>(generated.value(), this, seeds, List.of(generated));
 	}
 
 	private GeneratedValue<T> edgeCase(GenerationSource source) {
