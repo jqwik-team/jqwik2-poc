@@ -8,7 +8,7 @@ repositories {
 }
 
 ext {
-	jqwikVersion = '1.7.3'
+	jqwikVersion = '1.7.4'
 	assertJVersion = '3.24.1'
 }
 
@@ -35,6 +35,7 @@ test {
 
 dependencies {
 	testImplementation("net.jqwik:jqwik:${jqwikVersion}")
+	testImplementation("net.jqwik:jqwik-testing:${jqwikVersion}")
 
 	// Fluent assertions library
 	testImplementation("org.assertj:assertj-core:${assertJVersion}")
@@ -44,5 +45,5 @@ dependencies {
 }
 
 wrapper {
-	gradleVersion = '8.1.1'
+	gradleVersion = '8.2.1'
 }
