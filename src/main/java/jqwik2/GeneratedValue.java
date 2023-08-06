@@ -7,22 +7,28 @@ import java.util.stream.*;
 public final class GeneratedValue<T> {
 	private final T value;
 	private final ValueGenerator<T> generator;
+	private final Seed seed;
 	private final List<Integer> baseSeeds;
 	private final List<GeneratedValue<?>> children;
 
-	public GeneratedValue(T value, ValueGenerator<T> generator, List<Integer> seeds) {
-		this(value, generator, seeds, List.of());
+	public GeneratedValue(T value, ValueGenerator<T> generator, Seed seed, List<Integer> seeds) {
+		this(value, generator, seed, seeds, List.of());
 	}
 
-	public GeneratedValue(T value, ValueGenerator<T> generator, List<Integer> baseSeeds, List<GeneratedValue<?>> children) {
+	public GeneratedValue(T value, ValueGenerator<T> generator, Seed seed, List<Integer> baseSeeds, List<GeneratedValue<?>> children) {
 		this.value = value;
 		this.generator = generator;
+		this.seed = seed;
 		this.baseSeeds = baseSeeds;
 		this.children = children;
 	}
 
 	public T value() {
 		return value;
+	}
+
+	public Seed seed() {
+		return seed;
 	}
 
 	public Stream<Integer> seeds() {

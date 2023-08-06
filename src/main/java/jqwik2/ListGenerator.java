@@ -19,14 +19,18 @@ public class ListGenerator<T> implements ValueGenerator<List<T>> {
 		List<T> value = new ArrayList<>();
 		List<GeneratedValue<?>> elements = new ArrayList<>();
 		List<Integer> seeds = new ArrayList<>();
-		int length = source.next(1, minLength, maxLength)[0];
+		int[] values = source.next(1, minLength, maxLength);
+		int length = values[0];
 		seeds.add(length);
 		for (int i = 0; i < length; i++) {
 			GeneratedValue<T> element = elementGenerator.generate(source);
 			value.add(element.value());
 			elements.add(element);
 		}
-		return new GeneratedValue<>(value, this, seeds, elements);
+		BaseSeed base = new BaseSeed(1, minLength, maxLength, values);
+		List<Seed> children = elements.stream().map(GeneratedValue::seed).toList();
+		Seed seed = new ParentSeed(base, children);
+		return new GeneratedValue<>(value, this, seed, seeds, elements);
 	}
 
 }

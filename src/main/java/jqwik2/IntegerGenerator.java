@@ -18,7 +18,8 @@ public class IntegerGenerator implements ValueGenerator<Integer> {
 
 	@Override
 	public GeneratedValue<Integer> generate(GenerationSource source) {
-		int value = source.next(1, min, max)[0];
-		return new GeneratedValue<>(value, this, List.of(value));
+		int[] values = source.next(1, min, max);
+		int value = values[0];
+		return new GeneratedValue<>(value, this, new BaseSeed(1, min, max, values), List.of(value));
 	}
 }
