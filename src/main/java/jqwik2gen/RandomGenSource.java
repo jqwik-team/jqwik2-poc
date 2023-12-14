@@ -2,14 +2,14 @@ package jqwik2gen;
 
 import java.util.*;
 
-public final class RandomSource implements GenSource {
+public final class RandomGenSource implements GenSource {
 	private final Random random;
 
-	public RandomSource() {
+	public RandomGenSource() {
 		this.random = new Random();
 	}
 
-	public RandomSource(long seed) {
+	public RandomGenSource(long seed) {
 		this.random = new Random(seed);
 	}
 

@@ -12,7 +12,7 @@ class GenerateIntegerTests {
 	void smallPositive() {
 		Generator<Integer> gen0to10 = new IntegerGen(0, 10);
 
-		RandomSource source = new RandomSource(42);
+		RandomGenSource source = new RandomGenSource(42);
 
 		Shrinkable<Integer> shrinkable = gen0to10.generate(source);
 

@@ -2,7 +2,7 @@ package jqwik2gen;
 
 import java.util.*;
 
-public sealed interface GenSource permits RandomSource, ReproducingSource {
+public sealed interface GenSource permits RandomGenSource, ReproducingSource {
 	int next(int max);
 }
 
