@@ -30,10 +30,14 @@ record UnshrinkableRecording() implements SourceRecording {
 	}
 }
 
-record AtomicRecording(int... seeds) implements SourceRecording {
+record AtomicRecording(List<Integer> seeds) implements SourceRecording {
+	AtomicRecording(Integer... seeds) {
+		this(Arrays.asList(seeds));
+	}
+
 	@Override
 	public Iterator<Integer> iterator() {
-		return Arrays.stream(seeds).iterator();
+		return seeds.iterator();
 	}
 
 	@Override
@@ -43,8 +47,16 @@ record AtomicRecording(int... seeds) implements SourceRecording {
 
 	@Override
 	public Stream<SourceRecording> shrink() {
-		// TODO: Implement shrinking
-		return Stream.empty();
+		// TODO: Shrink each seed from existing to 0 with in-between steps
+		List<SourceRecording> shrinkings = new ArrayList<>();
+		for (int i = seeds.size() - 1; i >= 0; i--) {
+			List<Integer> shrunk = new ArrayList<>(seeds);
+			if (shrunk.get(i) > 0) {
+				shrunk.set(i, 0);
+				shrinkings.add(new AtomicRecording(shrunk));
+			}
+		}
+		return shrinkings.stream();
 	}
 }
 

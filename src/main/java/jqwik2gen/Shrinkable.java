@@ -1,5 +1,6 @@
 package jqwik2gen;
 
+import java.util.*;
 import java.util.stream.*;
 
 public sealed interface Shrinkable<T> {
@@ -43,6 +44,13 @@ record Unshrinkable<T>(T value) implements Shrinkable<T> {
 record GeneratedShrinkable<T>(T value, Generator<T> generator, SourceRecording recording) implements Shrinkable<T> {
 	@Override
 	public Stream<Shrinkable<T>> shrink() {
-		return recording.shrink().map(s -> generator.generate(new RecordedSource(s)));
+		return recording.shrink()
+						.map(s -> {
+							try {
+								return generator.generate(new RecordedSource(s));
+							} catch (CannotGenerateException e) {
+								return null;
+							}
+						}).filter(Objects::nonNull);
 	}
 }

@@ -30,10 +30,9 @@ public class ShrinkingTests {
 	@Example
 	void shrinkPositiveIntegers() {
 		IntegerGenerator ints = new IntegerGenerator(-10, 100);
-		GenSource source = new RecordedSource(new AtomicRecording(100, 0));
+		GenSource source = new RecordedSource(new AtomicRecording(10, 1));
 		Shrinkable<Integer> shrinkable = ints.generate(source);
 
-		Assertions.fail("Shrinking has not been implemented");
 		shrinkable.shrink().forEach(s -> {
 			System.out.println("shrink: " + s.value());
 		});
