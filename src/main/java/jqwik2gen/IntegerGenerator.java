@@ -12,11 +12,13 @@ public class IntegerGenerator implements Generator<Integer>{
 	@Override
 	public Shrinkable<Integer> generate(GenSource source) {
 		while (true) {
-			int value = source.next(Math.max(Math.abs(min), Math.abs(max)) + 1);
-			int sign = source.next(2);
-			Integer valueWithSign = sign == 0 ? value : -value;
+			AtomicRecording recorded = new AtomicRecording();
+			int value = recorded.push(
+				source.next(Math.max(Math.abs(min), Math.abs(max)) + 1)
+			);
+			int sign = recorded.push(source.next(2));
+			int valueWithSign = sign == 0 ? value : -value;
 			if (valueWithSign >= min && valueWithSign <= max) {
-				SourceRecording recorded = new AtomicRecording(value, sign);
 				return new GeneratedShrinkable<>(valueWithSign, this, recorded);
 			}
 		}

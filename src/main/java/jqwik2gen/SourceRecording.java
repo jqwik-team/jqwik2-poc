@@ -35,6 +35,19 @@ record AtomicRecording(List<Integer> seeds) implements SourceRecording {
 		this(Arrays.asList(seeds));
 	}
 
+	AtomicRecording() {
+		this(new ArrayList<>());
+	}
+
+	int push(int seed) {
+		seeds.add(seed);
+		return seed;
+	}
+
+	int get(int index) {
+		return seeds.get(index);
+	}
+
 	@Override
 	public Iterator<Integer> iterator() {
 		return seeds.iterator();
