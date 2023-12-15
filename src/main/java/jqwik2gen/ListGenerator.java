@@ -21,7 +21,7 @@ public class ListGenerator<T> implements Generator<List<T>> {
 		}
 		SourceRecording recorded = new TreeRecording(
 			new AtomicRecording(size),
-			shrinkables.stream().map(Shrinkable::source).toList()
+			shrinkables.stream().map(Shrinkable::recording).toList()
 		);
 		return new GeneratedShrinkable<>(
 			shrinkables.stream().map(Shrinkable::value).toList(),

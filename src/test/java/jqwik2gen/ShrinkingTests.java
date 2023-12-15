@@ -1,5 +1,7 @@
 package jqwik2gen;
 
+import org.assertj.core.api.*;
+
 import net.jqwik.api.*;
 
 import static org.assertj.core.api.Assertions.*;
@@ -24,4 +26,17 @@ public class ShrinkingTests {
 			ints.generate(recorded);
 		}).isInstanceOf(CannotGenerateException.class);
 	}
+
+	@Example
+	void shrinkPositiveIntegers() {
+		IntegerGenerator ints = new IntegerGenerator(-10, 100);
+		GenSource source = new RecordedSource(new AtomicRecording(100, 0));
+		Shrinkable<Integer> shrinkable = ints.generate(source);
+
+		Assertions.fail("Shrinking has not been implemented");
+		shrinkable.shrink().forEach(s -> {
+			System.out.println("shrink: " + s.value());
+		});
+	}
+
 }

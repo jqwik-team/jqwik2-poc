@@ -1,13 +1,16 @@
 package jqwik2gen;
 
 import java.util.*;
+import java.util.stream.*;
 
-sealed interface SourceRecording
+public sealed interface SourceRecording
 	permits AtomicRecording, TreeRecording, UnshrinkableRecording {
 
 	Iterator<Integer> iterator();
 
 	List<SourceRecording> children();
+
+	Stream<SourceRecording> shrink();
 }
 
 record UnshrinkableRecording() implements SourceRecording {
@@ -20,6 +23,11 @@ record UnshrinkableRecording() implements SourceRecording {
 	public List<SourceRecording> children() {
 		return Collections.emptyList();
 	}
+
+	@Override
+	public Stream<SourceRecording> shrink() {
+		return Stream.empty();
+	}
 }
 
 record AtomicRecording(int... seeds) implements SourceRecording {
@@ -31,6 +39,12 @@ record AtomicRecording(int... seeds) implements SourceRecording {
 	@Override
 	public List<SourceRecording> children() {
 		return Collections.emptyList();
+	}
+
+	@Override
+	public Stream<SourceRecording> shrink() {
+		// TODO: Implement shrinking
+		return Stream.empty();
 	}
 }
 
@@ -46,5 +60,12 @@ record TreeRecording(SourceRecording head, List<SourceRecording> children) imple
 	public Iterator<Integer> iterator() {
 		return head.iterator();
 	}
+
+	@Override
+	public Stream<SourceRecording> shrink() {
+		// TODO: Implement shrinking
+		return Stream.empty();
+	}
+
 }
 
