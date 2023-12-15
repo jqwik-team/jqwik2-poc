@@ -2,49 +2,28 @@ package jqwik2gen;
 
 import java.util.*;
 
-sealed interface RecordedSource
-	permits AtomicSource, TreeSource, UnshrinkableSource {
+public final class RecordedSource implements GenSource {
+	private final Iterator<Integer> iterator;
+	private final Iterator<SourceRecording> children;
 
-	Iterator<Integer> iterator();
-
-	List<RecordedSource> children();
-}
-
-record UnshrinkableSource() implements RecordedSource {
-	@Override
-	public Iterator<Integer> iterator() {
-		return Collections.emptyIterator();
+	public RecordedSource(SourceRecording source) {
+		this.children = source.children().iterator();
+		this.iterator = source.iterator();
 	}
 
 	@Override
-	public List<RecordedSource> children() {
-		return Collections.emptyList();
-	}
-}
-
-record AtomicSource(int... seeds) implements RecordedSource {
-	@Override
-	public Iterator<Integer> iterator() {
-		return Arrays.stream(seeds).iterator();
+	public int next(int max) {
+		if (iterator.hasNext())
+			return iterator.next();
+		else
+			throw new CannotGenerateException("No more values!");
 	}
 
 	@Override
-	public List<RecordedSource> children() {
-		return Collections.emptyList();
+	public GenSource child() {
+		if (children.hasNext())
+			return new RecordedSource(children.next());
+		else
+			throw new CannotGenerateException("No more children!");
 	}
 }
-
-// record TupleSource(List<RecordedSource> tuple) implements RecordedSource {
-// 	@Override
-// 	public Collection<RecordedSource> children() {
-// 		return Collections.emptyList();
-// 	}
-// }
-
-record TreeSource(RecordedSource head, List<RecordedSource> children) implements RecordedSource {
-	@Override
-	public Iterator<Integer> iterator() {
-		return head.iterator();
-	}
-}
-

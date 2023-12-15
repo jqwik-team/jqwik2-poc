@@ -5,10 +5,10 @@ public sealed interface Shrinkable<T> {
 
 	Generator<T> generator();
 
-	RecordedSource source();
+	SourceRecording source();
 
 	default T regenerate() {
-		return generator().generate(new ReproducingSource(source())).value();
+		return generator().generate(new RecordedSource(source())).value();
 	}
 }
 
@@ -19,8 +19,8 @@ record Unshrinkable<T>(T value) implements Shrinkable<T> {
 	}
 
 	@Override
-	public RecordedSource source() {
-		return new UnshrinkableSource();
+	public SourceRecording source() {
+		return new UnshrinkableRecording();
 	}
 
 	private class ConstantGenerator implements Generator<T> {
@@ -31,5 +31,5 @@ record Unshrinkable<T>(T value) implements Shrinkable<T> {
 	}
 }
 
-record GeneratedShrinkable<T>(T value, Generator<T> generator, RecordedSource source) implements Shrinkable<T> {
+record GeneratedShrinkable<T>(T value, Generator<T> generator, SourceRecording source) implements Shrinkable<T> {
 }

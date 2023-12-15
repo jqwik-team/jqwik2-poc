@@ -1,7 +1,5 @@
 package jqwik2gen;
 
-import java.util.*;
-
 public class IntegerGenerator implements Generator<Integer>{
 	private final int min;
 	private final int max;
@@ -18,7 +16,7 @@ public class IntegerGenerator implements Generator<Integer>{
 			int sign = source.next(2);
 			Integer valueWithSign = sign == 0 ? value : -value;
 			if (valueWithSign >= min && valueWithSign <= max) {
-				RecordedSource recorded = new AtomicSource(value, sign);
+				SourceRecording recorded = new AtomicRecording(value, sign);
 				return new GeneratedShrinkable<>(valueWithSign, this, recorded);
 			}
 		}

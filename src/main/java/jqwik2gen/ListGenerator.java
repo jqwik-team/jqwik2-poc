@@ -19,8 +19,8 @@ public class ListGenerator<T> implements Generator<List<T>> {
 			GenSource childSource = source.child();
 			shrinkables.add(elements.generate(childSource));
 		}
-		RecordedSource recorded = new TreeSource(
-			new AtomicSource(size),
+		SourceRecording recorded = new TreeRecording(
+			new AtomicRecording(size),
 			shrinkables.stream().map(Shrinkable::source).toList()
 		);
 		return new GeneratedShrinkable<>(
