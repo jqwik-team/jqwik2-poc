@@ -16,10 +16,10 @@ record UnshrinkableSource() implements RecordedSource {
 	}
 }
 
-record AtomicSource(int seed) implements RecordedSource {
+record AtomicSource(int... seeds) implements RecordedSource {
 	@Override
 	public Stream<Integer> stream() {
-		return Stream.of(seed);
+		return Arrays.stream(seeds).boxed();
 	}
 }
 
