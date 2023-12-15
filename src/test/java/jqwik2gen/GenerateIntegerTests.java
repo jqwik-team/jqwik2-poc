@@ -17,7 +17,8 @@ class GenerateIntegerTests {
 			Assertions.assertThat(shrinkable).isNotNull();
 			System.out.println("value=" + shrinkable.value());
 
-
+			Integer regenerated = shrinkable.regenerate();
+			System.out.println("regenerated=" + regenerated);
 		}
 	}
 }

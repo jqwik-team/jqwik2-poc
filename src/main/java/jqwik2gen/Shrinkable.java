@@ -6,6 +6,10 @@ public sealed interface Shrinkable<T> {
 	Generator<T> generator();
 
 	RecordedSource source();
+
+	default T regenerate() {
+		return generator().generate(new ReproducingSource(source())).value();
+	}
 }
 
 record Unshrinkable<T>(T value) implements Shrinkable<T> {
