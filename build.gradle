@@ -13,8 +13,8 @@ ext {
 }
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_17
-	targetCompatibility = JavaVersion.VERSION_17
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
 }
 
 compileTestJava {
@@ -23,14 +23,16 @@ compileTestJava {
 }
 
 test {
-	useJUnitPlatform()
+	useJUnitPlatform {
+		includeEngines 'jqwik'
+	}
 
 	include '**/*Properties.class'
 	include '**/*Test.class'
 	include '**/*Tests.class'
 
-	// testLogging.events = ["passed", "failed", "skipped"]
-    // testLogging.showStandardStreams = true
+// testLogging.events = ["passed", "failed", "skipped"]
+// testLogging.showStandardStreams = true
 }
 
 dependencies {
