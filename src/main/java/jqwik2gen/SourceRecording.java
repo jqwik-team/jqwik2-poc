@@ -81,6 +81,7 @@ record AtomicRecording(List<Integer> seeds) implements SourceRecording {
 // }
 
 record TreeRecording(SourceRecording head, List<SourceRecording> children) implements SourceRecording {
+
 	@Override
 	public Iterator<Integer> iterator() {
 		return head.iterator();
@@ -92,5 +93,9 @@ record TreeRecording(SourceRecording head, List<SourceRecording> children) imple
 		return Stream.empty();
 	}
 
+	public SourceRecording pushChild(SourceRecording recording) {
+		children.add(recording);
+		return recording;
+	}
 }
 
