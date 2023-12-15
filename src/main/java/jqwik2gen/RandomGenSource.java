@@ -17,4 +17,9 @@ public final class RandomGenSource implements GenSource {
 	public int next(int max) {
 		return random.nextInt(max);
 	}
+
+	@Override
+	public GenSource child() {
+		return new RandomGenSource(random.nextLong());
+	}
 }

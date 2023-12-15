@@ -1,39 +1,50 @@
 package jqwik2gen;
 
 import java.util.*;
-import java.util.stream.*;
 
 sealed interface RecordedSource
-	permits AtomicSource, TreeSource, TupleSource, UnshrinkableSource {
+	permits AtomicSource, TreeSource, UnshrinkableSource {
 
-	Stream<Integer> stream();
+	Iterator<Integer> iterator();
+
+	List<RecordedSource> children();
 }
 
 record UnshrinkableSource() implements RecordedSource {
 	@Override
-	public Stream<Integer> stream() {
-		return Stream.empty();
+	public Iterator<Integer> iterator() {
+		return Collections.emptyIterator();
+	}
+
+	@Override
+	public List<RecordedSource> children() {
+		return Collections.emptyList();
 	}
 }
 
 record AtomicSource(int... seeds) implements RecordedSource {
 	@Override
-	public Stream<Integer> stream() {
-		return Arrays.stream(seeds).boxed();
+	public Iterator<Integer> iterator() {
+		return Arrays.stream(seeds).iterator();
+	}
+
+	@Override
+	public List<RecordedSource> children() {
+		return Collections.emptyList();
 	}
 }
 
-record TupleSource(List<RecordedSource> tuple) implements RecordedSource {
-	@Override
-	public Stream<Integer> stream() {
-		return tuple.stream().flatMap(RecordedSource::stream);
-	}
-}
+// record TupleSource(List<RecordedSource> tuple) implements RecordedSource {
+// 	@Override
+// 	public Collection<RecordedSource> children() {
+// 		return Collections.emptyList();
+// 	}
+// }
 
-record TreeSource(RecordedSource head, List<TreeSource> children) implements RecordedSource {
+record TreeSource(RecordedSource head, List<RecordedSource> children) implements RecordedSource {
 	@Override
-	public Stream<Integer> stream() {
-		return Stream.concat(head.stream(), children.stream().flatMap(RecordedSource::stream));
+	public Iterator<Integer> iterator() {
+		return head.iterator();
 	}
 }
 
