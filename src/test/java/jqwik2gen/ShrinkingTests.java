@@ -1,6 +1,7 @@
 package jqwik2gen;
 
 import java.util.*;
+import java.util.function.*;
 
 import org.assertj.core.api.*;
 
@@ -66,6 +67,29 @@ public class ShrinkingTests {
 			assertThat(s.recording()).isLessThan(shrinkable.recording());
 			System.out.println("shrink: " + s.value());
 		});
+	}
+
+	@Example
+	void shrinkWithProperty() {
+		IntegerGenerator ints = new IntegerGenerator(-10000, 10000);
+
+		// 9999
+		GenSource source = new RecordedSource(new AtomicRecording(9999, 0));
+		Shrinkable<Integer> shrinkable = ints.generate(source);
+
+		Function<List<Object>, PropertyExecutionResult> property = args -> {
+			int i = (int) args.get(0);
+			return i > 1000 ? PropertyExecutionResult.FAILED : PropertyExecutionResult.SUCCESSFUL;
+		};
+
+		assertThat(property.apply(List.of(shrinkable.value()))).isEqualTo(PropertyExecutionResult.FAILED);
+
+		// new Shrinker(shrinkable, property).shrink().forEach(s -> {
+		// 	assertThat(s.recording()).isLessThan(shrinkable.recording());
+		// 	System.out.println("shrink: " + s.value());
+		// });
+
+
 	}
 
 }
