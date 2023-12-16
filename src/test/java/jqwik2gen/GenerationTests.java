@@ -29,7 +29,7 @@ class GenerationTests {
 	@Example
 	void listOfInts() {
 		IntegerGenerator ints = new IntegerGenerator(-10, 100);
-		Generator<List<Integer>> listOfInts = new ListGenerator(ints, 5);
+		Generator<List<Integer>> listOfInts = new ListGenerator<>(ints, 5);
 
 		RandomGenSource source = new RandomGenSource(42);
 

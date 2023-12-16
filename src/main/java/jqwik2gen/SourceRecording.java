@@ -118,9 +118,8 @@ record TreeRecording(SourceRecording head, List<SourceRecording> children) imple
 	}
 
 	@Override
-	public Stream<SourceRecording> shrink() {
-		// TODO: Implement shrinking
-		return Stream.empty();
+	public Stream<? extends SourceRecording> shrink() {
+		return new TreeShrinker(this).shrink();
 	}
 
 	public SourceRecording pushChild(SourceRecording recording) {
