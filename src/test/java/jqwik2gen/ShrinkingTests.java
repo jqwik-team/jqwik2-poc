@@ -71,10 +71,10 @@ public class ShrinkingTests {
 
 	@Example
 	void shrinkWithProperty() {
-		IntegerGenerator ints = new IntegerGenerator(-10000, 10000);
+		IntegerGenerator ints = new IntegerGenerator(-100000, 100000);
 
-		// 9999
-		GenSource source = new RecordedSource(new AtomicRecording(9999, 0));
+		// 99999
+		GenSource source = new RecordedSource(new AtomicRecording(99999, 0));
 		Shrinkable<Integer> shrinkable = ints.generate(source);
 
 		Function<List<Object>, PropertyExecutionResult> property = args -> {
@@ -84,10 +84,15 @@ public class ShrinkingTests {
 
 		assertThat(property.apply(List.of(shrinkable.value()))).isEqualTo(PropertyExecutionResult.FAILED);
 
-		// new Shrinker(shrinkable, property).shrink().forEach(s -> {
-		// 	assertThat(s.recording()).isLessThan(shrinkable.recording());
-		// 	System.out.println("shrink: " + s.value());
-		// });
+		Shrinker shrinker = new Shrinker(List.of(shrinkable), property);
+
+		while(true) {
+			Optional<List<Shrinkable<?>>> next = shrinker.nextStep();
+			if (next.isEmpty()) {
+				break;
+			}
+			System.out.println("shrink: " + next.get());
+		}
 
 
 	}

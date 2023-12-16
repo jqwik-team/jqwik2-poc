@@ -3,7 +3,7 @@ package jqwik2gen;
 import java.util.*;
 import java.util.stream.*;
 
-public sealed interface Shrinkable<T> {
+public sealed interface Shrinkable<T> extends Comparable<Shrinkable<T>> {
 	T value();
 
 	Generator<T> generator();
@@ -33,6 +33,11 @@ record Unshrinkable<T>(T value) implements Shrinkable<T> {
 		return Stream.empty();
 	}
 
+	@Override
+	public int compareTo(Shrinkable<T> o) {
+		return this.recording().compareTo(o.recording());
+	}
+
 	private class ConstantGenerator implements Generator<T> {
 		@Override
 		public Shrinkable<T> generate(GenSource source) {
@@ -52,5 +57,10 @@ record GeneratedShrinkable<T>(T value, Generator<T> generator, SourceRecording r
 								return null;
 							}
 						}).filter(Objects::nonNull);
+	}
+
+	@Override
+	public int compareTo(Shrinkable<T> o) {
+		return this.recording().compareTo(o.recording());
 	}
 }
