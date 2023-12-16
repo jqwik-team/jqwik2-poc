@@ -140,10 +140,31 @@ record TreeRecording(SourceRecording head, List<SourceRecording> children) imple
 			if (headComparison != 0) {
 				return headComparison;
 			}
-			// TODO: Compare children
-			return 0;
+			List<SourceRecording> mySortedChildren = new ArrayList<>(this.children);
+			Collections.sort(mySortedChildren);
+			List<SourceRecording> otherSortedChildren = new ArrayList<>(otherTree.children);
+			Collections.sort(otherSortedChildren);
+			int sortedChildrenComparison = compareChildren(mySortedChildren, otherSortedChildren);
+			if (sortedChildrenComparison != 0) {
+				return sortedChildrenComparison;
+			}
+			return compareChildren(this.children, otherTree.children);
 		}
 
+		return 0;
+	}
+
+	private int compareChildren(List<SourceRecording> left, List<SourceRecording> right) {
+		int sizeComparison = Integer.compare(left.size(), right.size());
+		if (sizeComparison != 0) {
+			return sizeComparison;
+		}
+		for (int i = 0; i < left.size(); i++) {
+			int childComparison = left.get(i).compareTo(right.get(i));
+			if (childComparison != 0) {
+				return childComparison;
+			}
+		}
 		return 0;
 	}
 }

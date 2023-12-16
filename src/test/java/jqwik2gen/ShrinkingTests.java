@@ -61,8 +61,9 @@ public class ShrinkingTests {
 
 		Shrinkable<List<Integer>> shrinkable = listOfInts.generate(source);
 
+		System.out.println("value: " + shrinkable.value());
 		shrinkable.shrink().forEach(s -> {
-			//assertThat(s.recording()).isLessThan(shrinkable.recording());
+			assertThat(s.recording()).isLessThan(shrinkable.recording());
 			System.out.println("shrink: " + s.value());
 		});
 	}

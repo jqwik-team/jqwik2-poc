@@ -15,7 +15,7 @@ class AtomicShrinker {
 		Set<AtomicRecording> candidates = new LinkedHashSet<>();
 		addCandidatesFromRight(candidates);
 		addCandidatesFromLeft(candidates);
-		return candidates.stream().sorted();
+		return candidates.stream();
 	}
 
 	private void addCandidatesFromRight(Set<AtomicRecording> candidates) {
