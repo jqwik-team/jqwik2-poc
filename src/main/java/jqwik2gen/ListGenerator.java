@@ -14,7 +14,7 @@ public class ListGenerator<T> implements Generator<List<T>> {
 	@Override
 	public Shrinkable<List<T>> generate(GenSource source) {
 		AtomicRecording sizeRecording = new AtomicRecording();
-		TreeRecording recorded = new TreeRecording(
+		OldTreeRecording recorded = new OldTreeRecording(
 			sizeRecording,
 			new ArrayList<>()
 		);

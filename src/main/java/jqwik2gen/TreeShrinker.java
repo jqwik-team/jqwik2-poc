@@ -7,19 +7,19 @@ public class TreeShrinker {
 	private final SourceRecording head;
 	private final List<SourceRecording> children;
 
-	public TreeShrinker(TreeRecording treeRecording) {
+	public TreeShrinker(OldTreeRecording treeRecording) {
 		this.head = treeRecording.head();
 		this.children = treeRecording.children();
 	}
 
-	Stream<TreeRecording> shrink() {
+	Stream<OldTreeRecording> shrink() {
 		return Stream.concat(
 			shrinkHead(),
 			shrinkChildren()
 		);
 	}
 
-	private Stream<TreeRecording> shrinkChildren() {
+	private Stream<OldTreeRecording> shrinkChildren() {
 		if (children.isEmpty()) {
 			return Stream.empty();
 		}
@@ -46,8 +46,8 @@ public class TreeShrinker {
 		return shrunkChildren;
 	}
 
-	private TreeRecording replaceChildren(List<SourceRecording> childrenRecordings) {
-		return new TreeRecording(head, childrenRecordings);
+	private OldTreeRecording replaceChildren(List<SourceRecording> childrenRecordings) {
+		return new OldTreeRecording(head, childrenRecordings);
 	}
 
 	private Stream<List<SourceRecording>> reorderChildren() {
@@ -56,12 +56,12 @@ public class TreeShrinker {
 		return Stream.of(reorderedChildren);
 	}
 
-	private Stream<TreeRecording> shrinkHead() {
+	private Stream<OldTreeRecording> shrinkHead() {
 		Stream<? extends SourceRecording> headCandidates = head.shrink();
 		return headCandidates.map(this::replaceHead);
 	}
 
-	private TreeRecording replaceHead(SourceRecording headRecording) {
-		return new TreeRecording(headRecording, children);
+	private OldTreeRecording replaceHead(SourceRecording headRecording) {
+		return new OldTreeRecording(headRecording, children);
 	}
 }
