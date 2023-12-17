@@ -86,12 +86,14 @@ public class ShrinkingTests {
 
 		Shrinker shrinker = new Shrinker(List.of(shrinkable.asGeneric()), property);
 
+		Shrinkable<Object> previous = shrinkable.asGeneric();
 		while (true) {
 			Optional<List<Shrinkable<Object>>> next = shrinker.nextStep();
 			if (next.isEmpty()) {
 				break;
 			}
-			assertThat(next).isNotEmpty();
+			assertThat(next.get().get(0).compareTo(previous)).isLessThan(0);
+			previous = next.get().get(0);
 			//System.out.println("shrink: " + next.get());
 		}
 
@@ -125,11 +127,14 @@ public class ShrinkingTests {
 
 		Shrinker shrinker = new Shrinker(List.of(shrinkable.asGeneric()), property);
 
+		Shrinkable<Object> previous = shrinkable.asGeneric();
 		while (true) {
 			Optional<List<Shrinkable<Object>>> next = shrinker.nextStep();
 			if (next.isEmpty()) {
 				break;
 			}
+			assertThat(next.get().get(0).compareTo(previous)).isLessThan(0);
+			previous = next.get().get(0);
 			System.out.println("shrink: " + next.get());
 		}
 
