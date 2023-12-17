@@ -6,13 +6,11 @@ import java.util.function.*;
 import java.util.stream.*;
 
 public class Shrinker {
-	private final List<Shrinkable<?>> startingShrinkables;
 	private final Function<List<Object>, PropertyExecutionResult> property;
-	private final SortedSet<List<Shrinkable<?>>> candidates = new TreeSet<>(this::compare);
-	private List<Shrinkable<?>> favourite;
+	private final SortedSet<List<Shrinkable<Object>>> candidates = new TreeSet<>(this::compare);
+	private List<Shrinkable<Object>> favourite;
 
-	public Shrinker(List<Shrinkable<?>> startingShrinkables, Function<List<Object>, PropertyExecutionResult> property) {
-		this.startingShrinkables = startingShrinkables;
+	public Shrinker(List<Shrinkable<Object>> startingShrinkables, Function<List<Object>, PropertyExecutionResult> property) {
 		this.property = property;
 		if (startingShrinkables.size() != 1) {
 			throw new IllegalArgumentException("Only one parameter supported for now!");
@@ -21,10 +19,10 @@ public class Shrinker {
 		favourite = startingShrinkables;
 	}
 
-	public Optional<List<Shrinkable<?>>> nextStep() {
+	public Optional<List<Shrinkable<Object>>> nextStep() {
 		while (!candidates.isEmpty()) {
 			//System.out.println("candidates: " + candidates);
-			List<Shrinkable<?>> nextCandidate = candidates.removeFirst();
+			List<Shrinkable<Object>> nextCandidate = candidates.removeFirst();
 
 			AtomicBoolean found = new AtomicBoolean(false);
 			shrink(nextCandidate)
@@ -49,20 +47,18 @@ public class Shrinker {
 		return Optional.empty();
 	}
 
-	private int compare(List<Shrinkable<?>> left, List<Shrinkable<?>> right) {
+	private int compare(List<Shrinkable<Object>> left, List<Shrinkable<Object>> right) {
 		return left.getFirst().recording().compareTo(right.getFirst().recording());
 	}
 
-	private Stream<List<Shrinkable<?>>> shrink(List<Shrinkable<?>> nextCandidate) {
-		Shrinkable<?> firstParam = nextCandidate.getFirst();
+	private Stream<List<Shrinkable<Object>>> shrink(List<Shrinkable<Object>> nextCandidate) {
+		Shrinkable<Object> firstParam = nextCandidate.getFirst();
 		return firstParam.shrink().map(List::of);
 	}
 
-	private List<Object> values(List<Shrinkable<?>> shrinkables) {
+	private List<Object> values(List<Shrinkable<Object>> shrinkables) {
 		return shrinkables.stream()
-						  .map((Shrinkable<?> shrinkable) -> {
-							  return (Object) shrinkable.value();
-						  })
+						  .map(Shrinkable::value)
 						  .toList();
 	}
 }

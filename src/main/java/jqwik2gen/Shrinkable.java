@@ -10,11 +10,16 @@ public sealed interface Shrinkable<T> extends Comparable<Shrinkable<T>> {
 
 	SourceRecording recording();
 
+	Stream<Shrinkable<T>> shrink();
+
 	default T regenerate() {
 		return generator().generate(new RecordedSource(recording())).value();
 	}
 
-	Stream<Shrinkable<T>> shrink();
+	@SuppressWarnings("unchecked")
+	default Shrinkable<Object> asGeneric() {
+		return (Shrinkable<Object>) this;
+	}
 }
 
 record Unshrinkable<T>(T value) implements Shrinkable<T> {

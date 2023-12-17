@@ -84,13 +84,14 @@ public class ShrinkingTests {
 
 		assertThat(property.apply(List.of(shrinkable.value()))).isEqualTo(PropertyExecutionResult.FAILED);
 
-		Shrinker shrinker = new Shrinker(List.of(shrinkable), property);
+		Shrinker shrinker = new Shrinker(List.of(shrinkable.asGeneric()), property);
 
 		while (true) {
-			Optional<List<Shrinkable<?>>> next = shrinker.nextStep();
+			Optional<List<Shrinkable<Object>>> next = shrinker.nextStep();
 			if (next.isEmpty()) {
 				break;
 			}
+			assertThat(next).isNotEmpty();
 			//System.out.println("shrink: " + next.get());
 		}
 
@@ -122,10 +123,10 @@ public class ShrinkingTests {
 
 		assertThat(property.apply(List.of(shrinkable.value()))).isEqualTo(PropertyExecutionResult.FAILED);
 
-		Shrinker shrinker = new Shrinker(List.of(shrinkable), property);
+		Shrinker shrinker = new Shrinker(List.of(shrinkable.asGeneric()), property);
 
 		while (true) {
-			Optional<List<Shrinkable<?>>> next = shrinker.nextStep();
+			Optional<List<Shrinkable<Object>>> next = shrinker.nextStep();
 			if (next.isEmpty()) {
 				break;
 			}
