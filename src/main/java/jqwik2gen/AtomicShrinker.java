@@ -7,18 +7,18 @@ class AtomicShrinker {
 
 	private final List<Integer> seeds;
 
-	AtomicShrinker(AtomicRecording recording) {
+	AtomicShrinker(AtomRecording recording) {
 		this.seeds = recording.seeds();
 	}
 
-	Stream<AtomicRecording> shrink() {
-		Set<AtomicRecording> candidates = new LinkedHashSet<>();
+	Stream<AtomRecording> shrink() {
+		Set<AtomRecording> candidates = new LinkedHashSet<>();
 		for (int i = 0; i < seeds.size(); i++) {
 			int current = seeds.get(i);
 			for (Integer integer : shrinkValue(current)) {
 				List<Integer> shrunk = new ArrayList<>(seeds);
 				shrunk.set(i, integer);
-				candidates.add(new AtomicRecording(shrunk));
+				candidates.add(new AtomRecording(shrunk));
 			}
 		}
 		return candidates.stream();

@@ -13,17 +13,17 @@ public class ShrinkingTests {
 	void generateWithUnsatisfyingGenSource() {
 		IntegerGenerator ints = new IntegerGenerator(-10, 100);
 
-		GenSource source = new RecordedSource(new AtomicRecording(10, 0));
+		GenSource source = new RecordedSource(new AtomRecording(10, 0));
 		Shrinkable<Integer> shrinkable = ints.generate(source);
 		assertThat(shrinkable.value()).isEqualTo(10);
 
 		assertThatThrownBy(() -> {
-			RecordedSource recorded = new RecordedSource(new AtomicRecording(100, 1));
+			RecordedSource recorded = new RecordedSource(new AtomRecording(100, 1));
 			ints.generate(recorded);
 		}).isInstanceOf(CannotGenerateException.class);
 
 		assertThatThrownBy(() -> {
-			RecordedSource recorded = new RecordedSource(new AtomicRecording(100));
+			RecordedSource recorded = new RecordedSource(new AtomRecording(100));
 			ints.generate(recorded);
 		}).isInstanceOf(CannotGenerateException.class);
 	}
@@ -33,7 +33,7 @@ public class ShrinkingTests {
 		IntegerGenerator ints = new IntegerGenerator(-10, 100);
 
 		// -10
-		GenSource source = new RecordedSource(new AtomicRecording(10, 1));
+		GenSource source = new RecordedSource(new AtomRecording(10, 1));
 		Shrinkable<Integer> shrinkable = ints.generate(source);
 
 		shrinkable.shrink().forEach(s -> {
@@ -51,13 +51,13 @@ public class ShrinkingTests {
 		// [-10, 50, -5]
 		ListRecording listRecording = new ListRecording(
 			List.of(
-				new AtomicRecording(10, 1),
-				new AtomicRecording(50, 0),
-				new AtomicRecording(5, 1)
+				new AtomRecording(10, 1),
+				new AtomRecording(50, 0),
+				new AtomRecording(5, 1)
 			)
 		);
 		TreeRecording treeRecording = new TreeRecording(
-			new AtomicRecording(3), listRecording
+			new AtomRecording(3), listRecording
 		);
 		GenSource source = new RecordedSource(treeRecording);
 
@@ -76,7 +76,7 @@ public class ShrinkingTests {
 		IntegerGenerator ints = new IntegerGenerator(-100000, 100000);
 
 		// 9999
-		GenSource source = new RecordedSource(new AtomicRecording(9999, 0));
+		GenSource source = new RecordedSource(new AtomRecording(9999, 0));
 		Shrinkable<Integer> shrinkable = ints.generate(source);
 
 		Function<List<Object>, PropertyExecutionResult> property = args -> {
@@ -110,13 +110,13 @@ public class ShrinkingTests {
 		// [-10, 50, -5]
 		ListRecording listRecording = new ListRecording(
 			List.of(
-				new AtomicRecording(10, 1),
-				new AtomicRecording(50, 0),
-				new AtomicRecording(5, 1)
+				new AtomRecording(10, 1),
+				new AtomRecording(50, 0),
+				new AtomRecording(5, 1)
 			)
 		);
 		TreeRecording treeRecording = new TreeRecording(
-			new AtomicRecording(3), listRecording
+			new AtomRecording(3), listRecording
 		);
 		GenSource source = new RecordedSource(treeRecording);
 

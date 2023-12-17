@@ -1,8 +1,13 @@
 package jqwik2gen;
 
 public sealed interface GenSource permits RandomGenSource, RecordedSource {
-	int next(int max);
 
+	// Todo: Distribute those methods to sub-interfaces: AtomSource, ListSource, TreeSource
+
+	int next(int max);
 	GenSource child();
+	GenSource next();
+
+	// Todo: Implement factory methods: atom(), list(), tree()
 }
 

@@ -4,11 +4,13 @@ import java.util.*;
 import java.util.stream.*;
 
 public sealed interface SourceRecording extends Comparable<SourceRecording>
-	permits AtomicRecording, ListRecording, TreeRecording, UnshrinkableRecording {
+	permits AtomRecording, ListRecording, TreeRecording, UnshrinkableRecording {
 
 	Iterator<Integer> iterator();
 
 	Stream<? extends SourceRecording> shrink();
+
+	SourceRecording UNSHRINKABLE = new UnshrinkableRecording();
 
 }
 
@@ -25,30 +27,13 @@ record UnshrinkableRecording() implements SourceRecording {
 
 	@Override
 	public int compareTo(SourceRecording other) {
-		// All shrinkable recordings are larger than unshrinkable ones
-		if (other instanceof UnshrinkableRecording) {
-			return 0;
-		}
-		return -1;
+		return 0;
 	}
 }
 
-record AtomicRecording(List<Integer> seeds) implements SourceRecording {
-	AtomicRecording(Integer... seeds) {
+record AtomRecording(List<Integer> seeds) implements SourceRecording {
+	AtomRecording(Integer... seeds) {
 		this(Arrays.asList(seeds));
-	}
-
-	AtomicRecording() {
-		this(new ArrayList<>());
-	}
-
-	int push(int seed) {
-		seeds.add(seed);
-		return seed;
-	}
-
-	int get(int index) {
-		return seeds.get(index);
 	}
 
 	@Override
@@ -63,16 +48,13 @@ record AtomicRecording(List<Integer> seeds) implements SourceRecording {
 
 	@Override
 	public int compareTo(SourceRecording other) {
-		if (other instanceof UnshrinkableRecording) {
-			return 1;
-		}
-		if (other instanceof AtomicRecording otherAtomic) {
-			return compareAtomic(this, otherAtomic);
+		if (other instanceof AtomRecording otherAtomic) {
+			return compareAtoms(this, otherAtomic);
 		}
 		return 0;
 	}
 
-	private int compareAtomic(AtomicRecording left, AtomicRecording right) {
+	private int compareAtoms(AtomRecording left, AtomRecording right) {
 		int sizeComparison = Integer.compare(left.seeds().size(), right.seeds().size());
 		if (sizeComparison != 0) {
 			return sizeComparison;
@@ -86,19 +68,11 @@ record AtomicRecording(List<Integer> seeds) implements SourceRecording {
 		return 0;
 	}
 
-
 	@Override
 	public String toString() {
 		return "atomic{%s}".formatted(seeds);
 	}
 }
-
-// record TupleSource(List<SourceRecording> tuple) implements SourceRecording {
-// 	@Override
-// 	public Collection<SourceRecording> children() {
-// 		return Collections.emptyList();
-// 	}
-// }
 
 record ListRecording(List<SourceRecording> elements) implements SourceRecording {
 
@@ -114,9 +88,6 @@ record ListRecording(List<SourceRecording> elements) implements SourceRecording 
 
 	@Override
 	public int compareTo(SourceRecording other) {
-		if (other instanceof UnshrinkableRecording) {
-			return 1;
-		}
 		if (other instanceof ListRecording otherList) {
 			List<SourceRecording> mySortedChildren = new ArrayList<>(this.elements);
 			Collections.sort(mySortedChildren);
@@ -154,6 +125,14 @@ record ListRecording(List<SourceRecording> elements) implements SourceRecording 
 
 }
 
+// TODO: Tuples could have more strict shrinking, since elements cannot be exchanged and size is stable
+// record TupleSource(List<SourceRecording> tuple) implements SourceRecording {
+// 	@Override
+// 	public Collection<SourceRecording> children() {
+// 		return Collections.emptyList();
+// 	}
+// }
+
 record TreeRecording(SourceRecording head, SourceRecording child) implements SourceRecording {
 
 	@Override
@@ -168,9 +147,6 @@ record TreeRecording(SourceRecording head, SourceRecording child) implements Sou
 
 	@Override
 	public int compareTo(SourceRecording other) {
-		if (other instanceof UnshrinkableRecording) {
-			return 1;
-		}
 		if (other instanceof TreeRecording otherTree) {
 			int headComparison = this.head.compareTo(otherTree.head);
 			if (headComparison != 0) {
@@ -180,6 +156,7 @@ record TreeRecording(SourceRecording head, SourceRecording child) implements Sou
 		}
 		return 0;
 	}
+
 	@Override
 	public String toString() {
 		return "tree{%s, %s}".formatted(head, child);

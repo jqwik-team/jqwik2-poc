@@ -23,4 +23,9 @@ public final class RandomGenSource implements GenSource {
 		return new RandomGenSource(random.nextLong());
 	}
 
+	@Override
+	public GenSource next() {
+		return new RandomGenSource(random.nextLong());
+	}
+
 }

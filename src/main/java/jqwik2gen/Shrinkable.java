@@ -30,7 +30,7 @@ record Unshrinkable<T>(T value) implements Shrinkable<T> {
 
 	@Override
 	public SourceRecording recording() {
-		return new UnshrinkableRecording();
+		return SourceRecording.UNSHRINKABLE;
 	}
 
 	@Override
