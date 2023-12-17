@@ -13,48 +13,29 @@ class AtomicShrinker {
 
 	Stream<AtomicRecording> shrink() {
 		Set<AtomicRecording> candidates = new LinkedHashSet<>();
-		addCandidatesFromRight(candidates);
-		addCandidatesFromLeft(candidates);
+		for (int i = 0; i < seeds.size(); i++) {
+			int current = seeds.get(i);
+			for (Integer integer : shrinkValue(current)) {
+				List<Integer> shrunk = new ArrayList<>(seeds);
+				shrunk.set(i, integer);
+				candidates.add(new AtomicRecording(shrunk));
+			}
+		}
 		return candidates.stream();
 	}
 
-	private void addCandidatesFromRight(Set<AtomicRecording> candidates) {
-		List<Integer> last = seeds;
-		for (int i = seeds.size() - 1; i >= 0; i--) {
-			while (true) {
-				List<Integer> shrunk = new ArrayList<>(last);
-				int seedValue = shrunk.get(i);
-				if (seedValue == 0) {
-					break;
-				}
-				shrunk.set(i, shrinkValue(seedValue));
-				candidates.add(new AtomicRecording(shrunk));
-				last = shrunk;
-			}
+	private Set<Integer> shrinkValue(int seedValue) {
+		if (seedValue == 0) {
+			return Set.of();
 		}
-	}
-
-	private void addCandidatesFromLeft(Set<AtomicRecording> candidates) {
-		List<Integer> last = seeds;
-		for (int i = 0; i < seeds.size(); i++) {
-			while (true) {
-				List<Integer> shrunk = new ArrayList<>(last);
-				int seedValue = shrunk.get(i);
-				if (seedValue == 0) {
-					break;
-				}
-				shrunk.set(i, shrinkValue(seedValue));
-				candidates.add(new AtomicRecording(shrunk));
-				last = shrunk;
-			}
+		Set<Integer> shrunkValues = new LinkedHashSet<>();
+		shrunkValues.add(0);
+		if (seedValue > 1) {
+			shrunkValues.add(1);
 		}
-	}
-
-	private int shrinkValue(int seedValue) {
-		if (seedValue <= 5) {
-			return --seedValue;
-		}
-		return seedValue / 2;
+		shrunkValues.add(seedValue - 1);
+		shrunkValues.add(seedValue / 2);
+		return shrunkValues;
 	}
 
 }

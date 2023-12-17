@@ -8,12 +8,8 @@ import java.util.stream.*;
 public class Shrinker {
 	private final List<Shrinkable<?>> startingShrinkables;
 	private final Function<List<Object>, PropertyExecutionResult> property;
-	private final SortedSet<List<Shrinkable<?>>> candidates = new TreeSet<>(parametersComparator());
+	private final SortedSet<List<Shrinkable<?>>> candidates = new TreeSet<>(this::compare);
 	private List<Shrinkable<?>> favourite;
-
-	private static Comparator<List<Shrinkable<?>>> parametersComparator() {
-		return Comparator.comparing((List<Shrinkable<?>> shrinkables) -> shrinkables.getFirst().recording());
-	}
 
 	public Shrinker(List<Shrinkable<?>> startingShrinkables, Function<List<Object>, PropertyExecutionResult> property) {
 		this.startingShrinkables = startingShrinkables;
@@ -33,21 +29,29 @@ public class Shrinker {
 
 			AtomicBoolean found = new AtomicBoolean(false);
 			shrink(nextCandidate)
-					.filter(shrinkables -> property.apply(values(shrinkables)) == PropertyExecutionResult.FAILED)
-					.forEach(e -> {
-						if (!favourite.equals(e)) {
-							candidates.add(e);
-							found.set(true);
-						}
-					});
+				.filter(shrinkables -> property.apply(values(shrinkables)) == PropertyExecutionResult.FAILED)
+				.forEach(e -> {
+					if (!favourite.equals(e)) {
+						candidates.add(e);
+						found.set(true);
+					}
+				});
 
-			// TODO: Only set if first candidate is smaller than favourite
-			if (found.get()) {
-				favourite = candidates.first();
+			if (candidates.isEmpty()) {
+				break;
+			}
+
+			List<Shrinkable<?>> bestCandidate = candidates.first();
+			if (found.get() && compare(bestCandidate, favourite) < 0) {
+				favourite = bestCandidate;
 				return Optional.of(favourite);
 			}
 		}
 		return Optional.empty();
+	}
+
+	private int compare(List<Shrinkable<?>> left, List<Shrinkable<?>> right) {
+		return left.getFirst().recording().compareTo(right.getFirst().recording());
 	}
 
 	private Stream<List<Shrinkable<?>>> shrink(List<Shrinkable<?>> nextCandidate) {

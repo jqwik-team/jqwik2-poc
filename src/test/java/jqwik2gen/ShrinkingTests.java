@@ -40,7 +40,8 @@ public class ShrinkingTests {
 
 		shrinkable.shrink().forEach(s -> {
 			assertThat(s.recording()).isLessThan(shrinkable.recording());
-			// System.out.println("shrink: " + s.value());
+			// System.out.println("shrink recording: " + s.recording());
+			// System.out.println("shrink value: " + s.value());
 		});
 	}
 
@@ -65,7 +66,8 @@ public class ShrinkingTests {
 		System.out.println("value: " + shrinkable.value());
 		shrinkable.shrink().forEach(s -> {
 			assertThat(s.recording()).isLessThan(shrinkable.recording());
-			System.out.println("shrink: " + s.value());
+			System.out.println("shrink recording: " + s.recording());
+			System.out.println("shrink value    : " + s.value());
 		});
 	}
 
