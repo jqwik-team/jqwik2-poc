@@ -36,6 +36,7 @@ class GenerationTests {
 		for (int i = 0; i < 10; i++) {
 			Shrinkable<List<Integer>> shrinkable = listOfInts.generate(source);
 			System.out.println("value=" + shrinkable.value());
+			System.out.println("recording=" + shrinkable.recording());
 
 			List<Integer> regenerated = shrinkable.regenerate();
 			System.out.println("regenerated=" + regenerated);

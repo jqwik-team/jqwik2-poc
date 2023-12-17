@@ -22,4 +22,5 @@ public final class RandomGenSource implements GenSource {
 	public GenSource child() {
 		return new RandomGenSource(random.nextLong());
 	}
+
 }

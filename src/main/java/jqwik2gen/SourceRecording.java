@@ -4,11 +4,9 @@ import java.util.*;
 import java.util.stream.*;
 
 public sealed interface SourceRecording extends Comparable<SourceRecording>
-	permits AtomicRecording, ListRecording, OldTreeRecording, TreeRecording, UnshrinkableRecording {
+	permits AtomicRecording, ListRecording, TreeRecording, UnshrinkableRecording {
 
 	Iterator<Integer> iterator();
-
-	List<SourceRecording> children();
 
 	Stream<? extends SourceRecording> shrink();
 
@@ -18,11 +16,6 @@ record UnshrinkableRecording() implements SourceRecording {
 	@Override
 	public Iterator<Integer> iterator() {
 		return Collections.emptyIterator();
-	}
-
-	@Override
-	public List<SourceRecording> children() {
-		return Collections.emptyList();
 	}
 
 	@Override
@@ -61,11 +54,6 @@ record AtomicRecording(List<Integer> seeds) implements SourceRecording {
 	@Override
 	public Iterator<Integer> iterator() {
 		return seeds.iterator();
-	}
-
-	@Override
-	public List<SourceRecording> children() {
-		return Collections.emptyList();
 	}
 
 	@Override
@@ -125,11 +113,6 @@ record ListRecording(List<SourceRecording> elements) implements SourceRecording 
 	}
 
 	@Override
-	public List<SourceRecording> children() {
-		return Collections.emptyList();
-	}
-
-	@Override
 	public int compareTo(SourceRecording other) {
 		if (other instanceof UnshrinkableRecording) {
 			return 1;
@@ -179,14 +162,8 @@ record TreeRecording(SourceRecording head, SourceRecording child) implements Sou
 	}
 
 	@Override
-	public List<SourceRecording> children() {
-		return List.of(child);
-	}
-
-	@Override
 	public Stream<? extends SourceRecording> shrink() {
-		return Stream.empty();
-		// return new TreeShrinker(this).shrink();
+		return new TreeShrinker(this).shrink();
 	}
 
 	@Override
@@ -206,69 +183,6 @@ record TreeRecording(SourceRecording head, SourceRecording child) implements Sou
 	@Override
 	public String toString() {
 		return "tree{%s, %s}".formatted(head, child);
-	}
-
-}
-
-
-record OldTreeRecording(SourceRecording head, List<SourceRecording> children) implements SourceRecording {
-
-	@Override
-	public Iterator<Integer> iterator() {
-		return head.iterator();
-	}
-
-	@Override
-	public Stream<? extends SourceRecording> shrink() {
-		return new TreeShrinker(this).shrink();
-	}
-
-	public SourceRecording pushChild(SourceRecording recording) {
-		children.add(recording);
-		return recording;
-	}
-
-	@Override
-	public int compareTo(SourceRecording other) {
-		if (other instanceof UnshrinkableRecording) {
-			return 1;
-		}
-		if (other instanceof OldTreeRecording otherTree) {
-			int headComparison = this.head.compareTo(otherTree.head);
-			if (headComparison != 0) {
-				return headComparison;
-			}
-			List<SourceRecording> mySortedChildren = new ArrayList<>(this.children);
-			Collections.sort(mySortedChildren);
-			List<SourceRecording> otherSortedChildren = new ArrayList<>(otherTree.children);
-			Collections.sort(otherSortedChildren);
-			int sortedChildrenComparison = compareChildren(mySortedChildren, otherSortedChildren);
-			if (sortedChildrenComparison != 0) {
-				return sortedChildrenComparison;
-			}
-			return compareChildren(this.children, otherTree.children);
-		}
-
-		return 0;
-	}
-
-	private int compareChildren(List<SourceRecording> left, List<SourceRecording> right) {
-		int sizeComparison = Integer.compare(left.size(), right.size());
-		if (sizeComparison != 0) {
-			return sizeComparison;
-		}
-		for (int i = 0; i < left.size(); i++) {
-			int childComparison = left.get(i).compareTo(right.get(i));
-			if (childComparison != 0) {
-				return childComparison;
-			}
-		}
-		return 0;
-	}
-
-	@Override
-	public String toString() {
-		return "oldtree{%s, %s}".formatted(head, children);
 	}
 
 }

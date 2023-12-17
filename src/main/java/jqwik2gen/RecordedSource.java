@@ -9,7 +9,10 @@ public final class RecordedSource implements GenSource {
 
 	public RecordedSource(SourceRecording source) {
 		this.recording = source;
-		this.children = source.children().iterator();
+		if (source instanceof ListRecording list)
+			this.children = list.elements().iterator();
+		else
+			this.children = Collections.emptyIterator();
 		this.iterator = source.iterator();
 	}
 
@@ -23,9 +26,13 @@ public final class RecordedSource implements GenSource {
 
 	@Override
 	public GenSource child() {
-		if (children.hasNext())
+		if (recording instanceof ListRecording && children.hasNext()) {
 			return new RecordedSource(children.next());
-		else
-			throw new CannotGenerateException("No more children!");
+		}
+		if (recording instanceof TreeRecording tree) {
+			return new RecordedSource(tree.child());
+		}
+		throw new CannotGenerateException("No more children!");
 	}
+
 }

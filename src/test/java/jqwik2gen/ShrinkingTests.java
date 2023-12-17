@@ -49,13 +49,15 @@ public class ShrinkingTests {
 		Generator<List<Integer>> listOfInts = new ListGenerator<>(ints, 5);
 
 		// [-10, 50, -5]
-		OldTreeRecording treeRecording = new OldTreeRecording(
-			new AtomicRecording(3),
+		ListRecording listRecording = new ListRecording(
 			List.of(
 				new AtomicRecording(10, 1),
 				new AtomicRecording(50, 0),
 				new AtomicRecording(5, 1)
 			)
+		);
+		TreeRecording treeRecording = new TreeRecording(
+			new AtomicRecording(3), listRecording
 		);
 		GenSource source = new RecordedSource(treeRecording);
 
@@ -106,13 +108,15 @@ public class ShrinkingTests {
 		Generator<List<Integer>> listOfInts = new ListGenerator<>(ints, 5);
 
 		// [-10, 50, -5]
-		OldTreeRecording treeRecording = new OldTreeRecording(
-			new AtomicRecording(3),
+		ListRecording listRecording = new ListRecording(
 			List.of(
 				new AtomicRecording(10, 1),
 				new AtomicRecording(50, 0),
 				new AtomicRecording(5, 1)
 			)
+		);
+		TreeRecording treeRecording = new TreeRecording(
+			new AtomicRecording(3), listRecording
 		);
 		GenSource source = new RecordedSource(treeRecording);
 

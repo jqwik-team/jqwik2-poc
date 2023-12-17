@@ -7,7 +7,7 @@ public class ListShrinker {
 	private final List<SourceRecording> elements;
 
 	public ListShrinker(ListRecording treeRecording) {
-		this.elements = treeRecording.children();
+		this.elements = treeRecording.elements();
 	}
 
 	Stream<ListRecording> shrink() {
