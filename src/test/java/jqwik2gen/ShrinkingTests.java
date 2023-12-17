@@ -3,8 +3,6 @@ package jqwik2gen;
 import java.util.*;
 import java.util.function.*;
 
-import org.assertj.core.api.*;
-
 import net.jqwik.api.*;
 
 import static org.assertj.core.api.Assertions.*;
@@ -72,11 +70,11 @@ public class ShrinkingTests {
 	}
 
 	@Example
-	void shrinkWithProperty() {
+	void shrinkIntWithProperty() {
 		IntegerGenerator ints = new IntegerGenerator(-100000, 100000);
 
-		// 99999
-		GenSource source = new RecordedSource(new AtomicRecording(99999, 0));
+		// 9999
+		GenSource source = new RecordedSource(new AtomicRecording(9999, 0));
 		Shrinkable<Integer> shrinkable = ints.generate(source);
 
 		Function<List<Object>, PropertyExecutionResult> property = args -> {
@@ -88,14 +86,13 @@ public class ShrinkingTests {
 
 		Shrinker shrinker = new Shrinker(List.of(shrinkable), property);
 
-		while(true) {
+		while (true) {
 			Optional<List<Shrinkable<?>>> next = shrinker.nextStep();
 			if (next.isEmpty()) {
 				break;
 			}
 			System.out.println("shrink: " + next.get());
 		}
-
 
 	}
 

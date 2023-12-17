@@ -22,14 +22,14 @@ public class Shrinker {
 	}
 
 	public Optional<List<Shrinkable<?>>> nextStep() {
-		System.out.println("candidates: " + candidates);
-
 		while (!candidates.isEmpty()) {
+			//System.out.println("candidates: " + candidates);
 			List<Shrinkable<?>> nextCandidate = candidates.removeFirst();
 
 			AtomicBoolean found = new AtomicBoolean(false);
 			shrink(nextCandidate)
 				.filter(shrinkables -> property.apply(values(shrinkables)) == PropertyExecutionResult.FAILED)
+				.filter(candidate -> compare(candidate, favourite) < 0)
 				.forEach(e -> {
 					if (!favourite.equals(e)) {
 						candidates.add(e);
@@ -41,9 +41,8 @@ public class Shrinker {
 				break;
 			}
 
-			List<Shrinkable<?>> bestCandidate = candidates.first();
-			if (found.get() && compare(bestCandidate, favourite) < 0) {
-				favourite = bestCandidate;
+			if (found.get()) {
+				favourite = candidates.first();
 				return Optional.of(favourite);
 			}
 		}

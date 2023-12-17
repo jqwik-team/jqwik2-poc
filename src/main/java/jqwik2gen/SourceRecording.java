@@ -101,6 +101,10 @@ record AtomicRecording(List<Integer> seeds) implements SourceRecording {
 		return 0;
 	}
 
+	@Override
+	public String toString() {
+		return "atomic{%s}".formatted(seeds);
+	}
 }
 
 // record TupleSource(List<SourceRecording> tuple) implements SourceRecording {
@@ -167,5 +171,11 @@ record TreeRecording(SourceRecording head, List<SourceRecording> children) imple
 		}
 		return 0;
 	}
+
+	@Override
+	public String toString() {
+		return "tree{%s, %s}".formatted(head, children);
+	}
+
 }
 

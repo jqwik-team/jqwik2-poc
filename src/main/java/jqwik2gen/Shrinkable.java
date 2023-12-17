@@ -63,4 +63,9 @@ record GeneratedShrinkable<T>(T value, Generator<T> generator, SourceRecording r
 	public int compareTo(Shrinkable<T> o) {
 		return this.recording().compareTo(o.recording());
 	}
+
+	@Override
+	public String toString() {
+		return "Shrinkable{value=%s, recording=%s}".formatted(value, recording);
+	}
 }
