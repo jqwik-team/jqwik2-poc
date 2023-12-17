@@ -91,6 +91,44 @@ public class ShrinkingTests {
 			if (next.isEmpty()) {
 				break;
 			}
+			//System.out.println("shrink: " + next.get());
+		}
+
+	}
+
+	@Example
+	void shrinkListWithProperty() {
+		IntegerGenerator ints = new IntegerGenerator(-10, 100);
+		Generator<List<Integer>> listOfInts = new ListGenerator<>(ints, 5);
+
+		// [-10, 50, -5]
+		TreeRecording treeRecording = new TreeRecording(
+			new AtomicRecording(3),
+			List.of(
+				new AtomicRecording(10, 1),
+				new AtomicRecording(50, 0),
+				new AtomicRecording(5, 1)
+			)
+		);
+		GenSource source = new RecordedSource(treeRecording);
+
+		Shrinkable<List<Integer>> shrinkable = listOfInts.generate(source);
+
+		Function<List<Object>, PropertyExecutionResult> property = args -> {
+			List<Integer> list = (List<Integer>) args.get(0);
+			int sum = list.stream().mapToInt(i -> i).sum();
+			return list.size() > 1 && sum != 0 ? PropertyExecutionResult.FAILED : PropertyExecutionResult.SUCCESSFUL;
+		};
+
+		assertThat(property.apply(List.of(shrinkable.value()))).isEqualTo(PropertyExecutionResult.FAILED);
+
+		Shrinker shrinker = new Shrinker(List.of(shrinkable), property);
+
+		while (true) {
+			Optional<List<Shrinkable<?>>> next = shrinker.nextStep();
+			if (next.isEmpty()) {
+				break;
+			}
 			System.out.println("shrink: " + next.get());
 		}
 
