@@ -12,7 +12,7 @@ public sealed interface SourceRecording extends Comparable<SourceRecording>
 
 	Stream<? extends SourceRecording> shrink();
 
-	static int compare(AtomicRecording left, AtomicRecording right) {
+	static int compareAtomic(AtomicRecording left, AtomicRecording right) {
 		int sizeComparison = Integer.compare(left.seeds().size(), right.seeds().size());
 		if (sizeComparison != 0) {
 			return sizeComparison;
@@ -93,10 +93,7 @@ record AtomicRecording(List<Integer> seeds) implements SourceRecording {
 			return 1;
 		}
 		if (other instanceof AtomicRecording otherAtomic) {
-			return SourceRecording.compare(this, otherAtomic);
-		}
-		if (other instanceof TreeRecording otherTree) {
-			return this.compareTo(otherTree.head());
+			return SourceRecording.compareAtomic(this, otherAtomic);
 		}
 		return 0;
 	}
@@ -135,9 +132,6 @@ record TreeRecording(SourceRecording head, List<SourceRecording> children) imple
 	public int compareTo(SourceRecording other) {
 		if (other instanceof UnshrinkableRecording) {
 			return 1;
-		}
-		if (other instanceof AtomicRecording) {
-			return this.head.compareTo(other);
 		}
 		if (other instanceof TreeRecording otherTree) {
 			int headComparison = this.head.compareTo(otherTree.head);

@@ -48,7 +48,7 @@ public class Shrinker {
 	}
 
 	private int compare(List<Shrinkable<Object>> left, List<Shrinkable<Object>> right) {
-		return left.getFirst().recording().compareTo(right.getFirst().recording());
+		return left.getFirst().compareTo(right.getFirst());
 	}
 
 	private Stream<List<Shrinkable<Object>>> shrink(List<Shrinkable<Object>> nextCandidate) {

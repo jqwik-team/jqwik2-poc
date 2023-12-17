@@ -86,16 +86,17 @@ public class ShrinkingTests {
 
 		Shrinker shrinker = new Shrinker(List.of(shrinkable.asGeneric()), property);
 
-		Shrinkable<Object> previous = shrinkable.asGeneric();
+		Shrinkable<Object> best = shrinkable.asGeneric();
 		while (true) {
 			Optional<List<Shrinkable<Object>>> next = shrinker.nextStep();
 			if (next.isEmpty()) {
 				break;
 			}
-			assertThat(next.get().get(0).compareTo(previous)).isLessThan(0);
-			previous = next.get().get(0);
+			assertThat(next.get().get(0).compareTo(best)).isLessThan(0);
+			best = next.get().get(0);
 			//System.out.println("shrink: " + next.get());
 		}
+		assertThat(best.value()).isEqualTo(1001);
 
 	}
 
@@ -127,16 +128,17 @@ public class ShrinkingTests {
 
 		Shrinker shrinker = new Shrinker(List.of(shrinkable.asGeneric()), property);
 
-		Shrinkable<Object> previous = shrinkable.asGeneric();
+		Shrinkable<Object> best = shrinkable.asGeneric();
 		while (true) {
 			Optional<List<Shrinkable<Object>>> next = shrinker.nextStep();
 			if (next.isEmpty()) {
 				break;
 			}
-			assertThat(next.get().get(0).compareTo(previous)).isLessThan(0);
-			previous = next.get().get(0);
+			assertThat(next.get().get(0).compareTo(best)).isLessThan(0);
+			best = next.get().get(0);
 			System.out.println("shrink: " + next.get());
 		}
+		assertThat(best.value()).isEqualTo(List.of(0, 1));
 
 	}
 
