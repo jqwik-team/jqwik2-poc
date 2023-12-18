@@ -11,9 +11,10 @@ public class IntegerGenerator implements Generator<Integer>{
 
 	@Override
 	public Shrinkable<Integer> generate(GenSource source) {
+		GenSource.Atom intSource = source.atom();
 		while (true) {
-			int abs = source.next(Math.max(Math.abs(min), Math.abs(max)) + 1);
-			int sign = source.next(2);
+			int abs = intSource.choice(Math.max(Math.abs(min), Math.abs(max)) + 1);
+			int sign = intSource.choice(2);
 			AtomRecording recorded = new AtomRecording(abs, sign);
 			int valueWithSign = sign == 0 ? abs : -abs;
 			if (valueWithSign >= min && valueWithSign <= max) {

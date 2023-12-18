@@ -1,13 +1,36 @@
 package jqwik2gen;
 
-public sealed interface GenSource permits RandomGenSource, RecordedSource {
+public interface GenSource {
 
-	// Todo: Distribute those methods to sub-interfaces: AtomSource, ListSource, TreeSource
+	Atom atom();
 
-	int next(int max);
-	GenSource child();
-	GenSource next();
+	List list();
 
-	// Todo: Implement factory methods: atom(), list(), tree()
+	Tree tree();
+
+	interface Atom extends GenSource {
+		int choice(int max);
+	}
+
+	interface List extends GenSource {
+		<T extends GenSource> T nextElement(Class<T> sourceType);
+		default GenSource nextElement() {
+			return nextElement(GenSource.class);
+		}
+	}
+
+	interface Tree extends GenSource {
+		<T extends GenSource> T head(Class<T> sourceType);
+
+		default GenSource head() {
+			return head(GenSource.class);
+		}
+
+		<T extends GenSource> T child(Class<T> sourceType);
+
+		default GenSource child() {
+			return child(GenSource.class);
+		}
+	}
 }
 
