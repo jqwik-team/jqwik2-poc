@@ -70,7 +70,8 @@ record AtomRecording(List<Integer> seeds) implements SourceRecording {
 
 	@Override
 	public String toString() {
-		return "atomic{%s}".formatted(seeds);
+		List<String> listOfStrings = seeds.stream().map(Object::toString).toList();
+		return "atom{%s}".formatted(String.join(", ", listOfStrings));
 	}
 }
 
