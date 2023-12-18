@@ -3,11 +3,11 @@ package jqwik2gen;
 import java.util.*;
 import java.util.stream.*;
 
-class AtomicShrinker {
+class AtomShrinker {
 
 	private final List<Integer> seeds;
 
-	AtomicShrinker(AtomRecording recording) {
+	AtomShrinker(AtomRecording recording) {
 		this.seeds = recording.seeds();
 	}
 

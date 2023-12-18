@@ -43,7 +43,7 @@ record AtomRecording(List<Integer> seeds) implements SourceRecording {
 
 	@Override
 	public Stream<? extends SourceRecording> shrink() {
-		return new AtomicShrinker(this).shrink();
+		return new AtomShrinker(this).shrink();
 	}
 
 	@Override
