@@ -33,7 +33,11 @@ record UnshrinkableRecording() implements SourceRecording {
 
 record AtomRecording(List<Integer> seeds) implements SourceRecording {
 	AtomRecording(Integer... seeds) {
-		this(Arrays.asList(seeds));
+		this(new ArrayList<>(Arrays.asList(seeds)));
+	}
+
+	public void pushChoice(int choice) {
+		seeds.add(choice);
 	}
 
 	@Override
