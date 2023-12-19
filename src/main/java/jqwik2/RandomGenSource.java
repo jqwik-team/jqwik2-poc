@@ -6,11 +6,15 @@ public final class RandomGenSource implements GenSource, GenSource.Atom, GenSour
 	private final Random random;
 
 	public RandomGenSource() {
-		this.random = new Random();
+		this(SourceOfRandomness.newRandom());
 	}
 
 	public RandomGenSource(long seed) {
-		this.random = new Random(seed);
+		this(SourceOfRandomness.newRandom(seed));
+	}
+
+	public RandomGenSource(Random random) {
+		this.random = random;
 	}
 
 	@Override
