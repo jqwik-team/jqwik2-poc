@@ -1,4 +1,4 @@
-package jqwik2gen;
+package jqwik2;
 
 import java.util.stream.*;
 

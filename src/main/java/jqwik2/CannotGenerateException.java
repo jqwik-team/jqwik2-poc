@@ -1,4 +1,4 @@
-package jqwik2gen;
+package jqwik2;
 
 public class CannotGenerateException extends RuntimeException {
 	public CannotGenerateException(String message) {

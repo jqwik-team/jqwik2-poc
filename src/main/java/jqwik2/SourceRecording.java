@@ -1,43 +1,20 @@
-package jqwik2gen;
+package jqwik2;
 
 import java.util.*;
 import java.util.stream.*;
 
 public sealed interface SourceRecording extends Comparable<SourceRecording>
-	permits AtomRecording, ListRecording, TreeRecording, UnshrinkableRecording {
+	permits AtomRecording, ListRecording, TreeRecording {
 
 	Iterator<Integer> iterator();
 
 	Stream<? extends SourceRecording> shrink();
 
-	SourceRecording UNSHRINKABLE = new UnshrinkableRecording();
-
-}
-
-record UnshrinkableRecording() implements SourceRecording {
-	@Override
-	public Iterator<Integer> iterator() {
-		return Collections.emptyIterator();
-	}
-
-	@Override
-	public Stream<SourceRecording> shrink() {
-		return Stream.empty();
-	}
-
-	@Override
-	public int compareTo(SourceRecording other) {
-		return 0;
-	}
 }
 
 record AtomRecording(List<Integer> seeds) implements SourceRecording {
 	AtomRecording(Integer... seeds) {
 		this(new ArrayList<>(Arrays.asList(seeds)));
-	}
-
-	public void pushChoice(int choice) {
-		seeds.add(choice);
 	}
 
 	@Override

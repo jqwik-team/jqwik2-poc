@@ -1,4 +1,4 @@
-package jqwik2gen;
+package jqwik2;
 
 import java.util.*;
 import java.util.stream.*;
@@ -19,35 +19,6 @@ public sealed interface Shrinkable<T> extends Comparable<Shrinkable<T>> {
 	@SuppressWarnings("unchecked")
 	default Shrinkable<Object> asGeneric() {
 		return (Shrinkable<Object>) this;
-	}
-}
-
-record Unshrinkable<T>(T value) implements Shrinkable<T> {
-	@Override
-	public Generator<T> generator() {
-		return new ConstantGenerator();
-	}
-
-	@Override
-	public SourceRecording recording() {
-		return SourceRecording.UNSHRINKABLE;
-	}
-
-	@Override
-	public Stream<Shrinkable<T>> shrink() {
-		return Stream.empty();
-	}
-
-	@Override
-	public int compareTo(Shrinkable<T> o) {
-		return this.recording().compareTo(o.recording());
-	}
-
-	private class ConstantGenerator implements Generator<T> {
-		@Override
-		public Shrinkable<T> generate(GenSource source) {
-			return Unshrinkable.this;
-		}
 	}
 }
 

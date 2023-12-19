@@ -1,15 +1,8 @@
 package jqwik2;
 
-import java.util.*;
-
-public class IntegerGenerator implements ValueGenerator<Integer> {
-
+public class IntegerGenerator implements Generator<Integer> {
 	private final int min;
 	private final int max;
-
-	public IntegerGenerator() {
-		this(Integer.MIN_VALUE, Integer.MAX_VALUE);
-	}
 
 	public IntegerGenerator(int min, int max) {
 		this.min = min;
@@ -17,9 +10,19 @@ public class IntegerGenerator implements ValueGenerator<Integer> {
 	}
 
 	@Override
-	public GeneratedValue<Integer> generate(GenerationSource source) {
-		int[] values = source.next(1, min, max);
-		int value = values[0];
-		return new GeneratedValue<>(value, this, new BaseSeed(1, min, max, values), List.of(value));
+	public Shrinkable<Integer> generate(GenSource source) {
+		while (true) {
+			GenSource.Atom intSource = source.atom();
+			int abs = intSource.choice(Math.max(Math.abs(min), Math.abs(max)) + 1);
+			int sign = intSource.choice(2);
+			int valueWithSign = sign == 0 ? abs : -abs;
+			if (sign == 2) { // Edge case that can never be reached by random generation
+				valueWithSign = Integer.MIN_VALUE;
+			}
+			AtomRecording recorded = new AtomRecording(abs, sign);
+			if (valueWithSign >= min && valueWithSign <= max) {
+				return new GeneratedShrinkable<>(valueWithSign, this, recorded);
+			}
+		}
 	}
 }

@@ -2,35 +2,41 @@ package jqwik2;
 
 import java.util.*;
 
-public class ListGenerator<T> implements ValueGenerator<List<T>> {
+public class ListGenerator<T> implements Generator<List<T>> {
+	private final Generator<T> elements;
+	private final int maxSize;
 
-	private final ValueGenerator<T> elementGenerator;
-	private final int minLength;
-	private final int maxLength;
-
-	public ListGenerator(ValueGenerator<T> elementGenerator, int minLength, int maxLength) {
-		this.elementGenerator = elementGenerator;
-		this.minLength = minLength;
-		this.maxLength = maxLength;
+	public ListGenerator(Generator<T> elements, int maxSize) {
+		this.elements = elements;
+		this.maxSize = maxSize;
 	}
 
 	@Override
-	public GeneratedValue<List<T>> generate(GenerationSource source) {
-		List<T> value = new ArrayList<>();
-		List<GeneratedValue<?>> elements = new ArrayList<>();
-		List<Integer> seeds = new ArrayList<>();
-		int[] values = source.next(1, minLength, maxLength);
-		int length = values[0];
-		seeds.add(length);
-		for (int i = 0; i < length; i++) {
-			GeneratedValue<T> element = elementGenerator.generate(source);
-			value.add(element.value());
-			elements.add(element);
-		}
-		BaseSeed base = new BaseSeed(1, minLength, maxLength, values);
-		List<Seed> children = elements.stream().map(GeneratedValue::seed).toList();
-		Seed seed = new ParentSeed(base, children);
-		return new GeneratedValue<>(value, this, seed, seeds, elements);
-	}
+	public Shrinkable<List<T>> generate(GenSource source) {
+		GenSource.Tree listSource = source.tree();
+		GenSource.Atom sizeSource = listSource.head(GenSource.Atom.class);
 
+		int size = sizeSource.choice(maxSize + 1);
+		AtomRecording sizeRecording = new AtomRecording(size);
+		List<SourceRecording> elementRecordings = new ArrayList<>();
+
+		List<Shrinkable<T>> shrinkables = new ArrayList<>(size);
+		GenSource.List elementsSource = listSource.child(GenSource.List.class);
+		for (int i = 0; i < size; i++) {
+			GenSource elementSource = elementsSource.nextElement();
+			Shrinkable<T> shrinkableElement = elements.generate(elementSource);
+			shrinkables.add(shrinkableElement);
+			elementRecordings.add(shrinkableElement.recording());
+		}
+		ListRecording listRecording = new ListRecording(elementRecordings);
+		TreeRecording recorded = new TreeRecording(
+			sizeRecording,
+			listRecording
+		);
+		return new GeneratedShrinkable<>(
+			shrinkables.stream().map(Shrinkable::value).toList(),
+			this,
+			recorded
+		);
+	}
 }
