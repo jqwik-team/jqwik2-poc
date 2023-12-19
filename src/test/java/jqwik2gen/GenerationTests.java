@@ -42,21 +42,34 @@ class GenerationTests {
 	}
 
 	@Example
-	void listOfInts() {
-		IntegerGenerator ints = new IntegerGenerator(-10, 100);
-		Generator<List<Integer>> listOfInts = new ListGenerator<>(ints, 5);
+	void intEdgeCases() {
+		Generator<Integer> allInts = new IntegerGenerator(Integer.MIN_VALUE, Integer.MAX_VALUE);
 
-		RandomGenSource source = new RandomGenSource(42);
+		GenSource maxValueSource = new RecordedSource(new AtomRecording(Integer.MAX_VALUE, 0));
+		GenSource minValueSource = new RecordedSource(new AtomRecording(Integer.MAX_VALUE, 2));
 
-		for (int i = 0; i < 10; i++) {
-			Shrinkable<List<Integer>> shrinkable = listOfInts.generate(source);
-			System.out.println("value=" + shrinkable.value());
-			System.out.println("recording=" + shrinkable.recording());
-
-			List<Integer> regenerated = shrinkable.regenerate();
-			System.out.println("regenerated=" + regenerated);
-
-			assertThat(regenerated).isEqualTo(shrinkable.value());
-		}
+		assertThat(allInts.generate(maxValueSource).value())
+			.isEqualTo(Integer.MAX_VALUE);
+		assertThat(allInts.generate(minValueSource).value())
+			.isEqualTo(Integer.MIN_VALUE);
 	}
+
+@Example
+void listOfInts() {
+	IntegerGenerator ints = new IntegerGenerator(-10, 100);
+	Generator<List<Integer>> listOfInts = new ListGenerator<>(ints, 5);
+
+	RandomGenSource source = new RandomGenSource(42);
+
+	for (int i = 0; i < 10; i++) {
+		Shrinkable<List<Integer>> shrinkable = listOfInts.generate(source);
+		System.out.println("value=" + shrinkable.value());
+		System.out.println("recording=" + shrinkable.recording());
+
+		List<Integer> regenerated = shrinkable.regenerate();
+		System.out.println("regenerated=" + regenerated);
+
+		assertThat(regenerated).isEqualTo(shrinkable.value());
+	}
+}
 }
