@@ -1,56 +1,57 @@
 package jqwik2gen;
 
 import java.util.*;
+import java.util.stream.*;
 
-public class GenRecorder implements GenSource {
+public class GenRecorder extends AbstractRecorder<GenSource> {
 
-	private final GenSource source;
-	private ConcreteRecorder recorder;
+	private AbstractRecorder<? extends GenSource> concreteRecorder;
 
 	public GenRecorder(GenSource source) {
-		this.source = source;
+		super(source);
 	}
 
 	public SourceRecording recording() {
-		if (recorder == null) {
+		if (concreteRecorder == null) {
 			throw new IllegalStateException("Recording has not been started");
 		}
-		return recorder.recording();
+		return concreteRecorder.recording();
 	}
 
 	@Override
 	public Atom atom() {
-		recorder = new AtomRecorder(source.atom());
-		return (Atom) recorder;
+		concreteRecorder = record(Atom.class, source.atom());
+		return (Atom) concreteRecorder;
 	}
 
 	@Override
 	public List list() {
-		throw new UnsupportedOperationException("Not yet implemented");
+		concreteRecorder = record(List.class, source.list());
+		return (List) concreteRecorder;
 	}
 
 	@Override
 	public Tree tree() {
-		throw new UnsupportedOperationException("Not yet implemented");
+		concreteRecorder = record(Tree.class, source.tree());
+		return (Tree) concreteRecorder;
 	}
 
-	private class AtomRecorder extends ConcreteRecorder implements Atom {
+	static class AtomRecorder extends AbstractRecorder<Atom> implements Atom {
 
-		private final Atom source;
 		private final java.util.List<Integer> seeds = new ArrayList<>();
 
-		private AtomRecorder(Atom source) {
-			this.source = source;
+		AtomRecorder(Atom source) {
+			super(source);
+		}
+
+		@Override
+		public Atom atom() {
+			return this;
 		}
 
 		@Override
 		SourceRecording recording() {
 			return new AtomRecording(seeds);
-		}
-
-		@Override
-		public Atom atom() {
-			return source.atom();
 		}
 
 		@Override
@@ -61,23 +62,110 @@ public class GenRecorder implements GenSource {
 		}
 	}
 
-	private static abstract class ConcreteRecorder implements GenSource {
+	static class ListRecorder extends AbstractRecorder<List> implements List {
 
-		abstract SourceRecording recording();
+		private final java.util.List<AbstractRecorder<?>> elements = new ArrayList<>();
 
-		@Override
-		public Atom atom() {
-			throw new UnsupportedOperationException("Should never be called");
+		ListRecorder(List source) {
+			super(source);
 		}
 
 		@Override
 		public List list() {
-			throw new UnsupportedOperationException("Should never be called");
+			return this;
+		}
+
+		@Override
+		SourceRecording recording() {
+			java.util.List<SourceRecording> elementRecordings = elements.stream()
+																		.map(AbstractRecorder::recording)
+																		.collect(Collectors.toList());
+			return new ListRecording(elementRecordings);
+		}
+
+		@Override
+		public <T extends GenSource> T nextElement(Class<T> sourceType) {
+			AbstractRecorder<?> next = record(sourceType, source.nextElement());
+			elements.add(next);
+			return (T) next;
+		}
+
+	}
+
+	static class TreeRecorder extends AbstractRecorder<Tree> implements Tree {
+
+		private AbstractRecorder<?> head;
+		private AbstractRecorder<?> child;
+
+		TreeRecorder(Tree source) {
+			super(source);
 		}
 
 		@Override
 		public Tree tree() {
-			throw new UnsupportedOperationException("Should never be called");
+			return this;
+		}
+
+		@Override
+		SourceRecording recording() {
+			if (head == null || child == null) {
+				throw new IllegalStateException("Recording has not been finished");
+			}
+			return new TreeRecording(head.recording(), child.recording());
+		}
+
+		@Override
+		public <T extends GenSource> T head(Class<T> sourceType) {
+			head = record(sourceType, source.head(sourceType));
+			return (T) head;
+		}
+
+		@Override
+		public <T extends GenSource> T child(Class<T> sourceType) {
+			child = record(sourceType, source.head(sourceType));
+			return (T) child;
 		}
 	}
+
 }
+
+abstract class AbstractRecorder<T extends GenSource> implements GenSource {
+
+	final T source;
+
+	AbstractRecorder(T source) {
+		this.source = source;
+	}
+
+	abstract SourceRecording recording();
+
+	@Override
+	public Atom atom() {
+		throw new UnsupportedOperationException("Should never be called");
+	}
+
+	@Override
+	public List list() {
+		throw new UnsupportedOperationException("Should never be called");
+	}
+
+	@Override
+	public Tree tree() {
+		throw new UnsupportedOperationException("Should never be called");
+	}
+
+	AbstractRecorder<?> record(Class<? extends GenSource> sourceType, GenSource source) {
+		if (sourceType.equals(Atom.class)) {
+			return new GenRecorder.AtomRecorder((Atom) source);
+		} else if (sourceType.equals(List.class)) {
+			return new GenRecorder.ListRecorder((List) source);
+		} else if (sourceType.equals(Tree.class)) {
+			return new GenRecorder.TreeRecorder((Tree) source);
+		} else if (sourceType.equals(GenSource.class)) {
+			return new GenRecorder(source);
+		}
+		throw new IllegalArgumentException("Invalid source type: " + source.getClass());
+	}
+
+}
+
