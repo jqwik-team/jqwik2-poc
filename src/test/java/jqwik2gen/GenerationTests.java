@@ -28,16 +28,17 @@ class GenerationTests {
 
 	@Example
 	void smallIntsWithRecorder() {
-		Generator<Integer> gen0to10 = new IntegerGenerator(-10, 100);
+		Generator<Integer> gen0to10 = new IntegerGenerator(-100, 100);
 
 		RandomGenSource source = new RandomGenSource(42);
-		GenRecorder recorder = new GenRecorder(source);
 
 		for (int i = 0; i < 10; i++) {
+			GenRecorder recorder = new GenRecorder(source);
 			Shrinkable<Integer> shrinkable = gen0to10.generate(recorder);
 			assertThat(shrinkable).isNotNull();
 			System.out.println("value=" + shrinkable.value());
-			System.out.println("recorded=" + recorder.recording());
+			System.out.println("recorded               = " + recorder.recording());
+			System.out.println("recorded by shrinkable = " + shrinkable.recording());
 		}
 	}
 
