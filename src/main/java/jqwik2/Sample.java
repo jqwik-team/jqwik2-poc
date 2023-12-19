@@ -10,4 +10,6 @@ public interface Sample {
 							.map(Shrinkable::value)
 							.toList();
 	}
+
+	Sample regenerate();
 }

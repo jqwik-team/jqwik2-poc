@@ -13,7 +13,7 @@ public class SourceOfRandomness {
 		try {
 			return newRandom(Long.parseLong(seed));
 		} catch (NumberFormatException nfe) {
-			throw new IllegalArgumentException(String.format("[%s] is not a valid random seed.", seed));
+			throw new IllegalArgumentException(String.format("[%s] is not a valid random randomSeed.", seed));
 		}
 	}
 
@@ -48,7 +48,7 @@ public class SourceOfRandomness {
 		private XORShiftRandom(long seed) {
 			this.seed = mix64(seed);
 			if (this.seed == 0) {
-				// 0 is invalid for XorShift seed, so we set it to a non-zero value
+				// 0 is invalid for XorShift randomSeed, so we set it to a non-zero value
 				this.seed = 0xbf58476d1ce4e5b9L;
 			}
 		}
