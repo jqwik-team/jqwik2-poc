@@ -1,5 +1,5 @@
-- Implement Sample.shrink()
-- Implement Sample.shrink() for several values
+- Shrinker accepts sample
+- Implement Shrinker for several values
 - Add edge cases to generators (or arbitraries)
 - Add GenSource.Tuple
 - Additional generators
@@ -7,3 +7,4 @@
 - Add exhaustive generation
 - Add descriptions to generators
 - Consider recording structure when shrinking lists
+- Parallelize shrinking

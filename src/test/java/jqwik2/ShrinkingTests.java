@@ -60,18 +60,18 @@ public class ShrinkingTests {
 		// 9999
 		GenSource source = new RecordedSource(new AtomRecording(9999, 0));
 
-		Shrinkable<Integer> shrinkable = new ShrinkableGenerator<>(ints).generate(source);
+		Sample sample = new SampleGenerator(List.of(ints)).generate(source);
 
 		Function<List<Object>, PropertyExecutionResult> property = args -> {
 			int i = (int) args.get(0);
 			return i > 1000 ? PropertyExecutionResult.FAILED : PropertyExecutionResult.SUCCESSFUL;
 		};
 
-		assertThat(property.apply(List.of(shrinkable.value()))).isEqualTo(PropertyExecutionResult.FAILED);
+		assertThat(property.apply(sample.values())).isEqualTo(PropertyExecutionResult.FAILED);
 
-		Shrinker shrinker = new Shrinker(List.of(shrinkable.asGeneric()), property);
+		Shrinker shrinker = new Shrinker(sample, property);
 
-		Shrinkable<Object> best = shrinkable.asGeneric();
+		Shrinkable<Object> best = sample.shrinkables().getFirst();
 		while (true) {
 			Optional<List<Shrinkable<Object>>> next = shrinker.nextStep();
 			if (next.isEmpty()) {

@@ -10,6 +10,10 @@ public class Shrinker {
 	private final SortedSet<List<Shrinkable<Object>>> candidates = new TreeSet<>(this::compare);
 	private List<Shrinkable<Object>> favourite;
 
+	public Shrinker(Sample sample, Function<List<Object>, PropertyExecutionResult> property) {
+		this(sample.shrinkables(), property);
+	}
+
 	public Shrinker(List<Shrinkable<Object>> startingShrinkables, Function<List<Object>, PropertyExecutionResult> property) {
 		this.property = property;
 		if (startingShrinkables.size() != 1) {
