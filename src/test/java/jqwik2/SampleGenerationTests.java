@@ -36,8 +36,8 @@ class SampleGenerationTests {
 
 		for (int i = 0; i < 10; i++) {
 
-			Sample sample = new RandomSampleGenerator(List.of(ints, lists))
-								.generate(new RandomGenSource());
+			Sample sample = new SampleGenerator(List.of(ints, lists))
+								.generateRandomly(new RandomGenSource());
 
 			System.out.println("sample = " + sample.values());
 
