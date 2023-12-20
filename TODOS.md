@@ -1,0 +1,9 @@
+- Generators should no longer create their own recordings, but instead generate target object
+- SampleGenerator should create Shrinkables instead of Generators
+- Add edge cases to generators (or arbitraries)
+- Add GenSource.Tuple
+- Additional generators
+  - Map, Filter, String, FlatMap
+- Add exhaustive generation
+- Add descriptions to generators
+- Consider recording structure when shrinking lists
