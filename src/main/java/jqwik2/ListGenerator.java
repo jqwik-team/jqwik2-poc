@@ -16,7 +16,7 @@ public class ListGenerator<T> implements Generator<List<T>> {
 		GenSource.Tree listSource = source.tree();
 		GenSource.Atom sizeSource = listSource.head().atom();
 
-		int size = sizeSource.choice(maxSize + 1);
+		int size = sizeSource.choose(maxSize + 1);
 		AtomRecording sizeRecording = new AtomRecording(size);
 		List<SourceRecording> elementRecordings = new ArrayList<>();
 

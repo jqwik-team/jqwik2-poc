@@ -1,24 +1,23 @@
 package jqwik2;
 
-import java.util.*;
-
 public final class RandomGenSource implements GenSource, GenSource.Atom, GenSource.List, GenSource.Tree {
-	private final Random random;
+	private final RandomChoice random;
 
 	public RandomGenSource() {
-		this(SourceOfRandomness.newRandom());
+		this(RandomChoice.create());
 	}
 
-	public RandomGenSource(long seed) {
-		this(SourceOfRandomness.newRandom(seed));
+	public RandomGenSource(String seed) {
+		this(RandomChoice.create(seed));
 	}
 
-	public RandomGenSource(Random random) {
+	public RandomGenSource(RandomChoice random) {
 		this.random = random;
 	}
 
+
 	@Override
-	public int choice(int max) {
+	public int choose(int max) {
 		return random.nextInt(max);
 	}
 
@@ -40,17 +39,17 @@ public final class RandomGenSource implements GenSource, GenSource.Atom, GenSour
 	@SuppressWarnings("unchecked")
 	@Override
 	public GenSource nextElement() {
-		return new RandomGenSource(random.nextLong());
+		return new RandomGenSource(random.split());
 	}
 
 	@Override
 	public GenSource head() {
-		return new RandomGenSource(random.nextLong());
+		return new RandomGenSource(random.split());
 	}
 
 	@Override
 	public GenSource child() {
-		return new RandomGenSource(random.nextLong());
+		return new RandomGenSource(random.split());
 	}
 
 }

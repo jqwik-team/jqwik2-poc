@@ -13,8 +13,8 @@ class SampleTests {
 		Generator<Integer> ints = new IntegerGenerator(-100, 100);
 		Generator<List<Integer>> lists = new ListGenerator<>(ints, 5);
 
-		GenRecorder recorder1 = new GenRecorder(new RandomGenSource(41l));
-		GenRecorder recorder2 = new GenRecorder(new RandomGenSource(42l));
+		GenRecorder recorder1 = new GenRecorder(new RandomGenSource("41"));
+		GenRecorder recorder2 = new GenRecorder(new RandomGenSource("42"));
 
 		List<Shrinkable<Object>> shrinkables = List.of(
 			ints.generate(recorder1).asGeneric(),

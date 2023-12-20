@@ -12,7 +12,7 @@ class GenerationTests {
 	void smallInts() {
 		Generator<Integer> gen0to10 = new IntegerGenerator(-10, 100);
 
-		RandomGenSource source = new RandomGenSource(42);
+		RandomGenSource source = new RandomGenSource("42");
 
 		for (int i = 0; i < 10; i++) {
 			Shrinkable<Integer> shrinkable = gen0to10.generate(source);
@@ -30,7 +30,7 @@ class GenerationTests {
 	void smallIntsWithRecorder() {
 		Generator<Integer> gen0to10 = new IntegerGenerator(-100, 100);
 
-		RandomGenSource source = new RandomGenSource(42);
+		RandomGenSource source = new RandomGenSource("42");
 
 		for (int i = 0; i < 10; i++) {
 			GenRecorder recorder = new GenRecorder(source);
@@ -60,7 +60,7 @@ class GenerationTests {
 		IntegerGenerator ints = new IntegerGenerator(-10, 100);
 		Generator<List<Integer>> listOfInts = new ListGenerator<>(ints, 5);
 
-		RandomGenSource source = new RandomGenSource(42);
+		RandomGenSource source = new RandomGenSource("42");
 
 		for (int i = 0; i < 10; i++) {
 			Shrinkable<List<Integer>> shrinkable = listOfInts.generate(source);
@@ -79,7 +79,7 @@ class GenerationTests {
 		IntegerGenerator ints = new IntegerGenerator(-10, 100);
 		Generator<List<Integer>> listOfInts = new ListGenerator<>(ints, 5);
 
-		RandomGenSource source = new RandomGenSource(42);
+		RandomGenSource source = new RandomGenSource("42");
 
 		for (int i = 0; i < 10; i++) {
 			GenRecorder recorder = new GenRecorder(source);

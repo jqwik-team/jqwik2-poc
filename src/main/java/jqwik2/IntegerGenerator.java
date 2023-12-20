@@ -13,8 +13,8 @@ public class IntegerGenerator implements Generator<Integer> {
 	public Shrinkable<Integer> generate(GenSource source) {
 		while (true) {
 			GenSource.Atom intSource = source.atom();
-			int abs = intSource.choice(Math.max(Math.abs(min), Math.abs(max)) + 1);
-			int sign = intSource.choice(2);
+			int abs = intSource.choose(Math.max(Math.abs(min), Math.abs(max)) + 1);
+			int sign = intSource.choose(2);
 			int valueWithSign = sign == 0 ? abs : -abs;
 			if (sign == 2) { // Edge case that can never be reached by random generation
 				valueWithSign = Integer.MIN_VALUE;

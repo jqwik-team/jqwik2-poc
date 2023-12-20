@@ -17,7 +17,7 @@ public final class RecordedSource implements GenSource, GenSource.Atom, GenSourc
 	}
 
 	@Override
-	public int choice(int max) {
+	public int choose(int max) {
 		if (recording instanceof AtomRecording) {
 			if (iterator.hasNext())
 				return iterator.next();
