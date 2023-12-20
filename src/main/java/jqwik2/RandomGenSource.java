@@ -52,4 +52,11 @@ public final class RandomGenSource implements GenSource, GenSource.Atom, GenSour
 		return new RandomGenSource(random.split());
 	}
 
+	/**
+	 * Split off a new random gen source for usage in different generators
+	 * @return a new random gen source
+	 */
+	public RandomGenSource split() {
+		return new RandomGenSource(random.split());
+	}
 }

@@ -13,7 +13,7 @@ public sealed interface Shrinkable<T> extends Comparable<Shrinkable<T>> {
 	Stream<Shrinkable<T>> shrink();
 
 	default T regenerate() {
-		return generator().generate(new RecordedSource(recording())).value();
+		return generator().generate_OLD(new RecordedSource(recording())).value();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -28,7 +28,7 @@ record GeneratedShrinkable<T>(T value, Generator<T> generator, SourceRecording r
 		return recording.shrink()
 						.map(s -> {
 							try {
-								return generator.generate(new RecordedSource(s));
+								return generator.generate_OLD(new RecordedSource(s));
 							} catch (CannotGenerateException e) {
 								return null;
 							}

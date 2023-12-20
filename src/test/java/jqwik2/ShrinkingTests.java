@@ -14,17 +14,17 @@ public class ShrinkingTests {
 		IntegerGenerator ints = new IntegerGenerator(-10, 100);
 
 		GenSource source = new RecordedSource(new AtomRecording(10, 0));
-		Shrinkable<Integer> shrinkable = ints.generate(source);
+		Shrinkable<Integer> shrinkable = ints.generate_OLD(source);
 		assertThat(shrinkable.value()).isEqualTo(10);
 
 		assertThatThrownBy(() -> {
 			RecordedSource recorded = new RecordedSource(new AtomRecording(100, 1));
-			ints.generate(recorded);
+			ints.generate_OLD(recorded);
 		}).isInstanceOf(CannotGenerateException.class);
 
 		assertThatThrownBy(() -> {
 			RecordedSource recorded = new RecordedSource(new AtomRecording(100));
-			ints.generate(recorded);
+			ints.generate_OLD(recorded);
 		}).isInstanceOf(CannotGenerateException.class);
 	}
 
@@ -34,7 +34,7 @@ public class ShrinkingTests {
 
 		// -10
 		GenSource source = new RecordedSource(new AtomRecording(10, 1));
-		Shrinkable<Integer> shrinkable = ints.generate(source);
+		Shrinkable<Integer> shrinkable = ints.generate_OLD(source);
 
 		shrinkable.shrink().forEach(s -> {
 			assertThat(s.recording()).isLessThan(shrinkable.recording());
@@ -61,7 +61,7 @@ public class ShrinkingTests {
 		);
 		GenSource source = new RecordedSource(treeRecording);
 
-		Shrinkable<List<Integer>> shrinkable = listOfInts.generate(source);
+		Shrinkable<List<Integer>> shrinkable = listOfInts.generate_OLD(source);
 
 		System.out.println("value: " + shrinkable.value());
 		shrinkable.shrink().forEach(s -> {
@@ -77,7 +77,7 @@ public class ShrinkingTests {
 
 		// 9999
 		GenSource source = new RecordedSource(new AtomRecording(9999, 0));
-		Shrinkable<Integer> shrinkable = ints.generate(source);
+		Shrinkable<Integer> shrinkable = ints.generate_OLD(source);
 
 		Function<List<Object>, PropertyExecutionResult> property = args -> {
 			int i = (int) args.get(0);
@@ -120,7 +120,7 @@ public class ShrinkingTests {
 		);
 		GenSource source = new RecordedSource(treeRecording);
 
-		Shrinkable<List<Integer>> shrinkable = listOfInts.generate(source);
+		Shrinkable<List<Integer>> shrinkable = listOfInts.generate_OLD(source);
 
 		Function<List<Object>, PropertyExecutionResult> property = args -> {
 			List<Integer> list = (List<Integer>) args.get(0);

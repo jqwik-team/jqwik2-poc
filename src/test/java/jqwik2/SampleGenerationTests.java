@@ -6,7 +6,7 @@ import net.jqwik.api.*;
 
 import static org.assertj.core.api.Assertions.*;
 
-class SampleTests {
+class SampleGenerationTests {
 
 	@Example
 	void generateRandomSample() {
@@ -17,8 +17,8 @@ class SampleTests {
 		GenRecorder recorder2 = new GenRecorder(new RandomGenSource("42"));
 
 		List<Shrinkable<Object>> shrinkables = List.of(
-			ints.generate(recorder1).asGeneric(),
-			lists.generate(recorder2).asGeneric()
+			ints.generate_OLD(recorder1).asGeneric(),
+			lists.generate_OLD(recorder2).asGeneric()
 		);
 
 		Sample sample = new Sample(shrinkables);
@@ -27,5 +27,22 @@ class SampleTests {
 
 		List<Object> regeneratedValues = sample.regenerateValues();
 		assertThat(regeneratedValues).isEqualTo(sample.values());
+	}
+
+	@Example
+	void useRandomSampleGenerator() {
+		Generator<Integer> ints = new IntegerGenerator(-100, 100);
+		Generator<List<Integer>> lists = new ListGenerator<>(ints, 5);
+
+		for (int i = 0; i < 10; i++) {
+
+			Sample sample = new RandomSampleGenerator(List.of(ints, lists))
+								.generate(new RandomGenSource());
+
+			System.out.println("sample = " + sample.values());
+
+			List<Object> regeneratedValues = sample.regenerateValues();
+			assertThat(regeneratedValues).isEqualTo(sample.values());
+		}
 	}
 }
