@@ -35,6 +35,32 @@ class GenerationTests {
 	}
 
 	@Example
+	void generateFromRecording() {
+		IntegerGenerator ints = new IntegerGenerator(-10, 100);
+
+		GenSource source = new RecordedSource(new AtomRecording(10, 0));
+		Integer shrinkable = ints.generate(source);
+		assertThat(shrinkable).isEqualTo(10);
+	}
+
+
+	@Example
+	void generateWithUnsatisfyingGenSource() {
+		IntegerGenerator ints = new IntegerGenerator(-10, 100);
+
+		assertThatThrownBy(() -> {
+			RecordedSource recorded = new RecordedSource(new AtomRecording(100, 1));
+			ints.generate(recorded);
+		}).isInstanceOf(CannotGenerateException.class);
+
+		assertThatThrownBy(() -> {
+			RecordedSource recorded = new RecordedSource(new AtomRecording(100));
+			ints.generate(recorded);
+		}).isInstanceOf(CannotGenerateException.class);
+	}
+
+
+	@Example
 	void intEdgeCases() {
 		Generator<Integer> allInts = new IntegerGenerator(Integer.MIN_VALUE, Integer.MAX_VALUE);
 
