@@ -2,14 +2,15 @@ package jqwik2;
 
 import java.util.*;
 
-public interface Sample {
-	List<Shrinkable<Object>> shrinkables();
+public record Sample(List<Shrinkable<Object>> shrinkables) {
 
-	default List<Object> values() {
+	public List<Object> values() {
 		return shrinkables().stream()
 							.map(Shrinkable::value)
 							.toList();
 	}
 
-	Sample regenerate();
+	List<Object> regenerateValues() {
+		return shrinkables().stream().map(Shrinkable::regenerate).toList();
+	}
 }
