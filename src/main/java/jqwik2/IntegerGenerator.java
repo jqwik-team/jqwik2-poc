@@ -25,20 +25,4 @@ public class IntegerGenerator implements Generator<Integer> {
 		}
 	}
 
-	@Override
-	public Shrinkable<Integer> generate_OLD(GenSource source) {
-		while (true) {
-			GenSource.Atom intSource = source.atom();
-			int abs = intSource.choose(Math.max(Math.abs(min), Math.abs(max)) + 1);
-			int sign = intSource.choose(2);
-			int valueWithSign = sign == 0 ? abs : -abs;
-			if (sign == 2) { // Edge case that can never be reached by random generation
-				valueWithSign = Integer.MIN_VALUE;
-			}
-			AtomRecording recorded = new AtomRecording(abs, sign);
-			if (valueWithSign >= min && valueWithSign <= max) {
-				return new GeneratedShrinkable<>(valueWithSign, this, recorded);
-			}
-		}
-	}
 }

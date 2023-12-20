@@ -30,6 +30,10 @@ public class SampleGenerator {
 		return new Sample(shrinkables);
 	}
 
+	public Sample generate(GenSource... sources) {
+		return generate(List.of(sources));
+	}
+
 	public Sample generateRandomly(RandomGenSource randomGenSource) {
 		List<RandomGenSource> genSources =
 			IntStream.range(0, generators.size())

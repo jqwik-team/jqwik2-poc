@@ -1,5 +1,6 @@
-- Generators should no longer create their own recordings, but instead generate target object
-- SampleGenerator should create Shrinkables instead of Generators
+- Introduce ShrinkableGenerator.generate()
+- Implement Sample.shrink()
+- Implement Sample.shrink() for several values
 - Add edge cases to generators (or arbitraries)
 - Add GenSource.Tuple
 - Additional generators
