@@ -39,8 +39,8 @@ class GenerationTests {
 		IntegerGenerator ints = new IntegerGenerator(-10, 100);
 
 		GenSource source = new RecordedSource(new AtomRecording(10, 0));
-		Integer shrinkable = ints.generate(source);
-		assertThat(shrinkable).isEqualTo(10);
+		Integer value = ints.generate(source);
+		assertThat(value).isEqualTo(10);
 	}
 
 
@@ -95,9 +95,9 @@ class GenerationTests {
 
 		for (int i = 0; i < 10; i++) {
 			GenRecorder recorder = new GenRecorder(source);
-			List<Integer> shrinkable = listOfInts.generate(recorder);
-			assertThat(shrinkable).isNotNull();
-			System.out.println("value=    " + shrinkable);
+			List<Integer> value = listOfInts.generate(recorder);
+			assertThat(value).isNotNull();
+			System.out.println("value=    " + value);
 			System.out.println("recorded= " + recorder.recording());
 		}
 	}

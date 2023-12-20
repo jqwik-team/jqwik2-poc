@@ -22,12 +22,14 @@ public class SampleGenerator {
 		for (int i = 0; i < generators.size(); i++) {
 			Generator<Object> generator = generators.get(i);
 			GenSource source = genSources.get(i);
-			GenRecorder recorder = new GenRecorder(source);
-			Object value = generator.generate(recorder);
-			Shrinkable<Object> apply = new GeneratedShrinkable<>(value, generator, recorder.recording());
-			shrinkables.add(apply);
+			shrinkables.add(createShrinkable(source, generator));
 		}
 		return new Sample(shrinkables);
+	}
+
+	private static Shrinkable<Object> createShrinkable(GenSource source, Generator<Object> generator) {
+		GenRecorder recorder = new GenRecorder(source);
+		return new ShrinkableGenerator<>(generator).generate(recorder);
 	}
 
 	public Sample generate(GenSource... sources) {

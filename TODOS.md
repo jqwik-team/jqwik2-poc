@@ -1,4 +1,3 @@
-- Introduce ShrinkableGenerator.generate()
 - Implement Sample.shrink()
 - Implement Sample.shrink() for several values
 - Add edge cases to generators (or arbitraries)

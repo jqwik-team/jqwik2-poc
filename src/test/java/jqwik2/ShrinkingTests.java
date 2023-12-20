@@ -16,8 +16,7 @@ public class ShrinkingTests {
 		// -10
 		GenSource source = new RecordedSource(new AtomRecording(10, 1));
 
-		Sample sample = new SampleGenerator(List.of(ints)).generate(source);
-		Shrinkable<Object> shrinkable = sample.shrinkables().get(0);
+		Shrinkable<Integer> shrinkable = new ShrinkableGenerator<>(ints).generate(source);
 
 		shrinkable.shrink().forEach(s -> {
 			assertThat(s.recording()).isLessThan(shrinkable.recording());
@@ -44,8 +43,7 @@ public class ShrinkingTests {
 		);
 		GenSource source = new RecordedSource(treeRecording);
 
-		Sample sample = new SampleGenerator(List.of(listOfInts)).generate(source);
-		Shrinkable<Object> shrinkable = sample.shrinkables().get(0);
+		Shrinkable<List<Integer>> shrinkable = new ShrinkableGenerator<>(listOfInts).generate(source);
 
 		System.out.println("value: " + shrinkable.value());
 		shrinkable.shrink().forEach(s -> {
@@ -62,8 +60,7 @@ public class ShrinkingTests {
 		// 9999
 		GenSource source = new RecordedSource(new AtomRecording(9999, 0));
 
-		Sample sample = new SampleGenerator(List.of(ints)).generate(source);
-		Shrinkable<Object> shrinkable = sample.shrinkables().get(0);
+		Shrinkable<Integer> shrinkable = new ShrinkableGenerator<>(ints).generate(source);
 
 		Function<List<Object>, PropertyExecutionResult> property = args -> {
 			int i = (int) args.get(0);
@@ -106,8 +103,7 @@ public class ShrinkingTests {
 		);
 		GenSource source = new RecordedSource(treeRecording);
 
-		Sample sample = new SampleGenerator(List.of(listOfInts)).generate(source);
-		Shrinkable<Object> shrinkable = sample.shrinkables().get(0);
+		Shrinkable<List<Integer>> shrinkable = new ShrinkableGenerator<>(listOfInts).generate(source);
 
 		Function<List<Object>, PropertyExecutionResult> property = args -> {
 			List<Integer> list = (List<Integer>) args.get(0);
@@ -117,7 +113,7 @@ public class ShrinkingTests {
 
 		assertThat(property.apply(List.of(shrinkable.value()))).isEqualTo(PropertyExecutionResult.FAILED);
 
-		Shrinker shrinker = new Shrinker(List.of(shrinkable), property);
+		Shrinker shrinker = new Shrinker(List.of(shrinkable.asGeneric()), property);
 
 		Shrinkable<Object> best = shrinkable.asGeneric();
 		while (true) {
