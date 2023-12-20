@@ -28,14 +28,6 @@ public final class RecordedSource implements GenSource, GenSource.Atom, GenSourc
 	}
 
 	@Override
-	public GenSource nextElement() {
-		if (elements.hasNext()) {
-			return new RecordedSource(elements.next());
-		}
-		throw new CannotGenerateException("No more elements!");
-	}
-
-	@Override
 	public Atom atom() {
 		if (!(recording instanceof AtomRecording)) {
 			throw new CannotGenerateException("Source is not an atom");
@@ -61,30 +53,28 @@ public final class RecordedSource implements GenSource, GenSource.Atom, GenSourc
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends GenSource> T nextElement(Class<T> sourceType) {
+	public GenSource nextElement() {
 		if (recording instanceof ListRecording) {
 			if (elements.hasNext()) {
-				return (T) new RecordedSource(elements.next());
+				return new RecordedSource(elements.next());
 			}
 			throw new CannotGenerateException("No more elements");
 		}
 		throw new CannotGenerateException("Source is not a list");
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends GenSource> T head(Class<T> sourceType) {
+	public GenSource head() {
 		if (recording instanceof TreeRecording tree) {
-			return (T) new RecordedSource(tree.head());
+			return new RecordedSource(tree.head());
 		}
 		throw new CannotGenerateException("Source is not a tree");
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends GenSource> T child(Class<T> sourceType) {
+	public GenSource child() {
 		if (recording instanceof TreeRecording tree) {
-			return (T) new RecordedSource(tree.child());
+			return new RecordedSource(tree.child());
 		}
 		throw new CannotGenerateException("Source is not a tree");
 	}

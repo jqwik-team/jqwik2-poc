@@ -23,11 +23,6 @@ public final class RandomGenSource implements GenSource, GenSource.Atom, GenSour
 	}
 
 	@Override
-	public GenSource nextElement() {
-		return new RandomGenSource(random.nextLong());
-	}
-
-	@Override
 	public Atom atom() {
 		return this;
 	}
@@ -44,19 +39,18 @@ public final class RandomGenSource implements GenSource, GenSource.Atom, GenSour
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends GenSource> T nextElement(Class<T> sourceType) {
-		return (T) new RandomGenSource(random.nextLong());
+	public GenSource nextElement() {
+		return new RandomGenSource(random.nextLong());
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends GenSource> T head(Class<T> sourceType) {
-		return (T) new RandomGenSource(random.nextLong());
+	public GenSource head() {
+		return new RandomGenSource(random.nextLong());
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends GenSource> T child(Class<T> sourceType) {
-		return (T) new RandomGenSource(random.nextLong());
+	public GenSource child() {
+		return new RandomGenSource(random.nextLong());
 	}
+
 }

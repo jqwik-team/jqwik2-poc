@@ -13,24 +13,14 @@ public interface GenSource {
 	}
 
 	interface List extends GenSource {
-		<T extends GenSource> T nextElement(Class<T> sourceType);
-		default GenSource nextElement() {
-			return nextElement(GenSource.class);
-		}
+		GenSource nextElement();
 	}
 
 	interface Tree extends GenSource {
-		<T extends GenSource> T head(Class<T> sourceType);
 
-		default GenSource head() {
-			return head(GenSource.class);
-		}
+		GenSource head();
 
-		<T extends GenSource> T child(Class<T> sourceType);
-
-		default GenSource child() {
-			return child(GenSource.class);
-		}
+		GenSource child();
 	}
 }
 

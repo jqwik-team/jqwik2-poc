@@ -20,19 +20,19 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 
 	@Override
 	public Atom atom() {
-		concreteRecorder = record(Atom.class, source.atom());
+		concreteRecorder = new AtomRecorder(source.atom());
 		return (Atom) concreteRecorder;
 	}
 
 	@Override
 	public List list() {
-		concreteRecorder = record(List.class, source.list());
+		concreteRecorder = new ListRecorder(source.list());
 		return (List) concreteRecorder;
 	}
 
 	@Override
 	public Tree tree() {
-		concreteRecorder = record(Tree.class, source.tree());
+		concreteRecorder = new TreeRecorder(source.tree());
 		return (Tree) concreteRecorder;
 	}
 
@@ -84,10 +84,10 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 		}
 
 		@Override
-		public <T extends GenSource> T nextElement(Class<T> sourceType) {
-			AbstractRecorder<?> next = record(sourceType, source.nextElement());
+		public GenSource nextElement() {
+			AbstractRecorder<?> next = new GenRecorder(source.nextElement());
 			elements.add(next);
-			return (T) next;
+			return next;
 		}
 
 	}
@@ -115,16 +115,17 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 		}
 
 		@Override
-		public <T extends GenSource> T head(Class<T> sourceType) {
-			head = record(sourceType, source.head(sourceType));
-			return (T) head;
+		public GenSource head() {
+			head = new GenRecorder(source.head());
+			return head;
 		}
 
 		@Override
-		public <T extends GenSource> T child(Class<T> sourceType) {
-			child = record(sourceType, source.head(sourceType));
-			return (T) child;
+		public GenSource child() {
+			child = new GenRecorder(source.child());
+			return child;
 		}
+
 	}
 
 }
@@ -152,19 +153,6 @@ abstract class AbstractRecorder<T extends GenSource> implements GenSource {
 	@Override
 	public Tree tree() {
 		throw new UnsupportedOperationException("Should never be called");
-	}
-
-	AbstractRecorder<?> record(Class<? extends GenSource> sourceType, GenSource source) {
-		if (sourceType.equals(Atom.class)) {
-			return new GenRecorder.AtomRecorder((Atom) source);
-		} else if (sourceType.equals(List.class)) {
-			return new GenRecorder.ListRecorder((List) source);
-		} else if (sourceType.equals(Tree.class)) {
-			return new GenRecorder.TreeRecorder((Tree) source);
-		} else if (sourceType.equals(GenSource.class)) {
-			return new GenRecorder(source);
-		}
-		throw new IllegalArgumentException("Invalid source type: " + source.getClass());
 	}
 
 }

@@ -14,14 +14,14 @@ public class ListGenerator<T> implements Generator<List<T>> {
 	@Override
 	public Shrinkable<List<T>> generate(GenSource source) {
 		GenSource.Tree listSource = source.tree();
-		GenSource.Atom sizeSource = listSource.head(GenSource.Atom.class);
+		GenSource.Atom sizeSource = listSource.head().atom();
 
 		int size = sizeSource.choice(maxSize + 1);
 		AtomRecording sizeRecording = new AtomRecording(size);
 		List<SourceRecording> elementRecordings = new ArrayList<>();
 
 		List<Shrinkable<T>> shrinkables = new ArrayList<>(size);
-		GenSource.List elementsSource = listSource.child(GenSource.List.class);
+		GenSource.List elementsSource = listSource.child().list();
 		for (int i = 0; i < size; i++) {
 			GenSource elementSource = elementsSource.nextElement();
 			Shrinkable<T> shrinkableElement = elements.generate(elementSource);
