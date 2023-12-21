@@ -3,7 +3,6 @@ package jqwik2;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 import java.util.function.*;
-import java.util.stream.*;
 
 public class Shrinker {
 	private final Function<List<Object>, PropertyExecutionResult> property;
@@ -29,15 +28,15 @@ public class Shrinker {
 			Sample nextCandidate = candidates.removeFirst();
 
 			AtomicBoolean found = new AtomicBoolean(false);
-			shrinkSample(nextCandidate)
-				.filter(sample -> property.apply(sample.values()) == PropertyExecutionResult.FAILED)
-				.filter(candidate -> candidate.compareTo(best) < 0)
-				.forEach(e -> {
-					if (!best.equals(e)) {
-						candidates.add(e);
-						found.set(true);
-					}
-				});
+			nextCandidate.shrink()
+						 .filter(sample -> property.apply(sample.values()) == PropertyExecutionResult.FAILED)
+						 .filter(candidate -> candidate.compareTo(best) < 0)
+						 .forEach(e -> {
+							 if (!best.equals(e)) {
+								 candidates.add(e);
+								 found.set(true);
+							 }
+						 });
 
 			if (candidates.isEmpty()) {
 				break;
@@ -49,11 +48,6 @@ public class Shrinker {
 			}
 		}
 		return Optional.empty();
-	}
-
-	private Stream<Sample> shrinkSample(Sample nextCandidate) {
-		Shrinkable<Object> firstParam = nextCandidate.shrinkables().getFirst();
-		return firstParam.shrink().map((Shrinkable<Object> s) -> new Sample(List.of(s)));
 	}
 
 }
