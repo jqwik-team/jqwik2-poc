@@ -22,6 +22,14 @@ public record TreeRecording(Recording head, Recording child) implements Recordin
 	}
 
 	@Override
+	public boolean isomorphicTo(Recording other) {
+		if (other instanceof TreeRecording otherTree) {
+			return head.isomorphicTo(otherTree.head) && child.isomorphicTo(otherTree.child);
+		}
+		return false;
+	}
+
+	@Override
 	public String toString() {
 		return "tree{%s, %s}".formatted(head, child);
 	}

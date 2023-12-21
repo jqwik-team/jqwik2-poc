@@ -8,6 +8,10 @@ public sealed interface Recording extends Comparable<Recording>
 
 	Stream<? extends Recording> shrink();
 
+	default boolean isomorphicTo(Recording other) {
+		return false;
+	}
+
 	static AtomRecording atom(Integer... choices) {
 		return new AtomRecording(choices);
 	}
@@ -24,12 +28,3 @@ public sealed interface Recording extends Comparable<Recording>
 		return new ListRecording(elements);
 	}
 }
-
-// TODO: Tuples could have more strict shrinking, since elements cannot be exchanged and size is stable
-// record TupleSource(List<SourceRecording> tuple) implements SourceRecording {
-// 	@Override
-// 	public Collection<SourceRecording> children() {
-// 		return Collections.emptyList();
-// 	}
-// }
-

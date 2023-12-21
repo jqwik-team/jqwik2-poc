@@ -27,6 +27,17 @@ public record ListRecording(List<Recording> elements) implements Recording {
 		return 0;
 	}
 
+	@Override
+	public boolean isomorphicTo(Recording other) {
+		if (other instanceof ListRecording otherList) {
+			if (elements.isEmpty() || otherList.elements.isEmpty()) {
+				return true;
+			}
+			return elements.getFirst().isomorphicTo(otherList.elements.getFirst());
+		}
+		return false;
+	}
+
 	private int compareElements(List<Recording> left, List<Recording> right) {
 		int sizeComparison = Integer.compare(left.size(), right.size());
 		if (sizeComparison != 0) {

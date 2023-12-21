@@ -21,6 +21,14 @@ public record AtomRecording(List<Integer> choices) implements Recording {
 		return 0;
 	}
 
+	@Override
+	public boolean isomorphicTo(Recording other) {
+		if (other instanceof AtomRecording atom) {
+			return choices.size() == atom.choices.size();
+		}
+		return false;
+	}
+
 	private int compareAtoms(AtomRecording left, AtomRecording right) {
 		int sizeComparison = Integer.compare(left.choices().size(), right.choices().size());
 		if (sizeComparison != 0) {
