@@ -3,6 +3,8 @@ package jqwik2;
 import java.util.*;
 import java.util.function.*;
 
+import jqwik2.recording.*;
+
 import net.jqwik.api.*;
 
 import static org.assertj.core.api.Assertions.*;

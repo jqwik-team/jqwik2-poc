@@ -1,12 +1,12 @@
-package jqwik2;
+package jqwik2.recording;
 
 import java.util.*;
 import java.util.stream.*;
 
-public class ListShrinker {
+class ListShrinker {
 	private final List<ChoicesRecording> elements;
 
-	public ListShrinker(ListRecording treeRecording) {
+	ListShrinker(ListRecording treeRecording) {
 		this.elements = treeRecording.elements();
 	}
 

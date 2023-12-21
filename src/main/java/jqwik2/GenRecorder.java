@@ -3,6 +3,8 @@ package jqwik2;
 import java.util.*;
 import java.util.stream.*;
 
+import jqwik2.recording.*;
+
 public class GenRecorder extends AbstractRecorder<GenSource> {
 
 	private AbstractRecorder<? extends GenSource> concreteRecorder;

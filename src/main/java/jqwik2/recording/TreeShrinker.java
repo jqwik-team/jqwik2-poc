@@ -1,12 +1,12 @@
-package jqwik2;
+package jqwik2.recording;
 
 import java.util.stream.*;
 
-public class TreeShrinker {
+class TreeShrinker {
 	private final ChoicesRecording head;
 	private final ChoicesRecording child;
 
-	public TreeShrinker(TreeRecording treeRecording) {
+	TreeShrinker(TreeRecording treeRecording) {
 		this.head = treeRecording.head();
 		this.child = treeRecording.child();
 	}

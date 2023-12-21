@@ -3,6 +3,8 @@ package jqwik2;
 import java.util.*;
 import java.util.stream.*;
 
+import jqwik2.recording.*;
+
 public sealed interface Shrinkable<T> extends Comparable<Shrinkable<T>> {
 	T value();
 
