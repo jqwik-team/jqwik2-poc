@@ -71,17 +71,17 @@ public class ShrinkingTests {
 
 		Shrinker shrinker = new Shrinker(sample, property);
 
-		Shrinkable<Object> best = sample.shrinkables().getFirst();
+		Sample previousBest = sample;
 		while (true) {
-			Optional<List<Shrinkable<Object>>> next = shrinker.nextStep();
+			Optional<Sample> next = shrinker.next();
 			if (next.isEmpty()) {
 				break;
 			}
-			assertThat(next.get().get(0).compareTo(best)).isLessThan(0);
-			best = next.get().get(0);
-			//System.out.println("shrink: " + next.get());
+			assertThat(next.get().compareTo(previousBest)).isLessThan(0);
+			previousBest = next.get();
+			// System.out.println("shrink: " + next.get());
 		}
-		assertThat(best.value()).isEqualTo(1001);
+		assertThat(shrinker.best().values()).isEqualTo(List.of(1001));
 
 	}
 
@@ -103,7 +103,7 @@ public class ShrinkingTests {
 		);
 		GenSource source = new RecordedSource(treeRecording);
 
-		Shrinkable<List<Integer>> shrinkable = new ShrinkableGenerator<>(listOfInts).generate(source);
+		Sample sample = new SampleGenerator(List.of(listOfInts)).generate(source);
 
 		Function<List<Object>, PropertyExecutionResult> property = args -> {
 			List<Integer> list = (List<Integer>) args.get(0);
@@ -111,21 +111,21 @@ public class ShrinkingTests {
 			return list.size() > 1 && sum != 0 ? PropertyExecutionResult.FAILED : PropertyExecutionResult.SUCCESSFUL;
 		};
 
-		assertThat(property.apply(List.of(shrinkable.value()))).isEqualTo(PropertyExecutionResult.FAILED);
+		assertThat(property.apply(sample.values())).isEqualTo(PropertyExecutionResult.FAILED);
 
-		Shrinker shrinker = new Shrinker(List.of(shrinkable.asGeneric()), property);
+		Shrinker shrinker = new Shrinker(sample, property);
 
-		Shrinkable<Object> best = shrinkable.asGeneric();
+		Sample previousBest = sample;
 		while (true) {
-			Optional<List<Shrinkable<Object>>> next = shrinker.nextStep();
+			Optional<Sample> next = shrinker.next();
 			if (next.isEmpty()) {
 				break;
 			}
-			assertThat(next.get().get(0).compareTo(best)).isLessThan(0);
-			best = next.get().get(0);
+			assertThat(next.get().compareTo(previousBest)).isLessThan(0);
+			previousBest = next.get();
 			System.out.println("shrink: " + next.get());
 		}
-		assertThat(best.value()).isEqualTo(List.of(0, 1));
+		assertThat(shrinker.best().values()).isEqualTo(List.of(List.of(0, 1)));
 
 	}
 

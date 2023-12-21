@@ -1,5 +1,4 @@
-- Shrinker accepts sample
-- Implement Shrinker for several values
+- Implement Shrinker for more than one shrinkable
 - Add edge cases to generators (or arbitraries)
 - Add GenSource.Tuple
 - Additional generators

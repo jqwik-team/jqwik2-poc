@@ -7,33 +7,33 @@ import java.util.stream.*;
 
 public class Shrinker {
 	private final Function<List<Object>, PropertyExecutionResult> property;
-	private final SortedSet<List<Shrinkable<Object>>> candidates = new TreeSet<>(this::compare);
-	private List<Shrinkable<Object>> favourite;
+	private final SortedSet<Sample> candidates = new TreeSet<>();
+	private Sample best;
 
 	public Shrinker(Sample sample, Function<List<Object>, PropertyExecutionResult> property) {
-		this(sample.shrinkables(), property);
-	}
-
-	public Shrinker(List<Shrinkable<Object>> startingShrinkables, Function<List<Object>, PropertyExecutionResult> property) {
-		this.property = property;
-		if (startingShrinkables.size() != 1) {
+		if (sample.size() != 1) {
 			throw new IllegalArgumentException("Only one parameter supported for now!");
 		}
-		candidates.add(startingShrinkables);
-		favourite = startingShrinkables;
+		this.property = property;
+		candidates.add(sample);
+		best = sample;
 	}
 
-	public Optional<List<Shrinkable<Object>>> nextStep() {
+	public Sample best() {
+		return best;
+	}
+
+	public Optional<Sample> next() {
 		while (!candidates.isEmpty()) {
 			//System.out.println("candidates: " + candidates);
-			List<Shrinkable<Object>> nextCandidate = candidates.removeFirst();
+			Sample nextCandidate = candidates.removeFirst();
 
 			AtomicBoolean found = new AtomicBoolean(false);
-			shrink(nextCandidate)
-				.filter(shrinkables -> property.apply(values(shrinkables)) == PropertyExecutionResult.FAILED)
-				.filter(candidate -> compare(candidate, favourite) < 0)
+			shrinkSample(nextCandidate)
+				.filter(sample -> property.apply(sample.values()) == PropertyExecutionResult.FAILED)
+				.filter(candidate -> candidate.compareTo(best) < 0)
 				.forEach(e -> {
-					if (!favourite.equals(e)) {
+					if (!best.equals(e)) {
 						candidates.add(e);
 						found.set(true);
 					}
@@ -44,25 +44,16 @@ public class Shrinker {
 			}
 
 			if (found.get()) {
-				favourite = candidates.first();
-				return Optional.of(favourite);
+				best = candidates.first();
+				return Optional.of(best);
 			}
 		}
 		return Optional.empty();
 	}
 
-	private int compare(List<Shrinkable<Object>> left, List<Shrinkable<Object>> right) {
-		return left.getFirst().compareTo(right.getFirst());
+	private Stream<Sample> shrinkSample(Sample nextCandidate) {
+		Shrinkable<Object> firstParam = nextCandidate.shrinkables().getFirst();
+		return firstParam.shrink().map((Shrinkable<Object> s) -> new Sample(List.of(s)));
 	}
 
-	private Stream<List<Shrinkable<Object>>> shrink(List<Shrinkable<Object>> nextCandidate) {
-		Shrinkable<Object> firstParam = nextCandidate.getFirst();
-		return firstParam.shrink().map(List::of);
-	}
-
-	private List<Object> values(List<Shrinkable<Object>> shrinkables) {
-		return shrinkables.stream()
-						  .map(Shrinkable::value)
-						  .toList();
-	}
 }
