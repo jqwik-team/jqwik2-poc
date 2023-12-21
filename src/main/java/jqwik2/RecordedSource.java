@@ -13,18 +13,18 @@ public final class RecordedSource implements GenSource, GenSource.Atom, GenSourc
 			this.elements = list.elements().iterator();
 		else
 			this.elements = Collections.emptyIterator();
-		this.iterator = source.iterator();
+		if (source instanceof AtomRecording atom)
+			this.iterator = atom.seeds().iterator();
+		else
+			this.iterator = Collections.emptyIterator();
 	}
 
 	@Override
 	public int choose(int max) {
-		if (recording instanceof AtomRecording) {
-			if (iterator.hasNext())
-				return iterator.next();
-			else
-				throw new CannotGenerateException("No more choices!");
-		}
-		throw new CannotGenerateException("Source is not an atom");
+		if (iterator.hasNext())
+			return iterator.next();
+		else
+			throw new CannotGenerateException("No more choices!");
 	}
 
 	@Override

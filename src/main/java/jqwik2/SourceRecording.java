@@ -6,20 +6,12 @@ import java.util.stream.*;
 public sealed interface SourceRecording extends Comparable<SourceRecording>
 	permits AtomRecording, ListRecording, TreeRecording {
 
-	Iterator<Integer> iterator();
-
 	Stream<? extends SourceRecording> shrink();
-
 }
 
 record AtomRecording(List<Integer> seeds) implements SourceRecording {
 	AtomRecording(Integer... seeds) {
 		this(new ArrayList<>(Arrays.asList(seeds)));
-	}
-
-	@Override
-	public Iterator<Integer> iterator() {
-		return seeds.iterator();
 	}
 
 	@Override
@@ -57,11 +49,6 @@ record AtomRecording(List<Integer> seeds) implements SourceRecording {
 }
 
 record ListRecording(List<SourceRecording> elements) implements SourceRecording {
-
-	@Override
-	public Iterator<Integer> iterator() {
-		return Collections.emptyIterator();
-	}
 
 	@Override
 	public Stream<? extends SourceRecording> shrink() {
@@ -116,11 +103,6 @@ record ListRecording(List<SourceRecording> elements) implements SourceRecording 
 // }
 
 record TreeRecording(SourceRecording head, SourceRecording child) implements SourceRecording {
-
-	@Override
-	public Iterator<Integer> iterator() {
-		return head.iterator();
-	}
 
 	@Override
 	public Stream<? extends SourceRecording> shrink() {
