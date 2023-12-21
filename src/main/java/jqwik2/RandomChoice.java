@@ -1,6 +1,7 @@
 package jqwik2;
 
 import java.util.*;
+import java.util.random.*;
 
 public abstract class RandomChoice {
 
@@ -33,7 +34,7 @@ public abstract class RandomChoice {
 	}
 
 	private static class XORShiftRandomChoice extends RandomChoice {
-		private final Random random;
+		private final RandomGenerator random;
 
 		private XORShiftRandomChoice(String seed) {
 			try {
@@ -76,7 +77,7 @@ public abstract class RandomChoice {
 	 *     <li>nextBytes(int)</li>
 	 * </ul>
 	 */
-	static class XORShiftRandom extends Random {
+	static class XORShiftRandom implements RandomGenerator {
 		private long seed;
 
 		XORShiftRandom() {
@@ -98,13 +99,6 @@ public abstract class RandomChoice {
 			z = (z ^ (z >>> 30)) * 0xbf58476d1ce4e5b9L;
 			z = (z ^ (z >>> 27)) * 0x94d049bb133111ebL;
 			return z ^ (z >>> 31);
-		}
-
-		@Override
-		protected int next(int nbits) {
-			long x = nextLong();
-			x &= ((1L << nbits) - 1);
-			return (int) x;
 		}
 
 		/**

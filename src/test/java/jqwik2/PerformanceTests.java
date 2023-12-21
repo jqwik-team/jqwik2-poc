@@ -6,13 +6,22 @@ import net.jqwik.api.*;
 
 class PerformanceTests {
 
+	// @Example
+	void testXorShiftGenerator() {
+		java.util.random.RandomGenerator generator = new RandomChoice.XORShiftRandom();
+		int count = 100_000_000;
+		time("XorShift", count, () -> {
+			generator.nextDouble();
+			// System.out.println(generator.nextInt(5));
+		});
+	}
 
 	@Example
-	void performance() {
+	void compare_jqwik2poc_with_jqwik() {
 		IntegerGenerator randomInteger = new IntegerGenerator(-10, 100);
-		ListGenerator<Integer> randomList = new ListGenerator<>(randomInteger, 10);
+		ListGenerator<Integer> randomList = new ListGenerator<>(randomInteger, 100);
 
-		int count = 1_000_000;
+		int count = 100_000;
 
 		GenRecorder source = new GenRecorder(new RandomGenSource());
 		time("jqwik2", count, () -> {
@@ -21,10 +30,10 @@ class PerformanceTests {
 		// System.out.println(source.recording());
 
 		RandomGenerator<List<Integer>> generator = Arbitraries.integers().between(-10, 100)
-															  .list().ofMaxSize(10)
+															  .list().ofMaxSize(100)
 															  .generator(1000);
 
-		Random random = new RandomChoice.XORShiftRandom();
+		Random random = new Random();
 		time("jqwik1", count, () -> generator.next(random));
 	}
 
