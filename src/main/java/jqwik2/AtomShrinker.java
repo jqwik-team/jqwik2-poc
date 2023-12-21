@@ -8,7 +8,7 @@ class AtomShrinker {
 	private final List<Integer> seeds;
 
 	AtomShrinker(AtomRecording recording) {
-		this.seeds = recording.seeds();
+		this.seeds = recording.choices();
 	}
 
 	Stream<AtomRecording> shrink() {

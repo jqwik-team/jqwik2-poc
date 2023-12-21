@@ -3,24 +3,24 @@ package jqwik2;
 import java.util.*;
 import java.util.stream.*;
 
-public sealed interface SourceRecording extends Comparable<SourceRecording>
+public sealed interface ChoicesRecording extends Comparable<ChoicesRecording>
 	permits AtomRecording, ListRecording, TreeRecording {
 
-	Stream<? extends SourceRecording> shrink();
+	Stream<? extends ChoicesRecording> shrink();
 }
 
-record AtomRecording(List<Integer> seeds) implements SourceRecording {
-	AtomRecording(Integer... seeds) {
-		this(new ArrayList<>(Arrays.asList(seeds)));
+record AtomRecording(List<Integer> choices) implements ChoicesRecording {
+	AtomRecording(Integer... choices) {
+		this(new ArrayList<>(Arrays.asList(choices)));
 	}
 
 	@Override
-	public Stream<? extends SourceRecording> shrink() {
+	public Stream<? extends ChoicesRecording> shrink() {
 		return new AtomShrinker(this).shrink();
 	}
 
 	@Override
-	public int compareTo(SourceRecording other) {
+	public int compareTo(ChoicesRecording other) {
 		if (other instanceof AtomRecording otherAtomic) {
 			return compareAtoms(this, otherAtomic);
 		}
@@ -28,12 +28,12 @@ record AtomRecording(List<Integer> seeds) implements SourceRecording {
 	}
 
 	private int compareAtoms(AtomRecording left, AtomRecording right) {
-		int sizeComparison = Integer.compare(left.seeds().size(), right.seeds().size());
+		int sizeComparison = Integer.compare(left.choices().size(), right.choices().size());
 		if (sizeComparison != 0) {
 			return sizeComparison;
 		}
-		for (int i = 0; i < left.seeds().size(); i++) {
-			int seedComparison = Integer.compare(left.seeds().get(i), right.seeds().get(i));
+		for (int i = 0; i < left.choices().size(); i++) {
+			int seedComparison = Integer.compare(left.choices().get(i), right.choices().get(i));
 			if (seedComparison != 0) {
 				return seedComparison;
 			}
@@ -43,24 +43,24 @@ record AtomRecording(List<Integer> seeds) implements SourceRecording {
 
 	@Override
 	public String toString() {
-		List<String> listOfStrings = seeds.stream().map(Object::toString).toList();
+		List<String> listOfStrings = choices.stream().map(Object::toString).toList();
 		return "atom{%s}".formatted(String.join(", ", listOfStrings));
 	}
 }
 
-record ListRecording(List<SourceRecording> elements) implements SourceRecording {
+record ListRecording(List<ChoicesRecording> elements) implements ChoicesRecording {
 
 	@Override
-	public Stream<? extends SourceRecording> shrink() {
+	public Stream<? extends ChoicesRecording> shrink() {
 		return new ListShrinker(this).shrink();
 	}
 
 	@Override
-	public int compareTo(SourceRecording other) {
+	public int compareTo(ChoicesRecording other) {
 		if (other instanceof ListRecording otherList) {
-			List<SourceRecording> mySortedChildren = new ArrayList<>(this.elements);
+			List<ChoicesRecording> mySortedChildren = new ArrayList<>(this.elements);
 			Collections.sort(mySortedChildren);
-			List<SourceRecording> otherSortedChildren = new ArrayList<>(otherList.elements);
+			List<ChoicesRecording> otherSortedChildren = new ArrayList<>(otherList.elements);
 			Collections.sort(otherSortedChildren);
 			int sortedChildrenComparison = compareElements(mySortedChildren, otherSortedChildren);
 			if (sortedChildrenComparison != 0) {
@@ -72,7 +72,7 @@ record ListRecording(List<SourceRecording> elements) implements SourceRecording 
 		return 0;
 	}
 
-	private int compareElements(List<SourceRecording> left, List<SourceRecording> right) {
+	private int compareElements(List<ChoicesRecording> left, List<ChoicesRecording> right) {
 		int sizeComparison = Integer.compare(left.size(), right.size());
 		if (sizeComparison != 0) {
 			return sizeComparison;
@@ -102,15 +102,15 @@ record ListRecording(List<SourceRecording> elements) implements SourceRecording 
 // 	}
 // }
 
-record TreeRecording(SourceRecording head, SourceRecording child) implements SourceRecording {
+record TreeRecording(ChoicesRecording head, ChoicesRecording child) implements ChoicesRecording {
 
 	@Override
-	public Stream<? extends SourceRecording> shrink() {
+	public Stream<? extends ChoicesRecording> shrink() {
 		return new TreeShrinker(this).shrink();
 	}
 
 	@Override
-	public int compareTo(SourceRecording other) {
+	public int compareTo(ChoicesRecording other) {
 		if (other instanceof TreeRecording otherTree) {
 			int headComparison = this.head.compareTo(otherTree.head);
 			if (headComparison != 0) {

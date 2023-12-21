@@ -11,7 +11,7 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 		super(source);
 	}
 
-	public SourceRecording recording() {
+	public ChoicesRecording recording() {
 		if (concreteRecorder == null) {
 			throw new IllegalStateException("Recording has not been started");
 		}
@@ -50,7 +50,7 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 		}
 
 		@Override
-		SourceRecording recording() {
+		ChoicesRecording recording() {
 			return new AtomRecording(seeds);
 		}
 
@@ -76,10 +76,10 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 		}
 
 		@Override
-		SourceRecording recording() {
-			java.util.List<SourceRecording> elementRecordings = elements.stream()
-																		.map(AbstractRecorder::recording)
-																		.collect(Collectors.toList());
+		ChoicesRecording recording() {
+			java.util.List<ChoicesRecording> elementRecordings = elements.stream()
+																		 .map(AbstractRecorder::recording)
+																		 .collect(Collectors.toList());
 			return new ListRecording(elementRecordings);
 		}
 
@@ -107,7 +107,7 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 		}
 
 		@Override
-		SourceRecording recording() {
+		ChoicesRecording recording() {
 			if (head == null || child == null) {
 				throw new IllegalStateException("Recording has not been finished");
 			}
@@ -138,7 +138,7 @@ abstract class AbstractRecorder<T extends GenSource> implements GenSource {
 		this.source = source;
 	}
 
-	abstract SourceRecording recording();
+	abstract ChoicesRecording recording();
 
 	@Override
 	public Atom atom() {

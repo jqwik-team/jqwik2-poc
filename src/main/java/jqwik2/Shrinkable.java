@@ -8,7 +8,7 @@ public sealed interface Shrinkable<T> extends Comparable<Shrinkable<T>> {
 
 	Generator<T> generator();
 
-	SourceRecording recording();
+	ChoicesRecording recording();
 
 	Stream<Shrinkable<T>> shrink();
 
@@ -22,7 +22,7 @@ public sealed interface Shrinkable<T> extends Comparable<Shrinkable<T>> {
 	}
 }
 
-record GeneratedShrinkable<T>(T value, Generator<T> generator, SourceRecording recording) implements Shrinkable<T> {
+record GeneratedShrinkable<T>(T value, Generator<T> generator, ChoicesRecording recording) implements Shrinkable<T> {
 	@Override
 	public Stream<Shrinkable<T>> shrink() {
 		return recording.shrink()

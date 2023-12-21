@@ -4,17 +4,17 @@ import java.util.*;
 
 public final class RecordedSource implements GenSource, GenSource.Atom, GenSource.List, GenSource.Tree {
 	private final Iterator<Integer> iterator;
-	private final Iterator<SourceRecording> elements;
-	private final SourceRecording recording;
+	private final Iterator<ChoicesRecording> elements;
+	private final ChoicesRecording recording;
 
-	public RecordedSource(SourceRecording source) {
+	public RecordedSource(ChoicesRecording source) {
 		this.recording = source;
 		if (source instanceof ListRecording list)
 			this.elements = list.elements().iterator();
 		else
 			this.elements = Collections.emptyIterator();
 		if (source instanceof AtomRecording atom)
-			this.iterator = atom.seeds().iterator();
+			this.iterator = atom.choices().iterator();
 		else
 			this.iterator = Collections.emptyIterator();
 	}
