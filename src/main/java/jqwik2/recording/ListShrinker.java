@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.stream.*;
 
 class ListShrinker {
-	private final List<ChoicesRecording> elements;
+	private final List<Recording> elements;
 
 	ListShrinker(ListRecording treeRecording) {
 		this.elements = treeRecording.elements();
@@ -20,25 +20,25 @@ class ListShrinker {
 		).map(ListRecording::new);
 	}
 
-	private Stream<List<ChoicesRecording>> shrinkIndividually() {
+	private Stream<List<Recording>> shrinkIndividually() {
 		return IntStream.range(0, elements.size() - 1)
 						.boxed()
 						.flatMap(this::shrinkElement);
 	}
 
-	private Stream<List<ChoicesRecording>> shrinkElement(int index) {
-		ChoicesRecording child = elements.get(index);
+	private Stream<List<Recording>> shrinkElement(int index) {
+		Recording child = elements.get(index);
 		return child.shrink().map(shrunkChild -> replaceElement(index, shrunkChild));
 	}
 
-	private List<ChoicesRecording> replaceElement(int index, ChoicesRecording shrunkChild) {
-		List<ChoicesRecording> shrunkChildren = new ArrayList<>(elements);
+	private List<Recording> replaceElement(int index, Recording shrunkChild) {
+		List<Recording> shrunkChildren = new ArrayList<>(elements);
 		shrunkChildren.set(index, shrunkChild);
 		return shrunkChildren;
 	}
 
-	private Stream<List<ChoicesRecording>> reorder() {
-		List<ChoicesRecording> reorderedChildren = new ArrayList<>(elements);
+	private Stream<List<Recording>> reorder() {
+		List<Recording> reorderedChildren = new ArrayList<>(elements);
 		Collections.sort(reorderedChildren);
 		return Stream.of(reorderedChildren);
 	}

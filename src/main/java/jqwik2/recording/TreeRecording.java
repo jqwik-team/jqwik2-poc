@@ -2,15 +2,15 @@ package jqwik2.recording;
 
 import java.util.stream.*;
 
-public record TreeRecording(ChoicesRecording head, ChoicesRecording child) implements ChoicesRecording {
+public record TreeRecording(Recording head, Recording child) implements Recording {
 
 	@Override
-	public Stream<? extends ChoicesRecording> shrink() {
+	public Stream<? extends Recording> shrink() {
 		return new TreeShrinker(this).shrink();
 	}
 
 	@Override
-	public int compareTo(ChoicesRecording other) {
+	public int compareTo(Recording other) {
 		if (other instanceof TreeRecording otherTree) {
 			int headComparison = this.head.compareTo(otherTree.head);
 			if (headComparison != 0) {

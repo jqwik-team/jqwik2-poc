@@ -7,6 +7,8 @@ import jqwik2.recording.*;
 
 import net.jqwik.api.*;
 
+import static jqwik2.recording.Recording.*;
+import static jqwik2.recording.Recording.list;
 import static org.assertj.core.api.Assertions.*;
 
 public class ShrinkingTests {
@@ -16,7 +18,7 @@ public class ShrinkingTests {
 		IntegerGenerator ints = new IntegerGenerator(-10, 100);
 
 		// -10
-		GenSource source = new RecordedSource(new AtomRecording(10, 1));
+		GenSource source = new RecordedSource(atom(10, 1));
 
 		Shrinkable<Integer> shrinkable = new ShrinkableGenerator<>(ints).generate(source);
 
@@ -33,15 +35,13 @@ public class ShrinkingTests {
 		Generator<List<Integer>> listOfInts = new ListGenerator<>(ints, 5);
 
 		// [-10, 50, -5]
-		ListRecording listRecording = new ListRecording(
-			List.of(
-				new AtomRecording(10, 1),
-				new AtomRecording(50, 0),
-				new AtomRecording(5, 1)
-			)
+		ListRecording listRecording = list(
+			atom(10, 1),
+			atom(50, 0),
+			atom(5, 1)
 		);
-		TreeRecording treeRecording = new TreeRecording(
-			new AtomRecording(3), listRecording
+		TreeRecording treeRecording = tree(
+			atom(3), listRecording
 		);
 		GenSource source = new RecordedSource(treeRecording);
 
@@ -60,7 +60,7 @@ public class ShrinkingTests {
 		IntegerGenerator ints = new IntegerGenerator(-100000, 100000);
 
 		// 9999
-		GenSource source = new RecordedSource(new AtomRecording(9999, 0));
+		GenSource source = new RecordedSource(atom(9999, 0));
 
 		Sample sample = new SampleGenerator(List.of(ints)).generate(source);
 
@@ -93,15 +93,13 @@ public class ShrinkingTests {
 		Generator<List<Integer>> listOfInts = new ListGenerator<>(ints, 5);
 
 		// [-10, 50, -5]
-		ListRecording listRecording = new ListRecording(
-			List.of(
-				new AtomRecording(10, 1),
-				new AtomRecording(50, 0),
-				new AtomRecording(5, 1)
-			)
+		ListRecording listRecording = list(
+			atom(10, 1),
+			atom(50, 0),
+			atom(5, 1)
 		);
-		TreeRecording treeRecording = new TreeRecording(
-			new AtomRecording(3), listRecording
+		TreeRecording treeRecording = tree(
+			atom(3), listRecording
 		);
 		GenSource source = new RecordedSource(treeRecording);
 

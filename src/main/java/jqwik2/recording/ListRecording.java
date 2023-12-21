@@ -3,19 +3,19 @@ package jqwik2.recording;
 import java.util.*;
 import java.util.stream.*;
 
-public record ListRecording(List<ChoicesRecording> elements) implements ChoicesRecording {
+public record ListRecording(List<Recording> elements) implements Recording {
 
 	@Override
-	public Stream<? extends ChoicesRecording> shrink() {
+	public Stream<? extends Recording> shrink() {
 		return new ListShrinker(this).shrink();
 	}
 
 	@Override
-	public int compareTo(ChoicesRecording other) {
+	public int compareTo(Recording other) {
 		if (other instanceof ListRecording otherList) {
-			List<ChoicesRecording> mySortedChildren = new ArrayList<>(this.elements);
+			List<Recording> mySortedChildren = new ArrayList<>(this.elements);
 			Collections.sort(mySortedChildren);
-			List<ChoicesRecording> otherSortedChildren = new ArrayList<>(otherList.elements);
+			List<Recording> otherSortedChildren = new ArrayList<>(otherList.elements);
 			Collections.sort(otherSortedChildren);
 			int sortedChildrenComparison = compareElements(mySortedChildren, otherSortedChildren);
 			if (sortedChildrenComparison != 0) {
@@ -27,7 +27,7 @@ public record ListRecording(List<ChoicesRecording> elements) implements ChoicesR
 		return 0;
 	}
 
-	private int compareElements(List<ChoicesRecording> left, List<ChoicesRecording> right) {
+	private int compareElements(List<Recording> left, List<Recording> right) {
 		int sizeComparison = Integer.compare(left.size(), right.size());
 		if (sizeComparison != 0) {
 			return sizeComparison;

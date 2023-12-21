@@ -3,18 +3,18 @@ package jqwik2.recording;
 import java.util.*;
 import java.util.stream.*;
 
-public record AtomRecording(List<Integer> choices) implements ChoicesRecording {
-	public AtomRecording(Integer... choices) {
+public record AtomRecording(List<Integer> choices) implements Recording {
+	AtomRecording(Integer... choices) {
 		this(new ArrayList<>(Arrays.asList(choices)));
 	}
 
 	@Override
-	public Stream<? extends ChoicesRecording> shrink() {
+	public Stream<? extends Recording> shrink() {
 		return new AtomShrinker(this).shrink();
 	}
 
 	@Override
-	public int compareTo(ChoicesRecording other) {
+	public int compareTo(Recording other) {
 		if (other instanceof AtomRecording otherAtomic) {
 			return compareAtoms(this, otherAtomic);
 		}

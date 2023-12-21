@@ -3,8 +3,8 @@ package jqwik2.recording;
 import java.util.stream.*;
 
 class TreeShrinker {
-	private final ChoicesRecording head;
-	private final ChoicesRecording child;
+	private final Recording head;
+	private final Recording child;
 
 	TreeShrinker(TreeRecording treeRecording) {
 		this.head = treeRecording.head();
@@ -19,20 +19,20 @@ class TreeShrinker {
 	}
 
 	private Stream<TreeRecording> shrinkChild() {
-		Stream<? extends ChoicesRecording> childCandidates = child.shrink();
+		Stream<? extends Recording> childCandidates = child.shrink();
 		return childCandidates.map(this::replaceChild);
 	}
 
-	private TreeRecording replaceChild(ChoicesRecording childRecording) {
+	private TreeRecording replaceChild(Recording childRecording) {
 		return new TreeRecording(head, childRecording);
 	}
 
 	private Stream<TreeRecording> shrinkHead() {
-		Stream<? extends ChoicesRecording> headCandidates = head.shrink();
+		Stream<? extends Recording> headCandidates = head.shrink();
 		return headCandidates.map(this::replaceHead);
 	}
 
-	private TreeRecording replaceHead(ChoicesRecording headRecording) {
+	private TreeRecording replaceHead(Recording headRecording) {
 		return new TreeRecording(headRecording, child);
 	}
 }

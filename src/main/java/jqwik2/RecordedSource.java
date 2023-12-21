@@ -6,10 +6,10 @@ import jqwik2.recording.*;
 
 public final class RecordedSource implements GenSource, GenSource.Atom, GenSource.List, GenSource.Tree {
 	private final Iterator<Integer> iterator;
-	private final Iterator<ChoicesRecording> elements;
-	private final ChoicesRecording recording;
+	private final Iterator<Recording> elements;
+	private final Recording recording;
 
-	public RecordedSource(ChoicesRecording source) {
+	public RecordedSource(Recording source) {
 		this.recording = source;
 		if (source instanceof ListRecording list)
 			this.elements = list.elements().iterator();

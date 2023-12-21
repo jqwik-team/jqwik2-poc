@@ -2,10 +2,9 @@ package jqwik2;
 
 import java.util.*;
 
-import jqwik2.recording.*;
-
 import net.jqwik.api.*;
 
+import static jqwik2.recording.Recording.*;
 import static org.assertj.core.api.Assertions.*;
 
 class GenerationTests {
@@ -40,34 +39,32 @@ class GenerationTests {
 	void generateFromRecording() {
 		IntegerGenerator ints = new IntegerGenerator(-10, 100);
 
-		GenSource source = new RecordedSource(new AtomRecording(10, 0));
+		GenSource source = new RecordedSource(atom(10, 0));
 		Integer value = ints.generate(source);
 		assertThat(value).isEqualTo(10);
 	}
-
 
 	@Example
 	void generateWithUnsatisfyingGenSource() {
 		IntegerGenerator ints = new IntegerGenerator(-10, 100);
 
 		assertThatThrownBy(() -> {
-			RecordedSource recorded = new RecordedSource(new AtomRecording(100, 1));
+			RecordedSource recorded = new RecordedSource(atom(100, 1));
 			ints.generate(recorded);
 		}).isInstanceOf(CannotGenerateException.class);
 
 		assertThatThrownBy(() -> {
-			RecordedSource recorded = new RecordedSource(new AtomRecording(100));
+			RecordedSource recorded = new RecordedSource(atom(100));
 			ints.generate(recorded);
 		}).isInstanceOf(CannotGenerateException.class);
 	}
-
 
 	@Example
 	void intEdgeCases() {
 		Generator<Integer> allInts = new IntegerGenerator(Integer.MIN_VALUE, Integer.MAX_VALUE);
 
-		GenSource maxValueSource = new RecordedSource(new AtomRecording(Integer.MAX_VALUE, 0));
-		GenSource minValueSource = new RecordedSource(new AtomRecording(Integer.MAX_VALUE, 2));
+		GenSource maxValueSource = new RecordedSource(atom(Integer.MAX_VALUE, 0));
+		GenSource minValueSource = new RecordedSource(atom(Integer.MAX_VALUE, 2));
 
 		assertThat(allInts.generate(maxValueSource))
 			.isEqualTo(Integer.MAX_VALUE);
