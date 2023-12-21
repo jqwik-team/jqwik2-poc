@@ -16,11 +16,7 @@ public record Sample(List<Shrinkable<Object>> shrinkables) implements Comparable
 	}
 
 	public Stream<Sample> shrink() {
-		if (size() != 1) {
-			throw new IllegalArgumentException("Only one parameter supported for now!");
-		}
-		Shrinkable<Object> firstParam = shrinkables().getFirst();
-		return firstParam.shrink().map((Shrinkable<Object> s) -> new Sample(List.of(s)));
+		return new SampleShrinker(this).shrink();
 	}
 
 	@Override
