@@ -79,7 +79,7 @@ public abstract class RandomChoice {
 	static class XORShiftRandom extends Random {
 		private long seed;
 
-		private XORShiftRandom() {
+		XORShiftRandom() {
 			this(System.nanoTime());
 		}
 
