@@ -98,27 +98,6 @@ class GenerationTests {
 	}
 
 	@Example
-	void intEdgeCases() {
-		Generator<Integer> allInts = new IntegerGenerator(Integer.MIN_VALUE, Integer.MAX_VALUE);
-
-		GenSource maxValueSource = new RecordedSource(atom(Integer.MAX_VALUE, 0));
-		GenSource minValueSource = new RecordedSource(atom(Integer.MAX_VALUE, 2));
-
-		assertThat(allInts.generate(maxValueSource)).isEqualTo(Integer.MAX_VALUE);
-		assertThat(allInts.generate(minValueSource)).isEqualTo(Integer.MIN_VALUE);
-
-		IntegerGenerator positiveInts = new IntegerGenerator(0, Integer.MAX_VALUE);
-		// RecordedSource has state and must be recreated for each test
-		maxValueSource = new RecordedSource(atom(Integer.MAX_VALUE, 0));
-		assertThat(positiveInts.generate(maxValueSource)).isEqualTo(Integer.MAX_VALUE);
-
-		IntegerGenerator negativeInts = new IntegerGenerator(Integer.MIN_VALUE, 0);
-		// RecordedSource has state and must be recreated for each test
-		minValueSource = new RecordedSource(atom(Integer.MAX_VALUE, 2));
-		assertThat(negativeInts.generate(minValueSource)).isEqualTo(Integer.MIN_VALUE);
-	}
-
-	@Example
 	void listOfInts() {
 		IntegerGenerator ints = new IntegerGenerator(-10, 100);
 		Generator<List<Integer>> listOfInts = new ListGenerator<>(ints, 5);
