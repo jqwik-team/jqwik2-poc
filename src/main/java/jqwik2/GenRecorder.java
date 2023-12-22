@@ -40,7 +40,7 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 
 	static class AtomRecorder extends AbstractRecorder<Atom> implements Atom {
 
-		private final java.util.List<Integer> seeds = new ArrayList<>();
+		private final java.util.List<Integer> seeds = new ArrayList<>(5);
 
 		AtomRecorder(Atom source) {
 			super(source);
