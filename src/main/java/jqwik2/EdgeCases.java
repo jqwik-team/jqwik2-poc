@@ -4,10 +4,10 @@ import java.util.*;
 
 import jqwik2.recording.*;
 
-class RecordedEdgeCases implements GenSource {
+class EdgeCases implements GenSource {
 	private final Iterator<Recording> recordings;
 
-	public RecordedEdgeCases(java.util.List<Recording> recordings) {
+	public EdgeCases(Collection<Recording> recordings) {
 		this.recordings = recordings.iterator();
 	}
 

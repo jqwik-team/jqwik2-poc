@@ -1,5 +1,9 @@
 package jqwik2;
 
+import java.util.*;
+
+import jqwik2.recording.*;
+
 class GenSourceSupport {
 	static int chooseInt(GenSource source, int min, int max) {
 		if (min > max) {
@@ -31,5 +35,40 @@ class GenSourceSupport {
 		int range = max - min;
 		int delta = source.atom().choose(range + 1);
 		return min + delta;
+	}
+
+	public static Set<Recording> chooseIntEdgeCases(int min, int max) {
+		if (min >= 0) {
+			return smallIntEdgeCases(min, max);
+		}
+		if (max <= 0 && min != Integer.MIN_VALUE) {
+			return smallIntEdgeCases(min, max);
+		}
+
+		Set<Recording> recordings = new LinkedHashSet<>();
+		recordings.add(Recording.atom(1, 1));
+		recordings.add(Recording.atom(0, 0));
+		if (max >= 0) {
+			if (max >= 1) {
+				recordings.add(Recording.atom(1, 0));
+				recordings.add(Recording.atom(max, 0));
+			}
+		} else {
+			recordings.add(Recording.atom(Math.abs(max), 1));
+		}
+		if (min == Integer.MIN_VALUE) {
+			recordings.add(Recording.atom(Integer.MAX_VALUE, 2));
+		} else {
+			recordings.add(Recording.atom(Math.abs(min), 1));
+		}
+		return recordings;
+	}
+
+	private static Set<Recording> smallIntEdgeCases(int min, int max) {
+		int range = max - min;
+		return Set.of(
+			Recording.atom(0),
+			Recording.atom(range)
+		);
 	}
 }

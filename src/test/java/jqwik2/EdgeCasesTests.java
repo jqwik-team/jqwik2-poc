@@ -31,17 +31,42 @@ class EdgeCasesTests {
 	}
 
 	@Example
-	void integerEdgeCases() {
+	void allIntegersEdgeCases() {
 		Generator<Integer> allInts = new IntegerGenerator(Integer.MIN_VALUE, Integer.MAX_VALUE);
 
 		Set<Integer> generatedEdgeCases = getGeneratedEdgeCases(allInts);
 
-		assertThat(generatedEdgeCases).containsExactly(
+		assertThat(generatedEdgeCases).containsExactlyInAnyOrder(
 			Integer.MIN_VALUE,
 			-1,
 			0,
 			1,
 			Integer.MAX_VALUE
+		);
+	}
+
+	@Example
+	void constrainedIntegerEdgeCases() {
+		Generator<Integer> someInts = new IntegerGenerator(-10, 100);
+		Set<Integer> generatedEdgeCases = getGeneratedEdgeCases(someInts);
+		assertThat(generatedEdgeCases).containsExactlyInAnyOrder(
+			-10,
+			-1,
+			0,
+			1,
+			100
+		);
+
+		generatedEdgeCases = getGeneratedEdgeCases(new IntegerGenerator(10, 100));
+		assertThat(generatedEdgeCases).containsExactlyInAnyOrder(
+			10,
+			100
+		);
+
+		generatedEdgeCases = getGeneratedEdgeCases(new IntegerGenerator(-100, -10));
+		assertThat(generatedEdgeCases).containsExactlyInAnyOrder(
+			-100,
+			-10
 		);
 
 	}
