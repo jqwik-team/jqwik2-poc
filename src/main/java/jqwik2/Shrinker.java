@@ -10,9 +10,6 @@ public class Shrinker {
 	private Sample best;
 
 	public Shrinker(Sample sample, Function<List<Object>, PropertyExecutionResult> property) {
-		if (sample.size() != 1) {
-			throw new IllegalArgumentException("Only one parameter supported for now!");
-		}
 		this.property = property;
 		candidates.add(sample);
 		best = sample;

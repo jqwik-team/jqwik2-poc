@@ -12,6 +12,7 @@ class AtomShrinker {
 	}
 
 	Stream<AtomRecording> shrink() {
+		// TODO: Shrink in fibonacci steps from both ends
 		Set<AtomRecording> candidates = new LinkedHashSet<>();
 		for (int i = 0; i < seeds.size(); i++) {
 			int current = seeds.get(i);

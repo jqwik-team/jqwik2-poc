@@ -50,8 +50,8 @@ public class ShrinkingTests {
 		System.out.println("value: " + shrinkable.value());
 		shrinkable.shrink().forEach(s -> {
 			assertThat(s.recording()).isLessThan(shrinkable.recording());
-			System.out.println("shrink recording: " + s.recording());
-			System.out.println("shrink value    : " + s.value());
+			// System.out.println("shrink recording: " + s.recording());
+			// System.out.println("shrink value    : " + s.value());
 		});
 	}
 
@@ -123,9 +123,43 @@ public class ShrinkingTests {
 			}
 			assertThat(next.get().compareTo(previousBest)).isLessThan(0);
 			previousBest = next.get();
-			System.out.println("shrink: " + next.get());
+			// System.out.println("shrink: " + next.get());
 		}
 		assertThat(shrinker.best().values()).isEqualTo(List.of(List.of(0, 1)));
+
+	}
+
+	@Example
+	void shrinkSeveralParametersWithProperty() {
+		IntegerGenerator gen1 = new IntegerGenerator(-100000, 100000);
+		IntegerGenerator gen2 = new IntegerGenerator(0, 100);
+
+		GenSource source1 = new RecordedSource(atom(9999, 1)); // -9999
+		GenSource source2 = new RecordedSource(atom(50)); // 50
+
+		Sample sample = new SampleGenerator(List.of(gen1, gen2)).generate(source1, source2);
+
+		Function<List<Object>, PropertyExecutionResult> property = args -> {
+			int i1 = (int) args.get(0);
+			int i2 = (int) args.get(1);
+			return i1 < -100 && i2 > 10 ? PropertyExecutionResult.FAILED : PropertyExecutionResult.SUCCESSFUL;
+		};
+
+		assertThat(property.apply(sample.values())).isEqualTo(PropertyExecutionResult.FAILED);
+
+		Shrinker shrinker = new Shrinker(sample, property);
+
+		Sample previousBest = sample;
+		while (true) {
+			Optional<Sample> next = shrinker.next();
+			if (next.isEmpty()) {
+				break;
+			}
+			assertThat(next.get().compareTo(previousBest)).isLessThan(0);
+			previousBest = next.get();
+			// System.out.println("shrink: " + next.get());
+		}
+		assertThat(shrinker.best().values()).isEqualTo(List.of(-101, 11));
 
 	}
 

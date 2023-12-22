@@ -1,4 +1,4 @@
-- Implement Shrinker for more than one shrinkable
+- Make shrinking work if some samples are excluded through assumptions
 - Add edge cases to generators (or arbitraries)
 - Add GenSource.Tuple
 - Additional generators
