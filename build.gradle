@@ -10,6 +10,7 @@ repositories {
 ext {
 	jqwikVersion = '1.8.2'
 	assertJVersion = '3.24.1'
+	opentest4jVersion = '1.3.0'
 }
 
 java {
@@ -36,6 +37,8 @@ test {
 }
 
 dependencies {
+	implementation("org.opentest4j:opentest4j:${opentest4jVersion}")
+
 	testImplementation("net.jqwik:jqwik:${jqwikVersion}")
 	testImplementation("net.jqwik:jqwik-testing:${jqwikVersion}")
 
@@ -44,6 +47,7 @@ dependencies {
 
 	// To work around annoying bug in "IntelliJ's test runner"
 	testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.1")
+
 }
 
 wrapper {
