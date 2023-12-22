@@ -17,8 +17,8 @@ public final class RandomGenSource implements GenSource, GenSource.Atom, GenSour
 
 
 	@Override
-	public int choose(int max) {
-		return random.nextInt(max);
+	public int choose(int maxExcluded) {
+		return random.nextInt(maxExcluded);
 	}
 
 	@Override

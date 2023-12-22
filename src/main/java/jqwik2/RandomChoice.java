@@ -8,10 +8,10 @@ public abstract class RandomChoice {
 	/**
 	 * Return a random value, equally distributes between 0 and max - 1.
 	 *
-	 * @param max The max choice to return
+	 * @param maxExcluded The max choice to return
 	 * @return A random value between 0 and max - 1
 	 */
-	public abstract int nextInt(int max);
+	public abstract int nextInt(int maxExcluded);
 
 	/**
 	 * Create a new source of randomness that is independent of this one,
@@ -54,8 +54,8 @@ public abstract class RandomChoice {
 		}
 
 		@Override
-		public int nextInt(int max) {
-			return random.nextInt(max);
+		public int nextInt(int maxExcluded) {
+			return random.nextInt(maxExcluded);
 		}
 
 		@Override

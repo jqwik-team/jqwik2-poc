@@ -57,8 +57,8 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 		}
 
 		@Override
-		public int choose(int max) {
-			int choice = source.choose(max);
+		public int choose(int maxExcluded) {
+			int choice = source.choose(maxExcluded);
 			seeds.add(choice);
 			return choice;
 		}

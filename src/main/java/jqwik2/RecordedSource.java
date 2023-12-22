@@ -22,7 +22,7 @@ public final class RecordedSource implements GenSource, GenSource.Atom, GenSourc
 	}
 
 	@Override
-	public int choose(int max) {
+	public int choose(int maxExcluded) {
 		if (iterator.hasNext())
 			return iterator.next();
 		else
