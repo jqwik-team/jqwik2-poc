@@ -11,13 +11,37 @@ class GenerationTests {
 
 	@Example
 	void smallInts() {
-		Generator<Integer> gen0to10 = new IntegerGenerator(-10, 100);
+		Generator<Integer> minus10to100 = new IntegerGenerator(-10, 100);
 		RandomGenSource source = new RandomGenSource("42");
 
 		for (int i = 0; i < 10; i++) {
-			Integer value = gen0to10.generate(source);
-			assertThat(value).isNotNull();
-			System.out.println("value=" + value);
+			Integer value = minus10to100.generate(source);
+			assertThat(value).isBetween(-10, 100);
+			// System.out.println("value=" + value);
+		}
+	}
+
+	@Example
+	void positiveInts() {
+		Generator<Integer> gen5to10 = new IntegerGenerator(5, 10);
+		RandomGenSource source = new RandomGenSource("42");
+
+		for (int i = 0; i < 10; i++) {
+			Integer value = gen5to10.generate(source);
+			assertThat(value).isBetween(5, 10);
+			// System.out.println("value=" + value);
+		}
+	}
+
+	@Example
+	void negativeInts() {
+		Generator<Integer> minus20to0 = new IntegerGenerator(-20, 0);
+		RandomGenSource source = new RandomGenSource("42");
+
+		for (int i = 0; i < 20; i++) {
+			Integer value = minus20to0.generate(source);
+			assertThat(value).isBetween(-20, 0);
+			// System.out.println("value=" + value);
 		}
 	}
 
@@ -30,8 +54,22 @@ class GenerationTests {
 			GenRecorder recorder = new GenRecorder(source);
 			Integer value = gen0to10.generate(recorder);
 			assertThat(value).isNotNull();
-			System.out.println("value=    " + value);
-			System.out.println("recorded= " + recorder.recording());
+			// System.out.println("value=    " + value);
+			// System.out.println("recorded= " + recorder.recording());
+		}
+	}
+
+	@Example
+	void positiveIntsWithRecorder() {
+		Generator<Integer> gen5to100 = new IntegerGenerator(5, 10);
+		RandomGenSource source = new RandomGenSource("42");
+
+		for (int i = 0; i < 10; i++) {
+			GenRecorder recorder = new GenRecorder(source);
+			Integer value = gen5to100.generate(recorder);
+			assertThat(value).isNotNull();
+			// System.out.println("value=    " + value);
+			// System.out.println("recorded= " + recorder.recording());
 		}
 	}
 
@@ -66,10 +104,18 @@ class GenerationTests {
 		GenSource maxValueSource = new RecordedSource(atom(Integer.MAX_VALUE, 0));
 		GenSource minValueSource = new RecordedSource(atom(Integer.MAX_VALUE, 2));
 
-		assertThat(allInts.generate(maxValueSource))
-			.isEqualTo(Integer.MAX_VALUE);
-		assertThat(allInts.generate(minValueSource))
-			.isEqualTo(Integer.MIN_VALUE);
+		assertThat(allInts.generate(maxValueSource)).isEqualTo(Integer.MAX_VALUE);
+		assertThat(allInts.generate(minValueSource)).isEqualTo(Integer.MIN_VALUE);
+
+		IntegerGenerator positiveInts = new IntegerGenerator(0, Integer.MAX_VALUE);
+		// RecordedSource has state and must be recreated for each test
+		maxValueSource = new RecordedSource(atom(Integer.MAX_VALUE, 0));
+		assertThat(positiveInts.generate(maxValueSource)).isEqualTo(Integer.MAX_VALUE);
+
+		IntegerGenerator negativeInts = new IntegerGenerator(Integer.MIN_VALUE, 0);
+		// RecordedSource has state and must be recreated for each test
+		minValueSource = new RecordedSource(atom(Integer.MAX_VALUE, 2));
+		assertThat(negativeInts.generate(minValueSource)).isEqualTo(Integer.MIN_VALUE);
 	}
 
 	@Example
