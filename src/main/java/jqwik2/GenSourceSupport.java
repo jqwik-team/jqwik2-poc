@@ -63,11 +63,11 @@ class GenSourceSupport {
 	static Set<Recording> chooseIntEdgeCases(int min, int max) {
 		if (isPositiveUnsignedIntRange(min, max)) {
 			int range = max - min;
-			return genericEdgeCases(range);
+			return EdgeCasesSupport.forAtom(range);
 		}
 		if (isNegativeUnsignedIntRange(max)) {
 			int range = max - min;
-			return genericEdgeCases(range);
+			return EdgeCasesSupport.forAtom(range);
 		}
 		return fullRangeIntEdgeCases(min, max);
 	}
@@ -90,31 +90,4 @@ class GenSourceSupport {
 		return recordings;
 	}
 
-	private static Set<Recording> genericEdgeCases(Integer... ranges) {
-		Set<Recording> result = new LinkedHashSet<>();
-		minMaxEdgeCases(Arrays.asList(ranges), 0, new ArrayList<>(), result);
-		return result;
-	}
-
-	private static void minMaxEdgeCases(
-		List<Integer> ranges,
-		int index,
-		List<Integer> currentCombination,
-		Set<Recording> recordings
-	) {
-		if (index == ranges.size()) {
-			recordings.add(Recording.atom(currentCombination));
-			return;
-		}
-
-		// Include the current element (originalList.get(index))
-		currentCombination.add(ranges.get(index));
-		minMaxEdgeCases(ranges, index + 1, currentCombination, recordings);
-
-		// Backtrack and exclude the current element by setting it to 0
-		currentCombination.removeLast();
-		currentCombination.add(0);
-		minMaxEdgeCases(ranges, index + 1, currentCombination, recordings);
-		currentCombination.removeLast();
-	}
 }
