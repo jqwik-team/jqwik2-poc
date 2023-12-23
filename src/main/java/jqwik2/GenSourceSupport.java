@@ -60,7 +60,7 @@ class GenSourceSupport {
 		return min + delta;
 	}
 
-	public static Set<Recording> chooseIntEdgeCases(int min, int max) {
+	static Set<Recording> chooseIntEdgeCases(int min, int max) {
 		if (isPositiveUnsignedIntRange(min, max)) {
 			int range = max - min;
 			return genericEdgeCases(range);

@@ -82,16 +82,15 @@ class EdgeCasesTests {
 	}
 
 	private static <T> Set<T> getGeneratedEdgeCases(Generator<T> generator) {
-		GenSource edgeCasesSource = generator.edgeCases();
 		Set<T> generatedEdgeCases = new LinkedHashSet<>();
-		while (true) {
+		generator.edgeCases().forEach(edgeCasesSource -> {
 			try {
 				T value = generator.generate(edgeCasesSource);
 				generatedEdgeCases.add(value);
 			} catch (CannotGenerateException e) {
-				break;
+				// ignore
 			}
-		}
+		});
 		return generatedEdgeCases;
 	}
 

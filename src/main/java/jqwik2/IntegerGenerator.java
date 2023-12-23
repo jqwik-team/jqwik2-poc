@@ -15,7 +15,7 @@ public class IntegerGenerator implements Generator<Integer> {
 	}
 
 	@Override
-	public GenSource edgeCases() {
-		return new EdgeCases(GenSourceSupport.chooseIntEdgeCases(min, max));
+	public Iterable<GenSource> edgeCases() {
+		return EdgeCasesSupport.chooseInt(min, max);
 	}
 }

@@ -1,8 +1,11 @@
 - Make shrinking work if some samples are excluded through assumptions
-- Add edge cases to generators (or arbitraries)
+- Add edge cases to list generator
 - Add GenSource.Tuple
 - Additional generators
-  - Map, Filter, String, FlatMap
+  - Filter 
+  - Map
+  - String 
+  - FlatMap
 - Add exhaustive generation
 - Add descriptions to generators
 - Consider recording structure when shrinking lists
