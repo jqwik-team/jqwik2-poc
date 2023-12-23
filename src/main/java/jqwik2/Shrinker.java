@@ -5,11 +5,11 @@ import java.util.concurrent.atomic.*;
 import java.util.function.*;
 
 public class Shrinker {
-	private final Function<List<Object>, PropertyExecutionResult> property;
+	private final Function<List<Object>, ExecutionResult> property;
 	private final SortedSet<Sample> candidates = new TreeSet<>();
 	private Sample best;
 
-	public Shrinker(Sample sample, Function<List<Object>, PropertyExecutionResult> property) {
+	public Shrinker(Sample sample, Function<List<Object>, ExecutionResult> property) {
 		this.property = property;
 		candidates.add(sample);
 		best = sample;
@@ -26,7 +26,7 @@ public class Shrinker {
 
 			AtomicBoolean found = new AtomicBoolean(false);
 			nextCandidate.shrink()
-						 .filter(sample -> property.apply(sample.values()) == PropertyExecutionResult.FAILED)
+						 .filter(sample -> property.apply(sample.values()) == ExecutionResult.FAILED)
 						 .filter(candidate -> candidate.compareTo(best) < 0)
 						 .forEach(e -> {
 							 if (!best.equals(e)) {

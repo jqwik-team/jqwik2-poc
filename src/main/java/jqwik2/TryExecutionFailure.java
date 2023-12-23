@@ -2,8 +2,8 @@ package jqwik2;
 
 import java.util.*;
 
-public record PropertyExecutionFailure(Sample sample, Throwable exception) {
-	public PropertyExecutionFailure(String message) {
+public record TryExecutionFailure(Sample sample, Throwable exception) {
+	public TryExecutionFailure(String message) {
 		this(null, new AssertionError(message));
 	}
 

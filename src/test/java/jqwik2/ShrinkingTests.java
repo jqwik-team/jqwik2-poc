@@ -64,12 +64,12 @@ public class ShrinkingTests {
 
 		Sample sample = new SampleGenerator(List.of(ints)).generate(source);
 
-		Function<List<Object>, PropertyExecutionResult> property = args -> {
+		Function<List<Object>, ExecutionResult> property = args -> {
 			int i = (int) args.get(0);
-			return i > 1000 ? PropertyExecutionResult.FAILED : PropertyExecutionResult.SUCCESSFUL;
+			return i > 1000 ? ExecutionResult.FAILED : ExecutionResult.SUCCESSFUL;
 		};
 
-		assertThat(property.apply(sample.values())).isEqualTo(PropertyExecutionResult.FAILED);
+		assertThat(property.apply(sample.values())).isEqualTo(ExecutionResult.FAILED);
 
 		Shrinker shrinker = new Shrinker(sample, property);
 
@@ -105,13 +105,13 @@ public class ShrinkingTests {
 
 		Sample sample = new SampleGenerator(List.of(listOfInts)).generate(source);
 
-		Function<List<Object>, PropertyExecutionResult> property = args -> {
+		Function<List<Object>, ExecutionResult> property = args -> {
 			List<Integer> list = (List<Integer>) args.get(0);
 			int sum = list.stream().mapToInt(i -> i).sum();
-			return list.size() > 1 && sum != 0 ? PropertyExecutionResult.FAILED : PropertyExecutionResult.SUCCESSFUL;
+			return list.size() > 1 && sum != 0 ? ExecutionResult.FAILED : ExecutionResult.SUCCESSFUL;
 		};
 
-		assertThat(property.apply(sample.values())).isEqualTo(PropertyExecutionResult.FAILED);
+		assertThat(property.apply(sample.values())).isEqualTo(ExecutionResult.FAILED);
 
 		Shrinker shrinker = new Shrinker(sample, property);
 
@@ -139,13 +139,13 @@ public class ShrinkingTests {
 
 		Sample sample = new SampleGenerator(List.of(gen1, gen2)).generate(source1, source2);
 
-		Function<List<Object>, PropertyExecutionResult> property = args -> {
+		Function<List<Object>, ExecutionResult> property = args -> {
 			int i1 = (int) args.get(0);
 			int i2 = (int) args.get(1);
-			return i1 < -100 && i2 > 10 ? PropertyExecutionResult.FAILED : PropertyExecutionResult.SUCCESSFUL;
+			return i1 < -100 && i2 > 10 ? ExecutionResult.FAILED : ExecutionResult.SUCCESSFUL;
 		};
 
-		assertThat(property.apply(sample.values())).isEqualTo(PropertyExecutionResult.FAILED);
+		assertThat(property.apply(sample.values())).isEqualTo(ExecutionResult.FAILED);
 
 		Shrinker shrinker = new Shrinker(sample, property);
 
@@ -160,6 +160,42 @@ public class ShrinkingTests {
 			// System.out.println("shrink: " + next.get());
 		}
 		assertThat(shrinker.best().values()).isEqualTo(List.of(-101, 11));
+	}
+
+	@Example
+	// Currently failing since funtionality is not implemented
+	void shrinkWithRejectedAssumptions() {
+		IntegerGenerator ints = new IntegerGenerator(-100000, 100000);
+
+		// 9999
+		GenSource source = new RecordedSource(atom(9999, 0));
+
+		Sample sample = new SampleGenerator(List.of(ints)).generate(source);
+
+		Function<List<Object>, ExecutionResult> property = args -> {
+			int i = (int) args.get(0);
+			if (i % 3 != 0) return ExecutionResult.ABORTED;
+			if (i >= 1000) return ExecutionResult.FAILED;
+			return ExecutionResult.SUCCESSFUL;
+		};
+
+		assertThat(property.apply(sample.values())).isEqualTo(ExecutionResult.FAILED);
+
+		Shrinker shrinker = new Shrinker(sample, property);
+
+		Sample previousBest = sample;
+		while (true) {
+			Optional<Sample> next = shrinker.next();
+			if (next.isEmpty()) {
+				break;
+			}
+			assertThat(next.get().compareTo(previousBest)).isLessThan(0);
+			previousBest = next.get();
+			// System.out.println("shrink: " + next.get());
+		}
+		assertThat(property.apply(shrinker.best().values())).isEqualTo(ExecutionResult.FAILED);
+
+		assertThat(shrinker.best().values()).isEqualTo(List.of(1002));
 
 	}
 
