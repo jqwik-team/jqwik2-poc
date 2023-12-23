@@ -23,9 +23,12 @@ public final class RecordedSource implements GenSource, GenSource.Atom, GenSourc
 
 	@Override
 	public int choose(int maxExcluded) {
-		if (iterator.hasNext())
-			return iterator.next();
-		else
+		if (iterator.hasNext()) {
+			if (maxExcluded == 0) {
+				return 0;
+			}
+			return iterator.next() % maxExcluded;
+		} else
 			throw new CannotGenerateException("No more choices!");
 	}
 

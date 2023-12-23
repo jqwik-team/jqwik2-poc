@@ -13,21 +13,31 @@ class EdgeCasesTests {
 	void intEdgeCasesCanBeGenerated() {
 		Generator<Integer> allInts = new IntegerGenerator(Integer.MIN_VALUE, Integer.MAX_VALUE);
 
-		GenSource maxValueSource = new RecordedSource(atom(Integer.MAX_VALUE, 0));
-		GenSource minValueSource = new RecordedSource(atom(Integer.MAX_VALUE, 2));
+		GenSource maxValueSource = new RecordedSource(atom(Integer.MAX_VALUE - 1, 2));
+		GenSource minValueSource = new RecordedSource(atom(Integer.MAX_VALUE - 1, 3));
 
 		assertThat(allInts.generate(maxValueSource)).isEqualTo(Integer.MAX_VALUE);
 		assertThat(allInts.generate(minValueSource)).isEqualTo(Integer.MIN_VALUE);
 
 		IntegerGenerator positiveInts = new IntegerGenerator(0, Integer.MAX_VALUE);
 		// RecordedSource has state and must be recreated for each test
-		maxValueSource = new RecordedSource(atom(Integer.MAX_VALUE, 0));
+		maxValueSource = new RecordedSource(atom(Integer.MAX_VALUE - 1, 2));
 		assertThat(positiveInts.generate(maxValueSource)).isEqualTo(Integer.MAX_VALUE);
 
 		IntegerGenerator negativeInts = new IntegerGenerator(Integer.MIN_VALUE, 0);
 		// RecordedSource has state and must be recreated for each test
-		minValueSource = new RecordedSource(atom(Integer.MAX_VALUE, 2));
+		minValueSource = new RecordedSource(atom(Integer.MAX_VALUE - 1, 3));
 		assertThat(negativeInts.generate(minValueSource)).isEqualTo(Integer.MIN_VALUE);
+
+		IntegerGenerator smallPositiveInts = new IntegerGenerator(10, Integer.MAX_VALUE);
+		// RecordedSource has state and must be recreated for each test
+		maxValueSource = new RecordedSource(atom(Integer.MAX_VALUE - 10));
+		assertThat(smallPositiveInts.generate(maxValueSource)).isEqualTo(Integer.MAX_VALUE);
+
+		IntegerGenerator smallNegativeInts = new IntegerGenerator(Integer.MIN_VALUE, -10);
+		// RecordedSource has state and must be recreated for each test
+		maxValueSource = new RecordedSource(atom(Integer.MAX_VALUE - 9));
+		assertThat(smallNegativeInts.generate(maxValueSource)).isEqualTo(Integer.MIN_VALUE);
 	}
 
 	@Example
