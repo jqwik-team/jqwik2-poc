@@ -2,10 +2,11 @@ package jqwik2;
 
 import java.util.*;
 
+import jqwik2.api.*;
 import jqwik2.recording.*;
 
-class GenSourceSupport {
-	static int chooseInt(GenSource source, int min, int max) {
+public class GenSourceSupport {
+	public static int chooseInt(GenSource source, int min, int max) {
 		if (min > max) {
 			throw new IllegalArgumentException("min must be smaller than or equal to max");
 		}
@@ -60,7 +61,7 @@ class GenSourceSupport {
 		return min + delta;
 	}
 
-	static Set<Recording> chooseIntEdgeCases(int min, int max) {
+	public static Set<Recording> chooseIntEdgeCases(int min, int max) {
 		if (isPositiveUnsignedIntRange(min, max)) {
 			int range = max - min;
 			return EdgeCasesSupport.forAtom(range);

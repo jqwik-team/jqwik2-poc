@@ -1,5 +1,7 @@
 package jqwik2;
 
+import jqwik2.api.*;
+
 public final class RandomGenSource implements GenSource, GenSource.Atom, GenSource.List, GenSource.Tree {
 	private final RandomChoice random;
 

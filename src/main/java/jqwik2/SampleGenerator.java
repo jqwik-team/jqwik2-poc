@@ -3,6 +3,8 @@ package jqwik2;
 import java.util.*;
 import java.util.stream.*;
 
+import jqwik2.api.*;
+
 public class SampleGenerator {
 
 	private final List<Generator<Object>> generators;

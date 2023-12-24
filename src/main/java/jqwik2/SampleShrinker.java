@@ -3,17 +3,18 @@ package jqwik2;
 import java.util.*;
 import java.util.stream.*;
 
+import jqwik2.api.*;
 import jqwik2.support.*;
 
-class SampleShrinker {
+public class SampleShrinker {
 
 	private final List<Shrinkable<Object>> shrinkables;
 
-	SampleShrinker(Sample sample) {
+	public SampleShrinker(Sample sample) {
 		this.shrinkables = sample.shrinkables();
 	}
 
-	Stream<Sample> shrink() {
+	public Stream<Sample> shrink() {
 		// TODO: Implement pairwise shrinking
 		// TODO: Implement grow and shrink
 		return shrinkOneAfterTheOther();

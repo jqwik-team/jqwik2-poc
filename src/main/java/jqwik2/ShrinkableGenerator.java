@@ -1,6 +1,8 @@
 package jqwik2;
 
-class ShrinkableGenerator<T> {
+import jqwik2.api.*;
+
+public class ShrinkableGenerator<T> {
 	private final Generator<T> generator;
 
 	public ShrinkableGenerator(Generator<T> generator) {

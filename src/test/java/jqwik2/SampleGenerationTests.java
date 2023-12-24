@@ -2,6 +2,9 @@ package jqwik2;
 
 import java.util.*;
 
+import jqwik2.api.*;
+import jqwik2.api.Shrinkable;
+
 import net.jqwik.api.*;
 
 import static org.assertj.core.api.Assertions.*;

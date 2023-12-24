@@ -2,6 +2,8 @@ package jqwik2;
 
 import java.util.*;
 
+import jqwik2.api.*;
+
 public class ListGenerator<T> implements Generator<List<T>> {
 	private final Generator<T> elementGenerator;
 	private final int maxSize;

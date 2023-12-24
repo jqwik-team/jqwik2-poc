@@ -1,5 +1,7 @@
 package jqwik2;
 
+import jqwik2.api.*;
+
 public class IntegerGenerator implements Generator<Integer> {
 	private final int min;
 	private final int max;

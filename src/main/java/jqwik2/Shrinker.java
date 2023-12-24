@@ -1,13 +1,14 @@
 package jqwik2;
 
 import java.util.*;
-import java.util.function.*;
+
+import jqwik2.api.*;
 
 public class Shrinker {
-	private final PropertyCode property;
+	private final Tryable property;
 	private Sample best;
 
-	public Shrinker(Sample sample, PropertyCode property) {
+	public Shrinker(Sample sample, Tryable property) {
 		this.property = property;
 		best = sample;
 	}

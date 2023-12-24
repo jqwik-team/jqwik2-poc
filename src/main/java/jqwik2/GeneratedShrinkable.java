@@ -3,26 +3,8 @@ package jqwik2;
 import java.util.*;
 import java.util.stream.*;
 
+import jqwik2.api.*;
 import jqwik2.recording.*;
-
-public sealed interface Shrinkable<T> extends Comparable<Shrinkable<T>> {
-	T value();
-
-	Generator<T> generator();
-
-	Recording recording();
-
-	Stream<Shrinkable<T>> shrink();
-
-	default T regenerate() {
-		return generator().generate(new RecordedSource(recording()));
-	}
-
-	@SuppressWarnings("unchecked")
-	default Shrinkable<Object> asGeneric() {
-		return (Shrinkable<Object>) this;
-	}
-}
 
 record GeneratedShrinkable<T>(T value, Generator<T> generator, Recording recording) implements Shrinkable<T> {
 	@Override

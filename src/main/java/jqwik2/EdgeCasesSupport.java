@@ -3,6 +3,7 @@ package jqwik2;
 import java.util.*;
 import java.util.stream.*;
 
+import jqwik2.api.*;
 import jqwik2.recording.*;
 
 class EdgeCasesSupport {

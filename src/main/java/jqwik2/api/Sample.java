@@ -1,7 +1,9 @@
-package jqwik2;
+package jqwik2.api;
 
 import java.util.*;
 import java.util.stream.*;
+
+import jqwik2.*;
 
 public record Sample(List<Shrinkable<Object>> shrinkables) implements Comparable<Sample> {
 
@@ -11,7 +13,7 @@ public record Sample(List<Shrinkable<Object>> shrinkables) implements Comparable
 							.toList();
 	}
 
-	List<Object> regenerateValues() {
+	public List<Object> regenerateValues() {
 		return shrinkables().stream().map(Shrinkable::regenerate).toList();
 	}
 
@@ -51,7 +53,7 @@ public record Sample(List<Shrinkable<Object>> shrinkables) implements Comparable
 		return "Sample{%s}".formatted(values().stream().map(Object::toString).toList());
 	}
 
-	int size() {
+	public int size() {
 		return shrinkables().size();
 	}
 }

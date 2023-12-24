@@ -2,6 +2,7 @@ package jqwik2;
 
 import java.util.*;
 
+import jqwik2.api.*;
 import jqwik2.recording.*;
 
 public final class RecordedSource implements GenSource, GenSource.Atom, GenSource.List, GenSource.Tree {

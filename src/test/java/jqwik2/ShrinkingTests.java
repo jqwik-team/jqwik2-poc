@@ -1,13 +1,14 @@
 package jqwik2;
 
 import java.util.*;
-import java.util.function.*;
 
+import jqwik2.api.*;
+import jqwik2.api.Shrinkable;
 import jqwik2.recording.*;
 
 import net.jqwik.api.*;
 
-import static jqwik2.TryExecutionResult.Status.*;
+import static jqwik2.api.TryExecutionResult.Status.*;
 import static jqwik2.recording.Recording.*;
 import static jqwik2.recording.Recording.list;
 import static org.assertj.core.api.Assertions.*;
@@ -65,7 +66,7 @@ public class ShrinkingTests {
 
 		Sample sample = new SampleGenerator(List.of(ints)).generate(source);
 
-		PropertyCode property = args -> {
+		Tryable property = args -> {
 			int i = (int) args.get(0);
 			return i > 1000
 					   ? new TryExecutionResult(FALSIFIED)
@@ -108,7 +109,7 @@ public class ShrinkingTests {
 
 		Sample sample = new SampleGenerator(List.of(listOfInts)).generate(source);
 
-		PropertyCode property = args -> {
+		Tryable property = args -> {
 			List<Integer> list = (List<Integer>) args.get(0);
 			int sum = list.stream().mapToInt(i -> i).sum();
 			return list.size() > 1 && sum != 0
@@ -144,7 +145,7 @@ public class ShrinkingTests {
 
 		Sample sample = new SampleGenerator(List.of(gen1, gen2)).generate(source1, source2);
 
-		PropertyCode property = args -> {
+		Tryable property = args -> {
 			int i1 = (int) args.get(0);
 			int i2 = (int) args.get(1);
 			return i1 < -100 && i2 > 10
@@ -179,7 +180,7 @@ public class ShrinkingTests {
 
 		Sample sample = new SampleGenerator(List.of(ints)).generate(source);
 
-		PropertyCode property = args -> {
+		Tryable property = args -> {
 			int i = (int) args.get(0);
 			if (i % 3 != 0) return new TryExecutionResult(INVALID);
 			if (i >= 1000) return new TryExecutionResult(FALSIFIED);

@@ -1,4 +1,4 @@
-package jqwik2;
+package jqwik2.api;
 
 public record TryExecutionResult(Status status, Throwable throwable) {
 
@@ -9,7 +9,7 @@ public record TryExecutionResult(Status status, Throwable throwable) {
 	/**
 	 * Status of running a single try.
 	 */
-	enum Status {
+	public enum Status {
 		/**
 		 * Current try does not falsify the property
 		 */

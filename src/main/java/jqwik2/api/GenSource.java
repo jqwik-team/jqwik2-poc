@@ -1,4 +1,6 @@
-package jqwik2;
+package jqwik2.api;
+
+import jqwik2.*;
 
 public interface GenSource {
 

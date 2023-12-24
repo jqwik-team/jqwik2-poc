@@ -2,6 +2,8 @@ package jqwik2;
 
 import java.util.*;
 
+import jqwik2.api.*;
+
 import net.jqwik.api.*;
 
 import static jqwik2.recording.Recording.*;
