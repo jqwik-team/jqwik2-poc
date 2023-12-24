@@ -1,17 +1,14 @@
 package jqwik2;
 
 import java.util.*;
-import java.util.concurrent.atomic.*;
 import java.util.function.*;
 
 public class Shrinker {
 	private final Function<List<Object>, ExecutionResult> property;
-	private final SortedSet<Sample> candidates = new TreeSet<>();
 	private Sample best;
 
 	public Shrinker(Sample sample, Function<List<Object>, ExecutionResult> property) {
 		this.property = property;
-		candidates.add(sample);
 		best = sample;
 	}
 
@@ -19,32 +16,48 @@ public class Shrinker {
 		return best;
 	}
 
+	@SuppressWarnings("OverlyLongMethod")
 	public Optional<Sample> next() {
-		while (!candidates.isEmpty()) {
-			//System.out.println("candidates: " + candidates);
-			Sample nextCandidate = candidates.removeFirst();
+		Set<Sample> alreadyTried = new HashSet<>();
+		SortedSet<Sample> filteredSamples = new TreeSet<>();
+		Sample shrinkBase = best;
+		while (true) {
+			// System.out.println("shrinkBase: " + shrinkBase);
+			Optional<Sample> shrinkingResult =
+				shrinkBase.shrink()
+						  .map(sample -> {
+							  ExecutionResult executionResult = property.apply(sample.values());
+							  return new Pair<>(sample, executionResult);
+						  })
+						  .filter(pair -> pair.second() != ExecutionResult.SUCCESSFUL)
+						  .filter(pair -> pair.first().compareTo(best) < 0)
+						  .peek(pair -> {
+							  if (pair.second() == ExecutionResult.ABORTED) {
+								  filteredSamples.add(pair.first());
+							  }
+						  })
+						  .filter(pair -> pair.second() == ExecutionResult.FAILED)
+						  .map(Pair::first)
+						  .findAny();
 
-			AtomicBoolean found = new AtomicBoolean(false);
-			nextCandidate.shrink()
-						 .filter(sample -> property.apply(sample.values()) == ExecutionResult.FAILED)
-						 .filter(candidate -> candidate.compareTo(best) < 0)
-						 .forEach(e -> {
-							 if (!best.equals(e)) {
-								 candidates.add(e);
-								 found.set(true);
-							 }
-						 });
-
-			if (candidates.isEmpty()) {
-				break;
-			}
-
-			if (found.get()) {
-				best = candidates.first();
+			if (shrinkingResult.isPresent()) {
+				best = shrinkingResult.get();
 				return Optional.of(best);
 			}
+
+			if (filteredSamples.isEmpty()) {
+				return Optional.empty();
+			}
+
+			while(!filteredSamples.isEmpty()) {
+				shrinkBase = filteredSamples.removeFirst();
+				if (alreadyTried.contains(shrinkBase)) {
+					continue;
+				}
+				alreadyTried.add(shrinkBase);
+			}
+
 		}
-		return Optional.empty();
 	}
 
 }

@@ -163,7 +163,7 @@ public class ShrinkingTests {
 	}
 
 	@Example
-	// Currently failing since funtionality is not implemented
+	// Currently failing since functionality is not implemented
 	void shrinkWithRejectedAssumptions() {
 		IntegerGenerator ints = new IntegerGenerator(-100000, 100000);
 
