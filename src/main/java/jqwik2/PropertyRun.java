@@ -2,5 +2,5 @@ package jqwik2;
 
 import java.util.*;
 
-public record PropertyRun(ExecutionResult result, List<FalsifiedSample> failures) {
+public record PropertyRun(PropertyExecutionResult result, List<FalsifiedSample> failures) {
 }

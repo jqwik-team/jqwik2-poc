@@ -19,8 +19,8 @@ public class PropertyCase {
 		this.propertyCode = propertyCode;
 	}
 
-	ExecutionResult execute() {
-		return ExecutionResult.SUCCESSFUL;
+	PropertyExecutionResult execute() {
+		return PropertyExecutionResult.SUCCESSFUL;
 	}
 
 }

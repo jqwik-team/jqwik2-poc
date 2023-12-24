@@ -1,6 +1,6 @@
 package jqwik2;
 
-public enum ExecutionResult {
+public enum PropertyExecutionResult {
 
 	/**
 	 * Indicates that the execution of a property or try was

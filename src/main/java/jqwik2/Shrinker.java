@@ -4,10 +4,10 @@ import java.util.*;
 import java.util.function.*;
 
 public class Shrinker {
-	private final Function<List<Object>, ExecutionResult> property;
+	private final PropertyCode property;
 	private Sample best;
 
-	public Shrinker(Sample sample, Function<List<Object>, ExecutionResult> property) {
+	public Shrinker(Sample sample, PropertyCode property) {
 		this.property = property;
 		best = sample;
 	}
@@ -19,24 +19,24 @@ public class Shrinker {
 	@SuppressWarnings("OverlyLongMethod")
 	public Optional<Sample> next() {
 		Set<Sample> triedFilteredSamples = new HashSet<>();
-		SortedSet<Sample> filteredSamples = new TreeSet<>();
+		SortedSet<Sample> invalidSamples = new TreeSet<>();
 		Sample shrinkBase = best;
 		while (true) {
 			// System.out.println("shrinkBase: " + shrinkBase);
 			Optional<Sample> shrinkingResult =
 				shrinkBase.shrink()
 						  .map(sample -> {
-							  ExecutionResult executionResult = property.apply(sample.values());
+							  TryExecutionResult executionResult = property.apply(sample.values());
 							  return new Pair<>(sample, executionResult);
 						  })
-						  .filter(pair -> pair.second() != ExecutionResult.SUCCESSFUL)
+						  .filter(pair -> pair.second().status() != TryExecutionResult.Status.SATISFIED)
 						  .filter(pair -> pair.first().compareTo(best) < 0)
 						  .peek(pair -> {
-							  if (pair.second() == ExecutionResult.ABORTED) {
-								  filteredSamples.add(pair.first());
+							  if (pair.second().status() == TryExecutionResult.Status.INVALID) {
+								  invalidSamples.add(pair.first());
 							  }
 						  })
-						  .filter(pair -> pair.second() == ExecutionResult.FAILED)
+						  .filter(pair -> pair.second().status() == TryExecutionResult.Status.FALSIFIED)
 						  .map(Pair::first)
 						  .findAny();
 
@@ -45,12 +45,12 @@ public class Shrinker {
 				return Optional.of(best);
 			}
 
-			if (filteredSamples.isEmpty()) {
+			if (invalidSamples.isEmpty()) {
 				return Optional.empty();
 			}
 
-			while(!filteredSamples.isEmpty()) {
-				shrinkBase = filteredSamples.removeFirst();
+			while(!invalidSamples.isEmpty()) {
+				shrinkBase = invalidSamples.removeFirst();
 				if (triedFilteredSamples.contains(shrinkBase)) {
 					continue;
 				}
@@ -59,5 +59,4 @@ public class Shrinker {
 
 		}
 	}
-
 }

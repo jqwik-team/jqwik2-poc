@@ -7,6 +7,7 @@ import jqwik2.recording.*;
 
 import net.jqwik.api.*;
 
+import static jqwik2.TryExecutionResult.Status.*;
 import static jqwik2.recording.Recording.*;
 import static jqwik2.recording.Recording.list;
 import static org.assertj.core.api.Assertions.*;
@@ -64,12 +65,14 @@ public class ShrinkingTests {
 
 		Sample sample = new SampleGenerator(List.of(ints)).generate(source);
 
-		Function<List<Object>, ExecutionResult> property = args -> {
+		PropertyCode property = args -> {
 			int i = (int) args.get(0);
-			return i > 1000 ? ExecutionResult.FAILED : ExecutionResult.SUCCESSFUL;
+			return i > 1000
+					   ? new TryExecutionResult(FALSIFIED)
+					   : new TryExecutionResult(TryExecutionResult.Status.SATISFIED);
 		};
 
-		assertThat(property.apply(sample.values())).isEqualTo(ExecutionResult.FAILED);
+		assertThat(property.apply(sample.values()).status()).isEqualTo(FALSIFIED);
 
 		Shrinker shrinker = new Shrinker(sample, property);
 
@@ -105,13 +108,15 @@ public class ShrinkingTests {
 
 		Sample sample = new SampleGenerator(List.of(listOfInts)).generate(source);
 
-		Function<List<Object>, ExecutionResult> property = args -> {
+		PropertyCode property = args -> {
 			List<Integer> list = (List<Integer>) args.get(0);
 			int sum = list.stream().mapToInt(i -> i).sum();
-			return list.size() > 1 && sum != 0 ? ExecutionResult.FAILED : ExecutionResult.SUCCESSFUL;
+			return list.size() > 1 && sum != 0
+					   ? new TryExecutionResult(FALSIFIED)
+					   : new TryExecutionResult(TryExecutionResult.Status.SATISFIED);
 		};
 
-		assertThat(property.apply(sample.values())).isEqualTo(ExecutionResult.FAILED);
+		assertThat(property.apply(sample.values()).status()).isEqualTo(FALSIFIED);
 
 		Shrinker shrinker = new Shrinker(sample, property);
 
@@ -139,13 +144,15 @@ public class ShrinkingTests {
 
 		Sample sample = new SampleGenerator(List.of(gen1, gen2)).generate(source1, source2);
 
-		Function<List<Object>, ExecutionResult> property = args -> {
+		PropertyCode property = args -> {
 			int i1 = (int) args.get(0);
 			int i2 = (int) args.get(1);
-			return i1 < -100 && i2 > 10 ? ExecutionResult.FAILED : ExecutionResult.SUCCESSFUL;
+			return i1 < -100 && i2 > 10
+					   ? new TryExecutionResult(FALSIFIED)
+					   : new TryExecutionResult(TryExecutionResult.Status.SATISFIED);
 		};
 
-		assertThat(property.apply(sample.values())).isEqualTo(ExecutionResult.FAILED);
+		assertThat(property.apply(sample.values()).status()).isEqualTo(FALSIFIED);
 
 		Shrinker shrinker = new Shrinker(sample, property);
 
@@ -172,14 +179,14 @@ public class ShrinkingTests {
 
 		Sample sample = new SampleGenerator(List.of(ints)).generate(source);
 
-		Function<List<Object>, ExecutionResult> property = args -> {
+		PropertyCode property = args -> {
 			int i = (int) args.get(0);
-			if (i % 3 != 0) return ExecutionResult.ABORTED;
-			if (i >= 1000) return ExecutionResult.FAILED;
-			return ExecutionResult.SUCCESSFUL;
+			if (i % 3 != 0) return new TryExecutionResult(INVALID);
+			if (i >= 1000) return new TryExecutionResult(FALSIFIED);
+			return new TryExecutionResult(TryExecutionResult.Status.SATISFIED);
 		};
 
-		assertThat(property.apply(sample.values())).isEqualTo(ExecutionResult.FAILED);
+		assertThat(property.apply(sample.values()).status()).isEqualTo(FALSIFIED);
 
 		Shrinker shrinker = new Shrinker(sample, property);
 
@@ -193,7 +200,7 @@ public class ShrinkingTests {
 			previousBest = next.get();
 			// System.out.println("shrink: " + next.get());
 		}
-		assertThat(property.apply(shrinker.best().values())).isEqualTo(ExecutionResult.FAILED);
+		assertThat(property.apply(shrinker.best().values()).status()).isEqualTo(FALSIFIED);
 
 		assertThat(shrinker.best().values()).isEqualTo(List.of(1002));
 
