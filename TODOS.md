@@ -1,3 +1,4 @@
+- Move int generation code to IntegerGenerationSupport
 - Add edge cases to list generator
 - Add GenSource.Tuple
 - Additional generators
