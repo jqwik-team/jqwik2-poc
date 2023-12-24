@@ -1,4 +1,4 @@
-package jqwik2.support;
+package jqwik2;
 
 import java.util.*;
 import java.util.function.*;

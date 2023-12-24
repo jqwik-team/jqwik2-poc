@@ -1,7 +1,5 @@
 package jqwik2.api;
 
-import jqwik2.*;
-
 public interface GenSource {
 
 	Atom atom();
@@ -9,18 +7,6 @@ public interface GenSource {
 	List list();
 
 	Tree tree();
-
-	/**
-	 * Choose a value between min and max. Both included.
-	 * min must be smaller than or equal to max.
-	 *
-	 * @param min A value between Integer.MIN_VALUE and Integer.MAX_VALUE
-	 * @param max A value between min and Integer.MAX_VALUE
-	 * @return a choice between min and max (included)
-	 */
-	default int chooseInt(int min, int max) {
-		return GenSourceSupport.chooseInt(this, min, max);
-	}
 
 	interface Atom extends GenSource {
 

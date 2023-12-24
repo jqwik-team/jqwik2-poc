@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.stream.*;
 
 import jqwik2.api.*;
-import jqwik2.support.*;
 
 public class SampleShrinker {
 

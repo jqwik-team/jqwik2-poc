@@ -1,24 +1,41 @@
-package jqwik2;
+package jqwik2.api.support;
 
 import java.util.*;
+import java.util.stream.*;
 
+import jqwik2.*;
 import jqwik2.api.*;
 import jqwik2.recording.*;
 
-public class GenSourceSupport {
-	public static int chooseInt(GenSource source, int min, int max) {
+public class IntegerGenerationSupport {
+
+	private final GenSource source;
+
+	public IntegerGenerationSupport(GenSource source) {
+		this.source = source;
+	}
+
+	/**
+	 * Choose a value between min and max. Both included.
+	 * min must be smaller than or equal to max.
+	 *
+	 * @param min A value between Integer.MIN_VALUE and Integer.MAX_VALUE
+	 * @param max A value between min and Integer.MAX_VALUE
+	 * @return a choice between min and max (included)
+	 */
+	public int chooseInt(int min, int max) {
 		if (min > max) {
 			throw new IllegalArgumentException("min must be smaller than or equal to max");
 		}
 		// Max possible range is 1..MAX_VALUE
 		if (isPositiveUnsignedIntRange(min, max)) {
-			return chooseUnsignedInt(source, min, max);
+			return chooseUnsignedInt(min, max);
 		}
 		// Max possible range is MIN_VALUE..-2
 		if (isNegativeUnsignedIntRange(max)) {
-			return -chooseUnsignedInt(source, Math.abs(max), Math.abs(min));
+			return -chooseUnsignedInt(Math.abs(max), Math.abs(min));
 		}
-		return chooseFullRangedInt(source, min, max);
+		return chooseFullRangedInt(min, max);
 	}
 
 	private static boolean isNegativeUnsignedIntRange(int max) {
@@ -29,7 +46,7 @@ public class GenSourceSupport {
 		return min > 0 || (min == 0 && max < Integer.MAX_VALUE);
 	}
 
-	private static int chooseFullRangedInt(GenSource source, int min, int max) {
+	private int chooseFullRangedInt(int min, int max) {
 		while (true) {
 			GenSource.Atom intSource = source.atom();
 			boolean isMinValueOrMaxValueRequested = min == Integer.MIN_VALUE || max == Integer.MAX_VALUE;
@@ -55,13 +72,19 @@ public class GenSourceSupport {
 		}
 	}
 
-	private static int chooseUnsignedInt(GenSource source, int min, int max) {
+	private int chooseUnsignedInt(int min, int max) {
 		int range = max - min;
 		int delta = source.atom().choose(range + 1);
 		return min + delta;
 	}
 
-	public static Set<Recording> chooseIntEdgeCases(int min, int max) {
+	public static Iterable<GenSource> edgeCases(int min, int max) {
+		return edgeCasesSet(min, max)
+							   .stream()
+							   .map(RecordedSource::new).collect(Collectors.toSet());
+	}
+
+	private static Set<Recording> edgeCasesSet(int min, int max) {
 		if (isPositiveUnsignedIntRange(min, max)) {
 			int range = max - min;
 			return EdgeCasesSupport.forAtom(range);
