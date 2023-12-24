@@ -17,7 +17,7 @@ public sealed interface Recording extends Comparable<Recording>
 	}
 
 	static AtomRecording atom(Integer... choices) {
-		return new AtomRecording(choices);
+		return atom(Arrays.asList(choices));
 	}
 
 	static TreeRecording tree(Recording head, Recording child) {

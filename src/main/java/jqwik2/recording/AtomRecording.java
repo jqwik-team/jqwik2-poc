@@ -4,8 +4,11 @@ import java.util.*;
 import java.util.stream.*;
 
 public record AtomRecording(List<Integer> choices) implements Recording {
-	AtomRecording(Integer... choices) {
-		this(new ArrayList<>(Arrays.asList(choices)));
+
+	public AtomRecording {
+		if (choices.stream().anyMatch(c -> c < 0)) {
+			throw new IllegalArgumentException("Atom choices must be >= 0");
+		}
 	}
 
 	@Override

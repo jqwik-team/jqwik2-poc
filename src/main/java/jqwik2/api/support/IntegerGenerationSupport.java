@@ -98,7 +98,6 @@ public class IntegerGenerationSupport {
 
 	private static Set<Recording> fullRangeIntEdgeCases(int min, int max) {
 		Set<Recording> recordings = new LinkedHashSet<>();
-		recordings.add(Recording.atom(Math.abs(min), 1));
 		recordings.add(Recording.atom(Math.abs(max), 0));
 		recordings.add(Recording.atom(0, 0));
 
@@ -110,6 +109,8 @@ public class IntegerGenerationSupport {
 		}
 		if (max == Integer.MAX_VALUE) {
 			recordings.add(Recording.atom(Integer.MAX_VALUE - 1, 3));
+		} else {
+			recordings.add(Recording.atom(Math.abs(min), 1));
 		}
 		return recordings;
 	}
