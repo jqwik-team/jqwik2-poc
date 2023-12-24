@@ -18,7 +18,7 @@ public class Shrinker {
 
 	@SuppressWarnings("OverlyLongMethod")
 	public Optional<Sample> next() {
-		Set<Sample> alreadyTried = new HashSet<>();
+		Set<Sample> triedFilteredSamples = new HashSet<>();
 		SortedSet<Sample> filteredSamples = new TreeSet<>();
 		Sample shrinkBase = best;
 		while (true) {
@@ -51,10 +51,10 @@ public class Shrinker {
 
 			while(!filteredSamples.isEmpty()) {
 				shrinkBase = filteredSamples.removeFirst();
-				if (alreadyTried.contains(shrinkBase)) {
+				if (triedFilteredSamples.contains(shrinkBase)) {
 					continue;
 				}
-				alreadyTried.add(shrinkBase);
+				triedFilteredSamples.add(shrinkBase);
 			}
 
 		}
