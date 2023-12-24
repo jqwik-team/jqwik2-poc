@@ -5,6 +5,7 @@ import java.util.*;
 import jqwik2.api.*;
 import jqwik2.api.Shrinkable;
 import jqwik2.recording.*;
+import org.opentest4j.*;
 
 import net.jqwik.api.*;
 
@@ -14,6 +15,30 @@ import static jqwik2.recording.Recording.list;
 import static org.assertj.core.api.Assertions.*;
 
 public class ShrinkingTests {
+
+	@Example
+	void checkTryableFromFunction() {
+		Tryable booleanSucceed = Tryable.from(args -> true);
+		assertThat(booleanSucceed.apply(List.of())).isEqualTo(new TryExecutionResult(SATISFIED));
+
+		Tryable booleanFailed = Tryable.from(args -> false);
+		assertThat(booleanFailed.apply(List.of())).isEqualTo(new TryExecutionResult(FALSIFIED));
+
+		Tryable booleanBoxedFailed = Tryable.from(args -> Boolean.FALSE);
+		assertThat(booleanBoxedFailed.apply(List.of())).isEqualTo(new TryExecutionResult(FALSIFIED));
+
+		AssertionFailedError failedError = new AssertionFailedError("failed");
+		Tryable assertionFailed = Tryable.from(args -> {
+			throw failedError;
+		});
+		assertThat(assertionFailed.apply(List.of()))
+			.isEqualTo(new TryExecutionResult(FALSIFIED, failedError));
+
+		Tryable invalid = Tryable.from(args -> {
+			throw new TestAbortedException();
+		});
+		assertThat(invalid.apply(List.of()).status()).isEqualTo(INVALID);
+	}
 
 	@Example
 	void shrinkIntegers() {
