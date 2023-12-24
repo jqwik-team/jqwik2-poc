@@ -12,13 +12,21 @@ import org.opentest4j.*;
 @FunctionalInterface
 public interface Tryable extends Function<List<Object>, TryExecutionResult> {
 
+	static Tryable from(Consumer<List<Object>> consumer) {
+		return from(args -> {
+			consumer.accept(args);
+			return null;
+		});
+	}
 	static Tryable from(Function<List<Object>, Object> function) {
 		return (List<Object> parameters) -> {
 			try {
 				Object result = function.apply(parameters);
-				boolean isBooleanType = result.getClass().equals(Boolean.class);
-				if (isBooleanType && result.equals(false)) {
-					return new TryExecutionResult(TryExecutionResult.Status.FALSIFIED);
+				if (result != null) {
+					boolean isBooleanType = result.getClass().equals(Boolean.class);
+					if (isBooleanType && result.equals(false)) {
+						return new TryExecutionResult(TryExecutionResult.Status.FALSIFIED);
+					}
 				}
 				return new TryExecutionResult(TryExecutionResult.Status.SATISFIED);
 			} catch (AssertionError ae) {

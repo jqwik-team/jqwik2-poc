@@ -1,6 +1,7 @@
 package jqwik2;
 
 import java.util.*;
+import java.util.function.*;
 
 import jqwik2.api.*;
 import jqwik2.api.Shrinkable;
@@ -28,13 +29,13 @@ public class ShrinkingTests {
 		assertThat(booleanBoxedFailed.apply(List.of())).isEqualTo(new TryExecutionResult(FALSIFIED));
 
 		AssertionFailedError failedError = new AssertionFailedError("failed");
-		Tryable assertionFailed = Tryable.from(args -> {
+		Tryable assertionFailed = Tryable.from((Consumer<List<Object>>) args -> {
 			throw failedError;
 		});
 		assertThat(assertionFailed.apply(List.of()))
 			.isEqualTo(new TryExecutionResult(FALSIFIED, failedError));
 
-		Tryable invalid = Tryable.from(args -> {
+		Tryable invalid = Tryable.from((Consumer<List<Object>>) args -> {
 			throw new TestAbortedException();
 		});
 		assertThat(invalid.apply(List.of()).status()).isEqualTo(INVALID);
@@ -134,17 +135,15 @@ public class ShrinkingTests {
 
 		Sample sample = new SampleGenerator(List.of(listOfInts)).generate(source);
 
-		Tryable property = args -> {
+		Tryable tryable = Tryable.from(args -> {
 			List<Integer> list = (List<Integer>) args.get(0);
 			int sum = list.stream().mapToInt(i -> i).sum();
-			return list.size() > 1 && sum != 0
-					   ? new TryExecutionResult(FALSIFIED)
-					   : new TryExecutionResult(TryExecutionResult.Status.SATISFIED);
-		};
+			assertThat(list.size() > 1 && sum != 0).isFalse();
+		});
 
-		assertThat(property.apply(sample.values()).status()).isEqualTo(FALSIFIED);
+		assertThat(tryable.apply(sample.values()).status()).isEqualTo(FALSIFIED);
 
-		Shrinker shrinker = new Shrinker(sample, property);
+		Shrinker shrinker = new Shrinker(sample, tryable);
 
 		Sample previousBest = sample;
 		while (true) {
@@ -170,13 +169,11 @@ public class ShrinkingTests {
 
 		Sample sample = new SampleGenerator(List.of(gen1, gen2)).generate(source1, source2);
 
-		Tryable property = args -> {
+		Tryable property = Tryable.from(args -> {
 			int i1 = (int) args.get(0);
 			int i2 = (int) args.get(1);
-			return i1 < -100 && i2 > 10
-					   ? new TryExecutionResult(FALSIFIED)
-					   : new TryExecutionResult(TryExecutionResult.Status.SATISFIED);
-		};
+			assertThat(i1 < -100 && i2 > 10).isFalse();
+		});
 
 		assertThat(property.apply(sample.values()).status()).isEqualTo(FALSIFIED);
 
@@ -205,12 +202,11 @@ public class ShrinkingTests {
 
 		Sample sample = new SampleGenerator(List.of(ints)).generate(source);
 
-		Tryable property = args -> {
+		Tryable property = Tryable.from(args -> {
 			int i = (int) args.get(0);
-			if (i % 3 != 0) return new TryExecutionResult(INVALID);
-			if (i >= 1000) return new TryExecutionResult(FALSIFIED);
-			return new TryExecutionResult(TryExecutionResult.Status.SATISFIED);
-		};
+			if (i % 3 != 0) throw new TestAbortedException();
+			assertThat(i).isLessThan(1000);
+		});
 
 		assertThat(property.apply(sample.values()).status()).isEqualTo(FALSIFIED);
 

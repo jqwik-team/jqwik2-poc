@@ -5,11 +5,11 @@ import java.util.*;
 import jqwik2.api.*;
 
 public class Shrinker {
-	private final Tryable property;
+	private final Tryable tryable;
 	private Sample best;
 
-	public Shrinker(Sample sample, Tryable property) {
-		this.property = property;
+	public Shrinker(Sample sample, Tryable tryable) {
+		this.tryable = tryable;
 		best = sample;
 	}
 
@@ -27,7 +27,7 @@ public class Shrinker {
 			Optional<Sample> shrinkingResult =
 				shrinkBase.shrink()
 						  .map(sample -> {
-							  TryExecutionResult executionResult = property.apply(sample.values());
+							  TryExecutionResult executionResult = tryable.apply(sample.values());
 							  return new Pair<>(sample, executionResult);
 						  })
 						  .filter(pair -> pair.second().status() != TryExecutionResult.Status.SATISFIED)
