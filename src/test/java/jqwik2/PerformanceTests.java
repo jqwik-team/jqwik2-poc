@@ -8,7 +8,7 @@ class PerformanceTests {
 
 	// @Example
 	void testXorShiftGenerator() {
-		java.util.random.RandomGenerator generator = new RandomChoice.XORShiftRandom();
+		java.util.random.RandomGenerator generator = new XORShiftRandom();
 		int count = 100_000_000;
 		time("XorShift", count, () -> {
 			generator.nextDouble();

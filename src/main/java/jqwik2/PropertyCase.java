@@ -4,6 +4,8 @@ import java.util.*;
 
 import jqwik2.api.*;
 
+import static jqwik2.api.PropertyExecutionResult.Status.*;
+
 public class PropertyCase {
 
 	private final String seed;
@@ -13,7 +15,7 @@ public class PropertyCase {
 	private final List<Generator> generators;
 	private final Tryable tryable;
 
-	public PropertyCase(String seed, int tries, double edgeCasesProbability, List<Generator> generators, Tryable tryable) {
+	public PropertyCase(List<Generator> generators, Tryable tryable, String seed, int tries, double edgeCasesProbability) {
 		this.seed = seed;
 		this.tries = tries;
 		this.edgeCasesProbability = edgeCasesProbability;
@@ -22,7 +24,7 @@ public class PropertyCase {
 	}
 
 	PropertyExecutionResult execute() {
-		return PropertyExecutionResult.SUCCESSFUL;
+		return new PropertyExecutionResult(SUCCESSFUL, 0, 0);
 	}
 
 }
