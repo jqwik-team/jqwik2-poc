@@ -1,11 +1,9 @@
 package jqwik2.api.support;
 
 import java.util.*;
-import java.util.stream.*;
 
-import jqwik2.*;
 import jqwik2.api.*;
-import jqwik2.recording.*;
+import jqwik2.api.recording.*;
 
 public class IntegerGenerationSupport {
 
@@ -78,13 +76,7 @@ public class IntegerGenerationSupport {
 		return min + delta;
 	}
 
-	public static Iterable<GenSource> edgeCases(int min, int max) {
-		return edgeCasesSet(min, max)
-							   .stream()
-							   .map(RecordedSource::new).collect(Collectors.toSet());
-	}
-
-	private static Set<Recording> edgeCasesSet(int min, int max) {
+	public static Collection<Recording> edgeCases(int min, int max) {
 		if (isPositiveUnsignedIntRange(min, max)) {
 			int range = max - min;
 			return EdgeCasesSupport.forAtom(range);

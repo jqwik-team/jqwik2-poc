@@ -3,12 +3,12 @@ package jqwik2;
 import java.util.*;
 
 import jqwik2.api.*;
-import jqwik2.recording.*;
+import jqwik2.api.recording.*;
 
 import net.jqwik.api.*;
 
-import static jqwik2.recording.Recording.list;
-import static jqwik2.recording.Recording.*;
+import static jqwik2.api.recording.Recording.list;
+import static jqwik2.api.recording.Recording.*;
 import static org.assertj.core.api.Assertions.*;
 
 class GenerationTests {

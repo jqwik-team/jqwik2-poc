@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.stream.*;
 
 import jqwik2.api.*;
-import jqwik2.recording.*;
+import jqwik2.api.recording.*;
 
 record GeneratedShrinkable<T>(T value, Generator<T> generator, Recording recording) implements Shrinkable<T> {
 	@Override

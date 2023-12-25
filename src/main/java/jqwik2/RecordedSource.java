@@ -3,7 +3,7 @@ package jqwik2;
 import java.util.*;
 
 import jqwik2.api.*;
-import jqwik2.recording.*;
+import jqwik2.api.recording.*;
 
 public final class RecordedSource implements GenSource, GenSource.Atom, GenSource.List, GenSource.Tree {
 	private final Iterator<Integer> iterator;

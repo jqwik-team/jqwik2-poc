@@ -1,4 +1,4 @@
-package jqwik2.recording;
+package jqwik2.api.recording;
 
 import java.util.*;
 import java.util.stream.*;

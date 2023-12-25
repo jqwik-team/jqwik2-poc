@@ -3,10 +3,11 @@ package jqwik2;
 import java.util.*;
 
 import jqwik2.api.*;
+import jqwik2.api.support.*;
 
 import net.jqwik.api.*;
 
-import static jqwik2.recording.Recording.*;
+import static jqwik2.api.recording.Recording.*;
 import static org.assertj.core.api.Assertions.*;
 
 class EdgeCasesTests {
@@ -46,7 +47,7 @@ class EdgeCasesTests {
 	void allIntegersEdgeCases() {
 		Generator<Integer> allInts = new IntegerGenerator(Integer.MIN_VALUE, Integer.MAX_VALUE);
 
-		Set<Integer> generatedEdgeCases = getGeneratedEdgeCases(allInts);
+		Set<Integer> generatedEdgeCases = collectAllEdgeCases(allInts);
 
 		assertThat(generatedEdgeCases).containsExactlyInAnyOrder(
 			Integer.MIN_VALUE,
@@ -60,7 +61,7 @@ class EdgeCasesTests {
 	@Example
 	void constrainedIntegerEdgeCases() {
 		Generator<Integer> someInts = new IntegerGenerator(-10, 100);
-		Set<Integer> generatedEdgeCases = getGeneratedEdgeCases(someInts);
+		Set<Integer> generatedEdgeCases = collectAllEdgeCases(someInts);
 		assertThat(generatedEdgeCases).containsExactlyInAnyOrder(
 			-10,
 			-1,
@@ -69,13 +70,13 @@ class EdgeCasesTests {
 			100
 		);
 
-		generatedEdgeCases = getGeneratedEdgeCases(new IntegerGenerator(10, 100));
+		generatedEdgeCases = collectAllEdgeCases(new IntegerGenerator(10, 100));
 		assertThat(generatedEdgeCases).containsExactlyInAnyOrder(
 			10,
 			100
 		);
 
-		generatedEdgeCases = getGeneratedEdgeCases(new IntegerGenerator(-100, -10));
+		generatedEdgeCases = collectAllEdgeCases(new IntegerGenerator(-100, -10));
 		assertThat(generatedEdgeCases).containsExactlyInAnyOrder(
 			-100,
 			-10
@@ -83,16 +84,33 @@ class EdgeCasesTests {
 
 	}
 
-	private static <T> Set<T> getGeneratedEdgeCases(Generator<T> generator) {
+	@Example
+	void allListEdgeCases() {
+		// Edge cases = 0, 1, 10
+		Generator<Integer> ints = new IntegerGenerator(0, 10);
+		Generator<List<Integer>> lists = new ListGenerator<>(ints, 5);
+
+		Set<List<Integer>> generatedEdgeCases = collectAllEdgeCases(lists);
+
+		assertThat(generatedEdgeCases).containsExactlyInAnyOrder(
+			List.of(),
+			List.of(0),
+			List.of(10)
+		);
+	}
+
+
+	private static <T> Set<T> collectAllEdgeCases(Generator<T> generator) {
 		Set<T> generatedEdgeCases = new LinkedHashSet<>();
-		generator.edgeCases().forEach(edgeCasesSource -> {
-			try {
-				T value = generator.generate(edgeCasesSource);
-				generatedEdgeCases.add(value);
-			} catch (CannotGenerateException e) {
-				// ignore
-			}
-		});
+		EdgeCasesSupport.sources(generator.edgeCases())
+			.forEach(source -> {
+				try {
+					T value = generator.generate(source);
+					generatedEdgeCases.add(value);
+				} catch (CannotGenerateException e) {
+					// ignore
+				}
+			});
 		return generatedEdgeCases;
 	}
 

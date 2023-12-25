@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.stream.*;
 
 import jqwik2.api.*;
-import jqwik2.recording.*;
+import jqwik2.api.recording.*;
 
 public class GenRecorder extends AbstractRecorder<GenSource> {
 

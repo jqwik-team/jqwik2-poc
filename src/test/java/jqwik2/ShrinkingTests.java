@@ -5,14 +5,14 @@ import java.util.function.*;
 
 import jqwik2.api.*;
 import jqwik2.api.Shrinkable;
-import jqwik2.recording.*;
+import jqwik2.api.recording.*;
 import org.opentest4j.*;
 
 import net.jqwik.api.*;
 
 import static jqwik2.api.TryExecutionResult.Status.*;
-import static jqwik2.recording.Recording.*;
-import static jqwik2.recording.Recording.list;
+import static jqwik2.api.recording.Recording.*;
+import static jqwik2.api.recording.Recording.list;
 import static org.assertj.core.api.Assertions.*;
 
 public class ShrinkingTests {

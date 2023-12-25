@@ -1,6 +1,7 @@
 package jqwik2;
 
 import jqwik2.api.*;
+import jqwik2.api.recording.*;
 import jqwik2.api.support.*;
 
 public class IntegerGenerator implements Generator<Integer> {
@@ -18,7 +19,7 @@ public class IntegerGenerator implements Generator<Integer> {
 	}
 
 	@Override
-	public Iterable<GenSource> edgeCases() {
+	public Iterable<Recording> edgeCases() {
 		return IntegerGenerationSupport.edgeCases(min, max);
 	}
 }

@@ -3,6 +3,9 @@ package jqwik2;
 import java.util.*;
 
 import jqwik2.api.*;
+import jqwik2.api.recording.*;
+
+import static jqwik2.api.recording.Recording.*;
 
 public class ListGenerator<T> implements Generator<List<T>> {
 	private final Generator<T> elementGenerator;
@@ -30,4 +33,17 @@ public class ListGenerator<T> implements Generator<List<T>> {
 		return elements;
 	}
 
+	@Override
+	public Iterable<Recording> edgeCases() {
+		return edgeCaseRecordings();
+	}
+
+	private Collection<Recording> edgeCaseRecordings() {
+		Set<Recording> recordings = new LinkedHashSet<>();
+		recordings.add(tree(atom(0), list()));
+		elementGenerator.edgeCases().forEach(elementEdgeCase -> {
+			recordings.add(tree(atom(1), list(elementEdgeCase)));
+		});
+		return recordings;
+	}
 }

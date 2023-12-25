@@ -2,8 +2,8 @@ package jqwik2;
 
 import net.jqwik.api.*;
 
-import static jqwik2.recording.Recording.list;
-import static jqwik2.recording.Recording.*;
+import static jqwik2.api.recording.Recording.list;
+import static jqwik2.api.recording.Recording.*;
 import static org.assertj.core.api.Assertions.*;
 
 class RecordingTests {
