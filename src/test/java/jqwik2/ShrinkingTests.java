@@ -100,20 +100,15 @@ public class ShrinkingTests {
 		assertThat(tryResult.status()).isEqualTo(FALSIFIED);
 		FalsifiedSample falsifiedSample = new FalsifiedSample(sample, tryResult.throwable());
 
-		Shrinker shrinker = new Shrinker(falsifiedSample, tryable);
+		final FalsifiedSample[] previousBest = new FalsifiedSample[] {falsifiedSample};
+		Consumer<FalsifiedSample> forEachShrinkStep = falsified -> {
+			// System.out.println("falsified: " + falsified.sample().values());
+			assertThat(falsified.compareTo(previousBest[0])).isLessThan(0);
+		};
 
-		FalsifiedSample previousBest = falsifiedSample;
-		while (true) {
-			Optional<FalsifiedSample> next = shrinker.next();
-			if (next.isEmpty()) {
-				break;
-			}
-			assertThat(next.get().compareTo(previousBest)).isLessThan(0);
-			previousBest = next.get();
-			// System.out.println("shrink: " + next.get());
-		}
-		assertThat(shrinker.best().values()).isEqualTo(List.of(1001));
-
+		FullShrinker shrinker = new FullShrinker(falsifiedSample, tryable);
+		FalsifiedSample best = shrinker.shrinkToEnd(forEachShrinkStep);
+		assertThat(best.values()).isEqualTo(List.of(1001));
 	}
 
 	@Example
@@ -143,19 +138,15 @@ public class ShrinkingTests {
 		assertThat(tryResult.status()).isEqualTo(FALSIFIED);
 		FalsifiedSample falsifiedSample = new FalsifiedSample(sample, tryResult.throwable());
 
-		Shrinker shrinker = new Shrinker(falsifiedSample, tryable);
+		final FalsifiedSample[] previousBest = new FalsifiedSample[] {falsifiedSample};
+		Consumer<FalsifiedSample> forEachShrinkStep = falsified -> {
+			// System.out.println("falsified: " + falsified.sample().values());
+			assertThat(falsified.compareTo(previousBest[0])).isLessThan(0);
+		};
 
-		FalsifiedSample previousBest = falsifiedSample;
-		while (true) {
-			Optional<FalsifiedSample> next = shrinker.next();
-			if (next.isEmpty()) {
-				break;
-			}
-			assertThat(next.get().compareTo(previousBest)).isLessThan(0);
-			previousBest = next.get();
-			// System.out.println("shrink: " + next.get());
-		}
-		assertThat(shrinker.best().values()).isEqualTo(List.of(List.of(0, 1)));
+		FullShrinker shrinker = new FullShrinker(falsifiedSample, tryable);
+		FalsifiedSample best = shrinker.shrinkToEnd(forEachShrinkStep);
+		assertThat(best.values()).isEqualTo(List.of(List.of(0, 1)));
 
 	}
 
@@ -178,19 +169,15 @@ public class ShrinkingTests {
 		assertThat(tryResult.status()).isEqualTo(FALSIFIED);
 		FalsifiedSample falsifiedSample = new FalsifiedSample(sample, tryResult.throwable());
 
-		Shrinker shrinker = new Shrinker(falsifiedSample, tryable);
+		final FalsifiedSample[] previousBest = new FalsifiedSample[] {falsifiedSample};
+		Consumer<FalsifiedSample> forEachShrinkStep = falsified -> {
+			// System.out.println("falsified: " + falsified.sample().values());
+			assertThat(falsified.compareTo(previousBest[0])).isLessThan(0);
+		};
 
-		FalsifiedSample previousBest = falsifiedSample;
-		while (true) {
-			Optional<FalsifiedSample> next = shrinker.next();
-			if (next.isEmpty()) {
-				break;
-			}
-			assertThat(next.get().compareTo(previousBest)).isLessThan(0);
-			previousBest = next.get();
-			// System.out.println("shrink: " + next.get());
-		}
-		assertThat(shrinker.best().values()).isEqualTo(List.of(-101, 11));
+		FullShrinker shrinker = new FullShrinker(falsifiedSample, tryable);
+		FalsifiedSample best = shrinker.shrinkToEnd(forEachShrinkStep);
+		assertThat(best.values()).isEqualTo(List.of(-101, 11));
 	}
 
 	@Example
@@ -212,22 +199,15 @@ public class ShrinkingTests {
 		assertThat(tryResult.status()).isEqualTo(FALSIFIED);
 		FalsifiedSample falsifiedSample = new FalsifiedSample(sample, tryResult.throwable());
 
-		Shrinker shrinker = new Shrinker(falsifiedSample, tryable);
+		final FalsifiedSample[] previousBest = new FalsifiedSample[] {falsifiedSample};
+		Consumer<FalsifiedSample> forEachShrinkStep = falsified -> {
+			// System.out.println("falsified: " + falsified.sample().values());
+			assertThat(falsified.compareTo(previousBest[0])).isLessThan(0);
+		};
 
-		FalsifiedSample previousBest = falsifiedSample;
-		while (true) {
-			Optional<FalsifiedSample> next = shrinker.next();
-			if (next.isEmpty()) {
-				break;
-			}
-			assertThat(next.get().compareTo(previousBest)).isLessThan(0);
-			previousBest = next.get();
-			// System.out.println("shrink: " + next.get());
-		}
-		assertThat(tryable.apply(shrinker.best().values()).status()).isEqualTo(FALSIFIED);
-
-		assertThat(shrinker.best().values()).isEqualTo(List.of(1002));
-
+		FullShrinker shrinker = new FullShrinker(falsifiedSample, tryable);
+		FalsifiedSample best = shrinker.shrinkToEnd(forEachShrinkStep);
+		assertThat(best.values()).isEqualTo(List.of(1002));
 	}
 
 }
