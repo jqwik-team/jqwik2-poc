@@ -7,24 +7,39 @@ import jqwik2.api.*;
 import static jqwik2.api.PropertyExecutionResult.Status.*;
 
 public class PropertyCase {
-
-	private final String seed;
-	private final int tries;
-	private final double edgeCasesProbability;
-
-	private final List<Generator> generators;
+	private final List<Generator<?>> generators;
 	private final Tryable tryable;
 
-	public PropertyCase(List<Generator> generators, Tryable tryable, String seed, int tries, double edgeCasesProbability) {
-		this.seed = seed;
-		this.tries = tries;
-		this.edgeCasesProbability = edgeCasesProbability;
+	private final String seed;
+	private final int maxTries;
+	private final double edgeCasesProbability;
+
+	public PropertyCase(List<Generator<?>> generators, Tryable tryable, String seed, int maxTries, double edgeCasesProbability) {
 		this.generators = generators;
 		this.tryable = tryable;
+		this.seed = seed;
+		this.maxTries = maxTries;
+		this.edgeCasesProbability = edgeCasesProbability;
 	}
 
 	PropertyExecutionResult execute() {
-		return new PropertyExecutionResult(SUCCESSFUL, 0, 0);
+		RandomGenSource randomGenSource = new RandomGenSource(seed);
+		int countTries = 0;
+		int countChecks = 0;
+
+		while(countTries < maxTries) {
+			Sample sample = new SampleGenerator(generators).generate(randomGenSource);
+			countTries++;
+			TryExecutionResult tryResult = tryable.apply(sample);
+			if (tryResult.status() != TryExecutionResult.Status.INVALID) {
+				countChecks++;
+			}
+			if (tryResult.status() == TryExecutionResult.Status.FALSIFIED) {
+				return new PropertyExecutionResult(FAILED, countTries, countChecks);
+			}
+		}
+
+		return new PropertyExecutionResult(SUCCESSFUL, countTries, countChecks);
 	}
 
 }
