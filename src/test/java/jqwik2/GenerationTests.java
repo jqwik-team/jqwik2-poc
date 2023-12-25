@@ -3,9 +3,11 @@ package jqwik2;
 import java.util.*;
 
 import jqwik2.api.*;
+import jqwik2.recording.*;
 
 import net.jqwik.api.*;
 
+import static jqwik2.recording.Recording.list;
 import static jqwik2.recording.Recording.*;
 import static org.assertj.core.api.Assertions.*;
 
@@ -48,58 +50,6 @@ class GenerationTests {
 	}
 
 	@Example
-	void smallIntsWithRecorder() {
-		Generator<Integer> gen0to10 = new IntegerGenerator(-100, 100);
-		RandomGenSource source = new RandomGenSource("42");
-
-		for (int i = 0; i < 10; i++) {
-			GenRecorder recorder = new GenRecorder(source);
-			Integer value = gen0to10.generate(recorder);
-			assertThat(value).isNotNull();
-			// System.out.println("value=    " + value);
-			// System.out.println("recorded= " + recorder.recording());
-		}
-	}
-
-	@Example
-	void positiveIntsWithRecorder() {
-		Generator<Integer> gen5to100 = new IntegerGenerator(5, 10);
-		RandomGenSource source = new RandomGenSource("42");
-
-		for (int i = 0; i < 10; i++) {
-			GenRecorder recorder = new GenRecorder(source);
-			Integer value = gen5to100.generate(recorder);
-			assertThat(value).isNotNull();
-			// System.out.println("value=    " + value);
-			// System.out.println("recorded= " + recorder.recording());
-		}
-	}
-
-	@Example
-	void generateFromRecording() {
-		IntegerGenerator ints = new IntegerGenerator(-10, 100);
-
-		GenSource source = new RecordedSource(atom(10, 0));
-		Integer value = ints.generate(source);
-		assertThat(value).isEqualTo(10);
-	}
-
-	@Example
-	void generateWithUnsatisfyingGenSource() {
-		IntegerGenerator ints = new IntegerGenerator(-10, 100);
-
-		assertThatThrownBy(() -> {
-			RecordedSource recorded = new RecordedSource(atom(100, 1));
-			ints.generate(recorded);
-		}).isInstanceOf(CannotGenerateException.class);
-
-		assertThatThrownBy(() -> {
-			RecordedSource recorded = new RecordedSource(atom(100));
-			ints.generate(recorded);
-		}).isInstanceOf(CannotGenerateException.class);
-	}
-
-	@Example
 	void listOfInts() {
 		IntegerGenerator ints = new IntegerGenerator(-10, 100);
 		Generator<List<Integer>> listOfInts = new ListGenerator<>(ints, 5);
@@ -112,19 +62,119 @@ class GenerationTests {
 		}
 	}
 
-	@Example
-	void listOfIntsWithRecorder() {
-		IntegerGenerator ints = new IntegerGenerator(-10, 100);
-		Generator<List<Integer>> listOfInts = new ListGenerator<>(ints, 5);
+	@Group
+	class WithRecorder {
 
-		RandomGenSource source = new RandomGenSource("42");
+		@Example
+		void smallInts() {
+			Generator<Integer> generator = new IntegerGenerator(-100, 100);
+			RandomGenSource source = new RandomGenSource("42");
 
-		for (int i = 0; i < 10; i++) {
-			GenRecorder recorder = new GenRecorder(source);
-			List<Integer> value = listOfInts.generate(recorder);
-			assertThat(value).isNotNull();
-			System.out.println("value=    " + value);
-			System.out.println("recorded= " + recorder.recording());
+			for (int i = 0; i < 10; i++) {
+				GenRecorder recorder = new GenRecorder(source);
+				Integer value = generator.generate(recorder);
+				assertThat(value).isNotNull();
+
+				RecordedSource recorded = new RecordedSource(recorder.recording());
+				assertThat(generator.generate(recorded))
+					.isEqualTo(value);
+			}
+		}
+
+		@Example
+		void positiveInts() {
+			Generator<Integer> generator = new IntegerGenerator(5, 10);
+			RandomGenSource source = new RandomGenSource("42");
+
+			for (int i = 0; i < 10; i++) {
+				GenRecorder recorder = new GenRecorder(source);
+				Integer value = generator.generate(recorder);
+				assertThat(value).isNotNull();
+
+				RecordedSource recorded = new RecordedSource(recorder.recording());
+				assertThat(generator.generate(recorded))
+					.isEqualTo(value);
+			}
+		}
+
+		@Example
+		void listOfInts() {
+			IntegerGenerator ints = new IntegerGenerator(-10, 100);
+			Generator<List<Integer>> generator = new ListGenerator<>(ints, 5);
+
+			RandomGenSource source = new RandomGenSource("42");
+
+			for (int i = 0; i < 10; i++) {
+				GenRecorder recorder = new GenRecorder(source);
+				List<Integer> value = generator.generate(recorder);
+				assertThat(value).isNotNull();
+
+				RecordedSource recorded = new RecordedSource(recorder.recording());
+				assertThat(generator.generate(recorded))
+					.isEqualTo(value);
+			}
 		}
 	}
+
+	@Group
+	class FromRecording {
+
+		@Example
+		void valid() {
+			IntegerGenerator ints = new IntegerGenerator(-10, 100);
+
+			GenSource source = new RecordedSource(atom(10, 0));
+			Integer value = ints.generate(source);
+			assertThat(value).isEqualTo(10);
+		}
+
+		@Example
+		void invalidRecording() {
+			IntegerGenerator ints = new IntegerGenerator(-10, 100);
+
+			assertThatThrownBy(() -> {
+				RecordedSource recorded = new RecordedSource(atom(100, 1));
+				ints.generate(recorded);
+			}).isInstanceOf(CannotGenerateException.class);
+
+			assertThatThrownBy(() -> {
+				RecordedSource recorded = new RecordedSource(atom(100));
+				ints.generate(recorded);
+			}).isInstanceOf(CannotGenerateException.class);
+
+		}
+
+		@Example
+		void exhaustedRecording() {
+			IntegerGenerator ints = new IntegerGenerator(0, 100);
+			ListGenerator<Integer> listOfInts = new ListGenerator<>(ints, 5);
+
+			assertThatThrownBy(() -> {
+				RecordedSource recorded = new RecordedSource(tree(
+					atom(3), list(atom(10))
+				));
+				listOfInts.generate(recorded);
+			}).isInstanceOf(CannotGenerateException.class);
+		}
+
+		@Example
+		void exhaustedRecordingWithBackUp() {
+			IntegerGenerator ints = new IntegerGenerator(0, 100);
+			ListGenerator<Integer> listOfInts = new ListGenerator<>(ints, 5);
+
+			Recording recording = tree(
+				atom(3), list(atom(10))
+			);
+
+			GenSource backUpSource = new RandomGenSource("42");
+			RecordedSource recordedSource = new RecordedSource(recording, backUpSource);
+			GenRecorder recorder = new GenRecorder(recordedSource);
+
+			List<Integer> value = listOfInts.generate(recorder);
+			System.out.println("value=     " + value);
+			System.out.println("recording= " + recorder.recording());
+		}
+
+	}
+
 }

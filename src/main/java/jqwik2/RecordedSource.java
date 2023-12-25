@@ -9,14 +9,20 @@ public final class RecordedSource implements GenSource, GenSource.Atom, GenSourc
 	private final Iterator<Integer> iterator;
 	private final Iterator<Recording> elements;
 	private final Recording recording;
+	private final GenSource backUpSource;
 
-	public RecordedSource(Recording source) {
-		this.recording = source;
-		if (source instanceof ListRecording list)
+	public RecordedSource(Recording recording) {
+		this(recording, null);
+	}
+
+	public RecordedSource(Recording recording, GenSource backUpSource) {
+		this.recording = recording;
+		this.backUpSource = backUpSource;
+		if (recording instanceof ListRecording list)
 			this.elements = list.elements().iterator();
 		else
 			this.elements = Collections.emptyIterator();
-		if (source instanceof AtomRecording atom)
+		if (recording instanceof AtomRecording atom)
 			this.iterator = atom.choices().iterator();
 		else
 			this.iterator = Collections.emptyIterator();
@@ -29,8 +35,12 @@ public final class RecordedSource implements GenSource, GenSource.Atom, GenSourc
 				return 0;
 			}
 			return iterator.next() % maxExcluded;
-		} else
+		} else {
+			if (backUpSource != null) {
+				return backUpSource.atom().choose(maxExcluded);
+			}
 			throw new CannotGenerateException("No more choices!");
+		}
 	}
 
 	@Override
@@ -62,7 +72,10 @@ public final class RecordedSource implements GenSource, GenSource.Atom, GenSourc
 	public GenSource nextElement() {
 		if (recording instanceof ListRecording) {
 			if (elements.hasNext()) {
-				return new RecordedSource(elements.next());
+				return new RecordedSource(elements.next(), backUpSource);
+			}
+			if (backUpSource != null) {
+				return backUpSource.list().nextElement();
 			}
 			throw new CannotGenerateException("No more elements");
 		}
@@ -72,7 +85,7 @@ public final class RecordedSource implements GenSource, GenSource.Atom, GenSourc
 	@Override
 	public GenSource head() {
 		if (recording instanceof TreeRecording tree) {
-			return new RecordedSource(tree.head());
+			return new RecordedSource(tree.head(), backUpSource);
 		}
 		throw new CannotGenerateException("Source is not a tree");
 	}
@@ -80,7 +93,7 @@ public final class RecordedSource implements GenSource, GenSource.Atom, GenSourc
 	@Override
 	public GenSource child() {
 		if (recording instanceof TreeRecording tree) {
-			return new RecordedSource(tree.child());
+			return new RecordedSource(tree.child(), backUpSource);
 		}
 		throw new CannotGenerateException("Source is not a tree");
 	}

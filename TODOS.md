@@ -1,4 +1,3 @@
-- RecordedSource should continue to generate values after the end of the recording
 - Add edge cases to list generator
 - Add GenSource.Tuple
 - Additional generators
@@ -10,3 +9,5 @@
 - Add descriptions to generators
 - Consider recording structure when shrinking lists
 - Parallelize shrinking
+- Stateful generators
+- Allow shrinking to use backup source when recording is exhausted
