@@ -35,11 +35,16 @@ public class PropertyCase {
 				countChecks++;
 			}
 			if (tryResult.status() == TryExecutionResult.Status.FALSIFIED) {
-				return new PropertyExecutionResult(FAILED, countTries, countChecks);
+				FalsifiedSample falsifiedSample = new FalsifiedSample(sample, tryResult.throwable());
+				return new PropertyExecutionResult(
+					FAILED, countTries, countChecks,
+					Optional.of(seed),
+					Optional.of(falsifiedSample), Optional.empty()
+				);
 			}
 		}
 
-		return new PropertyExecutionResult(SUCCESSFUL, countTries, countChecks);
+		return new PropertyExecutionResult(SUCCESSFUL, countTries, countChecks, seed);
 	}
 
 }

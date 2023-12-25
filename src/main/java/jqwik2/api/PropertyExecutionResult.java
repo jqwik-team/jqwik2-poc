@@ -7,13 +7,14 @@ import jqwik2.*;
 public record PropertyExecutionResult(
 	Status status, int countTries, int countChecks,
 	Optional<String> seed,
-	Optional<FalsifiedSample> originalSample, Optional<FalsifiedSample> shrunkSample
+	Optional<FalsifiedSample> optionalFalsifiedSample,
+	Optional<FalsifiedSample> shrunkFalsifiedSample
 ) {
 
-	public PropertyExecutionResult(Status status, int countTries, int countChecks) {
+	public PropertyExecutionResult(Status status, int countTries, int countChecks, String seed) {
 		this(
 			status, countTries, countChecks,
-			Optional.empty(),
+			Optional.of(seed),
 			Optional.empty(), Optional.empty()
 		);
 	}
