@@ -1,4 +1,4 @@
-- Introduce TryExecutor
+- RecordedSource should continue to generate values after the end of the recording
 - Add edge cases to list generator
 - Add GenSource.Tuple
 - Additional generators
