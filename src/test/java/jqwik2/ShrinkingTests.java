@@ -92,20 +92,19 @@ public class ShrinkingTests {
 
 		Sample sample = new SampleGenerator(List.of(ints)).generate(source);
 
-		Tryable property = args -> {
+		Tryable tryable = Tryable.from(args -> {
 			int i = (int) args.get(0);
-			return i > 1000
-					   ? new TryExecutionResult(FALSIFIED)
-					   : new TryExecutionResult(TryExecutionResult.Status.SATISFIED);
-		};
+			assertThat(i > 1000).isFalse();
+		});
+		TryExecutionResult tryResult = tryable.apply(sample);
+		assertThat(tryResult.status()).isEqualTo(FALSIFIED);
+		FalsifiedSample falsifiedSample = new FalsifiedSample(sample, tryResult.throwable());
 
-		assertThat(property.apply(sample.values()).status()).isEqualTo(FALSIFIED);
+		Shrinker shrinker = new Shrinker(falsifiedSample, tryable);
 
-		Shrinker shrinker = new Shrinker(sample, property);
-
-		Sample previousBest = sample;
+		FalsifiedSample previousBest = falsifiedSample;
 		while (true) {
-			Optional<Sample> next = shrinker.next();
+			Optional<FalsifiedSample> next = shrinker.next();
 			if (next.isEmpty()) {
 				break;
 			}
@@ -140,14 +139,15 @@ public class ShrinkingTests {
 			int sum = list.stream().mapToInt(i -> i).sum();
 			assertThat(list.size() > 1 && sum != 0).isFalse();
 		});
+		TryExecutionResult tryResult = tryable.apply(sample);
+		assertThat(tryResult.status()).isEqualTo(FALSIFIED);
+		FalsifiedSample falsifiedSample = new FalsifiedSample(sample, tryResult.throwable());
 
-		assertThat(tryable.apply(sample.values()).status()).isEqualTo(FALSIFIED);
+		Shrinker shrinker = new Shrinker(falsifiedSample, tryable);
 
-		Shrinker shrinker = new Shrinker(sample, tryable);
-
-		Sample previousBest = sample;
+		FalsifiedSample previousBest = falsifiedSample;
 		while (true) {
-			Optional<Sample> next = shrinker.next();
+			Optional<FalsifiedSample> next = shrinker.next();
 			if (next.isEmpty()) {
 				break;
 			}
@@ -169,19 +169,20 @@ public class ShrinkingTests {
 
 		Sample sample = new SampleGenerator(List.of(gen1, gen2)).generate(source1, source2);
 
-		Tryable property = Tryable.from(args -> {
+		Tryable tryable = Tryable.from(args -> {
 			int i1 = (int) args.get(0);
 			int i2 = (int) args.get(1);
 			assertThat(i1 < -100 && i2 > 10).isFalse();
 		});
+		TryExecutionResult tryResult = tryable.apply(sample);
+		assertThat(tryResult.status()).isEqualTo(FALSIFIED);
+		FalsifiedSample falsifiedSample = new FalsifiedSample(sample, tryResult.throwable());
 
-		assertThat(property.apply(sample.values()).status()).isEqualTo(FALSIFIED);
+		Shrinker shrinker = new Shrinker(falsifiedSample, tryable);
 
-		Shrinker shrinker = new Shrinker(sample, property);
-
-		Sample previousBest = sample;
+		FalsifiedSample previousBest = falsifiedSample;
 		while (true) {
-			Optional<Sample> next = shrinker.next();
+			Optional<FalsifiedSample> next = shrinker.next();
 			if (next.isEmpty()) {
 				break;
 			}
@@ -202,19 +203,20 @@ public class ShrinkingTests {
 
 		Sample sample = new SampleGenerator(List.of(ints)).generate(source);
 
-		Tryable property = Tryable.from(args -> {
+		Tryable tryable = Tryable.from(args -> {
 			int i = (int) args.get(0);
 			if (i % 3 != 0) throw new TestAbortedException();
 			assertThat(i).isLessThan(1000);
 		});
+		TryExecutionResult tryResult = tryable.apply(sample);
+		assertThat(tryResult.status()).isEqualTo(FALSIFIED);
+		FalsifiedSample falsifiedSample = new FalsifiedSample(sample, tryResult.throwable());
 
-		assertThat(property.apply(sample.values()).status()).isEqualTo(FALSIFIED);
+		Shrinker shrinker = new Shrinker(falsifiedSample, tryable);
 
-		Shrinker shrinker = new Shrinker(sample, property);
-
-		Sample previousBest = sample;
+		FalsifiedSample previousBest = falsifiedSample;
 		while (true) {
-			Optional<Sample> next = shrinker.next();
+			Optional<FalsifiedSample> next = shrinker.next();
 			if (next.isEmpty()) {
 				break;
 			}
@@ -222,7 +224,7 @@ public class ShrinkingTests {
 			previousBest = next.get();
 			// System.out.println("shrink: " + next.get());
 		}
-		assertThat(property.apply(shrinker.best().values()).status()).isEqualTo(FALSIFIED);
+		assertThat(tryable.apply(shrinker.best().values()).status()).isEqualTo(FALSIFIED);
 
 		assertThat(shrinker.best().values()).isEqualTo(List.of(1002));
 

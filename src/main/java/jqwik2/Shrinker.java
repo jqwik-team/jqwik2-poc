@@ -6,43 +6,47 @@ import jqwik2.api.*;
 
 public class Shrinker {
 	private final Tryable tryable;
-	private Sample best;
+	private final Throwable originalThrowable;
+	private FalsifiedSample best;
 
-	public Shrinker(Sample sample, Tryable tryable) {
+	public Shrinker(FalsifiedSample falsifiedSample, Tryable tryable) {
 		this.tryable = tryable;
-		best = sample;
+		best = falsifiedSample;
+		originalThrowable = falsifiedSample.throwable();
 	}
 
-	public Sample best() {
+	public FalsifiedSample best() {
 		return best;
 	}
 
 	@SuppressWarnings("OverlyLongMethod")
-	public Optional<Sample> next() {
+	public Optional<FalsifiedSample> next() {
 		Set<Sample> triedFilteredSamples = new HashSet<>();
 		SortedSet<Sample> invalidSamples = new TreeSet<>();
-		Sample shrinkBase = best;
+		Sample shrinkBase = best.sample();
 		while (true) {
 			// System.out.println("shrinkBase: " + shrinkBase);
-			Optional<Sample> shrinkingResult =
+			Optional<Pair<Sample, TryExecutionResult>> shrinkingResult =
 				shrinkBase.shrink()
 						  .map(sample -> {
-							  TryExecutionResult executionResult = tryable.apply(sample.values());
+							  TryExecutionResult executionResult = tryable.apply(sample);
 							  return new Pair<>(sample, executionResult);
 						  })
 						  .filter(pair -> pair.second().status() != TryExecutionResult.Status.SATISFIED)
-						  .filter(pair -> pair.first().compareTo(best) < 0)
+						  .filter(pair -> pair.first().compareTo(best.sample()) < 0)
 						  .peek(pair -> {
-							  if (pair.second().status() == TryExecutionResult.Status.INVALID) {
+							  TryExecutionResult result = pair.second();
+							  if (isInvalid(result)) {
 								  invalidSamples.add(pair.first());
 							  }
 						  })
 						  .filter(pair -> pair.second().status() == TryExecutionResult.Status.FALSIFIED)
-						  .map(Pair::first)
 						  .findAny();
 
 			if (shrinkingResult.isPresent()) {
-				best = shrinkingResult.get();
+				Sample sample = shrinkingResult.get().first();
+				TryExecutionResult result = shrinkingResult.get().second();
+				best = new FalsifiedSample(sample, result.throwable());
 				return Optional.of(best);
 			}
 
@@ -50,7 +54,7 @@ public class Shrinker {
 				return Optional.empty();
 			}
 
-			while(!invalidSamples.isEmpty()) {
+			while (!invalidSamples.isEmpty()) {
 				shrinkBase = invalidSamples.removeFirst();
 				if (triedFilteredSamples.contains(shrinkBase)) {
 					continue;
@@ -59,5 +63,20 @@ public class Shrinker {
 			}
 
 		}
+	}
+
+	private boolean isInvalid(TryExecutionResult result) {
+		return result.status() == TryExecutionResult.Status.INVALID ||
+				   isIncompatibleError(result.throwable());
+	}
+
+	private boolean isIncompatibleError(Throwable throwable) {
+		if (throwable == null) {
+			return originalThrowable != null;
+		}
+		if (originalThrowable == null) {
+			return true;
+		}
+		return throwable.getClass() != originalThrowable.getClass();
 	}
 }
