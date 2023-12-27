@@ -13,13 +13,18 @@ public class PropertyCase {
 	private final String seed;
 	private final int maxTries;
 	private final double edgeCasesProbability;
+	private final boolean shrinkingEnabled;
 
-	public PropertyCase(List<Generator<?>> generators, Tryable tryable, String seed, int maxTries, double edgeCasesProbability) {
+	public PropertyCase(
+		List<Generator<?>> generators, Tryable tryable,
+		String seed, int maxTries, double edgeCasesProbability, boolean shrinkingEnabled
+	) {
 		this.generators = generators;
 		this.tryable = tryable;
 		this.seed = seed;
 		this.maxTries = maxTries;
 		this.edgeCasesProbability = edgeCasesProbability;
+		this.shrinkingEnabled = shrinkingEnabled;
 	}
 
 	PropertyExecutionResult execute() {
@@ -35,8 +40,10 @@ public class PropertyCase {
 				countChecks++;
 			}
 			if (tryResult.status() == TryExecutionResult.Status.FALSIFIED) {
-				FalsifiedSample falsifiedSample = new FalsifiedSample(sample, tryResult.throwable());
-				List<FalsifiedSample> falsifiedSamples = List.of(falsifiedSample);
+				SortedSet<FalsifiedSample> falsifiedSamples = new TreeSet<>();
+				FalsifiedSample originalSample = new FalsifiedSample(sample, tryResult.throwable());
+				falsifiedSamples.add(originalSample);
+				shrink(originalSample, falsifiedSamples);
 				return new PropertyExecutionResult(
 					FAILED, countTries, countChecks,
 					falsifiedSamples
@@ -45,6 +52,15 @@ public class PropertyCase {
 		}
 
 		return new PropertyExecutionResult(SUCCESSFUL, countTries, countChecks);
+	}
+
+	private void shrink(FalsifiedSample originalSample, Collection<FalsifiedSample> falsifiedSamples) {
+		if (!shrinkingEnabled) {
+			return;
+		}
+		new FullShrinker(originalSample, tryable).shrinkToEnd(
+				falsifiedSamples::add
+		);
 	}
 
 }

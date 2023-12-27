@@ -1,5 +1,4 @@
 - PropertyCase Execution
-  - Shrink after failure
   - Generate edge cases with probability
   - Parallelize tries execution
   - Fail if ratio checks/tries is too low

@@ -6,11 +6,11 @@ import jqwik2.*;
 
 public record PropertyExecutionResult(
 	Status status, int countTries, int countChecks,
-	List<FalsifiedSample> falsifiedSamples
+	SortedSet<FalsifiedSample> falsifiedSamples
 ) {
 
 	public PropertyExecutionResult(Status status, int countTries, int countChecks) {
-		this(status, countTries, countChecks, List.of());
+		this(status, countTries, countChecks, new TreeSet<>());
 	}
 
 	public enum Status {

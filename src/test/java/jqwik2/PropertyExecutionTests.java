@@ -24,7 +24,8 @@ class PropertyExecutionTests {
 			tryable,
 			"42",
 			10,
-			0.0
+			0.0,
+			false
 		);
 
 		PropertyExecutionResult result = propertyCase.execute();
@@ -49,7 +50,8 @@ class PropertyExecutionTests {
 			tryable,
 			"42",
 			10,
-			0.0
+			0.0,
+			false
 		);
 
 		PropertyExecutionResult result = propertyCase.execute();
@@ -75,7 +77,8 @@ class PropertyExecutionTests {
 			tryable,
 			"42",
 			10,
-			0.0
+			0.0,
+			false
 		);
 
 		PropertyExecutionResult result = propertyCase.execute();
@@ -105,7 +108,8 @@ class PropertyExecutionTests {
 			tryable,
 			"42",
 			10,
-			0.0
+			0.0,
+			false
 		);
 
 		PropertyExecutionResult result = propertyCase.execute();
@@ -118,6 +122,35 @@ class PropertyExecutionTests {
 			assertThat(throwable).isInstanceOf(AssertionError.class);
 			assertThat(throwable).hasMessage("I failed!");
 		});
+	}
+
+	@Example
+	void failAndShrink() {
+		List<Generator<?>> generators = List.of(
+			new IntegerGenerator(0, 100)
+		);
+		Tryable tryable = Tryable.from(args -> {
+			int anInt = (int) args.get(0);
+			return anInt < 20;
+		});
+
+		PropertyCase propertyCase = new PropertyCase(
+			generators,
+			tryable,
+			"42",
+			100,
+			0.0,
+			true
+		);
+
+		PropertyExecutionResult result = propertyCase.execute();
+		assertThat(result.status()).isEqualTo(Status.FAILED);
+		assertThat(result.countTries()).isEqualTo(2); // depends on seed
+		assertThat(result.falsifiedSamples()).hasSizeGreaterThanOrEqualTo(2);
+		FalsifiedSample smallest = result.falsifiedSamples().getFirst();
+		assertThat(smallest.values()).isEqualTo(List.of(20));
+		FalsifiedSample biggest = result.falsifiedSamples().getLast();
+		assertThat(biggest.values()).isEqualTo(List.of(68)); // depends on seed
 	}
 
 }
