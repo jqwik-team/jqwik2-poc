@@ -1,5 +1,4 @@
 - PropertyCase Execution
-  - Check that same seed leads to same result, even with edge cases 
   - Fail if ratio checks/tries is too low
 - Add GenSource.Tuple
 - Additional generators

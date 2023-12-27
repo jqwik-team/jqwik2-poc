@@ -3,6 +3,7 @@ package jqwik2;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.*;
 
 import jqwik2.api.Assume;
 import jqwik2.api.*;
@@ -179,7 +180,7 @@ class PropertyExecutionTests {
 			0.0,
 			false,
 			Duration.ofSeconds(10),
-			Executors.newCachedThreadPool()
+			Executors::newCachedThreadPool
 		);
 
 		PropertyExecutionResult result = propertyCase.execute();
@@ -206,13 +207,67 @@ class PropertyExecutionTests {
 			0.0,
 			true,
 			Duration.ofSeconds(10),
-			Executors.newCachedThreadPool()
-		);
+			Executors::newCachedThreadPool		);
 
 		PropertyExecutionResult result = propertyCase.execute();
 		assertThat(result.status()).isEqualTo(Status.FAILED);
 		FalsifiedSample smallest = result.falsifiedSamples().getFirst();
 		assertThat(smallest.values()).isEqualTo(List.of(20));
+	}
+
+	@Property(tries = 10)
+	void reproduceSameSamplesWithSameSeed(@ForAll long seed) {
+		reproduceSameSamplesTwice(
+			seed,
+			0.0,
+			Executors::newCachedThreadPool
+		);
+	}
+
+	@Property(tries = 10)
+	void reproduceSameSamplesWithSingleThreadExecutor(@ForAll long seed) {
+		reproduceSameSamplesTwice(
+			seed,
+			0.0,
+			Executors::newSingleThreadExecutor
+		);
+	}
+
+	@Property(tries = 10)
+	void reproduceSameSamplesEvenWithEdgeCases(@ForAll long seed) {
+		reproduceSameSamplesTwice(
+			seed,
+			0.5,
+			Executors::newCachedThreadPool
+		);
+	}
+
+	private static void reproduceSameSamplesTwice(long seed, double edgeCasesProbability, Supplier<ExecutorService> serviceSupplier) {
+		List<Generator<?>> generators = List.of(
+			new IntegerGenerator(0, 100)
+		);
+		Tryable tryable = Tryable.from(args -> true);
+
+		PropertyCase propertyCase = new PropertyCase(
+			generators,
+			tryable,
+			Long.toString(seed),
+			10,
+			edgeCasesProbability,
+			false,
+			Duration.ofSeconds(10),
+			serviceSupplier
+		);
+
+		final Set<Sample> samples1 = new HashSet<>();
+		propertyCase.onSuccessful(samples1::add);
+		assertThat(propertyCase.execute().status()).isEqualTo(Status.SUCCESSFUL);
+
+		final Set<Sample> samples2 = new HashSet<>();
+		propertyCase.onSuccessful(samples2::add);
+		assertThat(propertyCase.execute().status()).isEqualTo(Status.SUCCESSFUL);
+
+		assertThat(samples1).hasSameElementsAs(samples2);
 	}
 
 }

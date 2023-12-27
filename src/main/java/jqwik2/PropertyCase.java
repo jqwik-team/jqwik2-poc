@@ -20,7 +20,8 @@ public class PropertyCase {
 	private final boolean shrinkingEnabled;
 
 	private final Duration timeout;
-	private final ExecutorService executorService;
+	private final Supplier<ExecutorService> executorServiceSupplier;
+	private Consumer<Sample> onSatisfied = ignore -> {};
 
 	public PropertyCase(
 			List<Generator<?>> generators, Tryable tryable,
@@ -28,13 +29,13 @@ public class PropertyCase {
 	) {
 		this(generators, tryable,
 			 seed, maxTries, edgeCasesProbability, shrinkingEnabled,
-			 Duration.ofSeconds(10), Executors.newSingleThreadExecutor()
+			 Duration.ofSeconds(10), () -> Executors.newSingleThreadExecutor()
 		);
 	}
 	public PropertyCase(
 			List<Generator<?>> generators, Tryable tryable,
 			String seed, int maxTries, double edgeCasesProbability, boolean shrinkingEnabled,
-			Duration timeout, ExecutorService executorService
+			Duration timeout, Supplier<ExecutorService> executorServiceSupplier
 	) {
 		this.generators = generators;
 		this.tryable = tryable;
@@ -43,12 +44,17 @@ public class PropertyCase {
 		this.edgeCasesProbability = edgeCasesProbability;
 		this.shrinkingEnabled = shrinkingEnabled;
 		this.timeout = timeout;
-		this.executorService = executorService;
+		this.executorServiceSupplier = executorServiceSupplier;
+	}
+
+	void onSuccessful(Consumer<Sample> onSuccessful) {
+		this.onSatisfied = onSuccessful;
 	}
 
 	@SuppressWarnings("OverlyLongMethod")
 	PropertyExecutionResult execute() {
 		RandomGenSource randomGenSource = new RandomGenSource(seed);
+		ExecutorService executorService = executorServiceSupplier.get();
 		int maxEdgeCases = Math.max(maxTries, 10);
 		SampleGenerator sampleGenerator = new SampleGenerator(generators, edgeCasesProbability, maxEdgeCases);
 
@@ -58,7 +64,7 @@ public class PropertyCase {
 		int count = 0;
 		SortedSet<FalsifiedSample> falsifiedSamples = Collections.synchronizedSortedSet(new TreeSet<>());
 
-		Consumer<FalsifiedSample> falsified = sample -> {
+		Consumer<FalsifiedSample> onFalsified = sample -> {
 			falsifiedSamples.add(sample);
 			executorService.shutdownNow();
 		};
@@ -67,14 +73,18 @@ public class PropertyCase {
 			count++;
 			Sample sample = sampleGenerator.generate(randomGenSource);
 			try {
-				executorService.submit(() -> executeTry(sample, countTries, countChecks, falsified));
+				Runnable executeTry = () -> executeTry(
+					sample, countTries, countChecks,
+					onFalsified, onSatisfied
+				);
+				executorService.submit(executeTry);
 			} catch (RejectedExecutionException ignore) {
 				// This can happen when a task is submitted after
 				// the executor service has been shut down due to a falsified sample.
 			}
 		}
 
-		waitForAllTriesToFinishOrAtLeastOneIsFalsified();
+		waitForAllTriesToFinishOrAtLeastOneIsFalsified(executorService);
 
 		if (falsifiedSamples.isEmpty()) {
 			return new PropertyExecutionResult(SUCCESSFUL, countTries.get(), countChecks.get());
@@ -88,7 +98,7 @@ public class PropertyCase {
 		);
 	}
 
-	private void waitForAllTriesToFinishOrAtLeastOneIsFalsified() {
+	private void waitForAllTriesToFinishOrAtLeastOneIsFalsified(ExecutorService executorService) {
 		boolean timeoutOccurred = false;
 		try {
 			executorService.shutdown();
@@ -106,7 +116,8 @@ public class PropertyCase {
 		Sample sample,
 		AtomicInteger countTries,
 		AtomicInteger countChecks,
-		Consumer<FalsifiedSample> falsifiedOccurred
+		Consumer<FalsifiedSample> onFalsified,
+		Consumer<Sample> onSatisfied
 	) {
 		countTries.incrementAndGet();
 		TryExecutionResult tryResult = tryable.apply(sample);
@@ -115,7 +126,10 @@ public class PropertyCase {
 		}
 		if (tryResult.status() == TryExecutionResult.Status.FALSIFIED) {
 			FalsifiedSample originalSample = new FalsifiedSample(sample, tryResult.throwable());
-			falsifiedOccurred.accept(originalSample);
+			onFalsified.accept(originalSample);
+		}
+		if (tryResult.status() == TryExecutionResult.Status.SATISFIED) {
+			onSatisfied.accept(sample);
 		}
 	}
 
@@ -127,5 +141,4 @@ public class PropertyCase {
 			falsifiedSamples::add
 		);
 	}
-
 }
