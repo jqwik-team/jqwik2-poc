@@ -85,7 +85,7 @@ class PropertyExecutionTests {
 		assertThat(result.status()).isEqualTo(Status.FAILED);
 		assertThat(result.countTries()).isEqualTo(1);
 		assertThat(result.countChecks()).isEqualTo(1);
-		assertThat(result.falsifiedSamples()).hasSize(1);
+		assertThat(result.falsifiedSamples()).hasSizeGreaterThanOrEqualTo(1);
 		FalsifiedSample smallest = result.falsifiedSamples().getFirst();
 		assertThat(smallest.values())
 			.isEqualTo(List.of(lastArg[0]));

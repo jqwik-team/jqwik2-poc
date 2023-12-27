@@ -1,6 +1,10 @@
 package jqwik2;
 
+import java.time.*;
 import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
+import java.util.function.*;
 
 import jqwik2.api.*;
 
@@ -15,9 +19,22 @@ public class PropertyCase {
 	private final double edgeCasesProbability;
 	private final boolean shrinkingEnabled;
 
+	private final Duration timeout;
+	private final ExecutorService executorService;
+
 	public PropertyCase(
-		List<Generator<?>> generators, Tryable tryable,
-		String seed, int maxTries, double edgeCasesProbability, boolean shrinkingEnabled
+			List<Generator<?>> generators, Tryable tryable,
+			String seed, int maxTries, double edgeCasesProbability, boolean shrinkingEnabled
+	) {
+		this(generators, tryable,
+			 seed, maxTries, edgeCasesProbability, shrinkingEnabled,
+			 Duration.ofSeconds(10), Executors.newSingleThreadExecutor()
+		);
+	}
+	public PropertyCase(
+			List<Generator<?>> generators, Tryable tryable,
+			String seed, int maxTries, double edgeCasesProbability, boolean shrinkingEnabled,
+			Duration timeout, ExecutorService executorService
 	) {
 		this.generators = generators;
 		this.tryable = tryable;
@@ -25,35 +42,80 @@ public class PropertyCase {
 		this.maxTries = maxTries;
 		this.edgeCasesProbability = edgeCasesProbability;
 		this.shrinkingEnabled = shrinkingEnabled;
+		this.timeout = timeout;
+		this.executorService = executorService;
 	}
 
+	@SuppressWarnings("OverlyLongMethod")
 	PropertyExecutionResult execute() {
 		RandomGenSource randomGenSource = new RandomGenSource(seed);
 		SampleGenerator sampleGenerator = new SampleGenerator(generators);
 
-		int countTries = 0;
-		int countChecks = 0;
+		AtomicInteger countTries = new AtomicInteger(0);
+		AtomicInteger countChecks = new AtomicInteger(0);
 
-		while (countTries < maxTries) {
+		int count = 0;
+		SortedSet<FalsifiedSample> falsifiedSamples = Collections.synchronizedSortedSet(new TreeSet<>());
+
+		Consumer<FalsifiedSample> falsified = sample -> {
+			falsifiedSamples.add(sample);
+			executorService.shutdownNow();
+		};
+
+		while (count < maxTries) {
+			count++;
 			Sample sample = sampleGenerator.generate(randomGenSource);
-			countTries++;
-			TryExecutionResult tryResult = tryable.apply(sample);
-			if (tryResult.status() != TryExecutionResult.Status.INVALID) {
-				countChecks++;
-			}
-			if (tryResult.status() == TryExecutionResult.Status.FALSIFIED) {
-				SortedSet<FalsifiedSample> falsifiedSamples = new TreeSet<>();
-				FalsifiedSample originalSample = new FalsifiedSample(sample, tryResult.throwable());
-				falsifiedSamples.add(originalSample);
-				shrink(originalSample, falsifiedSamples);
-				return new PropertyExecutionResult(
-					FAILED, countTries, countChecks,
-					falsifiedSamples
-				);
+			try {
+				executorService.submit(() -> executeTry(sample, countTries, countChecks, falsified));
+			} catch (RejectedExecutionException ignore) {
+				// This can happen when a task is submitted after
+				// the executor service has been shut down due to a falsified sample.
 			}
 		}
 
-		return new PropertyExecutionResult(SUCCESSFUL, countTries, countChecks);
+		waitForAllTriesToFinishOrAtLeastOneIsFalsified();
+
+		if (falsifiedSamples.isEmpty()) {
+			return new PropertyExecutionResult(SUCCESSFUL, countTries.get(), countChecks.get());
+		}
+
+		FalsifiedSample originalSample = falsifiedSamples.first();
+		shrink(originalSample, falsifiedSamples);
+		return new PropertyExecutionResult(
+			FAILED, countTries.get(), countChecks.get(),
+			falsifiedSamples
+		);
+	}
+
+	private void waitForAllTriesToFinishOrAtLeastOneIsFalsified() {
+		boolean timeoutOccurred = false;
+		try {
+			executorService.shutdown();
+			timeoutOccurred = !executorService.awaitTermination(timeout.toMillis(), TimeUnit.MILLISECONDS);
+		} catch (InterruptedException e) {
+			executorService.shutdownNow();
+		}
+		if (timeoutOccurred) {
+			executorService.shutdownNow();
+			throw new PropertyAbortedException("Timeout after " + timeout);
+		}
+	}
+
+	private void executeTry(
+		Sample sample,
+		AtomicInteger countTries,
+		AtomicInteger countChecks,
+		Consumer<FalsifiedSample> falsifiedOccurred
+	) {
+		countTries.incrementAndGet();
+		TryExecutionResult tryResult = tryable.apply(sample);
+		if (tryResult.status() != TryExecutionResult.Status.INVALID) {
+			countChecks.incrementAndGet();
+		}
+		if (tryResult.status() == TryExecutionResult.Status.FALSIFIED) {
+			FalsifiedSample originalSample = new FalsifiedSample(sample, tryResult.throwable());
+			falsifiedOccurred.accept(originalSample);
+		}
 	}
 
 	private void shrink(FalsifiedSample originalSample, Collection<FalsifiedSample> falsifiedSamples) {
@@ -61,7 +123,7 @@ public class PropertyCase {
 			return;
 		}
 		new FullShrinker(originalSample, tryable).shrinkToEnd(
-				falsifiedSamples::add
+			falsifiedSamples::add
 		);
 	}
 
