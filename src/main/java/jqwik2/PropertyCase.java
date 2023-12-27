@@ -29,11 +29,13 @@ public class PropertyCase {
 
 	PropertyExecutionResult execute() {
 		RandomGenSource randomGenSource = new RandomGenSource(seed);
+		SampleGenerator sampleGenerator = new SampleGenerator(generators);
+
 		int countTries = 0;
 		int countChecks = 0;
 
 		while (countTries < maxTries) {
-			Sample sample = new SampleGenerator(generators).generate(randomGenSource);
+			Sample sample = sampleGenerator.generate(randomGenSource);
 			countTries++;
 			TryExecutionResult tryResult = tryable.apply(sample);
 			if (tryResult.status() != TryExecutionResult.Status.INVALID) {
