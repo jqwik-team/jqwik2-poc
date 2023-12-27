@@ -10,6 +10,9 @@ class ListShrinker {
 		this.elements = treeRecording.elements();
 	}
 
+	// TODO: Shrink two elements together
+	// TODO: Shrink by removing elements from the head
+	// TODO: Shrink list of lists by moving element of inner list to next list element
 	Stream<ListRecording> shrink() {
 		if (elements.isEmpty()) {
 			return Stream.empty();
