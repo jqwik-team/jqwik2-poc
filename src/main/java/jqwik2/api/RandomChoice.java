@@ -34,6 +34,8 @@ public interface RandomChoice {
 		}
 	}
 
+	double nextDouble();
+
 	class XORShiftRandomChoice implements RandomChoice {
 		private final RandomGenerator random;
 
@@ -62,6 +64,11 @@ public interface RandomChoice {
 		@Override
 		public RandomChoice split() {
 			return new XORShiftRandomChoice(new XORShiftRandom(random.nextLong()));
+		}
+
+		@Override
+		public double nextDouble() {
+			return random.nextDouble();
 		}
 	}
 

@@ -49,7 +49,8 @@ public class PropertyCase {
 	@SuppressWarnings("OverlyLongMethod")
 	PropertyExecutionResult execute() {
 		RandomGenSource randomGenSource = new RandomGenSource(seed);
-		SampleGenerator sampleGenerator = new SampleGenerator(generators);
+		int maxEdgeCases = Math.max(maxTries, 10);
+		SampleGenerator sampleGenerator = new SampleGenerator(generators, edgeCasesProbability, maxEdgeCases);
 
 		AtomicInteger countTries = new AtomicInteger(0);
 		AtomicInteger countChecks = new AtomicInteger(0);

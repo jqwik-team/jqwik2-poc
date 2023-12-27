@@ -2,8 +2,8 @@ package jqwik2;
 
 import java.util.*;
 
-import jqwik2.api.*;
 import jqwik2.api.Shrinkable;
+import jqwik2.api.*;
 
 import net.jqwik.api.*;
 
@@ -21,12 +21,11 @@ class SampleGenerationTests {
 
 		List<Shrinkable<Object>> shrinkables = List.of(
 			new GeneratedShrinkable<>(ints.generate(recorder1), ints, recorder1.recording()).asGeneric(),
-			new GeneratedShrinkable<>( lists.generate(recorder2), lists, recorder2.recording()).asGeneric()
+			new GeneratedShrinkable<>(lists.generate(recorder2), lists, recorder2.recording()).asGeneric()
 		);
 
 		Sample sample = new Sample(shrinkables);
-
-		System.out.println("sample = " + sample);
+		// System.out.println("sample = " + sample);
 
 		List<Object> regeneratedValues = sample.regenerateValues();
 		assertThat(regeneratedValues).isEqualTo(sample.values());
@@ -41,6 +40,23 @@ class SampleGenerationTests {
 
 			Sample sample = new SampleGenerator(List.of(ints, lists))
 								.generateRandomly(new RandomGenSource());
+			// System.out.println("sample = " + sample.values());
+
+			List<Object> regeneratedValues = sample.regenerateValues();
+			assertThat(regeneratedValues).isEqualTo(sample.values());
+		}
+	}
+
+	@Example
+	void generateWithEdgeCases() {
+		Generator<Integer> ints = new IntegerGenerator(-100, 100);
+		Generator<List<Integer>> lists = new ListGenerator<>(ints, 5);
+
+		for (int i = 0; i < 100; i++) {
+			Sample sample = new SampleGenerator(
+				List.of(ints, lists),
+				0.5, 100
+			).generateRandomly(new RandomGenSource());
 
 			System.out.println("sample = " + sample.values());
 
@@ -48,4 +64,5 @@ class SampleGenerationTests {
 			assertThat(regeneratedValues).isEqualTo(sample.values());
 		}
 	}
+
 }
