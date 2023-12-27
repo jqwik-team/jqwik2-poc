@@ -1,6 +1,8 @@
 package jqwik2;
 
+import java.time.*;
 import java.util.*;
+import java.util.concurrent.*;
 
 import jqwik2.api.Assume;
 import jqwik2.api.*;
@@ -151,6 +153,66 @@ class PropertyExecutionTests {
 		assertThat(smallest.values()).isEqualTo(List.of(20));
 		FalsifiedSample biggest = result.falsifiedSamples().getLast();
 		assertThat(biggest.values()).isEqualTo(List.of(68)); // depends on seed
+	}
+
+	@Example
+	void runSuccessfulPropertyInCachedThreadPool() {
+		// Should run in not much longer than 100 ms
+
+		List<Generator<?>> generators = List.of(
+			new IntegerGenerator(0, 100)
+		);
+		Tryable tryable = Tryable.from(args -> {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+			return true;
+		});
+
+		PropertyCase propertyCase = new PropertyCase(
+			generators,
+			tryable,
+			"42",
+			1000,
+			0.0,
+			false,
+			Duration.ofSeconds(10),
+			Executors.newCachedThreadPool()
+		);
+
+		PropertyExecutionResult result = propertyCase.execute();
+		assertThat(result.status()).isEqualTo(Status.SUCCESSFUL);
+		assertThat(result.countTries()).isEqualTo(1000);
+		assertThat(result.countChecks()).isEqualTo(1000);
+	}
+
+	@Example
+	void failAndShrinkInCachedThreadPool() {
+		List<Generator<?>> generators = List.of(
+			new IntegerGenerator(0, 100)
+		);
+		Tryable tryable = Tryable.from(args -> {
+			int anInt = (int) args.get(0);
+			return anInt < 20;
+		});
+
+		PropertyCase propertyCase = new PropertyCase(
+			generators,
+			tryable,
+			"42",
+			1000,
+			0.0,
+			true,
+			Duration.ofSeconds(10),
+			Executors.newCachedThreadPool()
+		);
+
+		PropertyExecutionResult result = propertyCase.execute();
+		assertThat(result.status()).isEqualTo(Status.FAILED);
+		FalsifiedSample smallest = result.falsifiedSamples().getFirst();
+		assertThat(smallest.values()).isEqualTo(List.of(20));
 	}
 
 }
