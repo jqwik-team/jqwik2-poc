@@ -27,7 +27,7 @@ public class PropertyCase {
 		int countTries = 0;
 		int countChecks = 0;
 
-		while(countTries < maxTries) {
+		while (countTries < maxTries) {
 			Sample sample = new SampleGenerator(generators).generate(randomGenSource);
 			countTries++;
 			TryExecutionResult tryResult = tryable.apply(sample);
@@ -36,15 +36,15 @@ public class PropertyCase {
 			}
 			if (tryResult.status() == TryExecutionResult.Status.FALSIFIED) {
 				FalsifiedSample falsifiedSample = new FalsifiedSample(sample, tryResult.throwable());
+				List<FalsifiedSample> falsifiedSamples = List.of(falsifiedSample);
 				return new PropertyExecutionResult(
 					FAILED, countTries, countChecks,
-					Optional.of(seed),
-					Optional.of(falsifiedSample), Optional.empty()
+					falsifiedSamples
 				);
 			}
 		}
 
-		return new PropertyExecutionResult(SUCCESSFUL, countTries, countChecks, seed);
+		return new PropertyExecutionResult(SUCCESSFUL, countTries, countChecks);
 	}
 
 }

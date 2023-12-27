@@ -31,7 +31,6 @@ class PropertyExecutionTests {
 		assertThat(result.status()).isEqualTo(Status.SUCCESSFUL);
 		assertThat(result.countTries()).isEqualTo(10);
 		assertThat(result.countChecks()).isEqualTo(10);
-		assertThat(result.seed()).isEqualTo(Optional.of("42"));
 	}
 
 	@Example
@@ -83,8 +82,42 @@ class PropertyExecutionTests {
 		assertThat(result.status()).isEqualTo(Status.FAILED);
 		assertThat(result.countTries()).isEqualTo(1);
 		assertThat(result.countChecks()).isEqualTo(1);
-		assertThat(result.seed()).isEqualTo(Optional.of("42"));
-		assertThat(result.optionalFalsifiedSample()).isPresent();
+		assertThat(result.falsifiedSamples()).hasSize(1);
+		FalsifiedSample smallest = result.falsifiedSamples().getFirst();
+		assertThat(smallest.values())
+			.isEqualTo(List.of(lastArg[0]));
+		assertThat(smallest.thrown()).isEmpty();
+	}
+
+	@Example
+	void failPropertyWithException() {
+		List<Generator<?>> generators = List.of(
+			new IntegerGenerator(0, 100)
+		);
+		int[] lastArg = new int[1];
+		Tryable tryable = Tryable.from(args -> {
+			lastArg[0] = (int) args.get(0);
+			fail("I failed!");
+		});
+
+		PropertyCase propertyCase = new PropertyCase(
+			generators,
+			tryable,
+			"42",
+			10,
+			0.0
+		);
+
+		PropertyExecutionResult result = propertyCase.execute();
+		assertThat(result.status()).isEqualTo(Status.FAILED);
+		FalsifiedSample smallest = result.falsifiedSamples().getFirst();
+		assertThat(smallest.values())
+			.isEqualTo(List.of(lastArg[0]));
+		assertThat(smallest.thrown()).isPresent();
+		smallest.thrown().ifPresent(throwable -> {
+			assertThat(throwable).isInstanceOf(AssertionError.class);
+			assertThat(throwable).hasMessage("I failed!");
+		});
 	}
 
 }
