@@ -4,6 +4,12 @@ import java.util.random.*;
 
 import jqwik2.*;
 
+/**
+ * Implementations of this interface are used to generate random values.
+ *
+ * <p>The implementation must not be thread-safe since sample generation
+ * is performed in a single thread</p>
+ */
 public interface RandomChoice {
 
 	/**
