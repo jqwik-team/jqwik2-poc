@@ -1,5 +1,11 @@
 - PropertyCase Execution
+  - Wrap execution of service in a try(service) { } block
+  - Introduce config object: PropertyCase.execute(configuration)
+    config contains tries, shrinking, seed, edgecase probability etc.
   - Fail if ratio checks/tries is too low
+  - Save seed and falsified samples to disk
+  - Allow rerun with previously falsified samples (starting with smallest) 
+    => Rerun will improve shrinking!
 - Add GenSource.Tuple
 - Additional generators
   - Filter 
@@ -8,7 +14,17 @@
   - FlatMap
 - Add exhaustive generation
 - Add descriptions to generators
-- Consider recording structure when shrinking lists
-- Parallelize shrinking
+- Give generators equality to allow caching
 - Stateful generators
-- Allow shrinking to use backup source when recording is exhausted
+- Shrinking (https://www.drmaciver.com/2019/01/notes-on-test-case-reduction/)
+  - Compare shrinkables due to full length if different recording types are compared
+  - Remove big chunks of elements when shrinking lists
+  - Parallelize shrinking 
+    - https://github.com/DRMacIver/shrinkray/
+    - https://dl.acm.org/doi/10.1145/3319619.3322004
+  - Allow shrinking to use backup source when recording is exhausted
+  - Cache tryable results during shrinking
+  - Shrink with a timeout
+  - Shrink in passes? 
+  - Show shrinking progress on console
+- Target-based generation and shrinking
