@@ -1,21 +1,19 @@
 package jqwik2;
 
 import java.util.*;
-import java.util.function.*;
 
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
 
-class WithEdgeCasesDecorator implements Generator<Object> {
+class WithEdgeCasesDecorator extends Generator.Decorator<Object> {
 
-	private final Generator<Object> generator;
 	private final double edgeCasesProbability;
 	private final int maxEdgeCases;
 
 	private Set<Recording> edgeCasesCache = null;
 
 	WithEdgeCasesDecorator(Generator<Object> generator, double edgeCasesProbability, int maxEdgeCases) {
-		this.generator = generator;
+		super(generator);
 		this.edgeCasesProbability = edgeCasesProbability;
 		this.maxEdgeCases = maxEdgeCases;
 	}
@@ -26,28 +24,13 @@ class WithEdgeCasesDecorator implements Generator<Object> {
 	}
 
 	@Override
-	public Iterable<Recording> edgeCases() {
-		return generator.edgeCases();
-	}
-
-	@Override
-	public Generator<Object> decorate(Function<Generator<Object>, Generator<Object>> decorator) {
-		return generator.decorate(decorator);
-	}
-
-	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof WithEdgeCasesDecorator other) {
-			return other.generator.equals(generator) &&
-				   other.edgeCasesProbability == edgeCasesProbability &&
-				   other.maxEdgeCases == maxEdgeCases;
+			return super.equals(other) &&
+					   other.edgeCasesProbability == edgeCasesProbability &&
+					   other.maxEdgeCases == maxEdgeCases;
 		}
 		return false;
-	}
-
-	@Override
-	public int hashCode() {
-		return generator.hashCode();
 	}
 
 	private GenSource chooseRandomOrEdgeCaseSource(GenSource originalSource) {
