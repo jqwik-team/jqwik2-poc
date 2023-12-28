@@ -73,7 +73,7 @@ class SampleGenerationTests {
 				0.5, 100
 			).generateRandomly(new RandomGenSource());
 
-			System.out.println("sample = " + sample.values());
+			// System.out.println("sample = " + sample.values());
 
 			List<Object> regeneratedValues = sample.regenerateValues();
 			assertThat(regeneratedValues).isEqualTo(sample.values());

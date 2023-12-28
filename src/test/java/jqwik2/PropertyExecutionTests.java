@@ -51,7 +51,7 @@ class PropertyExecutionTests {
 		PropertyCase propertyCase = new PropertyCase(
 			generators,
 			tryable,
-			"42",
+			"47",
 			10,
 			0.0,
 			false
@@ -60,8 +60,8 @@ class PropertyExecutionTests {
 		PropertyExecutionResult result = propertyCase.execute();
 		assertThat(result.status()).isEqualTo(Status.SUCCESSFUL);
 		assertThat(result.countTries()).isEqualTo(10);
-		// 2 invalids - depends on random seed
-		assertThat(result.countChecks()).isEqualTo(8);
+		// 5 invalids - depends on random seed
+		assertThat(result.countChecks()).isEqualTo(5);
 	}
 
 	@Example
@@ -134,13 +134,13 @@ class PropertyExecutionTests {
 		);
 		Tryable tryable = Tryable.from(args -> {
 			int anInt = (int) args.get(0);
-			return anInt < 20;
+			return anInt < 45;
 		});
 
 		PropertyCase propertyCase = new PropertyCase(
 			generators,
 			tryable,
-			"42",
+			"424242",
 			100,
 			0.0,
 			true
@@ -151,9 +151,9 @@ class PropertyExecutionTests {
 		assertThat(result.countTries()).isEqualTo(2); // depends on seed
 		assertThat(result.falsifiedSamples()).hasSizeGreaterThanOrEqualTo(2);
 		FalsifiedSample smallest = result.falsifiedSamples().getFirst();
-		assertThat(smallest.values()).isEqualTo(List.of(20));
+		assertThat(smallest.values()).isEqualTo(List.of(45));
 		FalsifiedSample biggest = result.falsifiedSamples().getLast();
-		assertThat(biggest.values()).isEqualTo(List.of(68)); // depends on seed
+		assertThat(biggest.values()).isEqualTo(List.of(51)); // depends on seed
 	}
 
 	@Example

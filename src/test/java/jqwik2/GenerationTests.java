@@ -75,7 +75,7 @@ class GenerationTests {
 
 		for (int i = 0; i < 50; i++) {
 			List<Integer> value = listWithEdgeCases.generate(source);
-			System.out.println("value=" + value);
+			// System.out.println("value=" + value);
 			assertThat(value).hasSizeLessThanOrEqualTo(5);
 		}
 	}
@@ -189,8 +189,8 @@ class GenerationTests {
 			GenRecorder recorder = new GenRecorder(recordedSource);
 
 			List<Integer> value = listOfInts.generate(recorder);
-			System.out.println("value=     " + value);
-			System.out.println("recording= " + recorder.recording());
+			// System.out.println("value=     " + value);
+			// System.out.println("recording= " + recorder.recording());
 		}
 
 	}

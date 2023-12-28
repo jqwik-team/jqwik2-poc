@@ -72,10 +72,10 @@ public class PropertyCase {
 
 			while (count < maxTries) {
 				count++;
-				Sample sample = sampleGenerator.generate(randomGenSource);
+				RandomGenSource tryGenSource = randomGenSource.split();
 				try {
 					Runnable executeTry = () -> executeTry(
-						sample, countTries, countChecks,
+						sampleGenerator, tryGenSource, countTries, countChecks,
 						onFalsified, onSatisfied
 					);
 					executorService.submit(executeTry);
@@ -115,12 +115,14 @@ public class PropertyCase {
 	}
 
 	private void executeTry(
-		Sample sample,
+		SampleGenerator sampleGenerator,
+		GenSource tryGenSource,
 		AtomicInteger countTries,
 		AtomicInteger countChecks,
 		Consumer<FalsifiedSample> onFalsified,
 		Consumer<Sample> onSatisfied
 	) {
+		Sample sample = sampleGenerator.generate(tryGenSource);
 		countTries.incrementAndGet();
 		TryExecutionResult tryResult = tryable.apply(sample);
 		if (tryResult.status() != TryExecutionResult.Status.INVALID) {

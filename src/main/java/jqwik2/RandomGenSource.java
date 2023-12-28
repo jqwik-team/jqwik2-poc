@@ -59,10 +59,13 @@ public final class RandomGenSource implements GenSource, GenSource.Atom, GenSour
 	}
 
 	/**
-	 * Split off a new random gen source for usage in different generators
+	 * Split off a new random gen source for usage in different generators.
+	 *
+	 * <p>This method must be thread-safe!</p>
+	 *
 	 * @return a new random gen source
 	 */
-	public RandomGenSource split() {
+	public synchronized RandomGenSource split() {
 		return new RandomGenSource(random.split());
 	}
 
