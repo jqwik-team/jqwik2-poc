@@ -54,7 +54,6 @@ public class PropertyCase {
 	@SuppressWarnings("OverlyLongMethod")
 	PropertyExecutionResult execute() {
 		RandomGenSource randomGenSource = new RandomGenSource(seed);
-		ExecutorService executorService = executorServiceSupplier.get();
 		int maxEdgeCases = Math.max(maxTries, 10);
 		SampleGenerator sampleGenerator = new SampleGenerator(generators, edgeCasesProbability, maxEdgeCases);
 
@@ -64,27 +63,30 @@ public class PropertyCase {
 		int count = 0;
 		SortedSet<FalsifiedSample> falsifiedSamples = Collections.synchronizedSortedSet(new TreeSet<>());
 
-		Consumer<FalsifiedSample> onFalsified = sample -> {
-			falsifiedSamples.add(sample);
-			executorService.shutdownNow();
-		};
 
-		while (count < maxTries) {
-			count++;
-			Sample sample = sampleGenerator.generate(randomGenSource);
-			try {
-				Runnable executeTry = () -> executeTry(
-					sample, countTries, countChecks,
-					onFalsified, onSatisfied
-				);
-				executorService.submit(executeTry);
-			} catch (RejectedExecutionException ignore) {
-				// This can happen when a task is submitted after
-				// the executor service has been shut down due to a falsified sample.
+		try (var executorService = executorServiceSupplier.get();) {
+			Consumer<FalsifiedSample> onFalsified = sample -> {
+				falsifiedSamples.add(sample);
+				executorService.shutdownNow();
+			};
+
+			while (count < maxTries) {
+				count++;
+				Sample sample = sampleGenerator.generate(randomGenSource);
+				try {
+					Runnable executeTry = () -> executeTry(
+						sample, countTries, countChecks,
+						onFalsified, onSatisfied
+					);
+					executorService.submit(executeTry);
+				} catch (RejectedExecutionException ignore) {
+					// This can happen when a task is submitted after
+					// the executor service has been shut down due to a falsified sample.
+				}
 			}
-		}
 
-		waitForAllTriesToFinishOrAtLeastOneIsFalsified(executorService);
+			waitForAllTriesToFinishOrAtLeastOneIsFalsified(executorService);
+		}
 
 		if (falsifiedSamples.isEmpty()) {
 			return new PropertyExecutionResult(SUCCESSFUL, countTries.get(), countChecks.get());

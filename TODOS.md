@@ -1,5 +1,4 @@
 - PropertyCase Execution
-  - Wrap execution of service in a try(service) { } block
   - Introduce config object: PropertyCase.execute(configuration)
     config contains tries, shrinking, seed, edgecase probability etc.
   - Fail if ratio checks/tries is too low
