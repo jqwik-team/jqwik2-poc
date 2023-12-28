@@ -259,14 +259,16 @@ class PropertyExecutionTests {
 			serviceSupplier
 		);
 
-		final Set<Sample> samples1 = new HashSet<>();
+		final Set<Sample> samples1 = Collections.synchronizedSet(new HashSet<>());
 		propertyCase.onSuccessful(samples1::add);
 		assertThat(propertyCase.execute().status()).isEqualTo(Status.SUCCESSFUL);
 
-		final Set<Sample> samples2 = new HashSet<>();
+		final Set<Sample> samples2 = Collections.synchronizedSet(new HashSet<>());
 		propertyCase.onSuccessful(samples2::add);
 		assertThat(propertyCase.execute().status()).isEqualTo(Status.SUCCESSFUL);
 
+		Sample first1 = samples1.iterator().next();
+		Sample first2 = samples2.iterator().next();
 		assertThat(samples1).hasSameElementsAs(samples2);
 	}
 

@@ -48,6 +48,21 @@ class SampleGenerationTests {
 	}
 
 	@Example
+	void useRandomSampleGeneratorWithEdgeCases() {
+		Generator<Integer> ints = new IntegerGenerator(-100, 100);
+
+		Set<Integer> values = new HashSet<>();
+		for (int i = 0; i < 100; i++) {
+			Sample sample = new SampleGenerator(List.of(ints), 0.9, 10)
+								.generateRandomly(new RandomGenSource());
+			values.add((Integer) sample.values().getFirst());
+		}
+		assertThat(values).contains(
+			0, 1, -1, 100, -100
+		);
+	}
+
+	@Example
 	void generateWithEdgeCases() {
 		Generator<Integer> ints = new IntegerGenerator(-100, 100);
 		Generator<List<Integer>> lists = new ListGenerator<>(ints, 5);

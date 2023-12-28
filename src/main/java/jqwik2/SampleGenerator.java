@@ -1,6 +1,7 @@
 package jqwik2;
 
 import java.util.*;
+import java.util.function.*;
 import java.util.stream.*;
 
 import jqwik2.api.*;
@@ -11,8 +12,6 @@ public class SampleGenerator {
 	private final List<Generator<Object>> generators;
 	private final double edgeCasesProbability;
 	private final int maxEdgeCases;
-
-	private final Map<Generator<Object>, Collection<Recording>> edgeCasesCache = new HashMap<>();
 
 	public SampleGenerator(List<Generator<?>> generators) {
 		this(generators, 0.0, 100);
@@ -37,49 +36,23 @@ public class SampleGenerator {
 		}
 		List<Shrinkable<Object>> shrinkables = new ArrayList<>();
 		for (int i = 0; i < generators.size(); i++) {
-			Generator<Object> generator = generators.get(i);
-			GenSource randomOrEdgeCaseSource = chooseRandomOrEdgeCaseSource(genSources.get(i), generator);
-			shrinkables.add(createShrinkable(randomOrEdgeCaseSource, generator));
+			Generator<Object> generator = decorateWithEdgeCases(generators.get(i));
+			// GenSource randomOrEdgeCaseSource = chooseRandomOrEdgeCaseSource(genSources.get(i), generator);
+			// shrinkables.add(createShrinkable(randomOrEdgeCaseSource, generator));
+			shrinkables.add(createShrinkable(genSources.get(i), generator));
 		}
 		return new Sample(shrinkables);
 	}
 
 	private static Shrinkable<Object> createShrinkable(GenSource source, Generator<Object> generator) {
-		GenRecorder recorder = new GenRecorder(source);
-		return new ShrinkableGenerator<>(generator).generate(recorder);
+		return new ShrinkableGenerator<>(generator).generate(source);
 	}
 
-	private GenSource chooseRandomOrEdgeCaseSource(GenSource originalSource, Generator<Object> generator) {
-		if (originalSource instanceof RandomGenSource randomSource) {
-			return randomSource.withProbability(
-				edgeCasesProbability,
-				() -> edgeCaseSource(generator, randomSource),
-				() -> originalSource
-			);
+	private Generator<Object> decorateWithEdgeCases(Generator<Object> generator) {
+		if (edgeCasesProbability <= 0.0) {
+			return generator;
 		}
-		return originalSource;
-	}
-
-	private RecordedSource edgeCaseSource(Generator<Object> generator, RandomGenSource randomSource) {
-		Collection<Recording> edgeCases = edgeCasesCache.computeIfAbsent(
-			generator,
-			this::createEdgeCaseRecordings
-		);
-		Recording recording = randomSource.chooseOne(edgeCases);
-		return new RecordedSource(recording);
-	}
-
-	private Collection<Recording> createEdgeCaseRecordings(Generator<Object> generator) {
-
-		LinkedHashSet<Recording> edgeCases = new LinkedHashSet<>();
-		Iterator<Recording> iterator = generator.edgeCases().iterator();
-		while (edgeCases.size() < maxEdgeCases) {
-			if (!iterator.hasNext()) {
-				break;
-			}
-			edgeCases.add(iterator.next());
-		}
-		return edgeCases;
+		return generator.decorate(g -> new WithEdgeCasesDecorator(g, edgeCasesProbability, maxEdgeCases));
 	}
 
 	public Sample generate(GenSource... sources) {

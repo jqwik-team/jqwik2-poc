@@ -1,6 +1,7 @@
 package jqwik2;
 
 import java.util.*;
+import java.util.function.*;
 import java.util.stream.*;
 
 import jqwik2.api.*;
@@ -12,6 +13,14 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 
 	public GenRecorder(GenSource source) {
 		super(source);
+	}
+
+	public GenRecorder swapInnerSource(Function<GenSource, GenSource> swap) {
+		if (concreteRecorder != null) {
+			throw new IllegalStateException("Recording has already been started");
+		}
+		source = swap.apply(source);
+		return this;
 	}
 
 	public Recording recording() {
@@ -135,7 +144,7 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 
 abstract class AbstractRecorder<T extends GenSource> implements GenSource {
 
-	final T source;
+	T source;
 
 	AbstractRecorder(T source) {
 		this.source = source;
