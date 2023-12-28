@@ -16,8 +16,8 @@ public interface Generator<T> {
 	/**
 	 * Override if generator has inner generators that need to be decorated as well.
 	 */
-	default Generator<T> decorate(Function<Generator<T>, Generator<T>> decorator) {
-		return decorator.apply(this);
+	default Generator<T> decorate(Function<Generator<?>, Generator<?>> decorator) {
+		return (Generator<T>) decorator.apply(this);
 	}
 
 	class Decorator<T> implements Generator<T> {
@@ -39,7 +39,7 @@ public interface Generator<T> {
 		}
 
 		@Override
-		public Generator<T> decorate(Function<Generator<T>, Generator<T>> decorator) {
+		public Generator<T> decorate(Function<Generator<?>, Generator<?>> decorator) {
 			return generator.decorate(decorator);
 		}
 

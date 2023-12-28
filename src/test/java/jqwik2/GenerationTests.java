@@ -58,7 +58,25 @@ class GenerationTests {
 
 		for (int i = 0; i < 10; i++) {
 			List<Integer> value = listOfInts.generate(source);
+			// System.out.println("value=" + value);
+			assertThat(value).hasSizeLessThanOrEqualTo(5);
+		}
+	}
+
+	@Example
+	void listOfIntsWithEdgeCases() {
+		IntegerGenerator ints = new IntegerGenerator(-100, 100);
+		Generator<List<Integer>> listOfInts = new ListGenerator<>(ints, 5);
+		Generator<List<Integer>> listWithEdgeCases = listOfInts.decorate(
+			g -> new WithEdgeCasesDecorator<>(g, 0.5, 10)
+		);
+
+		RandomGenSource source = new RandomGenSource("42");
+
+		for (int i = 0; i < 50; i++) {
+			List<Integer> value = listWithEdgeCases.generate(source);
 			System.out.println("value=" + value);
+			assertThat(value).hasSizeLessThanOrEqualTo(5);
 		}
 	}
 

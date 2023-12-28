@@ -2,6 +2,8 @@ package jqwik2;
 
 import java.util.*;
 
+import jqwik2.api.*;
+
 import net.jqwik.api.*;
 
 class PerformanceTests {
@@ -20,12 +22,15 @@ class PerformanceTests {
 	void compare_jqwik2poc_with_jqwik() {
 		IntegerGenerator randomInteger = new IntegerGenerator(-10, 100);
 		ListGenerator<Integer> randomList = new ListGenerator<>(randomInteger, 100);
+		Generator<List<Integer>> randomListWithEdgeCases = randomList.decorate(
+			g -> new WithEdgeCasesDecorator<>(g, 0.05, 10)
+		);
 
 		int count = 100_000;
 
-		GenRecorder source = new GenRecorder(new RandomGenSource());
 		time("jqwik2", count, () -> {
-			randomList.generate(source);
+			GenRecorder source = new GenRecorder(new RandomGenSource());
+			randomListWithEdgeCases.generate(source);
 		});
 		// System.out.println(source.recording());
 

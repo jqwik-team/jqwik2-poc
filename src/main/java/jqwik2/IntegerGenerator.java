@@ -1,5 +1,7 @@
 package jqwik2;
 
+import java.util.function.*;
+
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
 import jqwik2.api.support.*;
