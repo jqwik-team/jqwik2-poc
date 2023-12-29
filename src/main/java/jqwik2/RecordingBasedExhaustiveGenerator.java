@@ -21,7 +21,7 @@ public class RecordingBasedExhaustiveGenerator implements ExhaustiveGenerator {
 	}
 
 	@Override
-	public Iterator<GenSource> iterator() {
-		return new MapIterator<>(recordings.iterator(), RecordedSource::new);
+	public Iterator<Recording> iterator() {
+		return recordings.iterator();
 	}
 }

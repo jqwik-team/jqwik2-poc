@@ -2,7 +2,9 @@ package jqwik2.api;
 
 import java.util.*;
 
-public interface ExhaustiveGenerator extends IterableGenSource {
+import jqwik2.api.recording.*;
+
+public interface ExhaustiveGenerator extends Iterable<Recording> {
 
 	Optional<Long> maxCount();
 }

@@ -5,6 +5,7 @@ import java.util.stream.*;
 
 import jqwik2.api.ExhaustiveGenerator;
 import jqwik2.api.*;
+import jqwik2.api.recording.*;
 
 import net.jqwik.api.*;
 
@@ -24,8 +25,9 @@ class ExhaustiveGenerationTests {
 
 	}
 
-	private static <T> List<T> collectAllEdgeCases(IterableGenSource genSources, Generator<T> generator) {
-		return StreamSupport.stream(genSources.spliterator(), false)
+	private static <T> List<T> collectAllEdgeCases(Iterable<Recording> recordings, Generator<T> generator) {
+		return StreamSupport.stream(recordings.spliterator(), false)
+							.map(RecordedSource::new)
 							.map(generator::generate)
 							.collect(Collectors.toList());
 	}
