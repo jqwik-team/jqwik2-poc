@@ -7,6 +7,10 @@ import jqwik2.api.recording.*;
 
 public class WithEdgeCasesDecorator<T> extends Generator.Decorator<T> {
 
+	public static <T> Generator<T> decorate(Generator<T> generator, double edgeCasesProbability, int maxEdgeCases) {
+		return generator.decorate(g -> new WithEdgeCasesDecorator<>(g, edgeCasesProbability, maxEdgeCases));
+	}
+
 	private final double edgeCasesProbability;
 	private final int maxEdgeCases;
 

@@ -22,9 +22,7 @@ class PerformanceTests {
 	void compare_jqwik2poc_with_jqwik() {
 		IntegerGenerator randomInteger = new IntegerGenerator(-10, 100);
 		ListGenerator<Integer> randomList = new ListGenerator<>(randomInteger, 100);
-		Generator<List<Integer>> randomListWithEdgeCases = randomList.decorate(
-			g -> new WithEdgeCasesDecorator<>(g, 0.05, 10)
-		);
+		Generator<List<Integer>> randomListWithEdgeCases = WithEdgeCasesDecorator.decorate(randomList, 0.05, 10);
 
 		int count = 100_000;
 

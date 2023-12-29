@@ -20,6 +20,11 @@ public interface Generator<T> {
 		return (Generator<T>) decorator.apply(this);
 	}
 
+	@SuppressWarnings("unchecked")
+	default Generator<Object> asGeneric() {
+		return (Generator<Object>) this;
+	}
+
 	class Decorator<T> implements Generator<T> {
 
 		final protected Generator<T> generator;

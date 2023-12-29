@@ -38,8 +38,8 @@ class SampleGenerationTests {
 
 		for (int i = 0; i < 10; i++) {
 
-			Sample sample = new SampleGenerator(List.of(ints, lists))
-								.generateRandomly(new RandomGenSource());
+			Sample sample = SampleGenerator.from(ints, lists)
+										   .generateRandomly(new RandomGenSource());
 			// System.out.println("sample = " + sample.values());
 
 			List<Object> regeneratedValues = sample.regenerateValues();
@@ -50,11 +50,12 @@ class SampleGenerationTests {
 	@Example
 	void useRandomSampleGeneratorWithEdgeCases() {
 		Generator<Integer> ints = new IntegerGenerator(-100, 100);
+		Generator<Integer> withEdgeCases = WithEdgeCasesDecorator.decorate(ints, 0.9, 10);
 
 		Set<Integer> values = new HashSet<>();
+		SampleGenerator sampleGenerator = SampleGenerator.from(withEdgeCases);
 		for (int i = 0; i < 100; i++) {
-			Sample sample = new SampleGenerator(List.of(ints), 0.9, 10)
-								.generateRandomly(new RandomGenSource());
+			Sample sample = sampleGenerator.generateRandomly(new RandomGenSource());
 			values.add((Integer) sample.values().getFirst());
 		}
 		assertThat(values).contains(
@@ -64,17 +65,25 @@ class SampleGenerationTests {
 
 	@Example
 	void generateWithEdgeCases() {
-		Generator<Integer> ints = new IntegerGenerator(-100, 100);
-		Generator<List<Integer>> lists = new ListGenerator<>(ints, 5);
-
-		for (int i = 0; i < 100; i++) {
-			Sample sample = new SampleGenerator(
-				List.of(ints, lists),
+		IntegerGenerator ints = new IntegerGenerator(-100, 100);
+		Generator<Integer> intsWithEdgeCases = WithEdgeCasesDecorator.decorate(
+			ints,
+			0.5, 100
+		);
+		Generator<List<Integer>> lists =
+			WithEdgeCasesDecorator.decorate(
+				new ListGenerator<>(ints, 5),
 				0.5, 100
-			).generateRandomly(new RandomGenSource());
+			);
 
+
+		Set<List<Object>> values = new HashSet<>();
+		SampleGenerator sampleGenerator = SampleGenerator.from(intsWithEdgeCases, lists);
+		for (int i = 0; i < 100; i++) {
+			Sample sample = sampleGenerator.generateRandomly(new RandomGenSource());
 			// System.out.println("sample = " + sample.values());
 
+			values.add(sample.values());
 			List<Object> regeneratedValues = sample.regenerateValues();
 			assertThat(regeneratedValues).isEqualTo(sample.values());
 		}

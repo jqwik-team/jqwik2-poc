@@ -50,18 +50,16 @@ public class PropertyCase {
 		boolean shrinkingEnabled = runConfiguration.shrinkingEnabled();
 
 		int maxEdgeCases = Math.max(maxTries, 10);
-		SampleGenerator sampleGenerator = new SampleGenerator(
-			generators,
-			((PropertyRunConfiguration.Randomized) runConfiguration).edgeCasesProbability(),
-			maxEdgeCases
-		);
+		double edgeCasesProbability = ((PropertyRunConfiguration.Randomized) runConfiguration).edgeCasesProbability();
+		List<Generator<Object>> effectiveGenerators = withEdgeCases(edgeCasesProbability, maxEdgeCases);
+
+		SampleGenerator sampleGenerator = new SampleGenerator(effectiveGenerators);
 
 		AtomicInteger countTries = new AtomicInteger(0);
 		AtomicInteger countChecks = new AtomicInteger(0);
 
 		int count = 0;
 		SortedSet<FalsifiedSample> falsifiedSamples = Collections.synchronizedSortedSet(new TreeSet<>());
-
 
 		try (var executorService = executorServiceSupplier.get();) {
 			Consumer<FalsifiedSample> onFalsified = sample -> {
@@ -100,6 +98,19 @@ public class PropertyCase {
 			FAILED, countTries.get(), countChecks.get(),
 			falsifiedSamples
 		);
+	}
+
+	private List<Generator<Object>> withEdgeCases(double edgeCasesProbability, int maxEdgeCases) {
+		return generators.stream()
+					 .map(gen -> decorateWithEdgeCases(gen.asGeneric(), edgeCasesProbability, maxEdgeCases))
+					 .toList();
+	}
+
+	private static Generator<Object> decorateWithEdgeCases(Generator<Object> generator, double edgeCasesProbability, int maxEdgeCases) {
+		if (edgeCasesProbability <= 0.0) {
+			return generator;
+		}
+		return WithEdgeCasesDecorator.decorate(generator, edgeCasesProbability, maxEdgeCases);
 	}
 
 	private static RandomGenSource randomSource(PropertyRunConfiguration.Randomized randomized) {

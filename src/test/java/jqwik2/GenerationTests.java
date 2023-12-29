@@ -67,9 +67,7 @@ class GenerationTests {
 	void listOfIntsWithEdgeCases() {
 		IntegerGenerator ints = new IntegerGenerator(-100, 100);
 		Generator<List<Integer>> listOfInts = new ListGenerator<>(ints, 5);
-		Generator<List<Integer>> listWithEdgeCases = listOfInts.decorate(
-			g -> new WithEdgeCasesDecorator<>(g, 0.5, 10)
-		);
+		Generator<List<Integer>> listWithEdgeCases = WithEdgeCasesDecorator.decorate(listOfInts, 0.5, 10);
 
 		RandomGenSource source = new RandomGenSource("42");
 
