@@ -4,12 +4,12 @@ import java.util.*;
 
 import jqwik2.*;
 
-public record PropertyExecutionResult(
+public record PropertyRunResult(
 	Status status, int countTries, int countChecks,
 	SortedSet<FalsifiedSample> falsifiedSamples
 ) {
 
-	public PropertyExecutionResult(Status status, int countTries, int countChecks) {
+	public PropertyRunResult(Status status, int countTries, int countChecks) {
 		this(status, countTries, countChecks, new TreeSet<>());
 	}
 

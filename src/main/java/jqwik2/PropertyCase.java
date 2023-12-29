@@ -8,41 +8,30 @@ import java.util.function.*;
 
 import jqwik2.api.*;
 
-import static jqwik2.api.PropertyExecutionResult.Status.*;
+import static jqwik2.api.PropertyRunResult.Status.*;
 
 public class PropertyCase {
 	private final List<Generator<?>> generators;
 	private final Tryable tryable;
-
-	private final String seed;
-	private final int maxTries;
-	private final double edgeCasesProbability;
-	private final boolean shrinkingEnabled;
 
 	private final Duration timeout;
 	private final Supplier<ExecutorService> executorServiceSupplier;
 	private Consumer<Sample> onSatisfied = ignore -> {};
 
 	public PropertyCase(
-			List<Generator<?>> generators, Tryable tryable,
-			String seed, int maxTries, double edgeCasesProbability, boolean shrinkingEnabled
+		List<Generator<?>> generators, Tryable tryable
 	) {
 		this(generators, tryable,
-			 seed, maxTries, edgeCasesProbability, shrinkingEnabled,
 			 Duration.ofSeconds(10), () -> Executors.newSingleThreadExecutor()
 		);
 	}
+
 	public PropertyCase(
-			List<Generator<?>> generators, Tryable tryable,
-			String seed, int maxTries, double edgeCasesProbability, boolean shrinkingEnabled,
-			Duration timeout, Supplier<ExecutorService> executorServiceSupplier
+		List<Generator<?>> generators, Tryable tryable,
+		Duration timeout, Supplier<ExecutorService> executorServiceSupplier
 	) {
 		this.generators = generators;
 		this.tryable = tryable;
-		this.seed = seed;
-		this.maxTries = maxTries;
-		this.edgeCasesProbability = edgeCasesProbability;
-		this.shrinkingEnabled = shrinkingEnabled;
 		this.timeout = timeout;
 		this.executorServiceSupplier = executorServiceSupplier;
 	}
@@ -52,10 +41,20 @@ public class PropertyCase {
 	}
 
 	@SuppressWarnings("OverlyLongMethod")
-	PropertyExecutionResult execute() {
-		RandomGenSource randomGenSource = new RandomGenSource(seed);
+	PropertyRunResult run(PropertyRunConfiguration runConfiguration) {
+		if (!(runConfiguration instanceof PropertyRunConfiguration.Randomized)) {
+			throw new IllegalArgumentException("Unsupported run configuration: " + runConfiguration);
+		}
+		RandomGenSource randomGenSource = randomSource((PropertyRunConfiguration.Randomized) runConfiguration);
+		int maxTries = runConfiguration.maxTries();
+		boolean shrinkingEnabled = runConfiguration.shrinkingEnabled();
+
 		int maxEdgeCases = Math.max(maxTries, 10);
-		SampleGenerator sampleGenerator = new SampleGenerator(generators, edgeCasesProbability, maxEdgeCases);
+		SampleGenerator sampleGenerator = new SampleGenerator(
+			generators,
+			((PropertyRunConfiguration.Randomized) runConfiguration).edgeCasesProbability(),
+			maxEdgeCases
+		);
 
 		AtomicInteger countTries = new AtomicInteger(0);
 		AtomicInteger countChecks = new AtomicInteger(0);
@@ -89,15 +88,24 @@ public class PropertyCase {
 		}
 
 		if (falsifiedSamples.isEmpty()) {
-			return new PropertyExecutionResult(SUCCESSFUL, countTries.get(), countChecks.get());
+			return new PropertyRunResult(SUCCESSFUL, countTries.get(), countChecks.get());
 		}
 
 		FalsifiedSample originalSample = falsifiedSamples.first();
-		shrink(originalSample, falsifiedSamples);
-		return new PropertyExecutionResult(
+		if (shrinkingEnabled) {
+			shrink(originalSample, falsifiedSamples);
+		}
+
+		return new PropertyRunResult(
 			FAILED, countTries.get(), countChecks.get(),
 			falsifiedSamples
 		);
+	}
+
+	private static RandomGenSource randomSource(PropertyRunConfiguration.Randomized randomized) {
+		return randomized.seed() == null
+				   ? new RandomGenSource()
+				   : new RandomGenSource(randomized.seed());
 	}
 
 	private void waitForAllTriesToFinishOrAtLeastOneIsFalsified(ExecutorService executorService) {
@@ -138,9 +146,6 @@ public class PropertyCase {
 	}
 
 	private void shrink(FalsifiedSample originalSample, Collection<FalsifiedSample> falsifiedSamples) {
-		if (!shrinkingEnabled) {
-			return;
-		}
 		new FullShrinker(originalSample, tryable).shrinkToEnd(
 			falsifiedSamples::add
 		);

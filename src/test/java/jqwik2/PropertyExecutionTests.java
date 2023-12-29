@@ -7,10 +7,11 @@ import java.util.function.*;
 
 import jqwik2.api.Assume;
 import jqwik2.api.*;
-import jqwik2.api.PropertyExecutionResult.*;
+import jqwik2.api.PropertyRunResult.*;
 
 import net.jqwik.api.*;
 
+import static jqwik2.PropertyRunConfiguration.*;
 import static org.assertj.core.api.Assertions.*;
 
 class PropertyExecutionTests {
@@ -24,14 +25,12 @@ class PropertyExecutionTests {
 
 		PropertyCase propertyCase = new PropertyCase(
 			generators,
-			tryable,
-			"42",
-			10,
-			0.0,
-			false
+			tryable
 		);
 
-		PropertyExecutionResult result = propertyCase.execute();
+		PropertyRunResult result = propertyCase.run(
+			randomized("42", 10, false, 0.0)
+		);
 		assertThat(result.status()).isEqualTo(Status.SUCCESSFUL);
 		assertThat(result.countTries()).isEqualTo(10);
 		assertThat(result.countChecks()).isEqualTo(10);
@@ -50,14 +49,12 @@ class PropertyExecutionTests {
 
 		PropertyCase propertyCase = new PropertyCase(
 			generators,
-			tryable,
-			"47",
-			10,
-			0.0,
-			false
+			tryable
 		);
 
-		PropertyExecutionResult result = propertyCase.execute();
+		PropertyRunResult result = propertyCase.run(
+			randomized("47", 10, false, 0.0)
+		);
 		assertThat(result.status()).isEqualTo(Status.SUCCESSFUL);
 		assertThat(result.countTries()).isEqualTo(10);
 		// 5 invalids - depends on random seed
@@ -77,14 +74,12 @@ class PropertyExecutionTests {
 
 		PropertyCase propertyCase = new PropertyCase(
 			generators,
-			tryable,
-			"42",
-			10,
-			0.0,
-			false
+			tryable
 		);
 
-		PropertyExecutionResult result = propertyCase.execute();
+		PropertyRunResult result = propertyCase.run(
+			randomized("42", 10, false, 0.0)
+		);
 		assertThat(result.status()).isEqualTo(Status.FAILED);
 		assertThat(result.countTries()).isEqualTo(1);
 		assertThat(result.countChecks()).isEqualTo(1);
@@ -108,14 +103,12 @@ class PropertyExecutionTests {
 
 		PropertyCase propertyCase = new PropertyCase(
 			generators,
-			tryable,
-			"42",
-			10,
-			0.0,
-			false
+			tryable
 		);
 
-		PropertyExecutionResult result = propertyCase.execute();
+		PropertyRunResult result = propertyCase.run(
+			randomized("42", 10, false, 0.0)
+		);
 		assertThat(result.status()).isEqualTo(Status.FAILED);
 		FalsifiedSample smallest = result.falsifiedSamples().getFirst();
 		assertThat(smallest.values())
@@ -139,14 +132,12 @@ class PropertyExecutionTests {
 
 		PropertyCase propertyCase = new PropertyCase(
 			generators,
-			tryable,
-			"424242",
-			100,
-			0.0,
-			true
+			tryable
 		);
 
-		PropertyExecutionResult result = propertyCase.execute();
+		PropertyRunResult result = propertyCase.run(
+			randomized("424242", 100, true, 0.0)
+		);
 		assertThat(result.status()).isEqualTo(Status.FAILED);
 		assertThat(result.countTries()).isEqualTo(2); // depends on seed
 		assertThat(result.falsifiedSamples()).hasSizeGreaterThanOrEqualTo(2);
@@ -175,15 +166,13 @@ class PropertyExecutionTests {
 		PropertyCase propertyCase = new PropertyCase(
 			generators,
 			tryable,
-			"42",
-			1000,
-			0.0,
-			false,
 			Duration.ofSeconds(10),
 			Executors::newCachedThreadPool
 		);
 
-		PropertyExecutionResult result = propertyCase.execute();
+		PropertyRunResult result = propertyCase.run(
+			randomized("42", 1000, false, 0.0)
+		);
 		assertThat(result.status()).isEqualTo(Status.SUCCESSFUL);
 		assertThat(result.countTries()).isEqualTo(1000);
 		assertThat(result.countChecks()).isEqualTo(1000);
@@ -202,14 +191,13 @@ class PropertyExecutionTests {
 		PropertyCase propertyCase = new PropertyCase(
 			generators,
 			tryable,
-			"42",
-			1000,
-			0.0,
-			true,
 			Duration.ofSeconds(10),
-			Executors::newCachedThreadPool		);
+			Executors::newCachedThreadPool
+		);
 
-		PropertyExecutionResult result = propertyCase.execute();
+		PropertyRunResult result = propertyCase.run(
+			randomized("42", 10, true, 0.0)
+		);
 		assertThat(result.status()).isEqualTo(Status.FAILED);
 		FalsifiedSample smallest = result.falsifiedSamples().getFirst();
 		assertThat(smallest.values()).isEqualTo(List.of(20));
@@ -248,24 +236,24 @@ class PropertyExecutionTests {
 		);
 		Tryable tryable = Tryable.from(args -> true);
 
+		PropertyRunConfiguration runConfiguration = randomized(Long.toString(seed), 10, false, edgeCasesProbability);
 		PropertyCase propertyCase = new PropertyCase(
 			generators,
 			tryable,
-			Long.toString(seed),
-			10,
-			edgeCasesProbability,
-			false,
 			Duration.ofSeconds(10),
 			serviceSupplier
 		);
 
 		final Set<Sample> samples1 = Collections.synchronizedSet(new HashSet<>());
 		propertyCase.onSuccessful(samples1::add);
-		assertThat(propertyCase.execute().status()).isEqualTo(Status.SUCCESSFUL);
+
+		assertThat(propertyCase.run(runConfiguration).status())
+			.isEqualTo(Status.SUCCESSFUL);
 
 		final Set<Sample> samples2 = Collections.synchronizedSet(new HashSet<>());
 		propertyCase.onSuccessful(samples2::add);
-		assertThat(propertyCase.execute().status()).isEqualTo(Status.SUCCESSFUL);
+		assertThat(propertyCase.run(runConfiguration).status())
+			.isEqualTo(Status.SUCCESSFUL);
 
 		Sample first1 = samples1.iterator().next();
 		Sample first2 = samples2.iterator().next();
