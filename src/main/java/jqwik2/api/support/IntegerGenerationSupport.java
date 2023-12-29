@@ -107,4 +107,16 @@ public class IntegerGenerationSupport {
 		return recordings;
 	}
 
+	public static ExhaustiveGenerator exhaustive(int min, int max) {
+		if (isPositiveUnsignedIntRange(min, max)) {
+			int range = max - min;
+			return ExhaustiveGenerationSupport.forAtom(range);
+		}
+		if (isNegativeUnsignedIntRange(max)) {
+			int range = max - min;
+			return ExhaustiveGenerationSupport.forAtom(range);
+		}
+		throw new UnsupportedOperationException("Exhaustive generation for full range integers not yet implemented");
+	}
+
 }

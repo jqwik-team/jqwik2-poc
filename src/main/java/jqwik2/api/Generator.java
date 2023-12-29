@@ -3,14 +3,20 @@ package jqwik2.api;
 import java.util.*;
 import java.util.function.*;
 
+import jqwik2.*;
 import jqwik2.api.recording.*;
 
 public interface Generator<T> {
 
 	T generate(GenSource source);
 
+	// TODO: Return IterableGenSource instead?
 	default Iterable<Recording> edgeCases() {
 		return Set.of();
+	}
+
+	default ExhaustiveGenerator exhaustive() {
+		return new RecordingBasedExhaustiveGenerator(Set.of(), null);
 	}
 
 	/**
