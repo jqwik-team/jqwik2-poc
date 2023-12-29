@@ -23,10 +23,7 @@ class PropertyExecutionTests {
 		);
 		Tryable tryable = Tryable.from(args -> true);
 
-		PropertyCase propertyCase = new PropertyCase(
-			generators,
-			tryable
-		);
+		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
 			randomized("42", 10, false, 0.0)
@@ -47,10 +44,7 @@ class PropertyExecutionTests {
 			return true;
 		});
 
-		PropertyCase propertyCase = new PropertyCase(
-			generators,
-			tryable
-		);
+		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
 			randomized("47", 10, false, 0.0)
@@ -72,10 +66,7 @@ class PropertyExecutionTests {
 			return false;
 		});
 
-		PropertyCase propertyCase = new PropertyCase(
-			generators,
-			tryable
-		);
+		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
 			randomized("42", 10, false, 0.0)
@@ -101,10 +92,7 @@ class PropertyExecutionTests {
 			fail("I failed!");
 		});
 
-		PropertyCase propertyCase = new PropertyCase(
-			generators,
-			tryable
-		);
+		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
 			randomized("42", 10, false, 0.0)
@@ -130,10 +118,7 @@ class PropertyExecutionTests {
 			return anInt < 45;
 		});
 
-		PropertyCase propertyCase = new PropertyCase(
-			generators,
-			tryable
-		);
+		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
 			randomized("424242", 100, true, 0.0)
@@ -163,15 +148,14 @@ class PropertyExecutionTests {
 			return true;
 		});
 
-		PropertyCase propertyCase = new PropertyCase(
-			generators,
-			tryable,
-			Duration.ofSeconds(10),
-			Executors::newCachedThreadPool
-		);
+		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
-			randomized("42", 1000, false, 0.0)
+			randomized(
+				"42", 1000, false, 0.0,
+				Duration.ofSeconds(10),
+				Executors::newCachedThreadPool
+			)
 		);
 		assertThat(result.status()).isEqualTo(Status.SUCCESSFUL);
 		assertThat(result.countTries()).isEqualTo(1000);
@@ -188,15 +172,14 @@ class PropertyExecutionTests {
 			return anInt < 20;
 		});
 
-		PropertyCase propertyCase = new PropertyCase(
-			generators,
-			tryable,
-			Duration.ofSeconds(10),
-			Executors::newCachedThreadPool
-		);
+		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
-			randomized("42", 10, true, 0.0)
+			randomized(
+				"42", 10, true, 0.0,
+				Duration.ofSeconds(10),
+				Executors::newCachedThreadPool
+			)
 		);
 		assertThat(result.status()).isEqualTo(Status.FAILED);
 		FalsifiedSample smallest = result.falsifiedSamples().getFirst();
@@ -236,16 +219,16 @@ class PropertyExecutionTests {
 		);
 		Tryable tryable = Tryable.from(args -> true);
 
-		PropertyRunConfiguration runConfiguration = randomized(Long.toString(seed), 10, false, edgeCasesProbability);
-		PropertyCase propertyCase = new PropertyCase(
-			generators,
-			tryable,
-			Duration.ofSeconds(10),
-			serviceSupplier
-		);
+		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		final Set<Sample> samples1 = Collections.synchronizedSet(new HashSet<>());
 		propertyCase.onSuccessful(samples1::add);
+
+		PropertyRunConfiguration runConfiguration = randomized(
+			Long.toString(seed), 10, false, edgeCasesProbability,
+			Duration.ofSeconds(10),
+			serviceSupplier
+		);
 
 		assertThat(propertyCase.run(runConfiguration).status())
 			.isEqualTo(Status.SUCCESSFUL);
@@ -255,8 +238,6 @@ class PropertyExecutionTests {
 		assertThat(propertyCase.run(runConfiguration).status())
 			.isEqualTo(Status.SUCCESSFUL);
 
-		Sample first1 = samples1.iterator().next();
-		Sample first2 = samples2.iterator().next();
 		assertThat(samples1).hasSameElementsAs(samples2);
 	}
 

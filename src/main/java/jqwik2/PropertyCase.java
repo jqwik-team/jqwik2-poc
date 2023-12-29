@@ -14,25 +14,9 @@ public class PropertyCase {
 	private final List<Generator<?>> generators;
 	private final Tryable tryable;
 
-	private final Duration timeout;
-	private final Supplier<ExecutorService> executorServiceSupplier;
 	private Consumer<Sample> onSatisfied = ignore -> {};
 
-	public PropertyCase(List<Generator<?>> generators, Tryable tryable) {
-		this(generators, tryable,
-			 Duration.ofSeconds(10), () -> Executors.newSingleThreadExecutor()
-		);
-	}
-
-	public PropertyCase(
-		List<Generator<?>> generators, Tryable tryable,
-		Duration timeout, Supplier<ExecutorService> executorServiceSupplier
-	) {
-		this.generators = generators;
-		this.tryable = tryable;
-		this.timeout = timeout;
-		this.executorServiceSupplier = executorServiceSupplier;
-	}
+	public PropertyCase(List<Generator<?>> generators, Tryable tryable) {this.generators = generators;this.tryable = tryable;}
 
 	void onSuccessful(Consumer<Sample> onSuccessful) {
 		this.onSatisfied = onSuccessful;
@@ -54,21 +38,34 @@ public class PropertyCase {
 		double edgeCasesProbability = randomized.edgeCasesProbability();
 		List<Generator<Object>> effectiveGenerators = withEdgeCases(edgeCasesProbability, maxEdgeCases);
 
-		return runAndShrink(effectiveGenerators, iterableGenSource, maxTries, shrinkingEnabled);
+		return runAndShrink(
+			effectiveGenerators,
+			iterableGenSource,
+			maxTries,
+			shrinkingEnabled,
+			randomized.maxRuntime(),
+			randomized.supplyExecutorService()
+		);
 	}
 
 	private PropertyRunResult runAndShrink(
 		List<Generator<Object>> effectiveGenerators,
 		IterableGenSource iterableGenSource,
 		int maxTries,
-		boolean shrinkingEnabled
+		boolean shrinkingEnabled,
+		Duration maxDuration,
+		Supplier<ExecutorService> executorServiceSupplier
 	) {
 		SampleGenerator sampleGenerator = new SampleGenerator(effectiveGenerators);
 
 		AtomicInteger countTries = new AtomicInteger(0);
 		AtomicInteger countChecks = new AtomicInteger(0);
 
-		SortedSet<FalsifiedSample> falsifiedSamples = runAndCollectFalsifiedSamples(iterableGenSource, maxTries, sampleGenerator, countTries, countChecks);
+		SortedSet<FalsifiedSample> falsifiedSamples = runAndCollectFalsifiedSamples(
+			iterableGenSource, maxTries, sampleGenerator,
+			countTries, countChecks,
+			maxDuration, executorServiceSupplier
+		);
 
 		if (falsifiedSamples.isEmpty()) {
 			return new PropertyRunResult(SUCCESSFUL, countTries.get(), countChecks.get());
@@ -90,12 +87,14 @@ public class PropertyCase {
 		int maxTries,
 		SampleGenerator sampleGenerator,
 		AtomicInteger countTries,
-		AtomicInteger countChecks
+		AtomicInteger countChecks,
+		Duration maxDuration,
+		Supplier<ExecutorService> executorServiceSupplier
 	) {
 		int count = 0;
 		SortedSet<FalsifiedSample> falsifiedSamples = Collections.synchronizedSortedSet(new TreeSet<>());
 		Iterator<GenSource> genSources = iterableGenSource.iterator();
-		try (var executorService = executorServiceSupplier.get();) {
+		try (var executorService = executorServiceSupplier.get()) {
 			Consumer<FalsifiedSample> onFalsified = sample -> {
 				falsifiedSamples.add(sample);
 				executorService.shutdownNow();
@@ -117,7 +116,7 @@ public class PropertyCase {
 					// the executor service has been shut down due to a falsified sample.
 				}
 			}
-			waitForAllTriesToFinishOrAtLeastOneIsFalsified(executorService);
+			waitForAllTriesToFinishOrAtLeastOneIsFalsified(executorService, maxDuration);
 		}
 		return falsifiedSamples;
 	}
@@ -141,7 +140,7 @@ public class PropertyCase {
 				   : new RandomGenSource(randomized.seed());
 	}
 
-	private void waitForAllTriesToFinishOrAtLeastOneIsFalsified(ExecutorService executorService) {
+	private void waitForAllTriesToFinishOrAtLeastOneIsFalsified(ExecutorService executorService, Duration timeout) {
 		boolean timeoutOccurred = false;
 		try {
 			executorService.shutdown();

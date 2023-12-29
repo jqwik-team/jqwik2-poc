@@ -1,8 +1,16 @@
 package jqwik2;
 
+import java.time.*;
+import java.util.concurrent.*;
+import java.util.function.*;
+
 public sealed interface PropertyRunConfiguration {
 
+	Duration maxRuntime();
+
 	int maxTries();
+
+	Supplier<ExecutorService> supplyExecutorService();
 
 	boolean shrinkingEnabled();
 
@@ -11,13 +19,36 @@ public sealed interface PropertyRunConfiguration {
 	}
 
 	static PropertyRunConfiguration randomized(String seed, int maxTries) {
-		return randomized(seed, maxTries, true, 0.05);
+		return randomized(seed, maxTries, true, 0.05, Duration.ofSeconds(10), Executors::newSingleThreadExecutor);
 	}
 
-	static PropertyRunConfiguration randomized(String seed, int maxTries, boolean shrinkingEnabled, double edgeCasesProbability) {
-		return new Randomized(seed, maxTries, shrinkingEnabled, edgeCasesProbability);
+	static PropertyRunConfiguration randomized(
+		String seed, int maxTries,
+		boolean shrinkingEnabled, double edgeCasesProbability
+	) {
+		return randomized(
+			seed, maxTries,
+			shrinkingEnabled, edgeCasesProbability,
+			Duration.ofSeconds(10), Executors::newSingleThreadExecutor
+		);
 	}
 
-	record Randomized(String seed, int maxTries, boolean shrinkingEnabled, double edgeCasesProbability) implements PropertyRunConfiguration {
+	static PropertyRunConfiguration randomized(
+		String seed, int maxTries,
+		boolean shrinkingEnabled, double edgeCasesProbability,
+		Duration maxRuntime, Supplier<ExecutorService> supplyExecutorService
+	) {
+		return new Randomized(
+			seed, maxTries,
+			shrinkingEnabled, edgeCasesProbability,
+			maxRuntime, supplyExecutorService
+		);
+	}
+
+	record Randomized(
+		String seed, int maxTries,
+		boolean shrinkingEnabled, double edgeCasesProbability,
+		Duration maxRuntime, Supplier<ExecutorService> supplyExecutorService
+	) implements PropertyRunConfiguration {
 	}
 }

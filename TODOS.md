@@ -1,6 +1,4 @@
 - PropertyCase Execution
-  - Introduce config object: PropertyCase.execute(configuration)
-    config contains tries, shrinking, seed, edge cases probability etc.
   - Fail if ratio checks/tries is too low
   - Save seed and falsified samples to disk
   - Allow rerun with previously falsified samples (starting with smallest) 
