@@ -18,9 +18,7 @@ public class PropertyCase {
 	private final Supplier<ExecutorService> executorServiceSupplier;
 	private Consumer<Sample> onSatisfied = ignore -> {};
 
-	public PropertyCase(
-		List<Generator<?>> generators, Tryable tryable
-	) {
+	public PropertyCase(List<Generator<?>> generators, Tryable tryable) {
 		this(generators, tryable,
 			 Duration.ofSeconds(10), () -> Executors.newSingleThreadExecutor()
 		);
@@ -40,50 +38,37 @@ public class PropertyCase {
 		this.onSatisfied = onSuccessful;
 	}
 
-	@SuppressWarnings("OverlyLongMethod")
-	PropertyRunResult run(PropertyRunConfiguration runConfiguration) {
-		if (!(runConfiguration instanceof PropertyRunConfiguration.Randomized)) {
-			throw new IllegalArgumentException("Unsupported run configuration: " + runConfiguration);
-		}
-		RandomGenSource randomGenSource = randomSource((PropertyRunConfiguration.Randomized) runConfiguration);
-		int maxTries = runConfiguration.maxTries();
-		boolean shrinkingEnabled = runConfiguration.shrinkingEnabled();
+	public PropertyRunResult run(PropertyRunConfiguration runConfiguration) {
+		return switch (runConfiguration) {
+			case PropertyRunConfiguration.Randomized randomized -> runRandomized(randomized);
+			case null, default -> throw new IllegalArgumentException("Unsupported run configuration: " + runConfiguration);
+		};
+	}
+
+	private PropertyRunResult runRandomized(PropertyRunConfiguration.Randomized randomized) {
+		IterableGenSource iterableGenSource = randomSource(randomized);
+		int maxTries = randomized.maxTries();
+		boolean shrinkingEnabled = randomized.shrinkingEnabled();
 
 		int maxEdgeCases = Math.max(maxTries, 10);
-		double edgeCasesProbability = ((PropertyRunConfiguration.Randomized) runConfiguration).edgeCasesProbability();
+		double edgeCasesProbability = randomized.edgeCasesProbability();
 		List<Generator<Object>> effectiveGenerators = withEdgeCases(edgeCasesProbability, maxEdgeCases);
 
+		return runAndShrink(effectiveGenerators, iterableGenSource, maxTries, shrinkingEnabled);
+	}
+
+	private PropertyRunResult runAndShrink(
+		List<Generator<Object>> effectiveGenerators,
+		IterableGenSource iterableGenSource,
+		int maxTries,
+		boolean shrinkingEnabled
+	) {
 		SampleGenerator sampleGenerator = new SampleGenerator(effectiveGenerators);
 
 		AtomicInteger countTries = new AtomicInteger(0);
 		AtomicInteger countChecks = new AtomicInteger(0);
 
-		int count = 0;
-		SortedSet<FalsifiedSample> falsifiedSamples = Collections.synchronizedSortedSet(new TreeSet<>());
-
-		try (var executorService = executorServiceSupplier.get();) {
-			Consumer<FalsifiedSample> onFalsified = sample -> {
-				falsifiedSamples.add(sample);
-				executorService.shutdownNow();
-			};
-
-			while (count < maxTries) {
-				count++;
-				RandomGenSource tryGenSource = randomGenSource.split();
-				try {
-					Runnable executeTry = () -> executeTry(
-						sampleGenerator, tryGenSource, countTries, countChecks,
-						onFalsified, onSatisfied
-					);
-					executorService.submit(executeTry);
-				} catch (RejectedExecutionException ignore) {
-					// This can happen when a task is submitted after
-					// the executor service has been shut down due to a falsified sample.
-				}
-			}
-
-			waitForAllTriesToFinishOrAtLeastOneIsFalsified(executorService);
-		}
+		SortedSet<FalsifiedSample> falsifiedSamples = runAndCollectFalsifiedSamples(iterableGenSource, maxTries, sampleGenerator, countTries, countChecks);
 
 		if (falsifiedSamples.isEmpty()) {
 			return new PropertyRunResult(SUCCESSFUL, countTries.get(), countChecks.get());
@@ -100,10 +85,47 @@ public class PropertyCase {
 		);
 	}
 
+	private SortedSet<FalsifiedSample> runAndCollectFalsifiedSamples(
+		IterableGenSource iterableGenSource,
+		int maxTries,
+		SampleGenerator sampleGenerator,
+		AtomicInteger countTries,
+		AtomicInteger countChecks
+	) {
+		int count = 0;
+		SortedSet<FalsifiedSample> falsifiedSamples = Collections.synchronizedSortedSet(new TreeSet<>());
+		Iterator<GenSource> genSources = iterableGenSource.iterator();
+		try (var executorService = executorServiceSupplier.get();) {
+			Consumer<FalsifiedSample> onFalsified = sample -> {
+				falsifiedSamples.add(sample);
+				executorService.shutdownNow();
+			};
+			while (count < maxTries) {
+				if (!genSources.hasNext()) {
+					break;
+				}
+				count++;
+				GenSource tryGenSource = genSources.next();
+				try {
+					Runnable executeTry = () -> executeTry(
+						sampleGenerator, tryGenSource, countTries, countChecks,
+						onFalsified, onSatisfied
+					);
+					executorService.submit(executeTry);
+				} catch (RejectedExecutionException ignore) {
+					// This can happen when a task is submitted after
+					// the executor service has been shut down due to a falsified sample.
+				}
+			}
+			waitForAllTriesToFinishOrAtLeastOneIsFalsified(executorService);
+		}
+		return falsifiedSamples;
+	}
+
 	private List<Generator<Object>> withEdgeCases(double edgeCasesProbability, int maxEdgeCases) {
 		return generators.stream()
-					 .map(gen -> decorateWithEdgeCases(gen.asGeneric(), edgeCasesProbability, maxEdgeCases))
-					 .toList();
+						 .map(gen -> decorateWithEdgeCases(gen.asGeneric(), edgeCasesProbability, maxEdgeCases))
+						 .toList();
 	}
 
 	private static Generator<Object> decorateWithEdgeCases(Generator<Object> generator, double edgeCasesProbability, int maxEdgeCases) {
@@ -113,7 +135,7 @@ public class PropertyCase {
 		return WithEdgeCasesDecorator.decorate(generator, edgeCasesProbability, maxEdgeCases);
 	}
 
-	private static RandomGenSource randomSource(PropertyRunConfiguration.Randomized randomized) {
+	private static IterableGenSource randomSource(PropertyRunConfiguration.Randomized randomized) {
 		return randomized.seed() == null
 				   ? new RandomGenSource()
 				   : new RandomGenSource(randomized.seed());

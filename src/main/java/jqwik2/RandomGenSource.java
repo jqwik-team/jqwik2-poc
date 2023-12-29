@@ -6,7 +6,7 @@ import java.util.function.*;
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
 
-public final class RandomGenSource implements GenSource, GenSource.Atom, GenSource.List, GenSource.Tree {
+public final class RandomGenSource implements IterableGenSource, GenSource, GenSource.Atom, GenSource.List, GenSource.Tree {
 	private final RandomChoice random;
 
 	public RandomGenSource() {
@@ -20,7 +20,6 @@ public final class RandomGenSource implements GenSource, GenSource.Atom, GenSour
 	public RandomGenSource(RandomChoice random) {
 		this.random = random;
 	}
-
 
 	@Override
 	public int choose(int maxExcluded) {
@@ -90,5 +89,20 @@ public final class RandomGenSource implements GenSource, GenSource.Atom, GenSour
 		ArrayList<Recording> values = new ArrayList<>(edgeCases);
 		int choice = random.nextInt(edgeCases.size());
 		return values.get(choice);
+	}
+
+	@Override
+	public Iterator<GenSource> iterator() {
+		return new Iterator<>() {
+			@Override
+			public boolean hasNext() {
+				return true;
+			}
+
+			@Override
+			public GenSource next() {
+				return RandomGenSource.this.split();
+			}
+		};
 	}
 }
