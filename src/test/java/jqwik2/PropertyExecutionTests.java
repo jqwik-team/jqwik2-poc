@@ -163,6 +163,61 @@ class PropertyExecutionTests {
 	}
 
 	@Example
+	void runSuccessfulWithMaxDuration() {
+
+		List<Generator<?>> generators = List.of(
+			new IntegerGenerator(0, 100)
+		);
+		Tryable tryable = Tryable.from(args -> {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+			return true;
+		});
+
+		PropertyCase propertyCase = new PropertyCase(generators, tryable);
+
+		PropertyRunResult result = propertyCase.run(
+			randomized(
+				"42", 1000, false, 0.0,
+				Duration.ofSeconds(1),
+				Executors::newSingleThreadExecutor
+			)
+		);
+		assertThat(result.status()).isEqualTo(Status.SUCCESSFUL);
+		assertThat(result.timedOut()).isTrue();
+		assertThat(result.countTries()).isGreaterThan(0);
+		assertThat(result.countChecks()).isLessThanOrEqualTo(result.countTries());
+	}
+
+	@Example
+	void abortWithTimeout() {
+
+		Tryable tryable = Tryable.from(args -> {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+		});
+
+		PropertyCase propertyCase = new PropertyCase(List.of(new IntegerGenerator(0, 100)), tryable);
+
+		PropertyRunResult result = propertyCase.run(
+			randomized(
+				"42", 1000, false, 0.0,
+				Duration.ofMillis(100),
+				Executors::newSingleThreadExecutor
+			)
+		);
+		assertThat(result.status()).isEqualTo(Status.ABORTED);
+		assertThat(result.abortionReason()).isPresent();
+		assertThat(result.timedOut()).isTrue();
+	}
+
+	@Example
 	void failAndShrinkInCachedThreadPool() {
 		List<Generator<?>> generators = List.of(
 			new IntegerGenerator(0, 100)

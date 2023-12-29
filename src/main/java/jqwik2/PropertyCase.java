@@ -16,7 +16,10 @@ public class PropertyCase {
 
 	private Consumer<Sample> onSatisfied = ignore -> {};
 
-	public PropertyCase(List<Generator<?>> generators, Tryable tryable) {this.generators = generators;this.tryable = tryable;}
+	public PropertyCase(List<Generator<?>> generators, Tryable tryable) {
+		this.generators = generators;
+		this.tryable = tryable;
+	}
 
 	void onSuccessful(Consumer<Sample> onSuccessful) {
 		this.onSatisfied = onSuccessful;
@@ -61,14 +64,25 @@ public class PropertyCase {
 		AtomicInteger countTries = new AtomicInteger(0);
 		AtomicInteger countChecks = new AtomicInteger(0);
 
-		SortedSet<FalsifiedSample> falsifiedSamples = runAndCollectFalsifiedSamples(
+		Pair<SortedSet<FalsifiedSample>, Boolean> falsifiedAndTimedOut = runAndCollectFalsifiedSamples(
 			iterableGenSource, maxTries, sampleGenerator,
 			countTries, countChecks,
 			maxDuration, executorServiceSupplier
 		);
 
+		SortedSet<FalsifiedSample> falsifiedSamples = falsifiedAndTimedOut.first();
+		boolean timedOut = falsifiedAndTimedOut.second();
+
 		if (falsifiedSamples.isEmpty()) {
-			return new PropertyRunResult(SUCCESSFUL, countTries.get(), countChecks.get());
+			if (timedOut && countChecks.get() < 1) {
+				String abortionReason = "Timeout after " + maxDuration + " without any check being executed.";
+				return new PropertyRunResult(
+					ABORTED, countTries.get(), countChecks.get(),
+					new TreeSet<>(), Optional.of(abortionReason),
+					timedOut
+				);
+			}
+			return new PropertyRunResult(SUCCESSFUL, countTries.get(), countChecks.get(), timedOut);
 		}
 
 		FalsifiedSample originalSample = falsifiedSamples.first();
@@ -78,11 +92,11 @@ public class PropertyCase {
 
 		return new PropertyRunResult(
 			FAILED, countTries.get(), countChecks.get(),
-			falsifiedSamples
+			falsifiedSamples, Optional.empty(), timedOut
 		);
 	}
 
-	private SortedSet<FalsifiedSample> runAndCollectFalsifiedSamples(
+	private Pair<SortedSet<FalsifiedSample>, Boolean> runAndCollectFalsifiedSamples(
 		IterableGenSource iterableGenSource,
 		int maxTries,
 		SampleGenerator sampleGenerator,
@@ -116,9 +130,9 @@ public class PropertyCase {
 					// the executor service has been shut down due to a falsified sample.
 				}
 			}
-			waitForAllTriesToFinishOrAtLeastOneIsFalsified(executorService, maxDuration);
+			boolean timedOut = waitForAllTriesToFinishOrAtLeastOneIsFalsified(executorService, maxDuration, countChecks);
+			return new Pair<>(falsifiedSamples, timedOut);
 		}
-		return falsifiedSamples;
 	}
 
 	private List<Generator<Object>> withEdgeCases(double edgeCasesProbability, int maxEdgeCases) {
@@ -140,7 +154,10 @@ public class PropertyCase {
 				   : new RandomGenSource(randomized.seed());
 	}
 
-	private void waitForAllTriesToFinishOrAtLeastOneIsFalsified(ExecutorService executorService, Duration timeout) {
+	private boolean waitForAllTriesToFinishOrAtLeastOneIsFalsified(
+		ExecutorService executorService, Duration timeout,
+		AtomicInteger countChecks
+	) {
 		boolean timeoutOccurred = false;
 		try {
 			executorService.shutdown();
@@ -150,7 +167,9 @@ public class PropertyCase {
 		}
 		if (timeoutOccurred) {
 			executorService.shutdownNow();
-			throw new PropertyAbortedException("Timeout after " + timeout);
+			return true;
+		} else {
+			return false;
 		}
 	}
 
