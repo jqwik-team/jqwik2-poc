@@ -25,19 +25,17 @@ public class IntegerGenerationSupport {
 		if (min > max) {
 			throw new IllegalArgumentException("min must be smaller than or equal to max");
 		}
-		// Max possible range is 1..MAX_VALUE
 		if (isPositiveUnsignedIntRange(min, max)) {
 			return chooseUnsignedInt(min, max);
 		}
-		// Max possible range is MIN_VALUE..-2
-		if (isNegativeUnsignedIntRange(max)) {
+		if (isNegativeUnsignedIntRange(min, max)) {
 			return -chooseUnsignedInt(Math.abs(max), Math.abs(min));
 		}
 		return chooseFullRangedInt(min, max);
 	}
 
-	private static boolean isNegativeUnsignedIntRange(int max) {
-		return max < -1;
+	private static boolean isNegativeUnsignedIntRange(int min, int max) {
+		return max < -1 || ((max <= 0) && ((long) max - (long) min) < Integer.MAX_VALUE);
 	}
 
 	private static boolean isPositiveUnsignedIntRange(int min, int max) {
@@ -81,7 +79,7 @@ public class IntegerGenerationSupport {
 			int range = max - min;
 			return EdgeCasesSupport.forAtom(range);
 		}
-		if (isNegativeUnsignedIntRange(max)) {
+		if (isNegativeUnsignedIntRange(min, max)) {
 			int range = max - min;
 			return EdgeCasesSupport.forAtom(range);
 		}
@@ -112,7 +110,7 @@ public class IntegerGenerationSupport {
 			int range = max - min;
 			return ExhaustiveGenerationSupport.forAtom(range);
 		}
-		if (isNegativeUnsignedIntRange(max)) {
+		if (isNegativeUnsignedIntRange(min, max)) {
 			int range = max - min;
 			return ExhaustiveGenerationSupport.forAtom(range);
 		}

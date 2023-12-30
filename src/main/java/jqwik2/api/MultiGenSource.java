@@ -7,7 +7,7 @@ import java.util.*;
  */
 public interface MultiGenSource {
 
-	static MultiGenSource of(GenSource[] sources) {
+	static MultiGenSource of(GenSource...sources) {
 		return new SimpleMultiSource(List.of(sources));
 	}
 

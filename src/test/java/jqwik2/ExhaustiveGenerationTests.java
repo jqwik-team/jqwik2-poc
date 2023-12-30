@@ -116,8 +116,23 @@ class ExhaustiveGenerationTests {
 		}
 
 		@Example
-		@Disabled
 		void generateSample() {
+			IntegerGenerator ints1 = new IntegerGenerator(0, 10);
+			IntegerGenerator ints2 = new IntegerGenerator(-10, -1);
+
+			SampleGenerator sampleGenerator = SampleGenerator.from(ints1, ints2);
+
+			ExhaustiveAtom atom1 = new ExhaustiveAtom(11);
+			ExhaustiveAtom atom2 = new ExhaustiveAtom(11);
+
+			// TODO: This is not yet working
+			//ExhaustiveGenSource exhaustiveGenSource = new ExhaustiveGenSource(atom1, atom2);
+
+			MultiGenSource multiGenSource = MultiGenSource.of(atom1, atom2);
+
+			Sample sample = sampleGenerator.generate(multiGenSource);
+
+			System.out.println(sample);
 
 		}
 
