@@ -5,9 +5,14 @@ public interface Exhaustive {
 
 	void advance();
 
-	void chain(Exhaustive second);
+	default void chain(Exhaustive succ)  {
+		this.setSucc(succ);
+		succ.setPrev(this);
+	}
 
 	void next();
 
-	void setBefore(Exhaustive exhaustive);
+	void setPrev(Exhaustive exhaustive);
+
+	void setSucc(Exhaustive exhaustive);
 }

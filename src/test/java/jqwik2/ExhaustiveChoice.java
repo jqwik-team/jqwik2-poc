@@ -6,8 +6,8 @@ public class ExhaustiveChoice implements Exhaustive {
 	private final int maxChoice;
 	private int current = 0;
 
-	private Exhaustive after = null;
-	private Exhaustive before = null;
+	private Exhaustive succ = null;
+	private Exhaustive prev = null;
 
 	public ExhaustiveChoice(int maxExcluded) {
 		this.maxChoice = maxExcluded;
@@ -23,8 +23,8 @@ public class ExhaustiveChoice implements Exhaustive {
 
 	@Override
 	public long maxCount() {
-		if (after != null) {
-			return maxChoice * after.maxCount();
+		if (succ != null) {
+			return maxChoice * succ.maxCount();
 		}
 		return maxChoice;
 	}
@@ -35,9 +35,9 @@ public class ExhaustiveChoice implements Exhaustive {
 			current++;
 		}
 		if (current == maxChoice) {
-			if (before != null) {
+			if (prev != null) {
 				reset();
-				before.advance();
+				prev.advance();
 			} else {
 				Generator.noMoreValues();
 			}
@@ -46,22 +46,27 @@ public class ExhaustiveChoice implements Exhaustive {
 
 	@Override
 	public void chain(Exhaustive second) {
-		this.after = second;
-		second.setBefore(this);
+		this.succ = second;
+		second.setPrev(this);
 	}
 
 	@Override
 	public void next() {
-		if (after == null) {
+		if (succ == null) {
 			advance();
 		} else {
-			after.next();
+			succ.next();
 		}
 	}
 
 	@Override
-	public void setBefore(Exhaustive exhaustive) {
-		this.before = exhaustive;
+	public void setPrev(Exhaustive exhaustive) {
+		this.prev = exhaustive;
+	}
+
+	@Override
+	public void setSucc(Exhaustive exhaustive) {
+		this.succ = exhaustive;
 	}
 
 	@Override
