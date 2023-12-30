@@ -8,6 +8,16 @@ import jqwik2.api.recording.*;
 
 public interface Generator<T> {
 
+	class NoMoreValues extends CannotGenerateException {
+		public NoMoreValues() {
+			super("No more values available");
+		}
+	}
+
+	static void noMoreValues() {
+		throw new NoMoreValues();
+	}
+
 	T generate(GenSource source);
 
 	// TODO: Return IterableGenSource instead?
