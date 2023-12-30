@@ -38,8 +38,9 @@ class SampleGenerationTests {
 
 		for (int i = 0; i < 10; i++) {
 
-			Sample sample = SampleGenerator.from(ints, lists)
-										   .generateRandomly(new RandomGenSource());
+			SampleGenerator sampleGenerator = SampleGenerator.from(ints, lists);
+			RandomGenSource randomGenSource = new RandomGenSource();
+			Sample sample = sampleGenerator.generate(randomGenSource);
 			// System.out.println("sample = " + sample.values());
 
 			List<Object> regeneratedValues = sample.regenerateValues();
@@ -55,7 +56,8 @@ class SampleGenerationTests {
 		Set<Integer> values = new HashSet<>();
 		SampleGenerator sampleGenerator = SampleGenerator.from(withEdgeCases);
 		for (int i = 0; i < 100; i++) {
-			Sample sample = sampleGenerator.generateRandomly(new RandomGenSource());
+			RandomGenSource randomGenSource = new RandomGenSource();
+			Sample sample = sampleGenerator.generate(randomGenSource);
 			values.add((Integer) sample.values().getFirst());
 		}
 		assertThat(values).contains(
@@ -80,7 +82,8 @@ class SampleGenerationTests {
 		Set<List<Object>> values = new HashSet<>();
 		SampleGenerator sampleGenerator = SampleGenerator.from(intsWithEdgeCases, lists);
 		for (int i = 0; i < 100; i++) {
-			Sample sample = sampleGenerator.generateRandomly(new RandomGenSource());
+			RandomGenSource randomGenSource = new RandomGenSource();
+			Sample sample = sampleGenerator.generate(randomGenSource);
 			// System.out.println("sample = " + sample.values());
 
 			values.add(sample.values());

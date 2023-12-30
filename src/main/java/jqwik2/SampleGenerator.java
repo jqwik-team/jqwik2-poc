@@ -1,7 +1,6 @@
 package jqwik2;
 
 import java.util.*;
-import java.util.stream.*;
 
 import jqwik2.api.*;
 
@@ -17,10 +16,8 @@ public class SampleGenerator {
 		this.generators = generators;
 	}
 
-	public Sample generate(List<? extends GenSource> genSources) {
-		if (genSources.size() != generators.size()) {
-			throw new IllegalArgumentException("Number of gen sources must match number of generators");
-		}
+	public Sample generate(MultiGenSource multiSource) {
+		List<GenSource> genSources = multiSource.sources(generators.size());
 		List<Shrinkable<Object>> shrinkables = new ArrayList<>();
 		for (int i = 0; i < generators.size(); i++) {
 			Generator<Object> generator = generators.get(i);
@@ -40,14 +37,7 @@ public class SampleGenerator {
 	}
 
 	public Sample generate(GenSource... sources) {
-		return generate(List.of(sources));
+		return generate(MultiGenSource.of(sources));
 	}
 
-	public Sample generateRandomly(RandomGenSource randomGenSource) {
-		List<RandomGenSource> genSources =
-			IntStream.range(0, generators.size())
-					 .mapToObj(i -> randomGenSource.split())
-					 .toList();
-		return generate(genSources);
-	}
 }

@@ -139,11 +139,11 @@ public class PropertyCase {
 					break;
 				}
 				count++;
-				List<GenSource> tryGenSources = genSources.next().sources(generators.size());
+				MultiGenSource trySource = genSources.next();
 
 				try {
 					Runnable executeTry = () -> executeTry(
-						sampleGenerator, tryGenSources, countTries, countChecks,
+						sampleGenerator, trySource, countTries, countChecks,
 						onFalsified, onSatisfied, onError, iterableGenSource.lock()
 					);
 					executorService.submit(executeTry);
@@ -200,7 +200,7 @@ public class PropertyCase {
 
 	private void executeTry(
 		SampleGenerator sampleGenerator,
-		List<GenSource> genSources,
+		MultiGenSource multiSource,
 		AtomicInteger countTries,
 		AtomicInteger countChecks,
 		Consumer<FalsifiedSample> onFalsified,
@@ -210,7 +210,7 @@ public class PropertyCase {
 	) {
 		try {
 			generationLock.lock();
-			Sample sample = sampleGenerator.generate(genSources);
+			Sample sample = sampleGenerator.generate(multiSource);
 			generationLock.unlock();
 			countTries.incrementAndGet();
 			TryExecutionResult tryResult = tryable.apply(sample);
