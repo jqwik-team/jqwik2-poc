@@ -2,6 +2,7 @@ package jqwik2.api.support;
 
 import java.util.*;
 
+import jqwik2.*;
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
 
@@ -32,6 +33,30 @@ public class IntegerGenerationSupport {
 			return -chooseUnsignedInt(Math.abs(max), Math.abs(min));
 		}
 		return chooseFullRangedInt(min, max);
+	}
+
+	public static Collection<Recording> edgeCases(int min, int max) {
+		if (isPositiveUnsignedIntRange(min, max)) {
+			int range = max - min;
+			return EdgeCasesSupport.forAtom(range);
+		}
+		if (isNegativeUnsignedIntRange(min, max)) {
+			int range = max - min;
+			return EdgeCasesSupport.forAtom(range);
+		}
+		return fullRangeIntEdgeCases(min, max);
+	}
+
+	public static ExhaustiveSource exhaustive(int min, int max) {
+		if (isPositiveUnsignedIntRange(min, max)) {
+			int range = max - min;
+			return ExhaustiveSource.atom(range + 1);
+		}
+		if (isNegativeUnsignedIntRange(min, max)) {
+			int range = max - min;
+			return ExhaustiveSource.atom(range + 1);
+		}
+		throw new UnsupportedOperationException("Exhaustive generation for full range integers not yet implemented");
 	}
 
 	private static boolean isNegativeUnsignedIntRange(int min, int max) {
@@ -74,18 +99,6 @@ public class IntegerGenerationSupport {
 		return min + delta;
 	}
 
-	public static Collection<Recording> edgeCases(int min, int max) {
-		if (isPositiveUnsignedIntRange(min, max)) {
-			int range = max - min;
-			return EdgeCasesSupport.forAtom(range);
-		}
-		if (isNegativeUnsignedIntRange(min, max)) {
-			int range = max - min;
-			return EdgeCasesSupport.forAtom(range);
-		}
-		return fullRangeIntEdgeCases(min, max);
-	}
-
 	private static Set<Recording> fullRangeIntEdgeCases(int min, int max) {
 		Set<Recording> recordings = new LinkedHashSet<>();
 		recordings.add(Recording.atom(Math.abs(max), 0));
@@ -104,17 +117,4 @@ public class IntegerGenerationSupport {
 		}
 		return recordings;
 	}
-
-	public static ExhaustiveGenerator exhaustive(int min, int max) {
-		if (isPositiveUnsignedIntRange(min, max)) {
-			int range = max - min;
-			return ExhaustiveGenerationSupport.forAtom(range);
-		}
-		if (isNegativeUnsignedIntRange(min, max)) {
-			int range = max - min;
-			return ExhaustiveGenerationSupport.forAtom(range);
-		}
-		throw new UnsupportedOperationException("Exhaustive generation for full range integers not yet implemented");
-	}
-
 }

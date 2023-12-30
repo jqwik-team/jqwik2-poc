@@ -2,12 +2,12 @@ package jqwik2;
 
 import jqwik2.api.*;
 
-public class ExhaustiveAtom extends AbstractExhaustive implements GenSource.Atom {
+public class ExhaustiveAtom extends AbstractExhaustive implements GenSource.Atom, ExhaustiveSource {
 
 	private int current = 0;
-	private java.util.List<ExhaustiveChoice> choices = new java.util.ArrayList<>();
+	private final java.util.List<ExhaustiveChoice> choices = new java.util.ArrayList<>();
 
-	public ExhaustiveAtom(int... maxChoices) {
+	ExhaustiveAtom(int... maxChoices) {
 		generateChoices(maxChoices);
 	}
 

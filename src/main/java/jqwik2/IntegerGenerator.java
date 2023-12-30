@@ -1,5 +1,7 @@
 package jqwik2;
 
+import java.util.*;
+
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
 import jqwik2.api.support.*;
@@ -24,7 +26,7 @@ public class IntegerGenerator implements Generator<Integer> {
 	}
 
 	@Override
-	public ExhaustiveGenerator exhaustive() {
-		return IntegerGenerationSupport.exhaustive(min, max);
+	public Optional<ExhaustiveSource> exhaustive() {
+		return Optional.of(IntegerGenerationSupport.exhaustive(min, max));
 	}
 }

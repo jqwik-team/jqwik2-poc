@@ -3,9 +3,7 @@ package jqwik2;
 import java.util.*;
 import java.util.stream.*;
 
-import jqwik2.api.ExhaustiveGenerator;
 import jqwik2.api.*;
-import jqwik2.api.recording.*;
 
 import net.jqwik.api.*;
 
@@ -126,7 +124,7 @@ class ExhaustiveGenerationTests {
 			ExhaustiveAtom atom2 = new ExhaustiveAtom(11);
 
 			// TODO: This is not yet working
-			//ExhaustiveGenSource exhaustiveGenSource = new ExhaustiveGenSource(atom1, atom2);
+			//ExhaustiveSource exhaustiveGenSource = new ExhaustiveSource(atom1, atom2);
 
 			MultiGenSource multiGenSource = MultiGenSource.of(atom1, atom2);
 
@@ -150,19 +148,25 @@ class ExhaustiveGenerationTests {
 	void smallIntegers() {
 		Generator<Integer> ints0to10 = new IntegerGenerator(0, 10);
 
-		ExhaustiveGenerator exhaustive = ints0to10.exhaustive();
-		assertThat(exhaustive.maxCount()).hasValue(11L);
+		ExhaustiveSource exhaustive = ints0to10.exhaustive().get();
+		assertThat(exhaustive.maxCount()).isEqualTo(11L);
 
-		List<Integer> allValues = collectAllEdgeCases(exhaustive, ints0to10);
+		List<Integer> allValues = collectAll(exhaustive, ints0to10);
 		assertThat(allValues).containsExactly(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
 
 	}
 
-	private static <T> List<T> collectAllEdgeCases(Iterable<Recording> recordings, Generator<T> generator) {
-		return StreamSupport.stream(recordings.spliterator(), false)
-							.map(RecordedSource::new)
-							.map(generator::generate)
-							.collect(Collectors.toList());
+	private static <T> List<T> collectAll(ExhaustiveSource source, Generator<T> generator) {
+		List<T> allValues = new ArrayList<>();
+		while (true) {
+			try {
+				allValues.add(generator.generate(source));
+				source.next();
+			} catch (Generator.NoMoreValues noMoreValues) {
+				break;
+			}
+		}
+		return allValues;
 	}
 
 }

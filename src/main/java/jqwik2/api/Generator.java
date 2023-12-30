@@ -20,13 +20,12 @@ public interface Generator<T> {
 
 	T generate(GenSource source);
 
-	// TODO: Return IterableGenSource instead?
 	default Iterable<Recording> edgeCases() {
 		return Set.of();
 	}
 
-	default ExhaustiveGenerator exhaustive() {
-		return new RecordingBasedExhaustiveGenerator(Set.of(), null);
+	default Optional<ExhaustiveSource> exhaustive() {
+		return Optional.empty();
 	}
 
 	/**
