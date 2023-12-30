@@ -2,12 +2,9 @@ package jqwik2;
 
 import jqwik2.api.*;
 
-public class ExhaustiveChoice implements Exhaustive {
+public class ExhaustiveChoice extends AbstractExhaustive implements Exhaustive {
 	private final int maxChoice;
 	private int current = 0;
-
-	private Exhaustive succ = null;
-	private Exhaustive prev = null;
 
 	public ExhaustiveChoice(int maxExcluded) {
 		this.maxChoice = maxExcluded;
@@ -42,31 +39,6 @@ public class ExhaustiveChoice implements Exhaustive {
 				Generator.noMoreValues();
 			}
 		}
-	}
-
-	@Override
-	public void chain(Exhaustive second) {
-		this.succ = second;
-		second.setPrev(this);
-	}
-
-	@Override
-	public void next() {
-		if (succ == null) {
-			advance();
-		} else {
-			succ.next();
-		}
-	}
-
-	@Override
-	public void setPrev(Exhaustive exhaustive) {
-		this.prev = exhaustive;
-	}
-
-	@Override
-	public void setSucc(Exhaustive exhaustive) {
-		this.succ = exhaustive;
 	}
 
 	@Override
