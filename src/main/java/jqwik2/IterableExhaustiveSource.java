@@ -7,8 +7,26 @@ import jqwik2.api.*;
 public class IterableExhaustiveSource implements IterableGenSource {
 	private final List<ExhaustiveSource> exhaustiveSources;
 
-	public IterableExhaustiveSource(ExhaustiveSource ... exhaustiveSources) {
+	public IterableExhaustiveSource(ExhaustiveSource... exhaustiveSources) {
 		this.exhaustiveSources = List.of(exhaustiveSources);
+	}
+
+	public IterableExhaustiveSource(List<ExhaustiveSource> exhaustiveSources) {
+		this.exhaustiveSources = exhaustiveSources;
+	}
+
+	public static IterableExhaustiveSource from(Generator<?>... generators) {
+		List<ExhaustiveSource> list =
+			Arrays.stream(generators)
+				  .map(Generator::exhaustive)
+				  .map(exhaustiveSource -> exhaustiveSource.orElseThrow(
+					  () -> {
+						  String message = "All generators must be exhaustive";
+						  return new IllegalArgumentException(message);
+					  }
+				  ))
+				  .toList();
+		return new IterableExhaustiveSource(list);
 	}
 
 	public long maxCount() {

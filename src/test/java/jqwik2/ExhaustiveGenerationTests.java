@@ -119,11 +119,7 @@ class ExhaustiveGenerationTests {
 
 			SampleGenerator sampleGenerator = SampleGenerator.from(ints1, ints2);
 
-			IterableExhaustiveSource exhaustiveGenSource =
-				new IterableExhaustiveSource(
-					ints1.exhaustive().get(),
-					ints2.exhaustive().get()
-				);
+			IterableExhaustiveSource exhaustiveGenSource = IterableExhaustiveSource.from(ints1, ints2);
 
 			assertThat(exhaustiveGenSource.maxCount()).isEqualTo(110L);
 
