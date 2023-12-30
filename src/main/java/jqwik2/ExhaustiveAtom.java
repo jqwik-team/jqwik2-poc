@@ -2,7 +2,7 @@ package jqwik2;
 
 import jqwik2.api.*;
 
-public class ExhaustiveAtom extends AbstractExhaustive implements GenSource.Atom, ExhaustiveSource {
+public class ExhaustiveAtom implements GenSource.Atom, ExhaustiveSource {
 
 	private int current = 0;
 	private final java.util.List<ExhaustiveChoice> choices = new java.util.ArrayList<>();
@@ -16,12 +16,8 @@ public class ExhaustiveAtom extends AbstractExhaustive implements GenSource.Atom
 		for (int maxChoice : maxChoices) {
 			ExhaustiveChoice choice = new ExhaustiveChoice(maxChoice);
 			choices.add(choice);
-			if (succ == null) {
-				succ = choice;
-			} else {
-				if (last != null) {
-					last.chain(choice);
-				}
+			if (last != null) {
+				last.chain(choice);
 			}
 			last = choice;
 		}
@@ -29,30 +25,31 @@ public class ExhaustiveAtom extends AbstractExhaustive implements GenSource.Atom
 
 	@Override
 	public long maxCount() {
-		if (succ == null) {
+		if (choices.isEmpty()) {
 			return 0;
 		}
-		return succ.maxCount();
+		return choices.getFirst().maxCount();
 	}
 
 	@Override
 	public void advance() {
-		if (prev != null) {
-			reset();
-			prev.advance();
-		} else {
-			Generator.noMoreValues();
-		}
+		choices.getLast().advance();
 	}
 
 	@Override
 	public void next() {
-		reset();
-		super.next();
+		current = 0;
+		choices.getFirst().next();
 	}
 
-	private void reset() {
-		current = 0;
+	@Override
+	public void setPrev(Exhaustive exhaustive) {
+		choices.getFirst().setPrev(exhaustive);
+	}
+
+	@Override
+	public void setSucc(Exhaustive exhaustive) {
+		choices.getLast().setSucc(exhaustive);
 	}
 
 	@Override

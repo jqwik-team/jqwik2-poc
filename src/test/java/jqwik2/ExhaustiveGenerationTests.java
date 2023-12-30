@@ -1,7 +1,6 @@
 package jqwik2;
 
 import java.util.*;
-import java.util.stream.*;
 
 import jqwik2.api.*;
 
@@ -120,18 +119,26 @@ class ExhaustiveGenerationTests {
 
 			SampleGenerator sampleGenerator = SampleGenerator.from(ints1, ints2);
 
-			ExhaustiveAtom atom1 = new ExhaustiveAtom(11);
-			ExhaustiveAtom atom2 = new ExhaustiveAtom(11);
+			IterableExhaustiveSource exhaustiveGenSource =
+				new IterableExhaustiveSource(
+					ints1.exhaustive().get(),
+					ints2.exhaustive().get()
+				);
 
-			// TODO: This is not yet working
-			//ExhaustiveSource exhaustiveGenSource = new ExhaustiveSource(atom1, atom2);
+			assertThat(exhaustiveGenSource.maxCount()).isEqualTo(110L);
 
-			MultiGenSource multiGenSource = MultiGenSource.of(atom1, atom2);
+			List<Sample> allSamples = new ArrayList<>();
+			for (MultiGenSource multiGenSource : exhaustiveGenSource) {
+				Sample sample = sampleGenerator.generate(multiGenSource);
+				// System.out.println(sample);
+				allSamples.add(sample);
+			}
+			assertThat(allSamples).hasSize(110);
 
-			Sample sample = sampleGenerator.generate(multiGenSource);
-
-			System.out.println(sample);
-
+			List<List<Object>> values = allSamples.stream().map(Sample::values).toList();
+			assertThat(values).contains(List.of(0, -1));
+			assertThat(values).contains(List.of(10, -10));
+			assertThat(Set.copyOf(values)).hasSize(110);
 		}
 
 		private static void assertAtom(ExhaustiveAtom atom, int... expected) {
