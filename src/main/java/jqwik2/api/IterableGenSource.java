@@ -1,4 +1,7 @@
 package jqwik2.api;
 
-public interface IterableGenSource extends Iterable<GenSource> {
+/**
+ * An iterable gen source is used to provide gen sources for more than one try.
+ */
+public interface IterableGenSource extends Iterable<MultiGenSource> {
 }

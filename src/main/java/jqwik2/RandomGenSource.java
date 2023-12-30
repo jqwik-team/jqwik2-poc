@@ -6,7 +6,7 @@ import java.util.function.*;
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
 
-public final class RandomGenSource implements IterableGenSource, GenSource, GenSource.Atom, GenSource.List, GenSource.Tree {
+public final class RandomGenSource implements IterableGenSource, MultiGenSource, GenSource, GenSource.Atom, GenSource.List, GenSource.Tree {
 	private final RandomChoice random;
 
 	public RandomGenSource() {
@@ -92,7 +92,7 @@ public final class RandomGenSource implements IterableGenSource, GenSource, GenS
 	}
 
 	@Override
-	public Iterator<GenSource> iterator() {
+	public Iterator<MultiGenSource> iterator() {
 		return new Iterator<>() {
 			@Override
 			public boolean hasNext() {
@@ -100,9 +100,18 @@ public final class RandomGenSource implements IterableGenSource, GenSource, GenS
 			}
 
 			@Override
-			public GenSource next() {
+			public MultiGenSource next() {
 				return RandomGenSource.this.split();
 			}
 		};
+	}
+
+	@Override
+	public java.util.List<GenSource> sources(int size) {
+		java.util.List<GenSource> sources = new ArrayList<>();
+		for (int i = 0; i < size; i++) {
+			sources.add(split());
+		}
+		return sources;
 	}
 }

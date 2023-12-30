@@ -120,7 +120,7 @@ public class PropertyCase {
 		int count = 0;
 		SortedSet<FalsifiedSample> falsifiedSamples = Collections.synchronizedSortedSet(new TreeSet<>());
 		Set<Throwable> thrownErrors = Collections.synchronizedSet(new HashSet<>());
-		Iterator<GenSource> genSources = iterableGenSource.iterator();
+		Iterator<MultiGenSource> genSources = iterableGenSource.iterator();
 		try (var executorService = executorServiceSupplier.get()) {
 			Consumer<FalsifiedSample> onFalsified = sample -> {
 				falsifiedSamples.add(sample);
@@ -136,10 +136,10 @@ public class PropertyCase {
 					break;
 				}
 				count++;
-				GenSource tryGenSource = genSources.next();
+				List<GenSource> tryGenSources = genSources.next().sources(generators.size());
 				try {
 					Runnable executeTry = () -> executeTry(
-						sampleGenerator, tryGenSource, countTries, countChecks,
+						sampleGenerator, tryGenSources, countTries, countChecks,
 						onFalsified, onSatisfied, onError
 					);
 					executorService.submit(executeTry);
@@ -196,7 +196,7 @@ public class PropertyCase {
 
 	private void executeTry(
 		SampleGenerator sampleGenerator,
-		GenSource tryGenSource,
+		List<GenSource> genSources,
 		AtomicInteger countTries,
 		AtomicInteger countChecks,
 		Consumer<FalsifiedSample> onFalsified,
@@ -204,7 +204,7 @@ public class PropertyCase {
 		Consumer<Throwable> onError
 	) {
 		try {
-			Sample sample = sampleGenerator.generate(tryGenSource);
+			Sample sample = sampleGenerator.generate(genSources);
 			countTries.incrementAndGet();
 			TryExecutionResult tryResult = tryable.apply(sample);
 			if (tryResult.status() != TryExecutionResult.Status.INVALID) {
