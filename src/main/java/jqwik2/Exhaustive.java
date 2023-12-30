@@ -1,9 +1,11 @@
 package jqwik2;
 
-public interface Exhaustive {
+public interface Exhaustive<T extends Exhaustive<T>> extends Cloneable {
 	long maxCount();
 
 	void advance();
+
+	T clone();
 
 	default void chain(Exhaustive succ)  {
 		this.setSucc(succ);

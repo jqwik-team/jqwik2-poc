@@ -4,14 +4,16 @@ import jqwik2.api.*;
 
 public class ExhaustiveAtom implements GenSource.Atom, ExhaustiveSource {
 
+	private final int[] maxChoices;
 	private int current = 0;
 	private final java.util.List<ExhaustiveChoice> choices = new java.util.ArrayList<>();
 
 	ExhaustiveAtom(int... maxChoices) {
-		generateChoices(maxChoices);
+		this.maxChoices = maxChoices;
+		generateChoices();
 	}
 
-	private void generateChoices(int[] maxChoices) {
+	private void generateChoices() {
 		ExhaustiveChoice last = null;
 		for (int maxChoice : maxChoices) {
 			ExhaustiveChoice choice = new ExhaustiveChoice(maxChoice);
@@ -34,6 +36,11 @@ public class ExhaustiveAtom implements GenSource.Atom, ExhaustiveSource {
 	@Override
 	public void advance() {
 		choices.getLast().advance();
+	}
+
+	@Override
+	public ExhaustiveSource clone() {
+		return new ExhaustiveAtom(maxChoices);
 	}
 
 	@Override

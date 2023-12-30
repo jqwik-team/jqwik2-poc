@@ -9,35 +9,49 @@ public class IterableExhaustiveSource implements IterableGenSource {
 
 	public IterableExhaustiveSource(ExhaustiveSource ... exhaustiveSources) {
 		this.exhaustiveSources = List.of(exhaustiveSources);
-		chainSources();
 	}
 
 	public long maxCount() {
-		return exhaustiveSources.getFirst().maxCount();
+		return exhaustiveSources.stream()
+								.mapToLong(ExhaustiveSource::maxCount)
+								.reduce(1, (a, b) -> a * b);
 	}
-
-	private void chainSources() {
-		for (int i = 0; i < exhaustiveSources.size() - 1; i++) {
-			ExhaustiveSource current = exhaustiveSources.get(i);
-			ExhaustiveSource next = exhaustiveSources.get(i + 1);
-			current.chain(next);
-		}
-	}
-
 
 	@Override
 	public Iterator<MultiGenSource> iterator() {
 		if (exhaustiveSources.isEmpty()) {
 			return Collections.emptyIterator();
 		}
-		return new ExhaustiveGenSourceIterator();
+		return new ExhaustiveGenSourceIterator(exhaustiveSources);
 	}
 
-	// TODO: Currently only one iterator creation is supported
-	private class ExhaustiveGenSourceIterator implements Iterator<MultiGenSource> {
+	private static class ExhaustiveGenSourceIterator implements Iterator<MultiGenSource> {
 
-		private final MultiGenSource source = MultiGenSource.of(exhaustiveSources);
+		private final MultiGenSource source;
+		private final ExhaustiveSource first;
+
 		private boolean hasNextBeenInvoked = false;
+
+		public ExhaustiveGenSourceIterator(List<ExhaustiveSource> exhaustiveSources) {
+			List<ExhaustiveSource> sources = cloneSources(exhaustiveSources);
+			chainSources(sources);
+			this.source = MultiGenSource.of(sources);
+			this.first = sources.getFirst();
+		}
+
+		private List<ExhaustiveSource> cloneSources(List<ExhaustiveSource> exhaustiveSources) {
+			return exhaustiveSources.stream()
+									.map(exhaustiveSource -> exhaustiveSource.clone())
+									.toList();
+		}
+
+		private void chainSources(List<ExhaustiveSource> sources) {
+			for (int i = 0; i < sources.size() - 1; i++) {
+				ExhaustiveSource current = sources.get(i);
+				ExhaustiveSource next = sources.get(i + 1);
+				current.chain(next);
+			}
+		}
 
 		@Override
 		public boolean hasNext() {
@@ -45,7 +59,7 @@ public class IterableExhaustiveSource implements IterableGenSource {
 				return true;
 			}
 			try {
-				exhaustiveSources.getFirst().next();
+				first.next();
 				hasNextBeenInvoked = false;
 				return true;
 			} catch (Generator.NoMoreValues e) {

@@ -138,7 +138,13 @@ class ExhaustiveGenerationTests {
 			List<List<Object>> values = allSamples.stream().map(Sample::values).toList();
 			assertThat(values).contains(List.of(0, -1));
 			assertThat(values).contains(List.of(10, -10));
-			assertThat(Set.copyOf(values)).hasSize(110);
+
+			// Second iteration
+			int count = 0;
+			for (MultiGenSource multiGenSource : exhaustiveGenSource) {
+				count++;
+			}
+			assertThat(count).isEqualTo(110);
 		}
 
 		private static void assertAtom(ExhaustiveAtom atom, int... expected) {

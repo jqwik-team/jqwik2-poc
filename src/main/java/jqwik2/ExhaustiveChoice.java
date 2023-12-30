@@ -64,6 +64,11 @@ public class ExhaustiveChoice implements Exhaustive {
 	}
 
 	@Override
+	public ExhaustiveChoice clone() {
+		return new ExhaustiveChoice(maxChoice);
+	}
+
+	@Override
 	public String toString() {
 		return "ExhaustiveChoice(max=%d, current=%d)".formatted(maxChoice, current);
 	}
