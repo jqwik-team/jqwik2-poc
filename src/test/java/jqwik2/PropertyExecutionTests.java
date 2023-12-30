@@ -34,6 +34,28 @@ class PropertyExecutionTests {
 	}
 
 	@Example
+	void runSuccessfulPropertyWithTwoParameters() {
+		List<Generator<?>> generators = List.of(
+			new IntegerGenerator(0, 100),
+			new IntegerGenerator(-100, -1)
+		);
+		Tryable tryable = Tryable.from(args -> {
+			int first = (int) args.get(0);
+			int second = (int) args.get(1);
+			return first > second;
+		});
+
+		PropertyCase propertyCase = new PropertyCase(generators, tryable);
+
+		PropertyRunResult result = propertyCase.run(
+			randomized("42", 10, false, 0.0)
+		);
+		assertThat(result.status()).isEqualTo(Status.SUCCESSFUL);
+		assertThat(result.countTries()).isEqualTo(10);
+		assertThat(result.countChecks()).isEqualTo(10);
+	}
+
+	@Example
 	void runSuccessfulWithInvalids() {
 		List<Generator<?>> generators = List.of(
 			new IntegerGenerator(0, 100)
