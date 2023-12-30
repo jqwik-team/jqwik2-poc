@@ -65,7 +65,59 @@ class ExhaustiveGenerationTests {
 
 		assertThatThrownBy(() -> first.next())
 			.isInstanceOf(Generator.NoMoreValues.class);
+	}
 
+	@Example
+	void exhaustiveAtom() {
+		ExhaustiveAtom atom = new ExhaustiveAtom(2, 3, 4);
+		assertThat(atom.maxCount()).isEqualTo(24L);
+
+		assertAtom(atom, 0, 0, 0);
+
+		atom.next();
+		assertAtom(atom, 0, 0, 1);
+		atom.next();
+		assertAtom(atom, 0, 0, 2);
+		atom.next();
+		assertAtom(atom, 0, 0, 3);
+		atom.next();
+		assertAtom(atom, 0, 1, 0);
+
+		atom.next();
+		atom.next();
+		atom.next();
+		atom.next();
+		atom.next();
+		atom.next();
+		atom.next();
+
+		atom.next();
+		assertAtom(atom, 1, 0, 0);
+
+		atom.next();
+		atom.next();
+		atom.next();
+		atom.next();
+		atom.next();
+		atom.next();
+		atom.next();
+		atom.next();
+		atom.next();
+		atom.next();
+		atom.next();
+		assertAtom(atom, 1, 2, 3);
+
+		assertThatThrownBy(() -> atom.next())
+			.isInstanceOf(Generator.NoMoreValues.class);
+
+	}
+
+	private static void assertAtom(ExhaustiveAtom atom, int... expected) {
+		for (int i = 0; i < expected.length; i++) {
+			assertThat(atom.choose(Integer.MAX_VALUE))
+				.describedAs("Expected %d at position %d", expected[i], i)
+				.isEqualTo(expected[i]);
+		}
 	}
 
 	@Example
