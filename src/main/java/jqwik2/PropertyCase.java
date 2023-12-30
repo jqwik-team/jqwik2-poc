@@ -4,6 +4,7 @@ import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
+import java.util.concurrent.locks.*;
 import java.util.function.*;
 
 import jqwik2.api.*;
@@ -52,6 +53,7 @@ public class PropertyCase {
 		);
 	}
 
+	@SuppressWarnings("OverlyLongMethod")
 	private PropertyRunResult runAndShrink(
 		List<Generator<Object>> effectiveGenerators,
 		IterableGenSource iterableGenSource,
@@ -77,7 +79,8 @@ public class PropertyCase {
 
 			if (falsifiedSamples.isEmpty()) {
 				if (timedOut && countChecks.get() < 1) {
-					String abortionReason = "Timeout after " + maxDuration + " without any check being executed.";
+					String timedOutMessage = "Timeout after " + maxDuration + " without any check being executed.";
+					Exception abortionReason = new TimeoutException(timedOutMessage);
 					return new PropertyRunResult(
 						ABORTED, countTries.get(), countChecks.get(),
 						new TreeSet<>(), Optional.of(abortionReason),
@@ -101,7 +104,7 @@ public class PropertyCase {
 			ExceptionSupport.rethrowIfBlacklisted(t);
 			return new PropertyRunResult(
 				ABORTED, countTries.get(), countChecks.get(),
-				new TreeSet<>(), Optional.of(t.getMessage()),
+				new TreeSet<>(), Optional.of(t),
 				false
 			);
 		}
@@ -137,10 +140,11 @@ public class PropertyCase {
 				}
 				count++;
 				List<GenSource> tryGenSources = genSources.next().sources(generators.size());
+
 				try {
 					Runnable executeTry = () -> executeTry(
 						sampleGenerator, tryGenSources, countTries, countChecks,
-						onFalsified, onSatisfied, onError
+						onFalsified, onSatisfied, onError, iterableGenSource.lock()
 					);
 					executorService.submit(executeTry);
 				} catch (RejectedExecutionException ignore) {
@@ -201,10 +205,13 @@ public class PropertyCase {
 		AtomicInteger countChecks,
 		Consumer<FalsifiedSample> onFalsified,
 		Consumer<Sample> onSatisfied,
-		Consumer<Throwable> onError
+		Consumer<Throwable> onError,
+		Lock generationLock
 	) {
 		try {
+			generationLock.lock();
 			Sample sample = sampleGenerator.generate(genSources);
+			generationLock.unlock();
 			countTries.incrementAndGet();
 			TryExecutionResult tryResult = tryable.apply(sample);
 			if (tryResult.status() != TryExecutionResult.Status.INVALID) {
@@ -218,6 +225,7 @@ public class PropertyCase {
 				onSatisfied.accept(sample);
 			}
 		} catch (Throwable t) {
+			generationLock.unlock();
 			onError.accept(t);
 		}
 	}
@@ -227,4 +235,5 @@ public class PropertyCase {
 			falsifiedSamples::add
 		);
 	}
+
 }

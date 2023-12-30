@@ -114,4 +114,9 @@ public final class RandomGenSource implements IterableGenSource, MultiGenSource,
 		}
 		return sources;
 	}
+
+	@Override
+	public boolean isThreadSafe() {
+		return true;
+	}
 }

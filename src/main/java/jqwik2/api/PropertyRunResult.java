@@ -7,7 +7,7 @@ import jqwik2.*;
 public record PropertyRunResult(
 	Status status, int countTries, int countChecks,
 	SortedSet<FalsifiedSample> falsifiedSamples,
-	Optional<String> abortionReason,
+	Optional<Throwable> abortionReason,
 	boolean timedOut
 ) {
 
