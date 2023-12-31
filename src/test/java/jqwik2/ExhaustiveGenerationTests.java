@@ -14,7 +14,7 @@ class ExhaustiveGenerationTests {
 	class ExhaustiveAtoms {
 
 		@Example
-		void singleExhaustiveChoice() {
+		void choiceWithMax() {
 			ExhaustiveChoice choice = new ExhaustiveChoice(3);
 			assertThat(choice.maxCount()).isEqualTo(3L);
 			assertThat(choice.choose(3)).isEqualTo(0);
@@ -30,6 +30,27 @@ class ExhaustiveGenerationTests {
 
 			choice.reset();
 			assertThat(choice.choose(3)).isEqualTo(0);
+		}
+
+		@Example
+		void choiceWithRange() {
+			ExhaustiveChoice choice = new ExhaustiveChoice(2, 6);
+			assertThat(choice.maxCount()).isEqualTo(4L);
+			assertThat(choice.choose(4)).isEqualTo(2);
+
+			choice.advance();
+			assertThat(choice.choose(6)).isEqualTo(3);
+			choice.advance();
+			assertThat(choice.choose(6)).isEqualTo(4);
+			assertThat(choice.choose(3)).isEqualTo(1);
+			choice.advance();
+			assertThat(choice.choose(6)).isEqualTo(5);
+
+			assertThatThrownBy(() -> choice.advance())
+				.isInstanceOf(Generator.NoMoreValues.class);
+
+			choice.reset();
+			assertThat(choice.choose(6)).isEqualTo(2);
 		}
 
 		@Example

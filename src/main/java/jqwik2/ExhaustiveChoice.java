@@ -4,10 +4,23 @@ import jqwik2.api.*;
 
 public class ExhaustiveChoice implements Exhaustive {
 
-	private final int maxChoice;
+	private final Range range;
 	private int current = 0;
 	private Exhaustive succ = null;
 	private Exhaustive prev = null;
+
+	public ExhaustiveChoice(int maxExcluded) {
+		this(0, maxExcluded);
+	}
+
+	public ExhaustiveChoice(int min, int maxExcluded) {
+		this(new Range(min, maxExcluded));
+	}
+
+	public ExhaustiveChoice(Range range) {
+		this.range = range;
+		reset();
+	}
 
 	@Override
 	public void next() {
@@ -18,24 +31,21 @@ public class ExhaustiveChoice implements Exhaustive {
 		}
 	}
 
-	public ExhaustiveChoice(int maxExcluded) {
-		this.maxChoice = maxExcluded;
-	}
-
 	public int choose(int maxExcluded) {
 		return current % maxExcluded;
 	}
 
 	public void reset() {
-		current = 0;
+		current = range.min;
 	}
 
 	@Override
 	public long maxCount() {
+		int localMaxCount = range.size();
 		if (succ != null) {
-			return maxChoice * succ.maxCount();
+			return localMaxCount * succ.maxCount();
 		}
-		return maxChoice;
+		return localMaxCount;
 	}
 
 	@Override
@@ -50,10 +60,10 @@ public class ExhaustiveChoice implements Exhaustive {
 
 	@Override
 	public void advance() {
-		if (current < maxChoice) {
+		if (current < range.maxExcluded) {
 			current++;
 		}
-		if (current == maxChoice) {
+		if (current == range.maxExcluded) {
 			if (prev != null) {
 				reset();
 				prev.advance();
@@ -65,11 +75,22 @@ public class ExhaustiveChoice implements Exhaustive {
 
 	@Override
 	public ExhaustiveChoice clone() {
-		return new ExhaustiveChoice(maxChoice);
+		return new ExhaustiveChoice(range);
 	}
 
 	@Override
 	public String toString() {
-		return "ExhaustiveChoice(max=%d, current=%d)".formatted(maxChoice, current);
+		return "ExhaustiveChoice(range=%d, current=%d)".formatted(range, current);
+	}
+
+	public record Range(int min, int maxExcluded) {
+		public int size() {
+			return maxExcluded - min;
+		}
+
+		@Override
+		public String toString() {
+			return "[%d-%d[".formatted(min, maxExcluded);
+		}
 	}
 }

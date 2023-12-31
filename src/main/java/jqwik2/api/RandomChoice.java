@@ -13,7 +13,7 @@ import jqwik2.*;
 public interface RandomChoice {
 
 	/**
-	 * Return a random value, equally distributes between 0 and max - 1.
+	 * Return a random value, equally distributes between 0 and maxExcluded - 1.
 	 *
 	 * @param maxExcluded The max choice to return
 	 * @return A random value between 0 and max - 1

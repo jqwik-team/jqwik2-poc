@@ -11,10 +11,10 @@ public interface GenSource {
 	interface Atom extends GenSource {
 
 		/**
-		 * Choose a value between 0 and max - 1.
+		 * Choose a value between 0 and maxExcluded - 1.
 		 *
 		 * @param maxExcluded A value between 0 and Integer.MAX_VALUE
-		 * @return a choice between 0 and max - 1
+		 * @return a choice between 0 and maxExcluded - 1
 		 */
 		int choose(int maxExcluded);
 
