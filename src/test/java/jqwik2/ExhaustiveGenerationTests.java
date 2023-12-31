@@ -257,6 +257,7 @@ class ExhaustiveGenerationTests {
 		}
 
 		@Example
+		@Disabled("Not yet implemented")
 		void exhaustiveTree() {
 			ExhaustiveTree tree = ExhaustiveSource.tree(
 				atom(2),

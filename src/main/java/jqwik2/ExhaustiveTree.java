@@ -15,6 +15,7 @@ public class ExhaustiveTree implements GenSource.Tree, ExhaustiveSource {
 
 	@Override
 	public long maxCount() {
+		System.out.println(head.allValues());
 		return head.maxCount();
 	}
 

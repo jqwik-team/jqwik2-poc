@@ -98,4 +98,10 @@ public class ExhaustiveAtom implements GenSource.Atom, ExhaustiveSource {
 		return currentChoice.choose(maxExcluded);
 	}
 
+	@Override
+	public String toString() {
+		return "ExhaustiveAtom{" +
+				   "ranges=" + Arrays.toString(ranges) +
+				   '}';
+	}
 }

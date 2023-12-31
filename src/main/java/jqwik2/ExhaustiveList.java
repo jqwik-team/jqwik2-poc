@@ -4,11 +4,13 @@ import jqwik2.api.*;
 
 public class ExhaustiveList implements GenSource.List, ExhaustiveSource {
 
+	private final int size;
 	private final ExhaustiveSource elementSource;
 	private final java.util.List<ExhaustiveSource> elements = new java.util.ArrayList<>();
 	private int current = 0;
 
 	public ExhaustiveList(int size, ExhaustiveSource elementSource) {
+		this.size = size;
 		this.elementSource = elementSource;
 		createElements(size, elementSource);
 	}
@@ -87,5 +89,13 @@ public class ExhaustiveList implements GenSource.List, ExhaustiveSource {
 	@Override
 	public GenSource nextElement() {
 		return elements.get(current++);
+	}
+
+	@Override
+	public String toString() {
+		return "ExhaustiveList{" +
+				   "size=" + size +
+				   ", elementSource=" + elementSource +
+				   '}';
 	}
 }
