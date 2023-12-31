@@ -12,12 +12,12 @@ public interface ExhaustiveSource extends GenSource, Exhaustive<ExhaustiveSource
 		return new ExhaustiveAtom(ranges);
 	}
 
-	static ExhaustiveChoice.Range range(int min, int maxExcluded) {
-		return new ExhaustiveChoice.Range(min, maxExcluded);
+	static ExhaustiveChoice.Range range(int min, int max) {
+		return new ExhaustiveChoice.Range(min, max);
 	}
 
 	static ExhaustiveChoice.Range value(int value) {
-		return range(value, value + 1);
+		return range(value, value);
 	}
 
 	static OrAtom or(ExhaustiveAtom ... atoms) {

@@ -52,15 +52,15 @@ public class IntegerGenerationSupport {
 	public static ExhaustiveSource exhaustive(int min, int max) {
 		if (isPositiveUnsignedIntRange(min, max)) {
 			int range = max - min;
-			return atom(range + 1);
+			return atom(range);
 		}
 		if (isNegativeUnsignedIntRange(min, max)) {
 			int range = max - min;
-			return atom(range + 1);
+			return atom(range);
 		}
 		return or(
-			atom(range(0, max + 1), value(0)),
-			atom(range(1, Math.abs(min) + 1), value(1))
+			atom(range(0, max), value(0)),
+			atom(range(1, Math.abs(min)), value(1))
 		);
 	}
 

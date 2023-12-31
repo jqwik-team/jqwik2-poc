@@ -1,3 +1,5 @@
+- Add exhaustive generation
+    - For lists
 - PropertyCase Execution
   - Fail if ratio checks/tries is too low
   - Save seed and falsified samples to disk
@@ -9,7 +11,6 @@
   - Map
   - String 
   - FlatMap
-- Add exhaustive generation
 - Add descriptions to generators
 - Give generators equality to allow caching
 - Stateful generators

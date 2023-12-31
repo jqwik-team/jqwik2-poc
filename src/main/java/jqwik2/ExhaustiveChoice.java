@@ -9,12 +9,12 @@ public class ExhaustiveChoice implements Exhaustive<ExhaustiveChoice> {
 	private Exhaustive<?> succ = null;
 	private Exhaustive<?> prev = null;
 
-	public ExhaustiveChoice(int maxExcluded) {
-		this(0, maxExcluded);
+	public ExhaustiveChoice(int maxIncluded) {
+		this(0, maxIncluded);
 	}
 
-	public ExhaustiveChoice(int min, int maxExcluded) {
-		this(new Range(min, maxExcluded));
+	public ExhaustiveChoice(int min, int maxIncluded) {
+		this(new Range(min, maxIncluded));
 	}
 
 	public ExhaustiveChoice(Range range) {
@@ -60,10 +60,10 @@ public class ExhaustiveChoice implements Exhaustive<ExhaustiveChoice> {
 
 	@Override
 	public void advance() {
-		if (current < range.maxExcluded) {
+		if (current <= range.max) {
 			current++;
 		}
-		if (current == range.maxExcluded) {
+		if (current > range.max) {
 			reset();
 			if (prev != null) {
 				prev.advance();
@@ -83,14 +83,14 @@ public class ExhaustiveChoice implements Exhaustive<ExhaustiveChoice> {
 		return "ExhaustiveChoice(range=%d, current=%d)".formatted(range, current);
 	}
 
-	public record Range(int min, int maxExcluded) {
+	public record Range(int min, int max) {
 		public int size() {
-			return maxExcluded - min;
+			return (max - min) + 1;
 		}
 
 		@Override
 		public String toString() {
-			return "[%d-%d[".formatted(min, maxExcluded);
+			return "[%d-%d]".formatted(min, max);
 		}
 	}
 }

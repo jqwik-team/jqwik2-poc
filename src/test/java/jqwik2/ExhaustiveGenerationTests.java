@@ -17,7 +17,7 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void choiceWithMax() {
-			ExhaustiveChoice choice = new ExhaustiveChoice(3);
+			ExhaustiveChoice choice = new ExhaustiveChoice(2);
 			assertThat(choice.maxCount()).isEqualTo(3L);
 			assertThat(choice.choose(3)).isEqualTo(0);
 
@@ -36,7 +36,7 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void choiceWithRange() {
-			ExhaustiveChoice choice = new ExhaustiveChoice(2, 6);
+			ExhaustiveChoice choice = new ExhaustiveChoice(2, 5);
 			assertThat(choice.maxCount()).isEqualTo(4L);
 			assertThat(choice.choose(4)).isEqualTo(2);
 
@@ -57,8 +57,8 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void twoConcatenatedExhaustiveChoices() {
-			ExhaustiveChoice first = new ExhaustiveChoice(3);
-			ExhaustiveChoice second = new ExhaustiveChoice(2);
+			ExhaustiveChoice first = new ExhaustiveChoice(2);
+			ExhaustiveChoice second = new ExhaustiveChoice(1);
 
 			first.chain(second);
 			assertThat(first.maxCount()).isEqualTo(6L);
@@ -92,7 +92,7 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void exhaustiveAtom() {
-			ExhaustiveAtom atom = ExhaustiveSource.atom(2, 3, 4);
+			ExhaustiveAtom atom = ExhaustiveSource.atom(1, 2, 3);
 			assertThat(atom.maxCount()).isEqualTo(24L);
 
 			assertAtom(atom, 0, 0, 0);
@@ -137,7 +137,9 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void exhaustiveAtomWithRanges() {
-			ExhaustiveAtom atom = ExhaustiveSource.atom(range(2, 4), range(3, 5), value(4));
+			ExhaustiveAtom atom = ExhaustiveSource.atom(
+				range(2, 3), range(3, 4), value(4)
+			);
 			assertThat(atom.maxCount()).isEqualTo(4L);
 
 			assertAtom(atom, 2, 3, 4);
@@ -152,8 +154,8 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void atomAlternatives() {
-			ExhaustiveAtom atom1 = ExhaustiveSource.atom(range(0, 2), value(0));
-			ExhaustiveAtom atom2 = ExhaustiveSource.atom(range(0, 3), value(1));
+			ExhaustiveAtom atom1 = ExhaustiveSource.atom(range(0, 1), value(0));
+			ExhaustiveAtom atom2 = ExhaustiveSource.atom(range(0, 2), value(1));
 			ExhaustiveAtom atom3 = ExhaustiveSource.atom(value(2), value(3));
 
 			OrAtom atom = ExhaustiveSource.or(atom1, atom2, atom3);
