@@ -223,7 +223,6 @@ class ExhaustiveGenerationTests {
 		@Example
 		void exhaustiveList() {
 			ExhaustiveList list = ExhaustiveSource.list(2, atom(2));
-
 			assertThat(list.maxCount()).isEqualTo(9L);
 
 			assertList(list, 0, 0);
@@ -259,10 +258,12 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void exhaustiveTree() {
-			// ExhaustiveTree atom = ExhaustiveSource.tree(
-			// 	atom(5),
-			// 	choices -> list(choices[0], atom(100))
-			// );
+			ExhaustiveTree tree = ExhaustiveSource.tree(
+				atom(2),
+				choices -> list(choices[0], atom(2))
+			);
+
+			assertThat(tree.maxCount()).isEqualTo(15L);
 		}
 	}
 

@@ -1,11 +1,21 @@
 package jqwik2;
 
+import java.util.function.*;
+
 import jqwik2.api.*;
 
 public class ExhaustiveTree implements GenSource.Tree, ExhaustiveSource {
+	private final ExhaustiveAtom head;
+	private final Function<Integer[], ExhaustiveSource> childCreator;
+
+	public ExhaustiveTree(ExhaustiveAtom head, Function<Integer[], ExhaustiveSource> childCreator) {
+		this.head = head;
+		this.childCreator = childCreator;
+	}
+
 	@Override
 	public long maxCount() {
-		return 0;
+		return head.maxCount();
 	}
 
 	@Override
@@ -14,8 +24,8 @@ public class ExhaustiveTree implements GenSource.Tree, ExhaustiveSource {
 	}
 
 	@Override
-	public ExhaustiveSource clone() {
-		return null;
+	public ExhaustiveTree clone() {
+		return new ExhaustiveTree(head, childCreator);
 	}
 
 	@Override

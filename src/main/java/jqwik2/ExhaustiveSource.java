@@ -1,5 +1,7 @@
 package jqwik2;
 
+import java.util.function.*;
+
 import jqwik2.api.*;
 
 public interface ExhaustiveSource extends GenSource, Exhaustive<ExhaustiveSource> {
@@ -26,5 +28,9 @@ public interface ExhaustiveSource extends GenSource, Exhaustive<ExhaustiveSource
 
 	static ExhaustiveList list(int size, ExhaustiveSource elementSource) {
 		return new ExhaustiveList(size, elementSource);
+	}
+
+	static ExhaustiveTree tree(ExhaustiveAtom head, Function<Integer[], ExhaustiveSource> childCreator) {
+		return new ExhaustiveTree(head, childCreator);
 	}
 }
