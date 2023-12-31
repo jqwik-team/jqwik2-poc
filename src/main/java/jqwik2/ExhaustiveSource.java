@@ -23,4 +23,8 @@ public interface ExhaustiveSource extends GenSource, Exhaustive<ExhaustiveSource
 	static OrAtom or(ExhaustiveAtom ... atoms) {
 		return new OrAtom(atoms);
 	}
+
+	static ExhaustiveList list(int size, ExhaustiveSource elementSource) {
+		return new ExhaustiveList(size, elementSource);
+	}
 }

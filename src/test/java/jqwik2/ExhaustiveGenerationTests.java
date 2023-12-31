@@ -218,6 +218,54 @@ class ExhaustiveGenerationTests {
 
 	}
 
+	@Group
+	class ExhaustiveTrees {
+		@Example
+		void exhaustiveList() {
+			ExhaustiveList list = ExhaustiveSource.list(2, atom(2));
+
+			assertThat(list.maxCount()).isEqualTo(9L);
+
+			assertList(list, 0, 0);
+			list.next();
+			assertList(list, 0, 1);
+			list.next();
+			assertList(list, 0, 2);
+			list.next();
+			assertList(list, 1, 0);
+			list.next();
+			assertList(list, 1, 1);
+			list.next();
+			assertList(list, 1, 2);
+			list.next();
+			assertList(list, 2, 0);
+			list.next();
+			assertList(list, 2, 1);
+			list.next();
+			assertList(list, 2, 2);
+
+			assertThatThrownBy(() -> list.next())
+				.isInstanceOf(Generator.NoMoreValues.class);
+		}
+
+		private void assertList(ExhaustiveList list, int...expected) {
+			for (int i = 0; i < list.size(); i++) {
+				var atom = list.nextElement().atom();
+				assertThat(atom.choose(Integer.MAX_VALUE))
+					.describedAs("Expected %d at position %d", expected[i], i)
+					.isEqualTo(expected[i]);
+			}
+		}
+
+		@Example
+		void exhaustiveTree() {
+			// ExhaustiveTree atom = ExhaustiveSource.tree(
+			// 	atom(5),
+			// 	choices -> list(choices[0], atom(100))
+			// );
+		}
+	}
+
 	@Example
 	void smallIntegers() {
 		Generator<Integer> ints0to10 = new IntegerGenerator(0, 10);
