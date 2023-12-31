@@ -257,14 +257,42 @@ class ExhaustiveGenerationTests {
 		}
 
 		@Example
-		@Disabled("Not yet implemented")
 		void exhaustiveTree() {
 			ExhaustiveTree tree = ExhaustiveSource.tree(
-				atom(2),
-				choices -> list(choices[0], atom(2))
+				List.of(0, 1, 2),
+				choice -> list(choice, atom(2))
 			);
 
-			assertThat(tree.maxCount()).isEqualTo(15L);
+			assertThat(tree.maxCount()).isEqualTo(13L);
+			assertTree(tree, 0);
+
+			tree.next();
+			assertTree(tree, 1, 0);
+			tree.next();
+			assertTree(tree, 1, 1);
+			tree.next();
+			assertTree(tree, 1, 2);
+
+		}
+
+		private void assertTree(ExhaustiveTree tree, int...expected) {
+			int head = tree.head().atom().choose(Integer.MAX_VALUE);
+			assertThat(head)
+				.describedAs("Expected %d as head", expected[0])
+				.isEqualTo(expected[0]);
+
+			ExhaustiveList list = (ExhaustiveList) tree.child().list();
+			int listSize = list.size();
+			assertThat(listSize)
+				.describedAs("Expected list size %d", listSize)
+				.isEqualTo(expected.length - 1);
+
+			for (int i = 0; i < listSize; i++) {
+				var atom = list.nextElement().atom();
+				assertThat(atom.choose(Integer.MAX_VALUE))
+					.describedAs("Expected %d at position %d", expected[i + 1], i)
+					.isEqualTo(expected[i + 1]);
+			}
 		}
 	}
 

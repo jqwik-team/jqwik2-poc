@@ -4,19 +4,31 @@ import java.util.function.*;
 
 import jqwik2.api.*;
 
-public class ExhaustiveTree implements GenSource.Tree, ExhaustiveSource {
-	private final ExhaustiveAtom head;
-	private final Function<Integer[], ExhaustiveSource> childCreator;
+import static jqwik2.ExhaustiveSource.*;
 
-	public ExhaustiveTree(ExhaustiveAtom head, Function<Integer[], ExhaustiveSource> childCreator) {
-		this.head = head;
+public class ExhaustiveTree implements GenSource.Tree, ExhaustiveSource {
+	private final Function<Integer, ExhaustiveSource> childCreator;
+	private final java.util.List<Integer> heads;
+	private final java.util.List<ExhaustiveSource> children;
+	private int current = 0;
+
+	public ExhaustiveTree(java.util.List<Integer> heads, Function<Integer, ExhaustiveSource> childCreator) {
+		this.heads = heads;
 		this.childCreator = childCreator;
+		this.children = createChildren();
+	}
+
+	private java.util.List<ExhaustiveSource> createChildren() {
+		java.util.List<ExhaustiveSource> result = new java.util.ArrayList<>();
+		for (int head : heads) {
+			result.add(childCreator.apply(head));
+		}
+		return result;
 	}
 
 	@Override
 	public long maxCount() {
-		System.out.println(head.allValues());
-		return head.maxCount();
+		return children.stream().mapToLong(ExhaustiveSource::maxCount).sum();
 	}
 
 	@Override
@@ -26,7 +38,7 @@ public class ExhaustiveTree implements GenSource.Tree, ExhaustiveSource {
 
 	@Override
 	public ExhaustiveTree clone() {
-		return new ExhaustiveTree(head, childCreator);
+		return new ExhaustiveTree(heads, childCreator);
 	}
 
 	@Override
@@ -61,11 +73,13 @@ public class ExhaustiveTree implements GenSource.Tree, ExhaustiveSource {
 
 	@Override
 	public GenSource head() {
-		return null;
+		return ExhaustiveSource.atom(
+			value(heads.get(current))
+		);
 	}
 
 	@Override
 	public GenSource child() {
-		return null;
+		return children.get(current);
 	}
 }
