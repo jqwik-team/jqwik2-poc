@@ -14,7 +14,7 @@ public interface Exhaustive<T extends Exhaustive<T>> extends Cloneable {
 
 	void next();
 
-	void setPrev(Exhaustive exhaustive);
+	void setPrev(Exhaustive<?> exhaustive);
 
-	void setSucc(Exhaustive exhaustive);
+	void setSucc(Exhaustive<?> exhaustive);
 }

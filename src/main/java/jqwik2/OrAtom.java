@@ -7,6 +7,9 @@ public class OrAtom implements GenSource.Atom, ExhaustiveSource {
 	private final java.util.List<ExhaustiveAtom> alternatives;
 	private int current = 0;
 
+	private Exhaustive<?> succ = null;
+	private Exhaustive<?> prev = null;
+
 	public OrAtom(ExhaustiveAtom... alternatives) {
 		this(java.util.List.of(alternatives));
 	}
@@ -28,6 +31,20 @@ public class OrAtom implements GenSource.Atom, ExhaustiveSource {
 
 	@Override
 	public void advance() {
+		ExhaustiveAtom currentAtom = alternatives.get(current);
+		try {
+			currentAtom.next();
+		} catch (Generator.NoMoreValues e) {
+			current++;
+			if (current >= alternatives.size()) {
+				current = 0;
+				if (prev != null) {
+					prev.advance();
+				} else {
+					throw new Generator.NoMoreValues();
+				}
+			}
+		}
 	}
 
 	@Override
@@ -37,23 +54,21 @@ public class OrAtom implements GenSource.Atom, ExhaustiveSource {
 
 	@Override
 	public void next() {
-		ExhaustiveAtom currentAtom = alternatives.get(current);
-		try {
-			currentAtom.next();
-		} catch (Generator.NoMoreValues e) {
-			current++;
-			if (current >= alternatives.size()) {
-				throw new Generator.NoMoreValues();
-			}
+		if (succ == null) {
+			advance();
+		} else {
+			succ.next();
 		}
 	}
 
 	@Override
-	public void setPrev(Exhaustive exhaustive) {
+	public void setPrev(Exhaustive<?> exhaustive) {
+		this.prev = exhaustive;
 	}
 
 	@Override
-	public void setSucc(Exhaustive exhaustive) {
+	public void setSucc(Exhaustive<?> exhaustive) {
+		this.succ = exhaustive;
 	}
 
 	@Override
