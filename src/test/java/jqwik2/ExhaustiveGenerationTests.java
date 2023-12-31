@@ -1,11 +1,13 @@
 package jqwik2;
 
 import java.util.*;
+import java.util.List;
 
 import jqwik2.api.*;
 
 import net.jqwik.api.*;
 
+import static jqwik2.ExhaustiveSource.*;
 import static org.assertj.core.api.Assertions.*;
 
 class ExhaustiveGenerationTests {
@@ -90,7 +92,7 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void exhaustiveAtom() {
-			ExhaustiveAtom atom = new ExhaustiveAtom(2, 3, 4);
+			ExhaustiveAtom atom = ExhaustiveSource.atom(2, 3, 4);
 			assertThat(atom.maxCount()).isEqualTo(24L);
 
 			assertAtom(atom, 0, 0, 0);
@@ -131,6 +133,21 @@ class ExhaustiveGenerationTests {
 			assertThatThrownBy(() -> atom.next())
 				.isInstanceOf(Generator.NoMoreValues.class);
 
+		}
+
+		@Example
+		void exhaustiveAtomWithRanges() {
+			ExhaustiveAtom atom = ExhaustiveSource.atom(range(2, 4), range(3, 5), value(4));
+			assertThat(atom.maxCount()).isEqualTo(4L);
+
+			assertAtom(atom, 2, 3, 4);
+			atom.next();
+			atom.next();
+			atom.next();
+			assertAtom(atom, 3, 4, 4);
+
+			assertThatThrownBy(() -> atom.next())
+				.isInstanceOf(Generator.NoMoreValues.class);
 		}
 
 		@Example
