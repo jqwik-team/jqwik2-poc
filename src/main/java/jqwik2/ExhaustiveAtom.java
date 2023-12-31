@@ -36,6 +36,10 @@ public class ExhaustiveAtom implements GenSource.Atom, ExhaustiveSource {
 		}
 	}
 
+	public int cardinality() {
+		return choices.size();
+	}
+
 	@Override
 	public long maxCount() {
 		if (choices.isEmpty()) {

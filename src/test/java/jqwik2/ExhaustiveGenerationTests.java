@@ -151,6 +151,31 @@ class ExhaustiveGenerationTests {
 		}
 
 		@Example
+		void atomAlternatives() {
+			ExhaustiveAtom atom1 = ExhaustiveSource.atom(range(0, 2), value(0));
+			ExhaustiveAtom atom2 = ExhaustiveSource.atom(range(0, 3), value(1));
+			ExhaustiveAtom atom3 = ExhaustiveSource.atom(value(2), value(3));
+
+			OrAtom atom = ExhaustiveSource.or(atom1, atom2, atom3);
+
+			assertThat(atom.maxCount()).isEqualTo(6L);
+			assertAtom(atom, 0, 0);
+
+			atom.next();
+			assertAtom(atom, 1, 0);
+			atom.next();
+			assertAtom(atom, 0, 1);
+			atom.next();
+			assertAtom(atom, 1, 1);
+			atom.next();
+			assertAtom(atom, 2, 1);
+			atom.next();
+			assertAtom(atom, 2, 3);
+			assertThatThrownBy(() -> atom.next())
+				.isInstanceOf(Generator.NoMoreValues.class);
+		}
+
+		@Example
 		void generateSample() {
 			IntegerGenerator ints1 = new IntegerGenerator(0, 10);
 			IntegerGenerator ints2 = new IntegerGenerator(-10, -1);
@@ -181,7 +206,7 @@ class ExhaustiveGenerationTests {
 			assertThat(count).isEqualTo(110);
 		}
 
-		private static void assertAtom(ExhaustiveAtom atom, int... expected) {
+		private static void assertAtom(Atom atom, int... expected) {
 			for (int i = 0; i < expected.length; i++) {
 				assertThat(atom.choose(Integer.MAX_VALUE))
 					.describedAs("Expected %d at position %d", expected[i], i)

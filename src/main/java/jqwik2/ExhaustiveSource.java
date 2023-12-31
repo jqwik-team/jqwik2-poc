@@ -19,4 +19,8 @@ public interface ExhaustiveSource extends GenSource, Exhaustive<ExhaustiveSource
 	static ExhaustiveChoice.Range value(int value) {
 		return range(value, value + 1);
 	}
+
+	static OrAtom or(ExhaustiveAtom ... atoms) {
+		return new OrAtom(atoms);
+	}
 }
