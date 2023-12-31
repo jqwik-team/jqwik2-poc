@@ -178,13 +178,13 @@ class ExhaustiveGenerationTests {
 		@Example
 		void generateSample() {
 			IntegerGenerator ints1 = new IntegerGenerator(0, 10);
-			IntegerGenerator ints2 = new IntegerGenerator(-10, -1);
+			IntegerGenerator ints2 = new IntegerGenerator(-5, 5);
 
 			SampleGenerator sampleGenerator = SampleGenerator.from(ints1, ints2);
 
 			IterableExhaustiveSource exhaustiveGenSource = IterableExhaustiveSource.from(ints1, ints2);
 
-			assertThat(exhaustiveGenSource.maxCount()).isEqualTo(110L);
+			assertThat(exhaustiveGenSource.maxCount()).isEqualTo(121);
 
 			List<Sample> allSamples = new ArrayList<>();
 			for (MultiGenSource multiGenSource : exhaustiveGenSource) {
@@ -192,18 +192,18 @@ class ExhaustiveGenerationTests {
 				// System.out.println(sample);
 				allSamples.add(sample);
 			}
-			assertThat(allSamples).hasSize(110);
+			assertThat(allSamples).hasSize(121);
 
 			List<List<Object>> values = allSamples.stream().map(Sample::values).toList();
-			assertThat(values).contains(List.of(0, -1));
-			assertThat(values).contains(List.of(10, -10));
+			assertThat(values).contains(List.of(0, -5));
+			assertThat(values).contains(List.of(10, 5));
 
 			// Second iteration
 			int count = 0;
 			for (MultiGenSource multiGenSource : exhaustiveGenSource) {
 				count++;
 			}
-			assertThat(count).isEqualTo(110);
+			assertThat(count).isEqualTo(121);
 		}
 
 		private static void assertAtom(Atom atom, int... expected) {
@@ -225,7 +225,18 @@ class ExhaustiveGenerationTests {
 
 		List<Integer> allValues = collectAll(exhaustive, ints0to10);
 		assertThat(allValues).containsExactly(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+	}
 
+	@Example
+	void generalIntegers() {
+		Generator<Integer> ints = new IntegerGenerator(-10, 100);
+
+		ExhaustiveSource exhaustive = ints.exhaustive().get();
+		assertThat(exhaustive.maxCount()).isEqualTo(111L);
+
+		List<Integer> allValues = collectAll(exhaustive, ints);
+		assertThat(allValues).hasSize(111);
+		assertThat(allValues).contains(-10, 100, 0, -9, 99, 42);
 	}
 
 	private static <T> List<T> collectAll(ExhaustiveSource source, Generator<T> generator) {

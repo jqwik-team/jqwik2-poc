@@ -12,6 +12,9 @@ public class OrAtom implements GenSource.Atom, ExhaustiveSource {
 	}
 
 	public OrAtom(java.util.List<ExhaustiveAtom> alternatives) {
+		if (alternatives.isEmpty()) {
+			throw new IllegalArgumentException("Must have at least one atom");
+		}
 		if (alternatives.stream().map(ExhaustiveAtom::cardinality).distinct().count() != 1) {
 			throw new IllegalArgumentException("All atoms must have the same cardinality");
 		}
