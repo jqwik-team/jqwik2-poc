@@ -273,7 +273,7 @@ class ExhaustiveGenerationTests {
 		@Example
 		void exhaustiveTree() {
 			ExhaustiveTree tree = ExhaustiveSource.tree(
-				List.of(0, 1, 2),
+				new ExhaustiveChoice.Range(0, 2),
 				choice -> list(choice, atom(2))
 			);
 
@@ -290,7 +290,7 @@ class ExhaustiveGenerationTests {
 		}
 
 		private void assertTree(ExhaustiveTree tree, int...expected) {
-			int head = tree.head().atom().choose(Integer.MAX_VALUE);
+			int head = ((ExhaustiveAtom) tree.head().atom()).fix().choose(Integer.MAX_VALUE);
 			assertThat(head)
 				.describedAs("Expected %d as head", expected[0])
 				.isEqualTo(expected[0]);

@@ -36,11 +36,11 @@ public interface ExhaustiveSource extends GenSource, Exhaustive<ExhaustiveSource
 	/**
 	 * Generate tree where head is atom with cardinality 1
 	 *
-	 * @param heads All possible head options
+	 * @param range A range of all possible choices for head
 	 * @param childCreator Function to create child source based on head value
 	 */
-	static ExhaustiveTree tree(java.util.List<Integer> heads, Function<Integer, ExhaustiveSource> childCreator) {
-		return new ExhaustiveTree(heads, childCreator);
+	static ExhaustiveTree tree(ExhaustiveChoice.Range range, Function<Integer, ExhaustiveSource> childCreator) {
+		return new ExhaustiveTree(range, childCreator);
 	}
 
 }
