@@ -3,6 +3,7 @@ package jqwik2.api;
 import java.util.function.*;
 
 import jqwik2.*;
+import jqwik2.api.recording.*;
 import jqwik2.exhaustive.*;
 
 public interface ExhaustiveSource extends GenSource, Exhaustive<ExhaustiveSource> {
@@ -44,4 +45,9 @@ public interface ExhaustiveSource extends GenSource, Exhaustive<ExhaustiveSource
 		return new ExhaustiveTree(range, childCreator);
 	}
 
+	Recording recording();
+
+	default GenSource fix() {
+		return new RecordedSource(recording());
+	}
 }

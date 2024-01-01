@@ -209,9 +209,10 @@ class ExhaustiveGenerationTests {
 			assertThat(count).isEqualTo(121);
 		}
 
-		private static void assertAtom(Atom atom, int... expected) {
+		private static void assertAtom(ExhaustiveSource atom, int... expected) {
+			Atom fixed = (Atom) atom.fix();
 			for (int i = 0; i < expected.length; i++) {
-				assertThat(atom.choose(Integer.MAX_VALUE))
+				assertThat(fixed.choose(Integer.MAX_VALUE))
 					.describedAs("Expected %d at position %d", expected[i], i)
 					.isEqualTo(expected[i]);
 			}
@@ -263,8 +264,9 @@ class ExhaustiveGenerationTests {
 		}
 
 		private void assertList(ExhaustiveList list, int...expected) {
-			for (int i = 0; i < list.size(); i++) {
-				var atom = list.nextElement().atom();
+			GenSource.List fixedList = (GenSource.List) list.fix();
+			for (int i = 0; i < expected.length; i++) {
+				var atom = fixedList.nextElement().atom();
 				assertThat(atom.choose(Integer.MAX_VALUE))
 					.describedAs("Expected %d at position %d", expected[i], i)
 					.isEqualTo(expected[i]);
@@ -291,7 +293,8 @@ class ExhaustiveGenerationTests {
 		}
 
 		private void assertTree(ExhaustiveTree tree, int...expected) {
-			int head = ((ExhaustiveAtom) tree.head().atom()).fix().choose(Integer.MAX_VALUE);
+			ExhaustiveAtom exhaustiveAtom = (ExhaustiveAtom) tree.head().atom();
+			int head = ((Atom) exhaustiveAtom.fix()).choose(Integer.MAX_VALUE);
 			assertThat(head)
 				.describedAs("Expected %d as head", expected[0])
 				.isEqualTo(expected[0]);

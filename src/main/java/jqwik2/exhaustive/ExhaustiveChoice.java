@@ -2,12 +2,10 @@ package jqwik2.exhaustive;
 
 import jqwik2.api.*;
 
-public class ExhaustiveChoice implements Exhaustive<ExhaustiveChoice> {
+public class ExhaustiveChoice extends AbstractExhaustive<ExhaustiveChoice> {
 
 	private final Range range;
 	private int current = 0;
-	private Exhaustive<?> succ = null;
-	private Exhaustive<?> prev = null;
 
 	public ExhaustiveChoice(int maxIncluded) {
 		this(0, maxIncluded);
@@ -23,53 +21,42 @@ public class ExhaustiveChoice implements Exhaustive<ExhaustiveChoice> {
 	}
 
 	@Override
-	public void next() {
-		if (succ == null) {
-			advance();
-		} else {
-			succ.next();
-		}
+	public void reset() {
+		current = range.min;
 	}
 
 	public int choose(int maxExcluded) {
 		return current % maxExcluded;
 	}
 
-	public void reset() {
-		current = range.min;
-	}
-
 	@Override
 	public long maxCount() {
 		int localMaxCount = range.size();
-		if (succ != null) {
-			return localMaxCount * succ.maxCount();
+		if (succ().isPresent()) {
+			return localMaxCount * succ().get().maxCount();
 		}
 		return localMaxCount;
 	}
 
 	@Override
-	public void setSucc(Exhaustive<?> exhaustive) {
-		this.succ = exhaustive;
-	}
-
-	@Override
-	public void setPrev(Exhaustive<?> exhaustive) {
-		this.prev = exhaustive;
-	}
-
-	@Override
 	public void advance() {
-		if (current <= range.max) {
-			current++;
+		if (tryAdvance()) {
+			return;
 		}
-		if (current > range.max) {
-			reset();
-			if (prev != null) {
-				prev.advance();
-			} else {
-				Generator.noMoreValues();
-			}
+		reset();
+		if (prev().isPresent()) {
+			prev().get().advance();
+		} else {
+			Generator.noMoreValues();
+		}
+	}
+
+	private boolean tryAdvance() {
+		if (current < range.max) {
+			current++;
+			return true;
+		} else {
+			return false;
 		}
 	}
 
@@ -80,7 +67,7 @@ public class ExhaustiveChoice implements Exhaustive<ExhaustiveChoice> {
 
 	@Override
 	public String toString() {
-		return "ExhaustiveChoice(range=%d, current=%d)".formatted(range, current);
+		return "ExhaustiveChoice(range=%s, current=%d)".formatted(range, current);
 	}
 
 	public Integer fix() {

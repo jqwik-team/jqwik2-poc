@@ -2,8 +2,11 @@ package jqwik2.exhaustive;
 
 import jqwik2.*;
 import jqwik2.api.*;
+import jqwik2.api.recording.*;
 
-public class ExhaustiveList implements GenSource.List, ExhaustiveSource {
+public class ExhaustiveList
+	extends AbstractExhaustiveSource
+	implements GenSource.List {
 
 	private final int size;
 	private final ExhaustiveSource elementSource;
@@ -41,6 +44,12 @@ public class ExhaustiveList implements GenSource.List, ExhaustiveSource {
 	}
 
 	@Override
+	public void reset() {
+		current = 0;
+		elements.forEach(ExhaustiveSource::reset);
+	}
+
+	@Override
 	public ExhaustiveSource clone() {
 		return new ExhaustiveList(elements.size(), elementSource);
 	}
@@ -53,12 +62,13 @@ public class ExhaustiveList implements GenSource.List, ExhaustiveSource {
 
 	@Override
 	public void setPrev(Exhaustive<?> exhaustive) {
-		elements.getFirst().setPrev(exhaustive);
+		super.setPrev(exhaustive);
 	}
 
 	@Override
 	public void setSucc(Exhaustive<?> exhaustive) {
-		elements.getLast().setPrev(exhaustive);
+		super.setSucc(exhaustive);
+		elements.getLast().setSucc(exhaustive);
 	}
 
 	@Override
@@ -87,5 +97,10 @@ public class ExhaustiveList implements GenSource.List, ExhaustiveSource {
 				   "size=" + size +
 				   ", elementSource=" + elementSource +
 				   '}';
+	}
+
+	@Override
+	public Recording recording() {
+		return Recording.list(elements.stream().map(ExhaustiveSource::recording).toList());
 	}
 }

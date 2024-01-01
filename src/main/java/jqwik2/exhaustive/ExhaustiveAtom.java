@@ -3,11 +3,11 @@ package jqwik2.exhaustive;
 import java.util.*;
 
 import jqwik2.*;
-import jqwik2.exhaustive.ExhaustiveChoice.*;
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
+import jqwik2.exhaustive.ExhaustiveChoice.*;
 
-public class ExhaustiveAtom implements GenSource.Atom, ExhaustiveSource {
+public class ExhaustiveAtom extends AbstractExhaustiveSource implements GenSource.Atom {
 
 	private final Range[] ranges;
 	private int current = 0;
@@ -52,7 +52,30 @@ public class ExhaustiveAtom implements GenSource.Atom, ExhaustiveSource {
 
 	@Override
 	public void advance() {
-		choices.getLast().advance();
+		if (tryAdvance()) {
+			return;
+		}
+		reset();
+		if (prev().isPresent()) {
+			prev().get().advance();
+		} else {
+			Generator.noMoreValues();
+		}
+	}
+
+	private boolean tryAdvance() {
+		try {
+			choices.getFirst().next();
+			return true;
+		} catch (Generator.NoMoreValues e) {
+			return false;
+		}
+	}
+
+	@Override
+	public void reset() {
+		current = 0;
+		choices.forEach(ExhaustiveChoice::reset);
 	}
 
 	@Override
@@ -61,24 +84,19 @@ public class ExhaustiveAtom implements GenSource.Atom, ExhaustiveSource {
 	}
 
 	@Override
-	public void next() {
-		current = 0;
-		choices.getFirst().next();
+	public void setPrev(Exhaustive<?> exhaustive) {
+		super.setPrev(exhaustive);
+		prev().ifPresent(prev -> choices.getFirst().setPrev(prev));
 	}
 
 	@Override
-	public void setPrev(Exhaustive exhaustive) {
-		choices.getFirst().setPrev(exhaustive);
-	}
-
-	@Override
-	public void setSucc(Exhaustive exhaustive) {
+	public void setSucc(Exhaustive<?> exhaustive) {
+		super.setSucc(exhaustive);
 		choices.getLast().setSucc(exhaustive);
 	}
 
-	public Atom fix() {
-		AtomRecording recording = Recording.atom(choices.stream().map(ExhaustiveChoice::fix).toList());
-		return new RecordedSource(recording);
+	public Recording recording() {
+		return Recording.atom(choices.stream().map(ExhaustiveChoice::fix).toList());
 	}
 
 	@Override

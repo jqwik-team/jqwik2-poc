@@ -1,9 +1,13 @@
 package jqwik2.api;
 
+import java.util.*;
+
 public interface Exhaustive<T extends Exhaustive<T>> extends Cloneable {
 	long maxCount();
 
 	void advance();
+
+	void reset();
 
 	T clone();
 
@@ -17,4 +21,8 @@ public interface Exhaustive<T extends Exhaustive<T>> extends Cloneable {
 	void setPrev(Exhaustive<?> exhaustive);
 
 	void setSucc(Exhaustive<?> exhaustive);
+
+	Optional<Exhaustive<?>> prev();
+
+	Optional<Exhaustive<?>> succ();
 }

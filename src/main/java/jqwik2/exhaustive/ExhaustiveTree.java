@@ -5,18 +5,19 @@ import java.util.stream.*;
 
 import jqwik2.*;
 import jqwik2.api.*;
+import jqwik2.api.recording.*;
 
-public class ExhaustiveTree implements GenSource.Tree, ExhaustiveSource {
+public class ExhaustiveTree extends AbstractExhaustiveSource implements GenSource.Tree {
 	private final ExhaustiveChoice.Range range;
 	private final Function<Integer, ExhaustiveSource> childCreator;
 	private final ExhaustiveAtom head;
 	private ExhaustiveSource child;
-	private Exhaustive<?> succ;
 
 	public ExhaustiveTree(ExhaustiveChoice.Range range, Function<Integer, ExhaustiveSource> childCreator) {
 		this.range = range;
 		this.childCreator = childCreator;
 		this.head = new ExhaustiveAtom(range);
+		this.head.setPrev(this);
 		creatAndChainChild();
 	}
 
@@ -46,11 +47,17 @@ public class ExhaustiveTree implements GenSource.Tree, ExhaustiveSource {
 		creatAndChainChild();
 	}
 
+	@Override
+	public void reset() {
+		head.reset();
+		creatAndChainChild();
+	}
+
 	private void creatAndChainChild() {
-		int size = head.fix().choose(Integer.MAX_VALUE);
+		int size = ((Atom) head.fix()).choose(Integer.MAX_VALUE);
 		child = childCreator.apply(size);
 		head.chain(child);
-		child.setSucc(succ);
+		succ().ifPresent(succ -> child.setSucc(succ));
 	}
 
 	@Override
@@ -66,12 +73,12 @@ public class ExhaustiveTree implements GenSource.Tree, ExhaustiveSource {
 
 	@Override
 	public void setPrev(Exhaustive<?> exhaustive) {
-		head.setPrev(exhaustive);
+		super.setPrev(exhaustive);
 	}
 
 	@Override
 	public void setSucc(Exhaustive<?> exhaustive) {
-		succ = exhaustive;
+		super.setSucc(exhaustive);
 		child.setSucc(exhaustive);
 	}
 
@@ -98,5 +105,10 @@ public class ExhaustiveTree implements GenSource.Tree, ExhaustiveSource {
 	@Override
 	public GenSource child() {
 		return child;
+	}
+
+	@Override
+	public Recording recording() {
+		throw new UnsupportedOperationException();
 	}
 }
