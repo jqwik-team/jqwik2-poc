@@ -247,6 +247,20 @@ class ExhaustiveGenerationTests {
 				.isInstanceOf(Generator.NoMoreValues.class);
 		}
 
+		@Example
+		void exhaustiveEmptyList() {
+			ExhaustiveList list = ExhaustiveSource.list(0, atom(2));
+			assertThat(list.maxCount()).isEqualTo(1L);
+
+			assertThat(list.size()).isEqualTo(0);
+
+			assertThatThrownBy(() -> list.nextElement())
+				.isInstanceOf(CannotGenerateException.class);
+
+			assertThatThrownBy(() -> list.next())
+				.isInstanceOf(Generator.NoMoreValues.class);
+		}
+
 		private void assertList(ExhaustiveList list, int...expected) {
 			for (int i = 0; i < list.size(); i++) {
 				var atom = list.nextElement().atom();

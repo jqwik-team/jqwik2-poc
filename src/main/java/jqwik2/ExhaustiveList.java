@@ -4,8 +4,6 @@ import jqwik2.api.*;
 
 public class ExhaustiveList implements GenSource.List, ExhaustiveSource {
 
-	public static final ExhaustiveAtom EMPTY_LIST = new ExhaustiveAtom(0);
-
 	private final int size;
 	private final ExhaustiveSource elementSource;
 	private final java.util.List<ExhaustiveSource> elements = new java.util.ArrayList<>();
@@ -18,10 +16,6 @@ public class ExhaustiveList implements GenSource.List, ExhaustiveSource {
 	}
 
 	private void createElements(int size, ExhaustiveSource elementSource) {
-		if (size == 0) {
-			elements.add(EMPTY_LIST);
-			return;
-		}
 		for (int i = 0; i < size; i++) {
 			ExhaustiveSource current = elementSource.clone();
 			elements.add(current);
@@ -37,9 +31,6 @@ public class ExhaustiveList implements GenSource.List, ExhaustiveSource {
 
 	@Override
 	public long maxCount() {
-		if (elements.isEmpty()) {
-			return 0;
-		}
 		return elements.getFirst().maxCount();
 	}
 
