@@ -4,8 +4,6 @@ import jqwik2.api.*;
 
 public class ExhaustiveEmptyList extends ExhaustiveList {
 
-	public static final ExhaustiveEmptyList INSTANCE = new ExhaustiveEmptyList();
-
 	private Exhaustive<?> prev;
 
 	public ExhaustiveEmptyList() {

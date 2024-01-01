@@ -28,7 +28,7 @@ public interface ExhaustiveSource extends GenSource, Exhaustive<ExhaustiveSource
 
 	static ExhaustiveList list(int size, ExhaustiveSource elementSource) {
 		if (size == 0) {
-			return ExhaustiveEmptyList.INSTANCE;
+			return new ExhaustiveEmptyList();
 		}
 		return new ExhaustiveList(size, elementSource);
 	}
