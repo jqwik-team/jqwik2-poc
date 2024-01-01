@@ -83,6 +83,10 @@ public class ExhaustiveChoice implements Exhaustive<ExhaustiveChoice> {
 		return "ExhaustiveChoice(range=%d, current=%d)".formatted(range, current);
 	}
 
+	public Integer fix() {
+		return current;
+	}
+
 	public record Range(int min, int max) {
 		public int size() {
 			return (max - min) + 1;

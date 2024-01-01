@@ -4,6 +4,7 @@ import java.util.*;
 
 import jqwik2.ExhaustiveChoice.*;
 import jqwik2.api.*;
+import jqwik2.api.recording.*;
 
 public class ExhaustiveAtom implements GenSource.Atom, ExhaustiveSource {
 
@@ -54,7 +55,7 @@ public class ExhaustiveAtom implements GenSource.Atom, ExhaustiveSource {
 	}
 
 	@Override
-	public ExhaustiveSource clone() {
+	public ExhaustiveAtom clone() {
 		return new ExhaustiveAtom(ranges);
 	}
 
@@ -72,6 +73,11 @@ public class ExhaustiveAtom implements GenSource.Atom, ExhaustiveSource {
 	@Override
 	public void setSucc(Exhaustive exhaustive) {
 		choices.getLast().setSucc(exhaustive);
+	}
+
+	public Atom fix() {
+		AtomRecording recording = Recording.atom(choices.stream().map(ExhaustiveChoice::fix).toList());
+		return new RecordedSource(recording);
 	}
 
 	@Override
