@@ -2,11 +2,10 @@ package jqwik2.api.support;
 
 import java.util.*;
 
-import jqwik2.*;
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
 
-import static jqwik2.ExhaustiveSource.*;
+import static jqwik2.api.ExhaustiveSource.*;
 
 public class IntegerGenerationSupport {
 

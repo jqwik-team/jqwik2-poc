@@ -1,8 +1,9 @@
-package jqwik2;
+package jqwik2.api;
 
 import java.util.function.*;
 
-import jqwik2.api.*;
+import jqwik2.*;
+import jqwik2.exhaustive.*;
 
 public interface ExhaustiveSource extends GenSource, Exhaustive<ExhaustiveSource> {
 

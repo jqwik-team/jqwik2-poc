@@ -1,4 +1,4 @@
-package jqwik2;
+package jqwik2.api;
 
 public interface Exhaustive<T extends Exhaustive<T>> extends Cloneable {
 	long maxCount();

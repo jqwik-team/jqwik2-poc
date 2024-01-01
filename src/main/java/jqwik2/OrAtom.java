@@ -1,6 +1,7 @@
 package jqwik2;
 
 import jqwik2.api.*;
+import jqwik2.exhaustive.*;
 
 public class OrAtom implements GenSource.Atom, ExhaustiveSource {
 

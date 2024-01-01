@@ -1,8 +1,9 @@
-package jqwik2;
+package jqwik2.exhaustive;
 
 import java.util.function.*;
 import java.util.stream.*;
 
+import jqwik2.*;
 import jqwik2.api.*;
 
 public class ExhaustiveTree implements GenSource.Tree, ExhaustiveSource {

@@ -1,5 +1,6 @@
-package jqwik2;
+package jqwik2.exhaustive;
 
+import jqwik2.*;
 import jqwik2.api.*;
 
 public class ExhaustiveEmptyList extends ExhaustiveList {

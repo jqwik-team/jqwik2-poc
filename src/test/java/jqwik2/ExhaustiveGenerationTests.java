@@ -4,10 +4,11 @@ import java.util.*;
 import java.util.List;
 
 import jqwik2.api.*;
+import jqwik2.exhaustive.*;
 
 import net.jqwik.api.*;
 
-import static jqwik2.ExhaustiveSource.*;
+import static jqwik2.api.ExhaustiveSource.*;
 import static org.assertj.core.api.Assertions.*;
 
 class ExhaustiveGenerationTests {
