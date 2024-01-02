@@ -7,7 +7,7 @@ import jqwik2.*;
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
 
-public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> implements GenSource.Tree {
+public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> {
 	private final ExhaustiveChoice.Range range;
 	private final Function<Integer, ExhaustiveSource<?>> childCreator;
 	private final ExhaustiveAtom head;
@@ -77,7 +77,7 @@ public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> imp
 	}
 
 	private void creatAndChainChild() {
-		int size = ((Atom) head.get()).choose(Integer.MAX_VALUE);
+		int size = head.get().choose(Integer.MAX_VALUE);
 		child = childCreator.apply(size);
 		head.chain(child);
 		succ().ifPresent(succ -> child.setSucc(succ));
@@ -92,31 +92,6 @@ public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> imp
 	public void setSucc(Exhaustive<?> exhaustive) {
 		super.setSucc(exhaustive);
 		child.setSucc(exhaustive);
-	}
-
-	@Override
-	public Atom atom() {
-		throw new CannotGenerateException("Source is not an atom");
-	}
-
-	@Override
-	public List list() {
-		throw new CannotGenerateException("Source is not a list");
-	}
-
-	@Override
-	public Tree tree() {
-		return this;
-	}
-
-	@Override
-	public GenSource head() {
-		return head;
-	}
-
-	@Override
-	public GenSource child() {
-		return child;
 	}
 
 	@Override

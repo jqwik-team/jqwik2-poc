@@ -7,10 +7,6 @@ import jqwik2.api.*;
 public class IterableExhaustiveSource implements IterableGenSource {
 	private final List<? extends ExhaustiveSource<?>> exhaustiveSources;
 
-	public IterableExhaustiveSource(ExhaustiveSource<?>... exhaustiveSources) {
-		this.exhaustiveSources = List.of(exhaustiveSources);
-	}
-
 	public IterableExhaustiveSource(List<? extends ExhaustiveSource<?>> exhaustiveSources) {
 		this.exhaustiveSources = exhaustiveSources;
 	}
@@ -45,8 +41,6 @@ public class IterableExhaustiveSource implements IterableGenSource {
 
 	private static class ExhaustiveGenSourceIterator implements Iterator<MultiGenSource> {
 
-		// private final MultiGenSource source;
-		private final ExhaustiveSource<?> first;
 		private final List<? extends ExhaustiveSource<?>> sources;
 
 		private boolean hasNextBeenInvoked = false;
@@ -54,8 +48,6 @@ public class IterableExhaustiveSource implements IterableGenSource {
 		public ExhaustiveGenSourceIterator(List<? extends ExhaustiveSource<?>> exhaustiveSources) {
 			this.sources = cloneSources(exhaustiveSources);
 			chainSources(sources);
-			// this.source = MultiGenSource.of(sources);
-			this.first = sources.getFirst();
 		}
 
 		private List<? extends ExhaustiveSource<?>> cloneSources(List<? extends ExhaustiveSource<?>> exhaustiveSources) {
@@ -78,7 +70,7 @@ public class IterableExhaustiveSource implements IterableGenSource {
 				return true;
 			}
 			try {
-				first.next();
+				sources.getFirst().next();
 				hasNextBeenInvoked = false;
 				return true;
 			} catch (Generator.NoMoreValues e) {
@@ -90,8 +82,8 @@ public class IterableExhaustiveSource implements IterableGenSource {
 		public MultiGenSource next() {
 			hasNextBeenInvoked = true;
 			List<? extends GenSource> realSources = sources.stream()
-										 .map(ExhaustiveSource::get)
-										 .toList();
+														   .map(ExhaustiveSource::get)
+														   .toList();
 			return MultiGenSource.of(realSources);
 		}
 	}

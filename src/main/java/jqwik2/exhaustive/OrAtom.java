@@ -1,10 +1,9 @@
 package jqwik2.exhaustive;
 
-import jqwik2.*;
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
 
-public class OrAtom extends AbstractExhaustiveSource<GenSource.Atom> implements GenSource.Atom {
+public class OrAtom extends AbstractExhaustiveSource<GenSource.Atom> {
 
 	private final java.util.List<ExhaustiveAtom> alternatives;
 	private int currentAlternative = 0;
@@ -51,33 +50,12 @@ public class OrAtom extends AbstractExhaustiveSource<GenSource.Atom> implements 
 	}
 
 	@Override
-	public ExhaustiveSource<Atom> clone() {
+	public ExhaustiveSource<GenSource.Atom> clone() {
 		java.util.List<ExhaustiveAtom> alternativesClones =
 			alternatives.stream()
 						.map(ExhaustiveAtom::clone)
 						.toList();
 		return new OrAtom(alternativesClones);
-	}
-
-	@Override
-	public Atom atom() {
-		return this;
-	}
-
-	@Override
-	public List list() {
-		throw new CannotGenerateException("Source is not a list");
-	}
-
-	@Override
-	public Tree tree() {
-		throw new CannotGenerateException("Source is not a tree");
-	}
-
-	@Override
-	public int choose(int maxExcluded) {
-		ExhaustiveAtom currentAtom = currentAtom();
-		return currentAtom.choose(maxExcluded);
 	}
 
 	private ExhaustiveAtom currentAtom() {

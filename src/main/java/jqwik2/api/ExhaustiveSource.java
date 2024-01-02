@@ -6,7 +6,7 @@ import jqwik2.*;
 import jqwik2.api.recording.*;
 import jqwik2.exhaustive.*;
 
-public interface ExhaustiveSource<T extends GenSource> extends GenSource, Exhaustive<ExhaustiveSource<T>>, Supplier<T> {
+public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<ExhaustiveSource<T>>, Supplier<T> {
 
 	static ExhaustiveAtom atom(int... maxChoices) {
 		return new ExhaustiveAtom(maxChoices);
@@ -28,7 +28,7 @@ public interface ExhaustiveSource<T extends GenSource> extends GenSource, Exhaus
 		return new OrAtom(atoms);
 	}
 
-	static ExhaustiveList list(int size, ExhaustiveSource elementSource) {
+	static ExhaustiveList list(int size, ExhaustiveSource<?> elementSource) {
 		if (size == 0) {
 			return new ExhaustiveEmptyList();
 		}

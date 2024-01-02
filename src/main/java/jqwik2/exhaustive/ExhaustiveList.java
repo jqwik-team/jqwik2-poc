@@ -1,17 +1,13 @@
 package jqwik2.exhaustive;
 
-import jqwik2.*;
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
 
-public class ExhaustiveList
-	extends AbstractExhaustiveSource<GenSource.List>
-	implements GenSource.List {
+public class ExhaustiveList extends AbstractExhaustiveSource<GenSource.List> {
 
 	private final int size;
 	private final ExhaustiveSource<?> elementSource;
 	private final java.util.List<ExhaustiveSource<?>> elements = new java.util.ArrayList<>();
-	private int currentElement = 0;
 
 	public ExhaustiveList(int size, ExhaustiveSource<?> elementSource) {
 		this.size = size;
@@ -50,18 +46,16 @@ public class ExhaustiveList
 
 	@Override
 	public void reset() {
-		currentElement = 0;
 		elements.forEach(ExhaustiveSource::reset);
 	}
 
 	@Override
-	public ExhaustiveSource<List> clone() {
+	public ExhaustiveSource<GenSource.List> clone() {
 		return new ExhaustiveList(elements.size(), elementSource);
 	}
 
 	@Override
 	public void next() {
-		currentElement = 0;
 		try {
 			elements.getFirst().next();
 		} catch (Generator.NoMoreValues e) {
@@ -77,26 +71,6 @@ public class ExhaustiveList
 	public void setSucc(Exhaustive<?> exhaustive) {
 		super.setSucc(exhaustive);
 		elements.getLast().setSucc(exhaustive);
-	}
-
-	@Override
-	public Atom atom() {
-		throw new CannotGenerateException("Source is not an atom");
-	}
-
-	@Override
-	public List list() {
-		return this;
-	}
-
-	@Override
-	public Tree tree() {
-		throw new CannotGenerateException("Source is not a list");
-	}
-
-	@Override
-	public GenSource nextElement() {
-		return elements.get(currentElement++);
 	}
 
 	@Override

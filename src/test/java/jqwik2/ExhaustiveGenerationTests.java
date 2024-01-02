@@ -144,28 +144,28 @@ class ExhaustiveGenerationTests {
 			first.chain(second);
 			assertThat(first.maxCount()).isEqualTo(6L);
 
-			assertThat(first.choose(3)).isEqualTo(0);
-			assertThat(second.choose(2)).isEqualTo(0);
+			assertThat(first.get().choose(3)).isEqualTo(0);
+			assertThat(second.get().choose(2)).isEqualTo(0);
 
 			first.next();
-			assertThat(first.choose(3)).isEqualTo(0);
-			assertThat(second.choose(2)).isEqualTo(1);
+			assertThat(first.get().choose(3)).isEqualTo(0);
+			assertThat(second.get().choose(2)).isEqualTo(1);
 
 			first.next();
-			assertThat(first.choose(3)).isEqualTo(1);
-			assertThat(second.choose(2)).isEqualTo(0);
+			assertThat(first.get().choose(3)).isEqualTo(1);
+			assertThat(second.get().choose(2)).isEqualTo(0);
 
 			first.next();
-			assertThat(first.choose(3)).isEqualTo(1);
-			assertThat(second.choose(2)).isEqualTo(1);
+			assertThat(first.get().choose(3)).isEqualTo(1);
+			assertThat(second.get().choose(2)).isEqualTo(1);
 
 			first.next();
-			assertThat(first.choose(3)).isEqualTo(2);
-			assertThat(second.choose(2)).isEqualTo(0);
+			assertThat(first.get().choose(3)).isEqualTo(2);
+			assertThat(second.get().choose(2)).isEqualTo(0);
 
 			first.next();
-			assertThat(first.choose(3)).isEqualTo(2);
-			assertThat(second.choose(2)).isEqualTo(1);
+			assertThat(first.get().choose(3)).isEqualTo(2);
+			assertThat(second.get().choose(2)).isEqualTo(1);
 
 			assertThatThrownBy(() -> first.next())
 				.isInstanceOf(Generator.NoMoreValues.class);
@@ -244,8 +244,17 @@ class ExhaustiveGenerationTests {
 			assertThat(count).isEqualTo(121);
 		}
 
-		private static void assertAtom(ExhaustiveSource atom, int... expected) {
-			Atom fixed = (Atom) atom.get();
+		private static void assertAtom(ExhaustiveAtom exhaustiveAtom, int... expected) {
+			GenSource.Atom fixed = exhaustiveAtom.get();
+			assertAtom(expected, fixed);
+		}
+
+		private static void assertAtom(OrAtom exhaustiveAtom, int... expected) {
+			GenSource.Atom fixed = exhaustiveAtom.get();
+			assertAtom(expected, fixed);
+		}
+
+		private static void assertAtom(int[] expected, GenSource.Atom fixed) {
 			for (int i = 0; i < expected.length; i++) {
 				assertThat(fixed.choose(Integer.MAX_VALUE))
 					.describedAs("Expected %d at position %d", expected[i], i)
@@ -290,9 +299,6 @@ class ExhaustiveGenerationTests {
 			assertThat(list.maxCount()).isEqualTo(1L);
 
 			assertThat(list.size()).isEqualTo(0);
-
-			assertThatThrownBy(() -> list.nextElement())
-				.isInstanceOf(CannotGenerateException.class);
 
 			assertThatThrownBy(() -> list.next())
 				.isInstanceOf(Generator.NoMoreValues.class);
@@ -351,9 +357,9 @@ class ExhaustiveGenerationTests {
 
 		}
 
-		private void assertTree(ExhaustiveTree tree, int... expected) {
-			GenSource.Tree fixedTree = (GenSource.Tree) tree.get();
-			int head = fixedTree.head().atom().choose(Integer.MAX_VALUE);
+		private void assertTree(ExhaustiveTree exhaustiveTree, int... expected) {
+			GenSource.Tree tree = exhaustiveTree.get();
+			int head = tree.head().atom().choose(Integer.MAX_VALUE);
 
 			assertThat(head)
 				.describedAs("Expected %d as head", expected[0])

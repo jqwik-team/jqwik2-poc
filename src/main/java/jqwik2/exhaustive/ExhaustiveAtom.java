@@ -7,11 +7,10 @@ import jqwik2.api.*;
 import jqwik2.api.recording.*;
 import jqwik2.exhaustive.ExhaustiveChoice.*;
 
-public class ExhaustiveAtom extends AbstractExhaustiveSource<GenSource.Atom> implements GenSource.Atom {
+public class ExhaustiveAtom extends AbstractExhaustiveSource<GenSource.Atom> {
 
 	private final Range[] ranges;
-	private int currentChoice = 0;
-	private final java.util.List<ExhaustiveChoice> choices = new java.util.ArrayList<>();
+	private final List<ExhaustiveChoice> choices = new java.util.ArrayList<>();
 
 	public ExhaustiveAtom(int... maxChoices) {
 		this(toRanges(maxChoices));
@@ -51,12 +50,6 @@ public class ExhaustiveAtom extends AbstractExhaustiveSource<GenSource.Atom> imp
 	}
 
 	@Override
-	public void next() {
-		currentChoice = 0;
-		super.next();
-	}
-
-	@Override
 	protected boolean tryAdvance() {
 		try {
 			choices.getLast().advance();
@@ -68,7 +61,6 @@ public class ExhaustiveAtom extends AbstractExhaustiveSource<GenSource.Atom> imp
 
 	@Override
 	public void reset() {
-		currentChoice = 0;
 		choices.forEach(ExhaustiveChoice::reset);
 	}
 
@@ -85,30 +77,6 @@ public class ExhaustiveAtom extends AbstractExhaustiveSource<GenSource.Atom> imp
 
 	public Recording recording() {
 		return Recording.atom(choices.stream().map(ExhaustiveChoice::fix).toList());
-	}
-
-	@Override
-	public Atom atom() {
-		return this;
-	}
-
-	@Override
-	public List list() {
-		throw new CannotGenerateException("Source is not a list");
-	}
-
-	@Override
-	public Tree tree() {
-		throw new CannotGenerateException("Source is not a tree");
-	}
-
-	@Override
-	public int choose(int maxExcluded) {
-		if (currentChoice >= choices.size()) {
-			throw new CannotGenerateException("No more choices!");
-		}
-		ExhaustiveChoice currentChoice = choices.get(this.currentChoice++);
-		return currentChoice.choose(maxExcluded);
 	}
 
 	@Override
