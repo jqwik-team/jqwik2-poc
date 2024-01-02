@@ -397,6 +397,18 @@ class ExhaustiveGenerationTests {
 		assertThat(allValues).contains(-10, 100, 0, -9, 99, 42);
 	}
 
+	@Example
+	void lists() {
+		Generator<Integer> ints0to10 = new IntegerGenerator(0, 2);
+		Generator<List<Integer>> lists = new ListGenerator<>(ints0to10, 2);
+
+		ExhaustiveSource exhaustive = lists.exhaustive().get();
+		assertThat(exhaustive.maxCount()).isEqualTo(13L);
+
+		List<List<Integer>> allValues = collectAll(exhaustive, lists);
+		// assertThat(allValues).containsExactly(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+	}
+
 	private static <T> List<T> collectAll(ExhaustiveSource source, Generator<T> generator) {
 		List<T> allValues = new ArrayList<>();
 		while (true) {

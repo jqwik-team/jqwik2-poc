@@ -5,6 +5,7 @@ import java.util.function.*;
 
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
+import jqwik2.exhaustive.*;
 
 import static jqwik2.api.recording.Recording.*;
 
@@ -35,14 +36,14 @@ public class ListGenerator<T> implements Generator<List<T>> {
 	}
 
 	@Override
-	public Iterable<Recording> edgeCases() {
-		return edgeCaseRecordings();
-	}
-
-	@Override
 	public Generator<List<T>> decorate(Function<Generator<?>, Generator<?>> decorator) {
 		Generator<T> decoratedElementGenerator = elementGenerator.decorate(decorator);
 		return (Generator<List<T>>) decorator.apply(new ListGenerator<>(decoratedElementGenerator, maxSize));
+	}
+
+	@Override
+	public Iterable<Recording> edgeCases() {
+		return edgeCaseRecordings();
 	}
 
 	private Collection<Recording> edgeCaseRecordings() {
@@ -53,4 +54,14 @@ public class ListGenerator<T> implements Generator<List<T>> {
 		});
 		return recordings;
 	}
+
+	@Override
+	public Optional<ExhaustiveSource> exhaustive() {
+		return elementGenerator.exhaustive().flatMap(
+			elementSource -> Optional.of(ExhaustiveSource.tree(
+				new ExhaustiveChoice.Range(0, maxSize),
+				size -> ExhaustiveSource.list(size, elementSource)
+			)));
+	}
+
 }
