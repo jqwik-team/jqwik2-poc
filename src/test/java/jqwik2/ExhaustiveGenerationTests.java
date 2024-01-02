@@ -352,21 +352,17 @@ class ExhaustiveGenerationTests {
 		}
 
 		private void assertTree(ExhaustiveTree tree, int...expected) {
-			ExhaustiveAtom exhaustiveAtom = (ExhaustiveAtom) tree.head().atom();
-			int head = ((Atom) exhaustiveAtom.fix()).choose(Integer.MAX_VALUE);
+			GenSource.Tree fixedTree = (GenSource.Tree) tree.fix();
+			int head = fixedTree.head().atom().choose(Integer.MAX_VALUE);
+
 			assertThat(head)
 				.describedAs("Expected %d as head", expected[0])
 				.isEqualTo(expected[0]);
 
-			ExhaustiveList list = (ExhaustiveList) tree.child().list();
-			int listSize = list.size();
-			assertThat(listSize)
-				.describedAs("Expected list size %d", listSize)
-				.isEqualTo(expected.length - 1);
+			GenSource.List list = tree.child().list();
 
-			GenSource.List fixedList = (GenSource.List) list.fix();
-			for (int i = 0; i < listSize; i++) {
-				var atom = fixedList.nextElement().atom();
+			for (int i = 0; i < head; i++) {
+				var atom = list.nextElement().atom();
 				assertThat(atom.choose(Integer.MAX_VALUE))
 					.describedAs("Expected %d at position %d", expected[i + 1], i)
 					.isEqualTo(expected[i + 1]);
@@ -399,36 +395,73 @@ class ExhaustiveGenerationTests {
 
 	@Example
 	void lists() {
-		Generator<Integer> ints0to10 = new IntegerGenerator(0, 2);
+		Generator<Integer> ints0to10 = new IntegerGenerator(-1, 2);
 		Generator<List<Integer>> lists = new ListGenerator<>(ints0to10, 2);
 
 		ExhaustiveSource exhaustive = lists.exhaustive().get();
-		assertThat(exhaustive.maxCount()).isEqualTo(13L);
+		assertThat(exhaustive.maxCount()).isEqualTo(21L);
 
 		List<List<Integer>> allValues = collectAll(exhaustive, lists);
-		assertThat(allValues).hasSize(13);
+		assertThat(allValues).hasSize(21);
 		assertThat(allValues).containsExactly(
 			List.of(),
 			List.of(0),
 			List.of(1),
+			List.of(-1),
 			List.of(2),
 			List.of(0, 0),
 			List.of(0, 1),
+			List.of(0, -1),
 			List.of(0, 2),
 			List.of(1, 0),
 			List.of(1, 1),
+			List.of(1, -1),
 			List.of(1, 2),
 			List.of(2, 0),
 			List.of(2, 1),
+			List.of(2, -1),
 			List.of(2, 2)
 		);
 	}
+
+	@Example
+	void generateSampleWithIntsAndLists() {
+		IntegerGenerator ints1 = new IntegerGenerator(0, 10);
+		ListGenerator<Integer> lists2 = new ListGenerator<>(new IntegerGenerator(0, 4), 2);
+
+		SampleGenerator sampleGenerator = SampleGenerator.from(ints1, lists2);
+
+		IterableExhaustiveSource exhaustiveGenSource = IterableExhaustiveSource.from(ints1, lists2);
+
+		assertThat(exhaustiveGenSource.maxCount()).isEqualTo(121);
+
+		// List<Sample> allSamples = new ArrayList<>();
+		// for (MultiGenSource multiGenSource : exhaustiveGenSource) {
+		// 	Sample sample = sampleGenerator.generate(multiGenSource);
+		// 	// System.out.println(sample);
+		// 	allSamples.add(sample);
+		// }
+		// assertThat(allSamples).hasSize(121);
+		//
+		// List<List<Object>> values = allSamples.stream().map(Sample::values).toList();
+		// assertThat(values).contains(List.of(0, -5));
+		// assertThat(values).contains(List.of(10, 5));
+		//
+		// // Second iteration
+		// int count = 0;
+		// for (MultiGenSource multiGenSource : exhaustiveGenSource) {
+		// 	count++;
+		// }
+		// assertThat(count).isEqualTo(121);
+	}
+
 
 	private static <T> List<T> collectAll(ExhaustiveSource source, Generator<T> generator) {
 		List<T> allValues = new ArrayList<>();
 		while (true) {
 			try {
-				allValues.add(generator.generate(source));
+				T value = generator.generate(source);
+				allValues.add(value);
 				source.next();
 			} catch (Generator.NoMoreValues noMoreValues) {
 				break;

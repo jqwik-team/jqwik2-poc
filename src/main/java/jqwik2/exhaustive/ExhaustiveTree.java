@@ -112,6 +112,6 @@ public class ExhaustiveTree extends AbstractExhaustiveSource implements GenSourc
 
 	@Override
 	public Recording recording() {
-		throw new UnsupportedOperationException();
+		return Recording.tree(head.recording(), child.recording());
 	}
 }
