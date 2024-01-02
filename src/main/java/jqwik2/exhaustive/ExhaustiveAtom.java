@@ -10,7 +10,7 @@ import jqwik2.exhaustive.ExhaustiveChoice.*;
 public class ExhaustiveAtom extends AbstractExhaustiveSource implements GenSource.Atom {
 
 	private final Range[] ranges;
-	private int current = 0;
+	private int currentChoice = 0;
 	private final java.util.List<ExhaustiveChoice> choices = new java.util.ArrayList<>();
 
 	public ExhaustiveAtom(int... maxChoices) {
@@ -63,9 +63,15 @@ public class ExhaustiveAtom extends AbstractExhaustiveSource implements GenSourc
 		}
 	}
 
+	@Override
+	public void next() {
+		currentChoice = 0;
+		super.next();
+	}
+
 	private boolean tryAdvance() {
 		try {
-			choices.getFirst().next();
+			choices.getLast().advance();
 			return true;
 		} catch (Generator.NoMoreValues e) {
 			return false;
@@ -74,7 +80,7 @@ public class ExhaustiveAtom extends AbstractExhaustiveSource implements GenSourc
 
 	@Override
 	public void reset() {
-		current = 0;
+		currentChoice = 0;
 		choices.forEach(ExhaustiveChoice::reset);
 	}
 
@@ -116,10 +122,10 @@ public class ExhaustiveAtom extends AbstractExhaustiveSource implements GenSourc
 
 	@Override
 	public int choose(int maxExcluded) {
-		if (current >= choices.size()) {
+		if (currentChoice >= choices.size()) {
 			throw new CannotGenerateException("No more choices!");
 		}
-		ExhaustiveChoice currentChoice = choices.get(current++);
+		ExhaustiveChoice currentChoice = choices.get(this.currentChoice++);
 		return currentChoice.choose(maxExcluded);
 	}
 

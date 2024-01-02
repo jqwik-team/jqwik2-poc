@@ -100,7 +100,7 @@ public class OrAtom extends AbstractExhaustiveSource implements GenSource.Atom {
 	@Override
 	public void setPrev(Exhaustive<?> exhaustive) {
 		super.setPrev(exhaustive);
-		alternatives.forEach(a -> a.setPrev(exhaustive));
+		//alternatives.forEach(a -> a.setPrev(exhaustive));
 	}
 
 	@Override

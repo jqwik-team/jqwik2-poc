@@ -154,7 +154,7 @@ class ExhaustiveGenerationTests {
 		}
 
 		@Example
-		void atomAlternatives() {
+		void orAtom() {
 			ExhaustiveAtom atom1 = ExhaustiveSource.atom(range(0, 1), value(0));
 			ExhaustiveAtom atom2 = ExhaustiveSource.atom(range(0, 2), value(1));
 			ExhaustiveAtom atom3 = ExhaustiveSource.atom(value(2), value(3));
