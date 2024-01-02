@@ -1,16 +1,18 @@
-- Add exhaustive generation
-    - For lists
+- Additional generators
+    - Filter
+    - Map
+    - String
+    - FlatMap
+    - Set of values
+- Exhaustive generation
+    - Make maxCount() calculation stable against overflow
 - PropertyCase Execution
   - Fail if ratio checks/tries is too low
   - Save seed and falsified samples to disk
   - Allow rerun with previously falsified samples (starting with smallest) 
     => Rerun will improve shrinking!
+  - Allow execution with exhaustive generation
 - Add GenSource.Tuple
-- Additional generators
-  - Filter 
-  - Map
-  - String 
-  - FlatMap
 - Add descriptions to generators
 - Give generators equality to allow caching
 - Stateful generators
