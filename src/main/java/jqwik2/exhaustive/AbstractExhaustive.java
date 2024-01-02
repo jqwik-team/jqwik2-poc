@@ -55,6 +55,6 @@ abstract class AbstractExhaustive<T extends Exhaustive<T>> implements Exhaustive
 
 	@Override
 	public T clone() {
-		return null;
+		throw new UnsupportedOperationException("clone() must be overridden in subclasses");
 	}
 }

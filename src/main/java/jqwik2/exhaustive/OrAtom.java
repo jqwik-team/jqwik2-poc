@@ -7,7 +7,7 @@ import jqwik2.api.recording.*;
 public class OrAtom extends AbstractExhaustiveSource implements GenSource.Atom {
 
 	private final java.util.List<ExhaustiveAtom> alternatives;
-	private int current = 0;
+	private int currentAlternative = 0;
 
 	public OrAtom(ExhaustiveAtom... alternatives) {
 		this(java.util.List.of(alternatives));
@@ -34,8 +34,8 @@ public class OrAtom extends AbstractExhaustiveSource implements GenSource.Atom {
 			currentAtom().next();
 			return true;
 		} catch (Generator.NoMoreValues e) {
-			if (current < alternatives.size() - 1) {
-				current++;
+			if (currentAlternative < alternatives.size() - 1) {
+				currentAlternative++;
 				return true;
 			} else {
 				reset();
@@ -46,7 +46,7 @@ public class OrAtom extends AbstractExhaustiveSource implements GenSource.Atom {
 
 	@Override
 	public void reset() {
-		current = 0;
+		currentAlternative = 0;
 		alternatives.forEach(ExhaustiveAtom::reset);
 	}
 
@@ -77,7 +77,7 @@ public class OrAtom extends AbstractExhaustiveSource implements GenSource.Atom {
 	}
 
 	private ExhaustiveAtom currentAtom() {
-		return alternatives.get(current);
+		return alternatives.get(currentAlternative);
 	}
 
 	@Override
@@ -95,7 +95,7 @@ public class OrAtom extends AbstractExhaustiveSource implements GenSource.Atom {
 	public String toString() {
 		return "OrAtom{" +
 				   "alternatives=" + alternatives +
-				   ", current=" + current +
+				   ", current=" + currentAlternative +
 				   '}';
 	}
 }
