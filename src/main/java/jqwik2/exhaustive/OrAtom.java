@@ -52,7 +52,11 @@ public class OrAtom extends AbstractExhaustiveSource implements GenSource.Atom {
 
 	@Override
 	public ExhaustiveSource clone() {
-		return new OrAtom(alternatives);
+		java.util.List<ExhaustiveAtom> alternativesClones =
+			alternatives.stream()
+						.map(ExhaustiveAtom::clone)
+						.toList();
+		return new OrAtom(alternativesClones);
 	}
 
 	@Override
