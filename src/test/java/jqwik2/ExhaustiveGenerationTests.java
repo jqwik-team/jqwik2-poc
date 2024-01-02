@@ -406,7 +406,22 @@ class ExhaustiveGenerationTests {
 		assertThat(exhaustive.maxCount()).isEqualTo(13L);
 
 		List<List<Integer>> allValues = collectAll(exhaustive, lists);
-		// assertThat(allValues).containsExactly(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+		assertThat(allValues).hasSize(13);
+		assertThat(allValues).containsExactly(
+			List.of(),
+			List.of(0),
+			List.of(1),
+			List.of(2),
+			List.of(0, 0),
+			List.of(0, 1),
+			List.of(0, 2),
+			List.of(1, 0),
+			List.of(1, 1),
+			List.of(1, 2),
+			List.of(2, 0),
+			List.of(2, 1),
+			List.of(2, 2)
+		);
 	}
 
 	private static <T> List<T> collectAll(ExhaustiveSource source, Generator<T> generator) {

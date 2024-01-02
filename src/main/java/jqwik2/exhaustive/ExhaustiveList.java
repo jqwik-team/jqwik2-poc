@@ -61,6 +61,7 @@ public class ExhaustiveList
 
 	@Override
 	public void next() {
+		currentElement = 0;
 		try {
 			elements.getFirst().next();
 		} catch (Generator.NoMoreValues e) {
