@@ -137,6 +137,41 @@ class ExhaustiveGenerationTests {
 		}
 
 		@Example
+		void twoConcatenatedExhaustiveAtoms() {
+			ExhaustiveAtom first = ExhaustiveSource.atom(2);
+			ExhaustiveAtom second = ExhaustiveSource.atom(1);
+
+			first.chain(second);
+			assertThat(first.maxCount()).isEqualTo(6L);
+
+			assertThat(first.choose(3)).isEqualTo(0);
+			assertThat(second.choose(2)).isEqualTo(0);
+
+			first.next();
+			assertThat(first.choose(3)).isEqualTo(0);
+			assertThat(second.choose(2)).isEqualTo(1);
+
+			first.next();
+			assertThat(first.choose(3)).isEqualTo(1);
+			assertThat(second.choose(2)).isEqualTo(0);
+
+			first.next();
+			assertThat(first.choose(3)).isEqualTo(1);
+			assertThat(second.choose(2)).isEqualTo(1);
+
+			first.next();
+			assertThat(first.choose(3)).isEqualTo(2);
+			assertThat(second.choose(2)).isEqualTo(0);
+
+			first.next();
+			assertThat(first.choose(3)).isEqualTo(2);
+			assertThat(second.choose(2)).isEqualTo(1);
+
+			assertThatThrownBy(() -> first.next())
+				.isInstanceOf(Generator.NoMoreValues.class);
+		}
+
+		@Example
 		void exhaustiveAtomWithRanges() {
 			ExhaustiveAtom atom = ExhaustiveSource.atom(
 				range(2, 3), range(3, 4), value(4)

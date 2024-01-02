@@ -51,25 +51,13 @@ public class ExhaustiveAtom extends AbstractExhaustiveSource implements GenSourc
 	}
 
 	@Override
-	public void advance() {
-		if (tryAdvance()) {
-			return;
-		}
-		reset();
-		if (prev().isPresent()) {
-			prev().get().advance();
-		} else {
-			Generator.noMoreValues();
-		}
-	}
-
-	@Override
 	public void next() {
 		currentChoice = 0;
 		super.next();
 	}
 
-	private boolean tryAdvance() {
+	@Override
+	protected boolean tryAdvance() {
 		try {
 			choices.getLast().advance();
 			return true;
@@ -87,12 +75,6 @@ public class ExhaustiveAtom extends AbstractExhaustiveSource implements GenSourc
 	@Override
 	public ExhaustiveAtom clone() {
 		return new ExhaustiveAtom(ranges);
-	}
-
-	@Override
-	public void setPrev(Exhaustive<?> exhaustive) {
-		super.setPrev(exhaustive);
-		prev().ifPresent(prev -> choices.getFirst().setPrev(prev));
 	}
 
 	@Override

@@ -1,11 +1,9 @@
 package jqwik2.exhaustive;
 
-import jqwik2.api.*;
-
 public class ExhaustiveChoice extends AbstractExhaustive<ExhaustiveChoice> {
 
 	private final Range range;
-	private int current = 0;
+	private int currentValue = 0;
 
 	public ExhaustiveChoice(int maxIncluded) {
 		this(0, maxIncluded);
@@ -22,11 +20,11 @@ public class ExhaustiveChoice extends AbstractExhaustive<ExhaustiveChoice> {
 
 	@Override
 	public void reset() {
-		current = range.min;
+		currentValue = range.min;
 	}
 
 	public int choose(int maxExcluded) {
-		return current % maxExcluded;
+		return currentValue % maxExcluded;
 	}
 
 	@Override
@@ -39,21 +37,9 @@ public class ExhaustiveChoice extends AbstractExhaustive<ExhaustiveChoice> {
 	}
 
 	@Override
-	public void advance() {
-		if (tryAdvance()) {
-			return;
-		}
-		reset();
-		if (prev().isPresent()) {
-			prev().get().advance();
-		} else {
-			Generator.noMoreValues();
-		}
-	}
-
-	private boolean tryAdvance() {
-		if (current < range.max) {
-			current++;
+	protected boolean tryAdvance() {
+		if (currentValue < range.max) {
+			currentValue++;
 			return true;
 		} else {
 			return false;
@@ -67,11 +53,11 @@ public class ExhaustiveChoice extends AbstractExhaustive<ExhaustiveChoice> {
 
 	@Override
 	public String toString() {
-		return "ExhaustiveChoice(range=%s, current=%d)".formatted(range, current);
+		return "ExhaustiveChoice(range=%s, current=%d)".formatted(range, currentValue);
 	}
 
 	public Integer fix() {
-		return current;
+		return currentValue;
 	}
 
 	public record Range(int min, int max) {

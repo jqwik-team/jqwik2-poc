@@ -11,7 +11,7 @@ public class ExhaustiveList
 	private final int size;
 	private final ExhaustiveSource elementSource;
 	private final java.util.List<ExhaustiveSource> elements = new java.util.ArrayList<>();
-	private int current = 0;
+	private int currentElement = 0;
 
 	public ExhaustiveList(int size, ExhaustiveSource elementSource) {
 		this.size = size;
@@ -39,13 +39,18 @@ public class ExhaustiveList
 	}
 
 	@Override
-	public void advance() {
-		elements.getLast().advance();
+	protected boolean tryAdvance() {
+		try {
+			elements.getLast().advance();
+			return true;
+		} catch (Generator.NoMoreValues e) {
+			return false;
+		}
 	}
 
 	@Override
 	public void reset() {
-		current = 0;
+		currentElement = 0;
 		elements.forEach(ExhaustiveSource::reset);
 	}
 
@@ -56,13 +61,8 @@ public class ExhaustiveList
 
 	@Override
 	public void next() {
-		current = 0;
+		currentElement = 0;
 		elements.getFirst().next();
-	}
-
-	@Override
-	public void setPrev(Exhaustive<?> exhaustive) {
-		super.setPrev(exhaustive);
 	}
 
 	@Override
@@ -88,7 +88,7 @@ public class ExhaustiveList
 
 	@Override
 	public GenSource nextElement() {
-		return elements.get(current++);
+		return elements.get(currentElement++);
 	}
 
 	@Override

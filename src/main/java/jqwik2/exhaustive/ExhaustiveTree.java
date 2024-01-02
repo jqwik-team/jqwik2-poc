@@ -48,6 +48,11 @@ public class ExhaustiveTree extends AbstractExhaustiveSource implements GenSourc
 	}
 
 	@Override
+	protected boolean tryAdvance() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public void reset() {
 		head.reset();
 		creatAndChainChild();

@@ -29,19 +29,7 @@ public class OrAtom extends AbstractExhaustiveSource implements GenSource.Atom {
 	}
 
 	@Override
-	public void advance() {
-		if (tryAdvance()) {
-			return;
-		}
-		reset();
-		if (prev().isPresent()) {
-			prev().get().advance();
-		} else {
-			Generator.noMoreValues();
-		}
-	}
-
-	private boolean tryAdvance() {
+	protected boolean tryAdvance() {
 		try {
 			currentAtom().next();
 			return true;
@@ -95,12 +83,6 @@ public class OrAtom extends AbstractExhaustiveSource implements GenSource.Atom {
 	@Override
 	public Recording recording() {
 		return currentAtom().recording();
-	}
-
-	@Override
-	public void setPrev(Exhaustive<?> exhaustive) {
-		super.setPrev(exhaustive);
-		//alternatives.forEach(a -> a.setPrev(exhaustive));
 	}
 
 	@Override
