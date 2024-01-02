@@ -298,7 +298,7 @@ class ExhaustiveGenerationTests {
 				.isInstanceOf(Generator.NoMoreValues.class);
 		}
 
-		private void assertList(ExhaustiveList list, int...expected) {
+		private void assertList(ExhaustiveList list, int... expected) {
 			GenSource.List fixedList = (GenSource.List) list.get();
 			for (int i = 0; i < expected.length; i++) {
 				var atom = fixedList.nextElement().atom();
@@ -351,7 +351,7 @@ class ExhaustiveGenerationTests {
 
 		}
 
-		private void assertTree(ExhaustiveTree tree, int...expected) {
+		private void assertTree(ExhaustiveTree tree, int... expected) {
 			GenSource.Tree fixedTree = (GenSource.Tree) tree.get();
 			int head = fixedTree.head().atom().choose(Integer.MAX_VALUE);
 
@@ -398,7 +398,7 @@ class ExhaustiveGenerationTests {
 		Generator<Integer> ints0to10 = new IntegerGenerator(-1, 2);
 		Generator<List<Integer>> lists = new ListGenerator<>(ints0to10, 2);
 
-		ExhaustiveSource exhaustive = lists.exhaustive().get();
+		ExhaustiveSource<?> exhaustive = lists.exhaustive().get();
 		assertThat(exhaustive.maxCount()).isEqualTo(21L);
 
 		List<List<Integer>> allValues = collectAll(exhaustive, lists);
@@ -407,20 +407,24 @@ class ExhaustiveGenerationTests {
 			List.of(),
 			List.of(0),
 			List.of(1),
-			List.of(-1),
 			List.of(2),
+			List.of(-1),
 			List.of(0, 0),
 			List.of(0, 1),
-			List.of(0, -1),
 			List.of(0, 2),
+			List.of(0, -1),
 			List.of(1, 0),
 			List.of(1, 1),
-			List.of(1, -1),
 			List.of(1, 2),
+			List.of(1, -1),
 			List.of(2, 0),
 			List.of(2, 1),
+			List.of(2, 2),
 			List.of(2, -1),
-			List.of(2, 2)
+			List.of(-1, 0),
+			List.of(-1, 1),
+			List.of(-1, 2),
+			List.of(-1, -1)
 		);
 	}
 
@@ -433,36 +437,41 @@ class ExhaustiveGenerationTests {
 
 		IterableExhaustiveSource exhaustiveGenSource = IterableExhaustiveSource.from(ints1, lists2);
 
-		assertThat(exhaustiveGenSource.maxCount()).isEqualTo(121);
+		assertThat(exhaustiveGenSource.maxCount()).isEqualTo(341);
 
-		// List<Sample> allSamples = new ArrayList<>();
-		// for (MultiGenSource multiGenSource : exhaustiveGenSource) {
-		// 	Sample sample = sampleGenerator.generate(multiGenSource);
-		// 	// System.out.println(sample);
-		// 	allSamples.add(sample);
-		// }
-		// assertThat(allSamples).hasSize(121);
-		//
-		// List<List<Object>> values = allSamples.stream().map(Sample::values).toList();
-		// assertThat(values).contains(List.of(0, -5));
-		// assertThat(values).contains(List.of(10, 5));
-		//
-		// // Second iteration
-		// int count = 0;
-		// for (MultiGenSource multiGenSource : exhaustiveGenSource) {
-		// 	count++;
-		// }
-		// assertThat(count).isEqualTo(121);
+		List<Sample> allSamples = new ArrayList<>();
+		for (MultiGenSource multiGenSource : exhaustiveGenSource) {
+			Sample sample = sampleGenerator.generate(multiGenSource);
+			// System.out.println(sample);
+			allSamples.add(sample);
+		}
+		assertThat(allSamples).hasSize(341);
+
+		List<List<Object>> values = allSamples.stream().map(Sample::values).toList();
+		assertThat(values).contains(List.of(0, List.of()));
+		assertThat(values).contains(List.of(10, List.of()));
+		assertThat(values).contains(List.of(0, List.of(0)));
+		assertThat(values).contains(List.of(0, List.of(4)));
+		assertThat(values).contains(List.of(10, List.of(0)));
+		assertThat(values).contains(List.of(10, List.of(4)));
+		assertThat(values).contains(List.of(0, List.of(0, 0)));
+		assertThat(values).contains(List.of(10, List.of(4, 4)));
+
+		// Second iteration
+		int count = 0;
+		for (MultiGenSource multiGenSource : exhaustiveGenSource) {
+			count++;
+		}
+		assertThat(count).isEqualTo(341);
 	}
 
-
-	private static <T> List<T> collectAll(ExhaustiveSource source, Generator<T> generator) {
+	private static <T> List<T> collectAll(ExhaustiveSource<?> exhaustiveSource, Generator<T> generator) {
 		List<T> allValues = new ArrayList<>();
 		while (true) {
 			try {
-				T value = generator.generate(source);
+				T value = generator.generate(exhaustiveSource.get());
 				allValues.add(value);
-				source.next();
+				exhaustiveSource.next();
 			} catch (Generator.NoMoreValues noMoreValues) {
 				break;
 			}

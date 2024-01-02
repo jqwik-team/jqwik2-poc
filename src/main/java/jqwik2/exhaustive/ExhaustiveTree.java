@@ -54,7 +54,16 @@ public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> imp
 	@Override
 	public void next() {
 		Recording before = head.recording();
-		head.next();
+		try {
+			head.next();
+		} catch (Generator.NoMoreValues e) {
+			if (prev().isPresent()) {
+				reset();
+				prev().get().advance();
+			} else {
+				Generator.noMoreValues();
+			}
+		}
 		Recording after = head.recording();
 		if (!before.equals(after)) {
 			creatAndChainChild();
