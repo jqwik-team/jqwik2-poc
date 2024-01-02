@@ -56,7 +56,7 @@ public class ListGenerator<T> implements Generator<List<T>> {
 	}
 
 	@Override
-	public Optional<ExhaustiveSource> exhaustive() {
+	public Optional<ExhaustiveSource<?>> exhaustive() {
 		return elementGenerator.exhaustive().flatMap(
 			elementSource -> Optional.of(ExhaustiveSource.tree(
 				new ExhaustiveChoice.Range(0, maxSize),

@@ -7,7 +7,7 @@ import jqwik2.api.*;
 import jqwik2.api.recording.*;
 import jqwik2.exhaustive.ExhaustiveChoice.*;
 
-public class ExhaustiveAtom extends AbstractExhaustiveSource implements GenSource.Atom {
+public class ExhaustiveAtom extends AbstractExhaustiveSource<GenSource.Atom> implements GenSource.Atom {
 
 	private final Range[] ranges;
 	private int currentChoice = 0;

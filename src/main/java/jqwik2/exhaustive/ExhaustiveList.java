@@ -5,23 +5,23 @@ import jqwik2.api.*;
 import jqwik2.api.recording.*;
 
 public class ExhaustiveList
-	extends AbstractExhaustiveSource
+	extends AbstractExhaustiveSource<GenSource.List>
 	implements GenSource.List {
 
 	private final int size;
-	private final ExhaustiveSource elementSource;
-	private final java.util.List<ExhaustiveSource> elements = new java.util.ArrayList<>();
+	private final ExhaustiveSource<?> elementSource;
+	private final java.util.List<ExhaustiveSource<?>> elements = new java.util.ArrayList<>();
 	private int currentElement = 0;
 
-	public ExhaustiveList(int size, ExhaustiveSource elementSource) {
+	public ExhaustiveList(int size, ExhaustiveSource<?> elementSource) {
 		this.size = size;
 		this.elementSource = elementSource;
 		createElements(size, elementSource);
 	}
 
-	private void createElements(int size, ExhaustiveSource elementSource) {
+	private void createElements(int size, ExhaustiveSource<?> elementSource) {
 		for (int i = 0; i < size; i++) {
-			ExhaustiveSource current = elementSource.clone();
+			ExhaustiveSource<?> current = elementSource.clone();
 			elements.add(current);
 			if (i > 0) {
 				elements.get(i - 1).chain(current);
@@ -55,7 +55,7 @@ public class ExhaustiveList
 	}
 
 	@Override
-	public ExhaustiveSource clone() {
+	public ExhaustiveSource<List> clone() {
 		return new ExhaustiveList(elements.size(), elementSource);
 	}
 

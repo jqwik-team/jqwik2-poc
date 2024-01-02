@@ -24,7 +24,7 @@ public interface Generator<T> {
 		return Set.of();
 	}
 
-	default Optional<ExhaustiveSource> exhaustive() {
+	default Optional<ExhaustiveSource<?>> exhaustive() {
 		return Optional.empty();
 	}
 

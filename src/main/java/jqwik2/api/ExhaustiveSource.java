@@ -6,7 +6,7 @@ import jqwik2.*;
 import jqwik2.api.recording.*;
 import jqwik2.exhaustive.*;
 
-public interface ExhaustiveSource extends GenSource, Exhaustive<ExhaustiveSource> {
+public interface ExhaustiveSource<T extends GenSource> extends GenSource, Exhaustive<ExhaustiveSource<T>>, Supplier<T> {
 
 	static ExhaustiveAtom atom(int... maxChoices) {
 		return new ExhaustiveAtom(maxChoices);
@@ -41,13 +41,14 @@ public interface ExhaustiveSource extends GenSource, Exhaustive<ExhaustiveSource
 	 * @param range A range of all possible choices for head
 	 * @param childCreator Function to create child source based on head value
 	 */
-	static ExhaustiveTree tree(ExhaustiveChoice.Range range, Function<Integer, ExhaustiveSource> childCreator) {
+	static ExhaustiveTree tree(ExhaustiveChoice.Range range, Function<Integer, ExhaustiveSource<?>> childCreator) {
 		return new ExhaustiveTree(range, childCreator);
 	}
 
 	Recording recording();
 
-	default GenSource fix() {
-		return new RecordedSource(recording());
+	@SuppressWarnings("unchecked")
+	default T get() {
+		return (T) new RecordedSource(recording());
 	}
 }

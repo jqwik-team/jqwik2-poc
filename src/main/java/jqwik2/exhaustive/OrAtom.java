@@ -4,7 +4,7 @@ import jqwik2.*;
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
 
-public class OrAtom extends AbstractExhaustiveSource implements GenSource.Atom {
+public class OrAtom extends AbstractExhaustiveSource<GenSource.Atom> implements GenSource.Atom {
 
 	private final java.util.List<ExhaustiveAtom> alternatives;
 	private int currentAlternative = 0;
@@ -51,7 +51,7 @@ public class OrAtom extends AbstractExhaustiveSource implements GenSource.Atom {
 	}
 
 	@Override
-	public ExhaustiveSource clone() {
+	public ExhaustiveSource<Atom> clone() {
 		java.util.List<ExhaustiveAtom> alternativesClones =
 			alternatives.stream()
 						.map(ExhaustiveAtom::clone)

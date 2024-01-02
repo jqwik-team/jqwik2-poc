@@ -7,13 +7,13 @@ import jqwik2.*;
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
 
-public class ExhaustiveTree extends AbstractExhaustiveSource implements GenSource.Tree {
+public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> implements GenSource.Tree {
 	private final ExhaustiveChoice.Range range;
-	private final Function<Integer, ExhaustiveSource> childCreator;
+	private final Function<Integer, ExhaustiveSource<?>> childCreator;
 	private final ExhaustiveAtom head;
-	private ExhaustiveSource child;
+	private ExhaustiveSource<?> child;
 
-	public ExhaustiveTree(ExhaustiveChoice.Range range, Function<Integer, ExhaustiveSource> childCreator) {
+	public ExhaustiveTree(ExhaustiveChoice.Range range, Function<Integer, ExhaustiveSource<?>> childCreator) {
 		this.range = range;
 		this.childCreator = childCreator;
 		this.head = new ExhaustiveAtom(range);
@@ -26,8 +26,8 @@ public class ExhaustiveTree extends AbstractExhaustiveSource implements GenSourc
 						.collect(Collectors.toList());
 	}
 
-	private java.util.List<ExhaustiveSource> createChildren(java.util.List<Integer> heads) {
-		java.util.List<ExhaustiveSource> result = new java.util.ArrayList<>();
+	private java.util.List<ExhaustiveSource<?>> createChildren(java.util.List<Integer> heads) {
+		java.util.List<ExhaustiveSource<?>> result = new java.util.ArrayList<>();
 		for (int head : heads) {
 			result.add(childCreator.apply(head));
 		}
@@ -68,7 +68,7 @@ public class ExhaustiveTree extends AbstractExhaustiveSource implements GenSourc
 	}
 
 	private void creatAndChainChild() {
-		int size = ((Atom) head.fix()).choose(Integer.MAX_VALUE);
+		int size = ((Atom) head.get()).choose(Integer.MAX_VALUE);
 		child = childCreator.apply(size);
 		head.chain(child);
 		succ().ifPresent(succ -> child.setSucc(succ));

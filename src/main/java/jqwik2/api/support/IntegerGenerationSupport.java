@@ -48,7 +48,7 @@ public class IntegerGenerationSupport {
 		return fullRangeIntEdgeCases(min, max);
 	}
 
-	public static ExhaustiveSource exhaustive(int min, int max) {
+	public static ExhaustiveSource<?> exhaustive(int min, int max) {
 		if (isPositiveUnsignedIntRange(min, max)) {
 			int range = max - min;
 			return atom(range);

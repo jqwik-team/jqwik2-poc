@@ -11,7 +11,7 @@ public interface Exhaustive<T extends Exhaustive<T>> extends Cloneable {
 
 	T clone();
 
-	default void chain(Exhaustive succ)  {
+	default void chain(Exhaustive<?> succ)  {
 		this.setSucc(succ);
 		succ.setPrev(this);
 	}

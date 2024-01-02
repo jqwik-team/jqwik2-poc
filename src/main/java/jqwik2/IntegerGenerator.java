@@ -26,7 +26,7 @@ public class IntegerGenerator implements Generator<Integer> {
 	}
 
 	@Override
-	public Optional<ExhaustiveSource> exhaustive() {
-		return Optional.of(IntegerGenerationSupport.exhaustive(min, max));
+	public Optional<ExhaustiveSource<?>> exhaustive() {
+		return Optional.ofNullable(IntegerGenerationSupport.exhaustive(min, max));
 	}
 }

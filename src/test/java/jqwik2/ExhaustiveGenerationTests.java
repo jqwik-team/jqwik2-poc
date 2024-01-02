@@ -245,7 +245,7 @@ class ExhaustiveGenerationTests {
 		}
 
 		private static void assertAtom(ExhaustiveSource atom, int... expected) {
-			Atom fixed = (Atom) atom.fix();
+			Atom fixed = (Atom) atom.get();
 			for (int i = 0; i < expected.length; i++) {
 				assertThat(fixed.choose(Integer.MAX_VALUE))
 					.describedAs("Expected %d at position %d", expected[i], i)
@@ -299,7 +299,7 @@ class ExhaustiveGenerationTests {
 		}
 
 		private void assertList(ExhaustiveList list, int...expected) {
-			GenSource.List fixedList = (GenSource.List) list.fix();
+			GenSource.List fixedList = (GenSource.List) list.get();
 			for (int i = 0; i < expected.length; i++) {
 				var atom = fixedList.nextElement().atom();
 				assertThat(atom.choose(Integer.MAX_VALUE))
@@ -352,7 +352,7 @@ class ExhaustiveGenerationTests {
 		}
 
 		private void assertTree(ExhaustiveTree tree, int...expected) {
-			GenSource.Tree fixedTree = (GenSource.Tree) tree.fix();
+			GenSource.Tree fixedTree = (GenSource.Tree) tree.get();
 			int head = fixedTree.head().atom().choose(Integer.MAX_VALUE);
 
 			assertThat(head)

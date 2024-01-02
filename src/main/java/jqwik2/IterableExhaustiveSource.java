@@ -5,18 +5,18 @@ import java.util.*;
 import jqwik2.api.*;
 
 public class IterableExhaustiveSource implements IterableGenSource {
-	private final List<ExhaustiveSource> exhaustiveSources;
+	private final List<? extends ExhaustiveSource<?>> exhaustiveSources;
 
-	public IterableExhaustiveSource(ExhaustiveSource... exhaustiveSources) {
+	public IterableExhaustiveSource(ExhaustiveSource<?>... exhaustiveSources) {
 		this.exhaustiveSources = List.of(exhaustiveSources);
 	}
 
-	public IterableExhaustiveSource(List<ExhaustiveSource> exhaustiveSources) {
+	public IterableExhaustiveSource(List<? extends ExhaustiveSource<?>> exhaustiveSources) {
 		this.exhaustiveSources = exhaustiveSources;
 	}
 
 	public static IterableExhaustiveSource from(Generator<?>... generators) {
-		List<ExhaustiveSource> list =
+		List<? extends ExhaustiveSource<?>> list =
 			Arrays.stream(generators)
 				  .map(Generator::exhaustive)
 				  .map(exhaustiveSource -> exhaustiveSource.orElseThrow(
@@ -46,27 +46,27 @@ public class IterableExhaustiveSource implements IterableGenSource {
 	private static class ExhaustiveGenSourceIterator implements Iterator<MultiGenSource> {
 
 		private final MultiGenSource source;
-		private final ExhaustiveSource first;
+		private final ExhaustiveSource<?> first;
 
 		private boolean hasNextBeenInvoked = false;
 
-		public ExhaustiveGenSourceIterator(List<ExhaustiveSource> exhaustiveSources) {
-			List<ExhaustiveSource> sources = cloneSources(exhaustiveSources);
+		public ExhaustiveGenSourceIterator(List<? extends ExhaustiveSource<?>> exhaustiveSources) {
+			List<? extends ExhaustiveSource<?>> sources = cloneSources(exhaustiveSources);
 			chainSources(sources);
 			this.source = MultiGenSource.of(sources);
 			this.first = sources.getFirst();
 		}
 
-		private List<ExhaustiveSource> cloneSources(List<ExhaustiveSource> exhaustiveSources) {
+		private List<? extends ExhaustiveSource<?>> cloneSources(List<? extends ExhaustiveSource<?>> exhaustiveSources) {
 			return exhaustiveSources.stream()
-									.map(exhaustiveSource -> exhaustiveSource.clone())
+									.map(Exhaustive::clone)
 									.toList();
 		}
 
-		private void chainSources(List<ExhaustiveSource> sources) {
+		private void chainSources(List<? extends ExhaustiveSource<?>> sources) {
 			for (int i = 0; i < sources.size() - 1; i++) {
-				ExhaustiveSource current = sources.get(i);
-				ExhaustiveSource next = sources.get(i + 1);
+				ExhaustiveSource<?> current = sources.get(i);
+				ExhaustiveSource<?> next = sources.get(i + 1);
 				current.chain(next);
 			}
 		}
