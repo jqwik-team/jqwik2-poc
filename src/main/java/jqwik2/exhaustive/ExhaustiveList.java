@@ -61,7 +61,15 @@ public class ExhaustiveList
 
 	@Override
 	public void next() {
-		elements.getFirst().next();
+		try {
+			elements.getFirst().next();
+		} catch (Generator.NoMoreValues e) {
+			if (prev().isPresent()) {
+				prev().get().advance();
+			} else {
+				Generator.noMoreValues();
+			}
+		}
 	}
 
 	@Override

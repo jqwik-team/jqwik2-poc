@@ -17,7 +17,6 @@ public class ExhaustiveTree extends AbstractExhaustiveSource implements GenSourc
 		this.range = range;
 		this.childCreator = childCreator;
 		this.head = new ExhaustiveAtom(range);
-		this.head.setPrev(this);
 		creatAndChainChild();
 	}
 
@@ -42,14 +41,24 @@ public class ExhaustiveTree extends AbstractExhaustiveSource implements GenSourc
 	}
 
 	@Override
-	public void advance() {
-		head.advance();
-		creatAndChainChild();
+	protected boolean tryAdvance() {
+		try {
+			head.advance();
+			creatAndChainChild();
+			return true;
+		} catch (Generator.NoMoreValues e) {
+			return false;
+		}
 	}
 
 	@Override
-	protected boolean tryAdvance() {
-		throw new UnsupportedOperationException();
+	public void next() {
+		Recording before = head.recording();
+		head.next();
+		Recording after = head.recording();
+		if (!before.equals(after)) {
+			creatAndChainChild();
+		}
 	}
 
 	@Override
@@ -68,17 +77,6 @@ public class ExhaustiveTree extends AbstractExhaustiveSource implements GenSourc
 	@Override
 	public ExhaustiveTree clone() {
 		return new ExhaustiveTree(range, childCreator);
-	}
-
-	@Override
-	public void next() {
-		head.next();
-		creatAndChainChild();
-	}
-
-	@Override
-	public void setPrev(Exhaustive<?> exhaustive) {
-		super.setPrev(exhaustive);
 	}
 
 	@Override

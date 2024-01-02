@@ -325,6 +325,30 @@ class ExhaustiveGenerationTests {
 			tree.next();
 			assertTree(tree, 1, 2);
 
+			tree.next();
+			assertTree(tree, 2, 0, 0);
+			tree.next();
+			assertTree(tree, 2, 0, 1);
+			tree.next();
+			assertTree(tree, 2, 0, 2);
+
+			tree.next();
+			assertTree(tree, 2, 1, 0);
+			tree.next();
+			assertTree(tree, 2, 1, 1);
+			tree.next();
+			assertTree(tree, 2, 1, 2);
+
+			tree.next();
+			assertTree(tree, 2, 2, 0);
+			tree.next();
+			assertTree(tree, 2, 2, 1);
+			tree.next();
+			assertTree(tree, 2, 2, 2);
+
+			assertThatThrownBy(() -> tree.next())
+				.isInstanceOf(Generator.NoMoreValues.class);
+
 		}
 
 		private void assertTree(ExhaustiveTree tree, int...expected) {
@@ -340,8 +364,9 @@ class ExhaustiveGenerationTests {
 				.describedAs("Expected list size %d", listSize)
 				.isEqualTo(expected.length - 1);
 
+			GenSource.List fixedList = (GenSource.List) list.fix();
 			for (int i = 0; i < listSize; i++) {
-				var atom = list.nextElement().atom();
+				var atom = fixedList.nextElement().atom();
 				assertThat(atom.choose(Integer.MAX_VALUE))
 					.describedAs("Expected %d at position %d", expected[i + 1], i)
 					.isEqualTo(expected[i + 1]);
