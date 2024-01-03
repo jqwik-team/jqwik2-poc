@@ -3,8 +3,8 @@ package jqwik2.api;
 import java.util.*;
 import java.util.function.*;
 
-import jqwik2.*;
 import jqwik2.api.recording.*;
+import jqwik2.internal.*;
 
 public interface Generator<T> {
 

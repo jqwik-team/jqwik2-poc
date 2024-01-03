@@ -3,16 +3,20 @@ package jqwik2;
 import java.util.*;
 import java.util.function.*;
 
-import jqwik2.api.*;
 import jqwik2.api.Shrinkable;
+import jqwik2.api.*;
 import jqwik2.api.recording.*;
+import jqwik2.internal.*;
+import jqwik2.internal.generators.*;
+import jqwik2.internal.recording.*;
+import jqwik2.internal.shrinking.*;
 import org.opentest4j.*;
 
 import net.jqwik.api.*;
 
 import static jqwik2.api.TryExecutionResult.Status.*;
-import static jqwik2.api.recording.Recording.*;
 import static jqwik2.api.recording.Recording.list;
+import static jqwik2.api.recording.Recording.*;
 import static org.assertj.core.api.Assertions.*;
 
 public class ShrinkingTests {

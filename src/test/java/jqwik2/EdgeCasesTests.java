@@ -1,10 +1,12 @@
 package jqwik2;
 
 import java.util.*;
-import java.util.stream.*;
 
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
+import jqwik2.internal.*;
+import jqwik2.internal.generators.*;
+import jqwik2.internal.recording.*;
 
 import net.jqwik.api.*;
 

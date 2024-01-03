@@ -8,10 +8,12 @@ import java.util.function.*;
 import jqwik2.api.Assume;
 import jqwik2.api.*;
 import jqwik2.api.PropertyRunResult.*;
+import jqwik2.internal.*;
+import jqwik2.internal.generators.*;
 
 import net.jqwik.api.*;
 
-import static jqwik2.PropertyRunConfiguration.*;
+import static jqwik2.api.PropertyRunConfiguration.*;
 import static org.assertj.core.api.Assertions.*;
 
 class PropertyExecutionTests {

@@ -2,7 +2,7 @@ package jqwik2.api;
 
 import java.util.random.*;
 
-import jqwik2.*;
+import jqwik2.internal.*;
 
 /**
  * Implementations of this interface are used to generate random values.

@@ -3,7 +3,7 @@ package jqwik2.api;
 import java.util.*;
 import java.util.stream.*;
 
-import jqwik2.*;
+import jqwik2.internal.shrinking.*;
 
 public record Sample(List<Shrinkable<Object>> shrinkables) implements Comparable<Sample> {
 

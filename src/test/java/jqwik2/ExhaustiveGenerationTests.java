@@ -1,13 +1,15 @@
 package jqwik2;
 
 import java.util.*;
-import java.util.List;
 
 import jqwik2.api.*;
-import jqwik2.exhaustive.*;
+import jqwik2.internal.*;
+import jqwik2.internal.exhaustive.*;
+import jqwik2.internal.generators.*;
 
 import net.jqwik.api.*;
 
+import static jqwik2.api.ExhaustiveSource.list;
 import static jqwik2.api.ExhaustiveSource.*;
 import static org.assertj.core.api.Assertions.*;
 

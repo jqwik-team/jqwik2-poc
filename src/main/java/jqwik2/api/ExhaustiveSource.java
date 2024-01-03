@@ -2,9 +2,9 @@ package jqwik2.api;
 
 import java.util.function.*;
 
-import jqwik2.*;
 import jqwik2.api.recording.*;
-import jqwik2.exhaustive.*;
+import jqwik2.internal.exhaustive.*;
+import jqwik2.internal.recording.*;
 
 public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<ExhaustiveSource<T>>, Supplier<T> {
 

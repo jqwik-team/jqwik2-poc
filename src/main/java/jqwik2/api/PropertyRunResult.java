@@ -2,8 +2,6 @@ package jqwik2.api;
 
 import java.util.*;
 
-import jqwik2.*;
-
 public record PropertyRunResult(
 	Status status, int countTries, int countChecks,
 	SortedSet<FalsifiedSample> falsifiedSamples,
