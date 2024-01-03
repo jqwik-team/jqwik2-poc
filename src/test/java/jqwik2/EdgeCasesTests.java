@@ -1,9 +1,10 @@
 package jqwik2;
 
 import java.util.*;
+import java.util.stream.*;
 
 import jqwik2.api.*;
-import jqwik2.api.support.*;
+import jqwik2.api.recording.*;
 
 import net.jqwik.api.*;
 
@@ -102,15 +103,16 @@ class EdgeCasesTests {
 
 	private static <T> Set<T> collectAllEdgeCases(Generator<T> generator) {
 		Set<T> generatedEdgeCases = new LinkedHashSet<>();
-		EdgeCasesSupport.sources(generator.edgeCases())
-			.forEach(source -> {
-				try {
-					T value = generator.generate(source);
-					generatedEdgeCases.add(value);
-				} catch (CannotGenerateException e) {
-					// ignore
-				}
-			});
+		Iterable<Recording> recordings = generator.edgeCases();
+		for (Recording recording : recordings) {
+			GenSource source = new RecordedSource(recording);
+			try {
+				T value = generator.generate(source);
+				generatedEdgeCases.add(value);
+			} catch (CannotGenerateException e) {
+				// ignore
+			}
+		}
 		return generatedEdgeCases;
 	}
 
