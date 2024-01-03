@@ -6,6 +6,11 @@ import java.util.function.*;
 
 public sealed interface PropertyRunConfiguration {
 
+	Supplier<ExecutorService> CURRENT_THREAD_EXECUTOR_SUPPLIER = () -> {
+		ThreadFactory threadFactory = r -> Thread.currentThread();
+		return Executors.newSingleThreadExecutor(threadFactory);
+	};
+
 	Duration maxRuntime();
 
 	int maxTries();
@@ -19,7 +24,7 @@ public sealed interface PropertyRunConfiguration {
 	}
 
 	static PropertyRunConfiguration randomized(String seed, int maxTries) {
-		return randomized(seed, maxTries, true, 0.05, Duration.ofSeconds(10), Executors::newSingleThreadExecutor);
+		return randomized(seed, maxTries, true, 0.05, Duration.ofSeconds(10), CURRENT_THREAD_EXECUTOR_SUPPLIER);
 	}
 
 	static PropertyRunConfiguration randomized(
