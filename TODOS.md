@@ -6,9 +6,11 @@
     - Set of values
 - Exhaustive generation
     - Make maxCount() calculation stable against overflow
+- Introduce Arbitraries
+- Introduce Jqwik or JqwikSession object as public entry point
 - PropertyCase Execution
   - Fail if ratio checks/tries is too low
-  - Save seed and falsified samples to disk
+  - Save seed and falsified samples to disk (.jqwik folder)
   - Allow rerun with previously falsified samples (starting with smallest) 
     => Rerun will improve shrinking!
   - Allow execution with exhaustive generation
@@ -27,4 +29,5 @@
   - Shrink with a timeout
   - Shrink in passes? 
   - Show shrinking progress on console
+- Jupiter Extension
 - Target-based generation and shrinking
