@@ -24,13 +24,13 @@ class ExhaustiveGenerationTests {
 			assertThat(choice.maxCount()).isEqualTo(3L);
 			assertThat(choice.choose(3)).isEqualTo(0);
 
-			choice.advance();
+			choice.next();
 			assertThat(choice.choose(3)).isEqualTo(1);
-			choice.advance();
+			choice.next();
 			assertThat(choice.choose(3)).isEqualTo(2);
 			assertThat(choice.choose(2)).isEqualTo(0);
 
-			assertThatThrownBy(() -> choice.advance())
+			assertThatThrownBy(() -> choice.next())
 				.isInstanceOf(Generator.NoMoreValues.class);
 
 			choice.reset();
@@ -135,7 +135,6 @@ class ExhaustiveGenerationTests {
 
 			assertThatThrownBy(() -> atom.next())
 				.isInstanceOf(Generator.NoMoreValues.class);
-
 		}
 
 		@Example
