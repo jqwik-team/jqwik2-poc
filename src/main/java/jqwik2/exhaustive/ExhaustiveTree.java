@@ -3,21 +3,35 @@ package jqwik2.exhaustive;
 import java.util.function.*;
 import java.util.stream.*;
 
-import jqwik2.*;
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
 
 public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> {
-	private final ExhaustiveChoice.Range range;
-	private final Function<Integer, ExhaustiveSource<?>> childCreator;
-	private final ExhaustiveAtom head;
+	private final Function<GenSource, ExhaustiveSource<?>> childCreator;
+	private final ExhaustiveSource<?> head;
 	private ExhaustiveSource<?> child;
 
 	public ExhaustiveTree(ExhaustiveChoice.Range range, Function<Integer, ExhaustiveSource<?>> childCreator) {
-		this.range = range;
+		this(new ExhaustiveAtom(range), childCreatorFromSource(childCreator));
+	}
+
+	private static Function<GenSource, ExhaustiveSource<?>> childCreatorFromSource(Function<Integer, ExhaustiveSource<?>> childCreator) {
+		return source -> {
+			int size = source.atom().choose(Integer.MAX_VALUE);
+			return childCreator.apply(size);
+		};
+	}
+
+	public ExhaustiveTree(ExhaustiveSource<?> head, Function<GenSource, ExhaustiveSource<?>> childCreator) {
 		this.childCreator = childCreator;
-		this.head = new ExhaustiveAtom(range);
+		this.head = head;
 		creatAndChainChild();
+	}
+
+	private void creatAndChainChild() {
+		child = childCreator.apply(head.get());
+		head.chain(child);
+		succ().ifPresent(succ -> child.setSucc(succ));
 	}
 
 	private static java.util.List<Integer> createHeads(ExhaustiveChoice.Range range) {
@@ -26,10 +40,16 @@ public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> {
 						.collect(Collectors.toList());
 	}
 
-	private java.util.List<ExhaustiveSource<?>> createChildren(java.util.List<Integer> heads) {
+	private java.util.List<ExhaustiveSource<?>> createChildren() {
+		ExhaustiveSource<?> iterator = head.clone();
 		java.util.List<ExhaustiveSource<?>> result = new java.util.ArrayList<>();
-		for (int head : heads) {
-			result.add(childCreator.apply(head));
+		while (true) {
+			result.add(childCreator.apply(iterator.get()));
+			try {
+				iterator.next();
+			} catch (Generator.NoMoreValues e) {
+				break;
+			}
 		}
 		return result;
 	}
@@ -37,7 +57,7 @@ public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> {
 	@Override
 	public long maxCount() {
 		// TODO: Optimize to not create all children
-		return createChildren(createHeads(range)).stream().mapToLong(ExhaustiveSource::maxCount).sum();
+		return createChildren().stream().mapToLong(ExhaustiveSource::maxCount).sum();
 	}
 
 	@Override
@@ -76,16 +96,9 @@ public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> {
 		creatAndChainChild();
 	}
 
-	private void creatAndChainChild() {
-		int size = head.get().choose(Integer.MAX_VALUE);
-		child = childCreator.apply(size);
-		head.chain(child);
-		succ().ifPresent(succ -> child.setSucc(succ));
-	}
-
 	@Override
 	public ExhaustiveTree clone() {
-		return new ExhaustiveTree(range, childCreator);
+		return new ExhaustiveTree(head.clone(), childCreator);
 	}
 
 	@Override

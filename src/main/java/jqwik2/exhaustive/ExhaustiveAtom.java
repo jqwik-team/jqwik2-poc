@@ -81,8 +81,6 @@ public class ExhaustiveAtom extends AbstractExhaustiveSource<GenSource.Atom> {
 
 	@Override
 	public String toString() {
-		return "ExhaustiveAtom{" +
-				   "ranges=" + Arrays.toString(ranges) +
-				   '}';
+		return "ExhaustiveAtom{ranges=%s, recording=%s}".formatted(Arrays.toString(ranges), recording());
 	}
 }
