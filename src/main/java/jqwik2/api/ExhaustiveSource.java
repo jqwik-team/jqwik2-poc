@@ -36,13 +36,13 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 	}
 
 	/**
-	 * Generate tree where head is atom with cardinality 1
+	 * Generate tree from given head source and child creator function
 	 *
-	 * @param range A range of all possible choices for head
+	 * @param head Source for head value
 	 * @param childCreator Function to create child source based on head value
 	 */
-	static ExhaustiveTree tree(ExhaustiveChoice.Range range, Function<Integer, ExhaustiveSource<?>> childCreator) {
-		return new ExhaustiveTree(range, childCreator);
+	static ExhaustiveTree tree(ExhaustiveSource<?> head, Function<GenSource, ExhaustiveSource<?>> childCreator) {
+		return new ExhaustiveTree(head, childCreator);
 	}
 
 	Recording recording();

@@ -1,5 +1,6 @@
 package jqwik2.exhaustive;
 
+import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
 
@@ -34,15 +35,15 @@ public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> {
 		succ().ifPresent(succ -> child.setSucc(succ));
 	}
 
-	private static java.util.List<Integer> createHeads(ExhaustiveChoice.Range range) {
+	private static List<Integer> createHeads(ExhaustiveChoice.Range range) {
 		return IntStream.range(range.min(), range.max() + 1)
 						.boxed()
 						.collect(Collectors.toList());
 	}
 
-	private java.util.List<ExhaustiveSource<?>> createChildren() {
+	private List<ExhaustiveSource<?>> createChildren() {
 		ExhaustiveSource<?> iterator = head.clone();
-		java.util.List<ExhaustiveSource<?>> result = new java.util.ArrayList<>();
+		List<ExhaustiveSource<?>> result = new ArrayList<>();
 		while (true) {
 			result.add(childCreator.apply(iterator.get()));
 			try {

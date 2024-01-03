@@ -21,9 +21,7 @@ public class ListGenerator<T> implements Generator<List<T>> {
 	@Override
 	public List<T> generate(GenSource source) {
 		GenSource.Tree listSource = source.tree();
-		GenSource.Atom sizeSource = listSource.head().atom();
-
-		int size = sizeSource.choose(maxSize + 1);
+		int size = chooseSize(listSource.head());
 
 		List<T> elements = new ArrayList<>(size);
 		GenSource.List elementsSource = listSource.child().list();
@@ -33,6 +31,11 @@ public class ListGenerator<T> implements Generator<List<T>> {
 			elements.add(element);
 		}
 		return elements;
+	}
+
+	private int chooseSize(GenSource head) {
+		GenSource.Atom sizeSource = head.atom();
+		return sizeSource.choose(maxSize + 1);
 	}
 
 	@Override
@@ -59,9 +62,10 @@ public class ListGenerator<T> implements Generator<List<T>> {
 	public Optional<ExhaustiveSource<?>> exhaustive() {
 		return elementGenerator.exhaustive().flatMap(
 			elementSource -> Optional.of(ExhaustiveSource.tree(
-				new ExhaustiveChoice.Range(0, maxSize),
-				size -> ExhaustiveSource.list(size, elementSource)
+				ExhaustiveSource.atom(maxSize),
+				head -> ExhaustiveSource.list(chooseSize(head), elementSource)
 			)));
 	}
+
 
 }
