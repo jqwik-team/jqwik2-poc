@@ -27,7 +27,6 @@ abstract class AbstractExhaustive<T extends Exhaustive<T>> implements Exhaustive
 		if (prev().isPresent()) {
 			return prev().get().advance();
 		} else {
-			Generator.noMoreValues();
 			return false;
 		}
 	}

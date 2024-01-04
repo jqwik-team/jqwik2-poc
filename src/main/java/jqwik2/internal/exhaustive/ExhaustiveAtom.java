@@ -49,12 +49,7 @@ public class ExhaustiveAtom extends AbstractExhaustiveSource<GenSource.Atom> {
 
 	@Override
 	protected boolean tryAdvance() {
-		try {
-			choices.getLast().advance();
-			return true;
-		} catch (Generator.NoMoreValues e) {
-			return false;
-		}
+		return choices.getLast().advance();
 	}
 
 	@Override

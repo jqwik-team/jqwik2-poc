@@ -29,10 +29,8 @@ public class OrAtom extends AbstractExhaustiveSource<GenSource.Atom> {
 
 	@Override
 	protected boolean tryAdvance() {
-		try {
-			currentAtom().advance();
-			return true;
-		} catch (Generator.NoMoreValues e) {
+		boolean advanced = currentAtom().advance();
+		if (!advanced) {
 			if (currentAlternative < alternatives.size() - 1) {
 				currentAlternative++;
 				return true;
@@ -41,6 +39,7 @@ public class OrAtom extends AbstractExhaustiveSource<GenSource.Atom> {
 				return false;
 			}
 		}
+		return true;
 	}
 
 	@Override

@@ -21,7 +21,6 @@ public class ExhaustiveEmptyList extends ExhaustiveList {
 	@Override
 	public boolean advance() {
 		if (prev().isEmpty()) {
-			Generator.noMoreValues();
 			return false;
 		}
 		return prev().get().advance();

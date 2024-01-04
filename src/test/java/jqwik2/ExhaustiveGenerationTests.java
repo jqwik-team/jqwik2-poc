@@ -30,8 +30,7 @@ class ExhaustiveGenerationTests {
 			assertThat(choice.choose(3)).isEqualTo(2);
 			assertThat(choice.choose(2)).isEqualTo(0);
 
-			assertThatThrownBy(() -> choice.advanceChain())
-				.isInstanceOf(Generator.NoMoreValues.class);
+			assertThat(choice.advanceChain()).isFalse();
 
 			choice.reset();
 			assertThat(choice.choose(3)).isEqualTo(0);
@@ -51,8 +50,7 @@ class ExhaustiveGenerationTests {
 			choice.advance();
 			assertThat(choice.choose(6)).isEqualTo(5);
 
-			assertThatThrownBy(() -> choice.advance())
-				.isInstanceOf(Generator.NoMoreValues.class);
+			assertThat(choice.advanceChain()).isFalse();
 
 			choice.reset();
 			assertThat(choice.choose(6)).isEqualTo(2);
@@ -89,8 +87,7 @@ class ExhaustiveGenerationTests {
 			assertThat(first.choose(3)).isEqualTo(2);
 			assertThat(second.choose(2)).isEqualTo(1);
 
-			assertThatThrownBy(() -> first.advanceChain())
-				.isInstanceOf(Generator.NoMoreValues.class);
+			assertThat(first.advanceChain()).isFalse();
 		}
 
 		@Example
@@ -133,8 +130,7 @@ class ExhaustiveGenerationTests {
 			atom.advanceChain();
 			assertAtom(atom, 1, 2, 3);
 
-			assertThatThrownBy(() -> atom.advanceChain())
-				.isInstanceOf(Generator.NoMoreValues.class);
+			assertThat(atom.advanceChain()).isFalse();
 		}
 
 		@Example
@@ -168,8 +164,7 @@ class ExhaustiveGenerationTests {
 			assertThat(first.get().choose(3)).isEqualTo(2);
 			assertThat(second.get().choose(2)).isEqualTo(1);
 
-			assertThatThrownBy(() -> first.advanceChain())
-				.isInstanceOf(Generator.NoMoreValues.class);
+			assertThat(first.advanceChain()).isFalse();
 		}
 
 		@Example
@@ -185,8 +180,7 @@ class ExhaustiveGenerationTests {
 			atom.advanceChain();
 			assertAtom(atom, 3, 4, 4);
 
-			assertThatThrownBy(() -> atom.advanceChain())
-				.isInstanceOf(Generator.NoMoreValues.class);
+			assertThat(atom.advanceChain()).isFalse();
 		}
 
 		@Example
@@ -210,8 +204,7 @@ class ExhaustiveGenerationTests {
 			assertAtom(atom, 2, 1);
 			atom.advanceChain();
 			assertAtom(atom, 2, 3);
-			assertThatThrownBy(() -> atom.advanceChain())
-				.isInstanceOf(Generator.NoMoreValues.class);
+			assertThat(atom.advanceChain()).isFalse();
 		}
 
 		@Example
@@ -290,8 +283,7 @@ class ExhaustiveGenerationTests {
 			list.advanceChain();
 			assertList(list, 2, 2);
 
-			assertThatThrownBy(() -> list.advanceChain())
-				.isInstanceOf(Generator.NoMoreValues.class);
+			assertThat(list.advanceChain()).isFalse();
 		}
 
 		@Example
@@ -301,8 +293,7 @@ class ExhaustiveGenerationTests {
 
 			assertThat(list.size()).isEqualTo(0);
 
-			assertThatThrownBy(() -> list.advanceChain())
-				.isInstanceOf(Generator.NoMoreValues.class);
+			assertThat(list.advanceChain()).isFalse();
 		}
 
 		private void assertList(ExhaustiveList list, int... expected) {
@@ -352,10 +343,7 @@ class ExhaustiveGenerationTests {
 			assertTree(tree, 2, 2, 1);
 			tree.advanceChain();
 			assertTree(tree, 2, 2, 2);
-
-			assertThatThrownBy(() -> tree.advanceChain())
-				.isInstanceOf(Generator.NoMoreValues.class);
-
+			assertThat(tree.advanceChain()).isFalse();
 		}
 
 		private void assertTree(ExhaustiveTree exhaustiveTree, int... expected) {
@@ -475,11 +463,9 @@ class ExhaustiveGenerationTests {
 	private static <T> List<T> collectAll(ExhaustiveSource<?> exhaustiveSource, Generator<T> generator) {
 		List<T> allValues = new ArrayList<>();
 		while (true) {
-			try {
-				T value = generator.generate(exhaustiveSource.get());
-				allValues.add(value);
-				exhaustiveSource.advanceChain();
-			} catch (Generator.NoMoreValues noMoreValues) {
+			T value = generator.generate(exhaustiveSource.get());
+			allValues.add(value);
+			if (!exhaustiveSource.advanceChain()) {
 				break;
 			}
 		}

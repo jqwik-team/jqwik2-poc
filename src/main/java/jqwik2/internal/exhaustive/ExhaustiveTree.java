@@ -46,9 +46,7 @@ public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> {
 		List<ExhaustiveSource<?>> result = new ArrayList<>();
 		while (true) {
 			result.add(childCreator.apply(iterator.get()));
-			try {
-				iterator.advanceChain();
-			} catch (Generator.NoMoreValues e) {
+			if (!iterator.advanceChain()) {
 				break;
 			}
 		}
@@ -63,11 +61,11 @@ public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> {
 
 	@Override
 	protected boolean tryAdvance() {
-		try {
-			head.advance();
+		boolean advanced = head.advance();
+		if (advanced) {
 			creatAndChainChild();
 			return true;
-		} catch (Generator.NoMoreValues e) {
+		} else {
 			return false;
 		}
 	}
@@ -75,14 +73,12 @@ public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> {
 	@Override
 	public boolean advanceChain() {
 		Recording before = head.recording();
-		try {
-			boolean advanced = head.advanceChain();
-		} catch (Generator.NoMoreValues e) {
+		boolean advanced = head.advanceChain();
+		if (!advanced) {
 			if (prev().isPresent()) {
 				reset();
 				return prev().get().advance();
 			} else {
-				Generator.noMoreValues();
 				return false;
 			}
 		}

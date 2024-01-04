@@ -69,13 +69,12 @@ public class IterableExhaustiveSource implements IterableGenSource {
 			if (!hasNextBeenInvoked) {
 				return true;
 			}
-			try {
-				sources.getFirst().advanceChain();
-				hasNextBeenInvoked = false;
-				return true;
-			} catch (Generator.NoMoreValues e) {
+			boolean advanced = sources.getFirst().advanceChain();
+			if (!advanced) {
 				return false;
 			}
+			hasNextBeenInvoked = false;
+			return true;
 		}
 
 		@Override
