@@ -30,7 +30,7 @@ public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> {
 	}
 
 	private void creatAndChainChild() {
-		child = childCreator.apply(head.get());
+		child = childCreator.apply(head.current());
 		head.chain(child);
 		succ().ifPresent(succ -> child.setSucc(succ));
 	}
@@ -45,7 +45,7 @@ public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> {
 		ExhaustiveSource<?> iterator = head.clone();
 		List<ExhaustiveSource<?>> result = new ArrayList<>();
 		while (true) {
-			result.add(childCreator.apply(iterator.get()));
+			result.add(childCreator.apply(iterator.current()));
 			if (!iterator.advance()) {
 				break;
 			}

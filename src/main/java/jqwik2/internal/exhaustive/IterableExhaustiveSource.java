@@ -81,7 +81,7 @@ public class IterableExhaustiveSource implements IterableGenSource {
 		public MultiGenSource next() {
 			hasNextBeenInvoked = true;
 			List<? extends GenSource> realSources = sources.stream()
-														   .map(ExhaustiveSource::get)
+														   .map(ExhaustiveSource::current)
 														   .toList();
 			return MultiGenSource.of(realSources);
 		}

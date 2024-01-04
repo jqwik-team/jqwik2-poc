@@ -19,7 +19,7 @@ abstract class AbstractExhaustiveSource<T extends GenSource> extends AbstractExh
 
 			@Override
 			public T next() {
-				T next = exhaustive.get();
+				T next = exhaustive.current();
 				hasNext = exhaustive.advance();
 				return next;
 			}

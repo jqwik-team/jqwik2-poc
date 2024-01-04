@@ -6,7 +6,7 @@ import jqwik2.api.recording.*;
 import jqwik2.internal.exhaustive.*;
 import jqwik2.internal.recording.*;
 
-public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<ExhaustiveSource<T>>, Iterable<T>, Supplier<T> {
+public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<ExhaustiveSource<T>>, Iterable<T> {
 
 	static ExhaustiveAtom atom(int... maxChoices) {
 		return new ExhaustiveAtom(maxChoices);
@@ -48,7 +48,7 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 	Recording recording();
 
 	@SuppressWarnings("unchecked")
-	default T get() {
+	default T current() {
 		return (T) new RecordedSource(recording());
 	}
 }
