@@ -26,8 +26,10 @@ public class ConcurrentRunner {
 
 	public void run(Iterator<ConcurrentRunner.Task> taskIterator) throws TimeoutException {
 		List<Throwable> uncaughtErrors = Collections.synchronizedList(new ArrayList<>());
+		List<Future<?>> submittedTasks = Collections.synchronizedList(new ArrayList<>());
+		Timer timer = new Timer();
 		try (executorService) {
-			Shutdown shutdown = () -> executorService.shutdownNow();
+			Shutdown shutdown = executorService::shutdownNow;
 			while (taskIterator.hasNext()) {
 				Task task = taskIterator.next();
 				try {
@@ -38,13 +40,17 @@ public class ConcurrentRunner {
 							uncaughtErrors.add(throwable);
 						}
 					};
-					executorService.submit(runnable);
+					submittedTasks.add(executorService.submit(runnable));
 				} catch (RejectedExecutionException ignore) {
 					// This can happen when a task is submitted after
 					// the executor service has been shut down due to a falsified sample.
 				}
 			}
+
+			scheduleAdditionTimeoutTask(timer, submittedTasks);
+
 			waitForFinishOrFail(executorService);
+
 			if (!uncaughtErrors.isEmpty()) {
 				throw uncaughtErrors.getFirst();
 			}
@@ -52,7 +58,20 @@ public class ConcurrentRunner {
 			throw timeoutException;
 		} catch (Throwable throwable) {
 			ExceptionSupport.throwAsUnchecked(throwable);
+		} finally {
+			timer.cancel();
 		}
+	}
+
+	private void scheduleAdditionTimeoutTask(Timer timer, List<Future<?>> submittedTasks) {
+		// Timeout is already handled by waitForFinishOrFail(), but this can speed up task cancellation,
+		// especially with Executors.newVirtualThreadPerTaskExecutor()
+		timer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				submittedTasks.forEach(future -> future.cancel(true));
+			}
+		}, timeout.toMillis());
 	}
 
 	private void waitForFinishOrFail(ExecutorService executorService) throws TimeoutException {
