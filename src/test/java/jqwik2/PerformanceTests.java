@@ -6,13 +6,14 @@ import jqwik2.api.*;
 import jqwik2.internal.*;
 import jqwik2.internal.generators.*;
 import jqwik2.internal.recording.*;
+import org.assertj.core.api.*;
 
 import net.jqwik.api.*;
 
 class PerformanceTests {
 
 	// @Example
-	void testXorShiftGenerator() {
+	void testXorShiftGenerator() throws Exception {
 		java.util.random.RandomGenerator generator = new XORShiftRandom();
 		int count = 100_000_000;
 		time("XorShift", count, () -> {
@@ -22,7 +23,7 @@ class PerformanceTests {
 	}
 
 	@Example
-	void compare_jqwik2poc_with_jqwik() {
+	void compare_jqwik2poc_with_jqwik() throws Exception {
 		IntegerGenerator randomInteger = new IntegerGenerator(-10, 100);
 		ListGenerator<Integer> randomList = new ListGenerator<>(randomInteger, 100);
 		Generator<List<Integer>> randomListWithEdgeCases = WithEdgeCasesDecorator.decorate(randomList, 0.05, 10);
@@ -43,7 +44,7 @@ class PerformanceTests {
 		time("jqwik1", count, () -> generator.next(random));
 	}
 
-	public static void time(String label, int count, Runnable runnable) {
+	public static void time(String label, int count, SoftAssertionsProvider.ThrowingRunnable runnable) throws Exception {
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < count; i++) {
 			runnable.run();

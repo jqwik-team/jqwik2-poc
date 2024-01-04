@@ -24,7 +24,7 @@ public class ConcurrentRunner {
 		this.timeout = timeout;
 	}
 
-	public void run(Iterator<ConcurrentRunner.Task> taskIterator) {
+	public void run(Iterator<ConcurrentRunner.Task> taskIterator) throws TimeoutException {
 		List<Throwable> uncaughtErrors = Collections.synchronizedList(new ArrayList<>());
 		try (executorService) {
 			Shutdown shutdown = () -> executorService.shutdownNow();
@@ -44,10 +44,12 @@ public class ConcurrentRunner {
 					// the executor service has been shut down due to a falsified sample.
 				}
 			}
-			// waitForFinishOrFail(executorService);
+			waitForFinishOrFail(executorService);
 			if (!uncaughtErrors.isEmpty()) {
 				throw uncaughtErrors.getFirst();
 			}
+		} catch (TimeoutException timeoutException) {
+			throw timeoutException;
 		} catch (Throwable throwable) {
 			ExceptionSupport.throwAsUnchecked(throwable);
 		}
@@ -63,7 +65,7 @@ public class ConcurrentRunner {
 		}
 		if (timeoutOccurred) {
 			executorService.shutdownNow();
-			String message = "Timed out after " + timeout;
+			String message = "Concurrent run timed out after " + timeout;
 			throw new TimeoutException(message);
 		}
 	}
