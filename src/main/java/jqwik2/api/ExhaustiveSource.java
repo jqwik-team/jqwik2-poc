@@ -1,19 +1,18 @@
 package jqwik2.api;
 
-import java.util.*;
 import java.util.function.*;
 
 import jqwik2.api.recording.*;
 import jqwik2.internal.exhaustive.*;
 import jqwik2.internal.recording.*;
 
-public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<ExhaustiveSource<T>>, Iterator<T>, Supplier<T> {
+public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<ExhaustiveSource<T>>, Iterable<T>, Supplier<T> {
 
 	static ExhaustiveAtom atom(int... maxChoices) {
 		return new ExhaustiveAtom(maxChoices);
 	}
 
-	static ExhaustiveAtom atom(ExhaustiveChoice.Range...ranges) {
+	static ExhaustiveAtom atom(ExhaustiveChoice.Range... ranges) {
 		return new ExhaustiveAtom(ranges);
 	}
 
@@ -25,7 +24,7 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 		return range(value, value);
 	}
 
-	static OrAtom or(ExhaustiveAtom ... atoms) {
+	static OrAtom or(ExhaustiveAtom... atoms) {
 		return new OrAtom(atoms);
 	}
 
@@ -39,7 +38,7 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 	/**
 	 * Generate tree from given head source and child creator function
 	 *
-	 * @param head Source for head value
+	 * @param head         Source for head value
 	 * @param childCreator Function to create child source based on head value
 	 */
 	static ExhaustiveTree tree(ExhaustiveSource<?> head, Function<GenSource, ExhaustiveSource<?>> childCreator) {

@@ -369,7 +369,7 @@ class ExhaustiveGenerationTests {
 	void smallIntegers() {
 		Generator<Integer> ints0to10 = new IntegerGenerator(0, 10);
 
-		ExhaustiveSource exhaustive = ints0to10.exhaustive().get();
+		ExhaustiveSource<?> exhaustive = ints0to10.exhaustive().get();
 		assertThat(exhaustive.maxCount()).isEqualTo(11L);
 
 		List<Integer> allValues = collectAll(exhaustive, ints0to10);
@@ -462,12 +462,9 @@ class ExhaustiveGenerationTests {
 
 	private static <T> List<T> collectAll(ExhaustiveSource<?> exhaustiveSource, Generator<T> generator) {
 		List<T> allValues = new ArrayList<>();
-		while (true) {
-			T value = generator.generate(exhaustiveSource.get());
+		for (GenSource genSource : exhaustiveSource) {
+			T value = generator.generate(genSource);
 			allValues.add(value);
-			if (!exhaustiveSource.advance()) {
-				break;
-			}
 		}
 		return allValues;
 	}

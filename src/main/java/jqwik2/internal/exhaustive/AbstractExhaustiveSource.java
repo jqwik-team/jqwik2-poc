@@ -1,20 +1,28 @@
 package jqwik2.internal.exhaustive;
 
+import java.util.*;
+
 import jqwik2.api.*;
 
 abstract class AbstractExhaustiveSource<T extends GenSource> extends AbstractExhaustive<ExhaustiveSource<T>> implements ExhaustiveSource<T> {
 
-	private boolean hasNext = true;
-
 	@Override
-	public boolean hasNext() {
-		return hasNext;
-	}
+	public Iterator<T> iterator() {
+		return new Iterator<T>() {
+			private boolean hasNext = true;
+			private ExhaustiveSource<T> exhaustive = AbstractExhaustiveSource.this.clone();
 
-	@Override
-	public T next() {
-		T next = get();
-		hasNext = advance();
-		return next;
+			@Override
+			public boolean hasNext() {
+				return hasNext;
+			}
+
+			@Override
+			public T next() {
+				T next = exhaustive.get();
+				hasNext = exhaustive.advance();
+				return next;
+			}
+		};
 	}
 }
