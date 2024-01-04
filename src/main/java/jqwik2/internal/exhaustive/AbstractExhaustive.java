@@ -10,24 +10,25 @@ abstract class AbstractExhaustive<T extends Exhaustive<T>> implements Exhaustive
 	private Exhaustive<?> prev = null;
 
 	@Override
-	public void next() {
+	public boolean advanceChain() {
 		if (succ().isEmpty()) {
-			advance();
+			return advance();
 		} else {
-			succ.next();
+			return succ.advanceChain();
 		}
 	}
 
 	@Override
-	public void advance() {
+	public boolean advance() {
 		if (tryAdvance()) {
-			return;
+			return true;
 		}
 		reset();
 		if (prev().isPresent()) {
-			prev().get().advance();
+			return prev().get().advance();
 		} else {
 			Generator.noMoreValues();
+			return false;
 		}
 	}
 

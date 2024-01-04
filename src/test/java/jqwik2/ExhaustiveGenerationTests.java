@@ -24,13 +24,13 @@ class ExhaustiveGenerationTests {
 			assertThat(choice.maxCount()).isEqualTo(3L);
 			assertThat(choice.choose(3)).isEqualTo(0);
 
-			choice.next();
+			choice.advanceChain();
 			assertThat(choice.choose(3)).isEqualTo(1);
-			choice.next();
+			choice.advanceChain();
 			assertThat(choice.choose(3)).isEqualTo(2);
 			assertThat(choice.choose(2)).isEqualTo(0);
 
-			assertThatThrownBy(() -> choice.next())
+			assertThatThrownBy(() -> choice.advanceChain())
 				.isInstanceOf(Generator.NoMoreValues.class);
 
 			choice.reset();
@@ -69,27 +69,27 @@ class ExhaustiveGenerationTests {
 			assertThat(first.choose(3)).isEqualTo(0);
 			assertThat(second.choose(2)).isEqualTo(0);
 
-			first.next();
+			first.advanceChain();
 			assertThat(first.choose(3)).isEqualTo(0);
 			assertThat(second.choose(2)).isEqualTo(1);
 
-			first.next();
+			first.advanceChain();
 			assertThat(first.choose(3)).isEqualTo(1);
 			assertThat(second.choose(2)).isEqualTo(0);
 
-			first.next();
+			first.advanceChain();
 			assertThat(first.choose(3)).isEqualTo(1);
 			assertThat(second.choose(2)).isEqualTo(1);
 
-			first.next();
+			first.advanceChain();
 			assertThat(first.choose(3)).isEqualTo(2);
 			assertThat(second.choose(2)).isEqualTo(0);
 
-			first.next();
+			first.advanceChain();
 			assertThat(first.choose(3)).isEqualTo(2);
 			assertThat(second.choose(2)).isEqualTo(1);
 
-			assertThatThrownBy(() -> first.next())
+			assertThatThrownBy(() -> first.advanceChain())
 				.isInstanceOf(Generator.NoMoreValues.class);
 		}
 
@@ -100,40 +100,40 @@ class ExhaustiveGenerationTests {
 
 			assertAtom(atom, 0, 0, 0);
 
-			atom.next();
+			atom.advanceChain();
 			assertAtom(atom, 0, 0, 1);
-			atom.next();
+			atom.advanceChain();
 			assertAtom(atom, 0, 0, 2);
-			atom.next();
+			atom.advanceChain();
 			assertAtom(atom, 0, 0, 3);
-			atom.next();
+			atom.advanceChain();
 			assertAtom(atom, 0, 1, 0);
 
-			atom.next();
-			atom.next();
-			atom.next();
-			atom.next();
-			atom.next();
-			atom.next();
-			atom.next();
+			atom.advanceChain();
+			atom.advanceChain();
+			atom.advanceChain();
+			atom.advanceChain();
+			atom.advanceChain();
+			atom.advanceChain();
+			atom.advanceChain();
 
-			atom.next();
+			atom.advanceChain();
 			assertAtom(atom, 1, 0, 0);
 
-			atom.next();
-			atom.next();
-			atom.next();
-			atom.next();
-			atom.next();
-			atom.next();
-			atom.next();
-			atom.next();
-			atom.next();
-			atom.next();
-			atom.next();
+			atom.advanceChain();
+			atom.advanceChain();
+			atom.advanceChain();
+			atom.advanceChain();
+			atom.advanceChain();
+			atom.advanceChain();
+			atom.advanceChain();
+			atom.advanceChain();
+			atom.advanceChain();
+			atom.advanceChain();
+			atom.advanceChain();
 			assertAtom(atom, 1, 2, 3);
 
-			assertThatThrownBy(() -> atom.next())
+			assertThatThrownBy(() -> atom.advanceChain())
 				.isInstanceOf(Generator.NoMoreValues.class);
 		}
 
@@ -148,27 +148,27 @@ class ExhaustiveGenerationTests {
 			assertThat(first.get().choose(3)).isEqualTo(0);
 			assertThat(second.get().choose(2)).isEqualTo(0);
 
-			first.next();
+			first.advanceChain();
 			assertThat(first.get().choose(3)).isEqualTo(0);
 			assertThat(second.get().choose(2)).isEqualTo(1);
 
-			first.next();
+			first.advanceChain();
 			assertThat(first.get().choose(3)).isEqualTo(1);
 			assertThat(second.get().choose(2)).isEqualTo(0);
 
-			first.next();
+			first.advanceChain();
 			assertThat(first.get().choose(3)).isEqualTo(1);
 			assertThat(second.get().choose(2)).isEqualTo(1);
 
-			first.next();
+			first.advanceChain();
 			assertThat(first.get().choose(3)).isEqualTo(2);
 			assertThat(second.get().choose(2)).isEqualTo(0);
 
-			first.next();
+			first.advanceChain();
 			assertThat(first.get().choose(3)).isEqualTo(2);
 			assertThat(second.get().choose(2)).isEqualTo(1);
 
-			assertThatThrownBy(() -> first.next())
+			assertThatThrownBy(() -> first.advanceChain())
 				.isInstanceOf(Generator.NoMoreValues.class);
 		}
 
@@ -180,12 +180,12 @@ class ExhaustiveGenerationTests {
 			assertThat(atom.maxCount()).isEqualTo(4L);
 
 			assertAtom(atom, 2, 3, 4);
-			atom.next();
-			atom.next();
-			atom.next();
+			atom.advanceChain();
+			atom.advanceChain();
+			atom.advanceChain();
 			assertAtom(atom, 3, 4, 4);
 
-			assertThatThrownBy(() -> atom.next())
+			assertThatThrownBy(() -> atom.advanceChain())
 				.isInstanceOf(Generator.NoMoreValues.class);
 		}
 
@@ -200,17 +200,17 @@ class ExhaustiveGenerationTests {
 			assertThat(atom.maxCount()).isEqualTo(6L);
 			assertAtom(atom, 0, 0);
 
-			atom.next();
+			atom.advanceChain();
 			assertAtom(atom, 1, 0);
-			atom.next();
+			atom.advanceChain();
 			assertAtom(atom, 0, 1);
-			atom.next();
+			atom.advanceChain();
 			assertAtom(atom, 1, 1);
-			atom.next();
+			atom.advanceChain();
 			assertAtom(atom, 2, 1);
-			atom.next();
+			atom.advanceChain();
 			assertAtom(atom, 2, 3);
-			assertThatThrownBy(() -> atom.next())
+			assertThatThrownBy(() -> atom.advanceChain())
 				.isInstanceOf(Generator.NoMoreValues.class);
 		}
 
@@ -273,24 +273,24 @@ class ExhaustiveGenerationTests {
 			assertThat(list.maxCount()).isEqualTo(9L);
 
 			assertList(list, 0, 0);
-			list.next();
+			list.advanceChain();
 			assertList(list, 0, 1);
-			list.next();
+			list.advanceChain();
 			assertList(list, 0, 2);
-			list.next();
+			list.advanceChain();
 			assertList(list, 1, 0);
-			list.next();
+			list.advanceChain();
 			assertList(list, 1, 1);
-			list.next();
+			list.advanceChain();
 			assertList(list, 1, 2);
-			list.next();
+			list.advanceChain();
 			assertList(list, 2, 0);
-			list.next();
+			list.advanceChain();
 			assertList(list, 2, 1);
-			list.next();
+			list.advanceChain();
 			assertList(list, 2, 2);
 
-			assertThatThrownBy(() -> list.next())
+			assertThatThrownBy(() -> list.advanceChain())
 				.isInstanceOf(Generator.NoMoreValues.class);
 		}
 
@@ -301,7 +301,7 @@ class ExhaustiveGenerationTests {
 
 			assertThat(list.size()).isEqualTo(0);
 
-			assertThatThrownBy(() -> list.next())
+			assertThatThrownBy(() -> list.advanceChain())
 				.isInstanceOf(Generator.NoMoreValues.class);
 		}
 
@@ -325,35 +325,35 @@ class ExhaustiveGenerationTests {
 			assertThat(tree.maxCount()).isEqualTo(13L);
 			assertTree(tree, 0);
 
-			tree.next();
+			tree.advanceChain();
 			assertTree(tree, 1, 0);
-			tree.next();
+			tree.advanceChain();
 			assertTree(tree, 1, 1);
-			tree.next();
+			tree.advanceChain();
 			assertTree(tree, 1, 2);
 
-			tree.next();
+			tree.advanceChain();
 			assertTree(tree, 2, 0, 0);
-			tree.next();
+			tree.advanceChain();
 			assertTree(tree, 2, 0, 1);
-			tree.next();
+			tree.advanceChain();
 			assertTree(tree, 2, 0, 2);
 
-			tree.next();
+			tree.advanceChain();
 			assertTree(tree, 2, 1, 0);
-			tree.next();
+			tree.advanceChain();
 			assertTree(tree, 2, 1, 1);
-			tree.next();
+			tree.advanceChain();
 			assertTree(tree, 2, 1, 2);
 
-			tree.next();
+			tree.advanceChain();
 			assertTree(tree, 2, 2, 0);
-			tree.next();
+			tree.advanceChain();
 			assertTree(tree, 2, 2, 1);
-			tree.next();
+			tree.advanceChain();
 			assertTree(tree, 2, 2, 2);
 
-			assertThatThrownBy(() -> tree.next())
+			assertThatThrownBy(() -> tree.advanceChain())
 				.isInstanceOf(Generator.NoMoreValues.class);
 
 		}
@@ -478,7 +478,7 @@ class ExhaustiveGenerationTests {
 			try {
 				T value = generator.generate(exhaustiveSource.get());
 				allValues.add(value);
-				exhaustiveSource.next();
+				exhaustiveSource.advanceChain();
 			} catch (Generator.NoMoreValues noMoreValues) {
 				break;
 			}

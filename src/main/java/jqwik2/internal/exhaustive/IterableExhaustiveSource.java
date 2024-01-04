@@ -70,7 +70,7 @@ public class IterableExhaustiveSource implements IterableGenSource {
 				return true;
 			}
 			try {
-				sources.getFirst().next();
+				sources.getFirst().advanceChain();
 				hasNextBeenInvoked = false;
 				return true;
 			} catch (Generator.NoMoreValues e) {

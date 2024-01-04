@@ -5,7 +5,7 @@ import java.util.*;
 public interface Exhaustive<T extends Exhaustive<T>> extends Cloneable {
 	long maxCount();
 
-	void advance();
+	boolean advance();
 
 	void reset();
 
@@ -16,7 +16,7 @@ public interface Exhaustive<T extends Exhaustive<T>> extends Cloneable {
 		succ.setPrev(this);
 	}
 
-	void next();
+	boolean advanceChain();
 
 	void setPrev(Exhaustive<?> exhaustive);
 

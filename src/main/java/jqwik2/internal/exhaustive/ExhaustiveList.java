@@ -55,14 +55,15 @@ public class ExhaustiveList extends AbstractExhaustiveSource<GenSource.List> {
 	}
 
 	@Override
-	public void next() {
+	public boolean advanceChain() {
 		try {
-			elements.getFirst().next();
+			return elements.getFirst().advanceChain();
 		} catch (Generator.NoMoreValues e) {
 			if (prev().isPresent()) {
-				prev().get().advance();
+				return prev().get().advance();
 			} else {
 				Generator.noMoreValues();
+				return false;
 			}
 		}
 	}

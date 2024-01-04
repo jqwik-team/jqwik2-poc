@@ -19,11 +19,12 @@ public class ExhaustiveEmptyList extends ExhaustiveList {
 	}
 
 	@Override
-	public void advance() {
+	public boolean advance() {
 		if (prev().isEmpty()) {
 			Generator.noMoreValues();
+			return false;
 		}
-		prev().get().advance();
+		return prev().get().advance();
 	}
 
 	@Override
@@ -32,8 +33,8 @@ public class ExhaustiveEmptyList extends ExhaustiveList {
 	}
 
 	@Override
-	public void next() {
-		advance();
+	public boolean advanceChain() {
+		return advance();
 	}
 
 	@Override
