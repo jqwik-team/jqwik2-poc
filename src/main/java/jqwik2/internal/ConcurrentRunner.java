@@ -44,9 +44,28 @@ public class ConcurrentRunner {
 					// the executor service has been shut down due to a falsified sample.
 				}
 			}
-		}
-		if (!uncaughtErrors.isEmpty()) {
-			ExceptionSupport.throwAsUnchecked(uncaughtErrors.getFirst());
+			// waitForFinishOrFail(executorService);
+			if (!uncaughtErrors.isEmpty()) {
+				throw uncaughtErrors.getFirst();
+			}
+		} catch (Throwable throwable) {
+			ExceptionSupport.throwAsUnchecked(throwable);
 		}
 	}
+
+	private void waitForFinishOrFail(ExecutorService executorService) throws TimeoutException {
+		boolean timeoutOccurred = false;
+		try {
+			executorService.shutdown();
+			timeoutOccurred = !executorService.awaitTermination(timeout.toMillis(), TimeUnit.MILLISECONDS);
+		} catch (InterruptedException e) {
+			executorService.shutdownNow();
+		}
+		if (timeoutOccurred) {
+			executorService.shutdownNow();
+			String message = "Timed out after " + timeout;
+			throw new TimeoutException(message);
+		}
+	}
+
 }

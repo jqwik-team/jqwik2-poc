@@ -4,12 +4,11 @@ import java.time.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 
+import jqwik2.internal.*;
+
 public sealed interface PropertyRunConfiguration {
 
-	Supplier<ExecutorService> CURRENT_THREAD_EXECUTOR_SUPPLIER = () -> {
-		ThreadFactory threadFactory = r -> Thread.currentThread();
-		return Executors.newSingleThreadExecutor(threadFactory);
-	};
+	Supplier<ExecutorService> DEFAULT_EXECUTOR_SERVICE_SUPPLIER = Executors::newSingleThreadExecutor;
 
 	Duration maxRuntime();
 
@@ -24,7 +23,7 @@ public sealed interface PropertyRunConfiguration {
 	}
 
 	static PropertyRunConfiguration randomized(String seed, int maxTries) {
-		return randomized(seed, maxTries, true, 0.05, Duration.ofSeconds(10), CURRENT_THREAD_EXECUTOR_SUPPLIER);
+		return randomized(seed, maxTries, true, 0.05, Duration.ofSeconds(10), DEFAULT_EXECUTOR_SERVICE_SUPPLIER);
 	}
 
 	static PropertyRunConfiguration randomized(

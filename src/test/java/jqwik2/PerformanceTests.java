@@ -43,7 +43,7 @@ class PerformanceTests {
 		time("jqwik1", count, () -> generator.next(random));
 	}
 
-	private void time(String label, int count, Runnable runnable) {
+	public static void time(String label, int count, Runnable runnable) {
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < count; i++) {
 			runnable.run();
