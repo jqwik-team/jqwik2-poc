@@ -5,6 +5,10 @@ import java.util.*;
 public interface Exhaustive<T extends Exhaustive<T>> extends Cloneable {
 	long maxCount();
 
+	/**
+	 * Advance this exhaustive source locally or up the chain.
+	 * Return true if successful, false if exhausted.
+	 */
 	boolean advance();
 
 	void reset();
@@ -16,6 +20,10 @@ public interface Exhaustive<T extends Exhaustive<T>> extends Cloneable {
 		succ.setPrev(this);
 	}
 
+	/**
+	 * Try to advance this exhaustive source with all its successors.
+	 * Return true if successful, false if exhausted.
+	 */
 	boolean advanceChain();
 
 	void setPrev(Exhaustive<?> exhaustive);

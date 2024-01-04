@@ -61,32 +61,28 @@ public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> {
 
 	@Override
 	protected boolean tryAdvance() {
-		boolean advanced = head.advance();
-		if (advanced) {
-			creatAndChainChild();
-			return true;
-		} else {
+		if (!head.advance()) {
 			return false;
 		}
+		creatAndChainChild();
+		return true;
 	}
 
 	@Override
 	public boolean advanceChain() {
 		Recording before = head.recording();
-		boolean advanced = head.advanceChain();
-		if (!advanced) {
-			if (prev().isPresent()) {
-				reset();
-				return prev().get().advance();
-			} else {
-				return false;
+		if (head.advanceChain()) {
+			Recording after = head.recording();
+			if (!before.equals(after)) {
+				creatAndChainChild();
 			}
+			return true;
 		}
-		Recording after = head.recording();
-		if (!before.equals(after)) {
-			creatAndChainChild();
+		if (prev().isEmpty()) {
+			return false;
 		}
-		return true;
+		reset();
+		return prev().get().advance();
 	}
 
 	@Override

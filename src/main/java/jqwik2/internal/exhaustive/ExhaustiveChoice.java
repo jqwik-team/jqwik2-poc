@@ -38,12 +38,11 @@ public class ExhaustiveChoice extends AbstractExhaustive<ExhaustiveChoice> {
 
 	@Override
 	protected boolean tryAdvance() {
-		if (currentValue < range.max) {
-			currentValue++;
-			return true;
-		} else {
+		if (currentValue >= range.max) {
 			return false;
 		}
+		currentValue++;
+		return true;
 	}
 
 	@Override

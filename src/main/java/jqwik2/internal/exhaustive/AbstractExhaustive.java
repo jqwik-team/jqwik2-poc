@@ -31,6 +31,10 @@ abstract class AbstractExhaustive<T extends Exhaustive<T>> implements Exhaustive
 		}
 	}
 
+	/**
+	 * Try to advance this exhaustive source locally.
+	 * Return true if successful, false if exhausted.
+	 */
 	protected abstract boolean tryAdvance();
 
 	@Override

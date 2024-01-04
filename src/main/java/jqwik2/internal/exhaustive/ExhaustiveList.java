@@ -51,15 +51,13 @@ public class ExhaustiveList extends AbstractExhaustiveSource<GenSource.List> {
 
 	@Override
 	public boolean advanceChain() {
-		boolean advanced = elements.getFirst().advanceChain();
-		if (!advanced) {
-			if (prev().isPresent()) {
-				return prev().get().advance();
-			} else {
-				return false;
-			}
+		if (elements.getFirst().advanceChain()) {
+			return true;
 		}
-		return true;
+		if (prev().isEmpty()) {
+			return false;
+		}
+		return prev().get().advance();
 	}
 
 	@Override
