@@ -46,7 +46,7 @@ public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> {
 		List<ExhaustiveSource<?>> result = new ArrayList<>();
 		while (true) {
 			result.add(childCreator.apply(iterator.get()));
-			if (!iterator.advanceChain()) {
+			if (!iterator.advance()) {
 				break;
 			}
 		}
@@ -61,7 +61,7 @@ public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> {
 
 	@Override
 	protected boolean tryAdvance() {
-		if (!head.advance()) {
+		if (!head.advanceThisOrUp()) {
 			return false;
 		}
 		creatAndChainChild();
@@ -69,9 +69,9 @@ public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> {
 	}
 
 	@Override
-	public boolean advanceChain() {
+	public boolean advance() {
 		Recording before = head.recording();
-		if (head.advanceChain()) {
+		if (head.advance()) {
 			Recording after = head.recording();
 			if (!before.equals(after)) {
 				creatAndChainChild();
@@ -82,7 +82,7 @@ public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> {
 			return false;
 		}
 		reset();
-		return prev().get().advance();
+		return prev().get().advanceThisOrUp();
 	}
 
 	@Override

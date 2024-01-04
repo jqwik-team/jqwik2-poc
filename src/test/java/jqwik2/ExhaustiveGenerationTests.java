@@ -24,13 +24,13 @@ class ExhaustiveGenerationTests {
 			assertThat(choice.maxCount()).isEqualTo(3L);
 			assertThat(choice.choose(3)).isEqualTo(0);
 
-			assertThat(choice.advanceChain()).isTrue();
+			assertThat(choice.advance()).isTrue();
 			assertThat(choice.choose(3)).isEqualTo(1);
-			assertThat(choice.advanceChain()).isTrue();
+			assertThat(choice.advance()).isTrue();
 			assertThat(choice.choose(3)).isEqualTo(2);
 			assertThat(choice.choose(2)).isEqualTo(0);
 
-			assertThat(choice.advanceChain()).isFalse();
+			assertThat(choice.advance()).isFalse();
 
 			choice.reset();
 			assertThat(choice.choose(3)).isEqualTo(0);
@@ -42,15 +42,15 @@ class ExhaustiveGenerationTests {
 			assertThat(choice.maxCount()).isEqualTo(4L);
 			assertThat(choice.choose(4)).isEqualTo(2);
 
-			assertThat(choice.advanceChain()).isTrue();
+			assertThat(choice.advance()).isTrue();
 			assertThat(choice.choose(6)).isEqualTo(3);
-			assertThat(choice.advanceChain()).isTrue();
+			assertThat(choice.advance()).isTrue();
 			assertThat(choice.choose(6)).isEqualTo(4);
 			assertThat(choice.choose(3)).isEqualTo(1);
-			assertThat(choice.advanceChain()).isTrue();
+			assertThat(choice.advance()).isTrue();
 			assertThat(choice.choose(6)).isEqualTo(5);
 
-			assertThat(choice.advanceChain()).isFalse();
+			assertThat(choice.advance()).isFalse();
 
 			choice.reset();
 			assertThat(choice.choose(6)).isEqualTo(2);
@@ -67,27 +67,27 @@ class ExhaustiveGenerationTests {
 			assertThat(first.choose(3)).isEqualTo(0);
 			assertThat(second.choose(2)).isEqualTo(0);
 
-			assertThat(first.advanceChain()).isTrue();
+			assertThat(first.advance()).isTrue();
 			assertThat(first.choose(3)).isEqualTo(0);
 			assertThat(second.choose(2)).isEqualTo(1);
 
-			assertThat(first.advanceChain()).isTrue();
+			assertThat(first.advance()).isTrue();
 			assertThat(first.choose(3)).isEqualTo(1);
 			assertThat(second.choose(2)).isEqualTo(0);
 
-			assertThat(first.advanceChain()).isTrue();
+			assertThat(first.advance()).isTrue();
 			assertThat(first.choose(3)).isEqualTo(1);
 			assertThat(second.choose(2)).isEqualTo(1);
 
-			assertThat(first.advanceChain()).isTrue();
+			assertThat(first.advance()).isTrue();
 			assertThat(first.choose(3)).isEqualTo(2);
 			assertThat(second.choose(2)).isEqualTo(0);
 
-			assertThat(first.advanceChain()).isTrue();
+			assertThat(first.advance()).isTrue();
 			assertThat(first.choose(3)).isEqualTo(2);
 			assertThat(second.choose(2)).isEqualTo(1);
 
-			assertThat(first.advanceChain()).isFalse();
+			assertThat(first.advance()).isFalse();
 		}
 
 		@Example
@@ -97,40 +97,40 @@ class ExhaustiveGenerationTests {
 
 			assertAtom(atom, 0, 0, 0);
 
-			assertThat(atom.advanceChain()).isTrue();
+			assertThat(atom.advance()).isTrue();
 			assertAtom(atom, 0, 0, 1);
-			assertThat(atom.advanceChain()).isTrue();
+			assertThat(atom.advance()).isTrue();
 			assertAtom(atom, 0, 0, 2);
-			assertThat(atom.advanceChain()).isTrue();
+			assertThat(atom.advance()).isTrue();
 			assertAtom(atom, 0, 0, 3);
-			assertThat(atom.advanceChain()).isTrue();
+			assertThat(atom.advance()).isTrue();
 			assertAtom(atom, 0, 1, 0);
 
-			atom.advanceChain();
-			atom.advanceChain();
-			atom.advanceChain();
-			atom.advanceChain();
-			atom.advanceChain();
-			atom.advanceChain();
-			atom.advanceChain();
+			atom.advance();
+			atom.advance();
+			atom.advance();
+			atom.advance();
+			atom.advance();
+			atom.advance();
+			atom.advance();
 
-			assertThat(atom.advanceChain()).isTrue();
+			assertThat(atom.advance()).isTrue();
 			assertAtom(atom, 1, 0, 0);
 
-			atom.advanceChain();
-			atom.advanceChain();
-			atom.advanceChain();
-			atom.advanceChain();
-			atom.advanceChain();
-			atom.advanceChain();
-			atom.advanceChain();
-			atom.advanceChain();
-			atom.advanceChain();
-			atom.advanceChain();
-			assertThat(atom.advanceChain()).isTrue();
+			atom.advance();
+			atom.advance();
+			atom.advance();
+			atom.advance();
+			atom.advance();
+			atom.advance();
+			atom.advance();
+			atom.advance();
+			atom.advance();
+			atom.advance();
+			assertThat(atom.advance()).isTrue();
 			assertAtom(atom, 1, 2, 3);
 
-			assertThat(atom.advanceChain()).isFalse();
+			assertThat(atom.advance()).isFalse();
 		}
 
 		@Example
@@ -144,27 +144,27 @@ class ExhaustiveGenerationTests {
 			assertThat(first.get().choose(3)).isEqualTo(0);
 			assertThat(second.get().choose(2)).isEqualTo(0);
 
-			assertThat(first.advanceChain()).isTrue();
+			assertThat(first.advance()).isTrue();
 			assertThat(first.get().choose(3)).isEqualTo(0);
 			assertThat(second.get().choose(2)).isEqualTo(1);
 
-			assertThat(first.advanceChain()).isTrue();
+			assertThat(first.advance()).isTrue();
 			assertThat(first.get().choose(3)).isEqualTo(1);
 			assertThat(second.get().choose(2)).isEqualTo(0);
 
-			assertThat(first.advanceChain()).isTrue();
+			assertThat(first.advance()).isTrue();
 			assertThat(first.get().choose(3)).isEqualTo(1);
 			assertThat(second.get().choose(2)).isEqualTo(1);
 
-			assertThat(first.advanceChain()).isTrue();
+			assertThat(first.advance()).isTrue();
 			assertThat(first.get().choose(3)).isEqualTo(2);
 			assertThat(second.get().choose(2)).isEqualTo(0);
 
-			assertThat(first.advanceChain()).isTrue();
+			assertThat(first.advance()).isTrue();
 			assertThat(first.get().choose(3)).isEqualTo(2);
 			assertThat(second.get().choose(2)).isEqualTo(1);
 
-			assertThat(first.advanceChain()).isFalse();
+			assertThat(first.advance()).isFalse();
 		}
 
 		@Example
@@ -175,12 +175,12 @@ class ExhaustiveGenerationTests {
 			assertThat(atom.maxCount()).isEqualTo(4L);
 
 			assertAtom(atom, 2, 3, 4);
-			atom.advanceChain();
-			atom.advanceChain();
-			assertThat(atom.advanceChain()).isTrue();
+			atom.advance();
+			atom.advance();
+			assertThat(atom.advance()).isTrue();
 			assertAtom(atom, 3, 4, 4);
 
-			assertThat(atom.advanceChain()).isFalse();
+			assertThat(atom.advance()).isFalse();
 		}
 
 		@Example
@@ -194,17 +194,17 @@ class ExhaustiveGenerationTests {
 			assertThat(atom.maxCount()).isEqualTo(6L);
 			assertAtom(atom, 0, 0);
 
-			assertThat(atom.advanceChain()).isTrue();
+			assertThat(atom.advance()).isTrue();
 			assertAtom(atom, 1, 0);
-			assertThat(atom.advanceChain()).isTrue();
+			assertThat(atom.advance()).isTrue();
 			assertAtom(atom, 0, 1);
-			assertThat(atom.advanceChain()).isTrue();
+			assertThat(atom.advance()).isTrue();
 			assertAtom(atom, 1, 1);
-			assertThat(atom.advanceChain()).isTrue();
+			assertThat(atom.advance()).isTrue();
 			assertAtom(atom, 2, 1);
-			assertThat(atom.advanceChain()).isTrue();
+			assertThat(atom.advance()).isTrue();
 			assertAtom(atom, 2, 3);
-			assertThat(atom.advanceChain()).isFalse();
+			assertThat(atom.advance()).isFalse();
 		}
 
 		@Example
@@ -266,24 +266,24 @@ class ExhaustiveGenerationTests {
 			assertThat(list.maxCount()).isEqualTo(9L);
 
 			assertList(list, 0, 0);
-			assertThat(list.advanceChain()).isTrue();
+			assertThat(list.advance()).isTrue();
 			assertList(list, 0, 1);
-			assertThat(list.advanceChain()).isTrue();
+			assertThat(list.advance()).isTrue();
 			assertList(list, 0, 2);
-			assertThat(list.advanceChain()).isTrue();
+			assertThat(list.advance()).isTrue();
 			assertList(list, 1, 0);
-			assertThat(list.advanceChain()).isTrue();
+			assertThat(list.advance()).isTrue();
 			assertList(list, 1, 1);
-			assertThat(list.advanceChain()).isTrue();
+			assertThat(list.advance()).isTrue();
 			assertList(list, 1, 2);
-			assertThat(list.advanceChain()).isTrue();
+			assertThat(list.advance()).isTrue();
 			assertList(list, 2, 0);
-			assertThat(list.advanceChain()).isTrue();
+			assertThat(list.advance()).isTrue();
 			assertList(list, 2, 1);
-			assertThat(list.advanceChain()).isTrue();
+			assertThat(list.advance()).isTrue();
 			assertList(list, 2, 2);
 
-			assertThat(list.advanceChain()).isFalse();
+			assertThat(list.advance()).isFalse();
 		}
 
 		@Example
@@ -293,7 +293,7 @@ class ExhaustiveGenerationTests {
 
 			assertThat(list.size()).isEqualTo(0);
 
-			assertThat(list.advanceChain()).isFalse();
+			assertThat(list.advance()).isFalse();
 		}
 
 		private void assertList(ExhaustiveList list, int... expected) {
@@ -316,34 +316,34 @@ class ExhaustiveGenerationTests {
 			assertThat(tree.maxCount()).isEqualTo(13L);
 			assertTree(tree, 0);
 
-			assertThat(tree.advanceChain()).isTrue();
+			assertThat(tree.advance()).isTrue();
 			assertTree(tree, 1, 0);
-			assertThat(tree.advanceChain()).isTrue();
+			assertThat(tree.advance()).isTrue();
 			assertTree(tree, 1, 1);
-			assertThat(tree.advanceChain()).isTrue();
+			assertThat(tree.advance()).isTrue();
 			assertTree(tree, 1, 2);
 
-			assertThat(tree.advanceChain()).isTrue();
+			assertThat(tree.advance()).isTrue();
 			assertTree(tree, 2, 0, 0);
-			tree.advanceChain();
+			tree.advance();
 			assertTree(tree, 2, 0, 1);
-			tree.advanceChain();
+			tree.advance();
 			assertTree(tree, 2, 0, 2);
 
-			tree.advanceChain();
+			tree.advance();
 			assertTree(tree, 2, 1, 0);
-			tree.advanceChain();
+			tree.advance();
 			assertTree(tree, 2, 1, 1);
-			tree.advanceChain();
+			tree.advance();
 			assertTree(tree, 2, 1, 2);
 
-			tree.advanceChain();
+			tree.advance();
 			assertTree(tree, 2, 2, 0);
-			tree.advanceChain();
+			tree.advance();
 			assertTree(tree, 2, 2, 1);
-			assertThat(tree.advanceChain()).isTrue();
+			assertThat(tree.advance()).isTrue();
 			assertTree(tree, 2, 2, 2);
-			assertThat(tree.advanceChain()).isFalse();
+			assertThat(tree.advance()).isFalse();
 		}
 
 		private void assertTree(ExhaustiveTree exhaustiveTree, int... expected) {
@@ -465,7 +465,7 @@ class ExhaustiveGenerationTests {
 		while (true) {
 			T value = generator.generate(exhaustiveSource.get());
 			allValues.add(value);
-			if (!exhaustiveSource.advanceChain()) {
+			if (!exhaustiveSource.advance()) {
 				break;
 			}
 		}

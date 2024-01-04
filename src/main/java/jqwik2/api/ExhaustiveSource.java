@@ -1,12 +1,13 @@
 package jqwik2.api;
 
+import java.util.*;
 import java.util.function.*;
 
 import jqwik2.api.recording.*;
 import jqwik2.internal.exhaustive.*;
 import jqwik2.internal.recording.*;
 
-public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<ExhaustiveSource<T>>, Supplier<T> {
+public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<ExhaustiveSource<T>>, Iterator<T>, Supplier<T> {
 
 	static ExhaustiveAtom atom(int... maxChoices) {
 		return new ExhaustiveAtom(maxChoices);

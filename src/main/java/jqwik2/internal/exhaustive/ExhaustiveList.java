@@ -36,7 +36,7 @@ public class ExhaustiveList extends AbstractExhaustiveSource<GenSource.List> {
 
 	@Override
 	protected boolean tryAdvance() {
-		return elements.getLast().advance();
+		return elements.getLast().advanceThisOrUp();
 	}
 
 	@Override
@@ -50,14 +50,14 @@ public class ExhaustiveList extends AbstractExhaustiveSource<GenSource.List> {
 	}
 
 	@Override
-	public boolean advanceChain() {
-		if (elements.getFirst().advanceChain()) {
+	public boolean advance() {
+		if (elements.getFirst().advance()) {
 			return true;
 		}
 		if (prev().isEmpty()) {
 			return false;
 		}
-		return prev().get().advance();
+		return prev().get().advanceThisOrUp();
 	}
 
 	@Override
