@@ -1,6 +1,5 @@
 - Additional generators
     - Filter
-    - Map
     - String
     - FlatMap
     - Set of values

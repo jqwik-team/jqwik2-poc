@@ -103,7 +103,7 @@ class EdgeCasesTests {
 	}
 
 
-	private static <T> Set<T> collectAllEdgeCases(Generator<T> generator) {
+	public static <T> Set<T> collectAllEdgeCases(Generator<T> generator) {
 		Set<T> generatedEdgeCases = new LinkedHashSet<>();
 		Iterable<Recording> recordings = generator.edgeCases();
 		for (Recording recording : recordings) {

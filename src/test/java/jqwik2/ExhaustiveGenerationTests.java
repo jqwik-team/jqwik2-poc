@@ -460,7 +460,7 @@ class ExhaustiveGenerationTests {
 		assertThat(count).isEqualTo(341);
 	}
 
-	private static <T> List<T> collectAll(ExhaustiveSource<?> exhaustiveSource, Generator<T> generator) {
+	public static <T> List<T> collectAll(ExhaustiveSource<?> exhaustiveSource, Generator<T> generator) {
 		List<T> allValues = new ArrayList<>();
 		for (GenSource genSource : exhaustiveSource) {
 			T value = generator.generate(genSource);
