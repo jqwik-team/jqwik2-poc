@@ -1,3 +1,4 @@
+- Weighted generation: BIASED, GAUSSIAN, LOGARITHMIC
 - Additional generators
     - Filter
     - String
