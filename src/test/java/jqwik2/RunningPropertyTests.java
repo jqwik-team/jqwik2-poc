@@ -16,7 +16,7 @@ import net.jqwik.api.*;
 import static jqwik2.api.PropertyRunConfiguration.*;
 import static org.assertj.core.api.Assertions.*;
 
-class PropertyExecutionTests {
+class RunningPropertyTests {
 
 	@Example
 	void runSuccessfulProperty() {
@@ -234,7 +234,6 @@ class PropertyExecutionTests {
 				"42", 1000, false, 0.0,
 				Duration.ofMillis(100),
 				Executors::newSingleThreadExecutor
-				// Executors::newCachedThreadPool // TODO: Does not work with short timeout
 			)
 		);
 		assertThat(result.status()).isEqualTo(Status.ABORTED);

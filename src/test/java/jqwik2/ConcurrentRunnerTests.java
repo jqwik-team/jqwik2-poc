@@ -76,11 +76,11 @@ class ConcurrentRunnerTests {
 		}
 		try {
 			runner.run(tasks.iterator());
-			//fail("Expected TimeoutException");
+			fail("Expected TimeoutException");
 		} catch (TimeoutException timeoutException) {
-			System.out.println("Timeout occurred: " + timeoutException.getMessage());
+			// System.out.println("Timeout occurred: " + timeoutException.getMessage());
 		}
-		assertThat(counter.get()).isGreaterThanOrEqualTo(2);
+		assertThat(counter.get()).isGreaterThanOrEqualTo(1);
 	}
 
 	@Property

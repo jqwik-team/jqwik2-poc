@@ -1,5 +1,3 @@
-- Fix PropertyExecutionTests.abortWithTimeout()
-  - Extract ConcurrentTryableExecutor to isolate concurrency code
 - Additional generators
     - Filter
     - Map

@@ -30,7 +30,7 @@ class PerformanceTests {
 
 		int count = 100_000;
 
-		time("jqwik2", count, () -> {
+		time("jqwik2 generation", count, () -> {
 			GenRecorder source = new GenRecorder(new RandomGenSource());
 			randomListWithEdgeCases.generate(source);
 		});
@@ -41,7 +41,7 @@ class PerformanceTests {
 															  .generator(1000);
 
 		Random random = new Random();
-		time("jqwik1", count, () -> generator.next(random));
+		time("jqwik1 generation", count, () -> generator.next(random));
 	}
 
 	public static void time(String label, int count, SoftAssertionsProvider.ThrowingRunnable runnable) throws Exception {

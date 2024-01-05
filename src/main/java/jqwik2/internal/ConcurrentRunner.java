@@ -3,6 +3,7 @@ package jqwik2.internal;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
 
 import jqwik2.api.support.*;
 
@@ -47,12 +48,17 @@ public class ConcurrentRunner {
 				}
 			}
 
-			scheduleAdditionTimeoutTask(timer, submittedTasks);
+			AtomicBoolean timeoutOccurred = new AtomicBoolean(false);
+			scheduleAdditionTimeoutTask(timer, submittedTasks, timeoutOccurred);
 
 			waitForFinishOrFail(executorService);
 
 			if (!uncaughtErrors.isEmpty()) {
 				throw uncaughtErrors.getFirst();
+			}
+
+			if (timeoutOccurred.get()) {
+				throw new TimeoutException("Concurrent run timed out after " + timeout);
 			}
 		} catch (TimeoutException timeoutException) {
 			throw timeoutException;
@@ -63,13 +69,15 @@ public class ConcurrentRunner {
 		}
 	}
 
-	private void scheduleAdditionTimeoutTask(Timer timer, List<Future<?>> submittedTasks) {
+	private void scheduleAdditionTimeoutTask(Timer timer, List<Future<?>> submittedTasks, AtomicBoolean timeoutOccurred) {
 		// Timeout is already handled by waitForFinishOrFail(), but this can speed up task cancellation,
-		// especially with Executors.newVirtualThreadPerTaskExecutor()
+		// especially with Executors.newVirtualThreadPerTaskExecutor().
+		// This is a performance optimization only. Remove if it causes problems.
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
 				submittedTasks.forEach(future -> future.cancel(true));
+				timeoutOccurred.set(true);
 			}
 		}, timeout.toMillis());
 	}

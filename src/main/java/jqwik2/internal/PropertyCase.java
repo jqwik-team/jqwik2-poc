@@ -111,7 +111,6 @@ public class PropertyCase {
 		}
 	}
 
-	@SuppressWarnings("OverlyLongMethod")
 	private Pair<SortedSet<FalsifiedSample>, Boolean> runAndCollectFalsifiedSamples(
 		IterableGenSource iterableGenSource,
 		int maxTries,
@@ -121,43 +120,69 @@ public class PropertyCase {
 		Duration maxDuration,
 		Supplier<ExecutorService> executorServiceSupplier
 	) {
-		int count = 0;
 		SortedSet<FalsifiedSample> falsifiedSamples = Collections.synchronizedSortedSet(new TreeSet<>());
-		Set<Throwable> thrownErrors = Collections.synchronizedSet(new HashSet<>());
-		Iterator<MultiGenSource> genSources = iterableGenSource.iterator();
-		try (var executorService = executorServiceSupplier.get()) {
-			Consumer<FalsifiedSample> onFalsified = sample -> {
-				falsifiedSamples.add(sample);
-				executorService.shutdownNow();
-			};
-			Consumer<Throwable> onError = throwable -> {
-				executorService.shutdownNow();
-				thrownErrors.add(throwable);
-			};
+		Consumer<FalsifiedSample> onFalsified = falsifiedSamples::add;
 
-			while (count < maxTries) {
-				if (!genSources.hasNext()) {
-					break;
-				}
-				count++;
+		var runner = new ConcurrentRunner(executorServiceSupplier.get(), maxDuration);
+
+		var taskIterator = new Iterator<ConcurrentRunner.Task>() {
+			private final Iterator<MultiGenSource> genSources = iterableGenSource.iterator();
+			private int count = 0;
+
+			@Override
+			public boolean hasNext() {
+				return genSources.hasNext() && count < maxTries;
+			}
+
+			@Override
+			public ConcurrentRunner.Task next() {
 				MultiGenSource trySource = genSources.next();
+				count++;
+				return shutdown -> executeTry(
+					sampleGenerator, trySource, countTries, countChecks,
+					shutdown, onFalsified, onSatisfied, iterableGenSource.lock()
+				);
+			}
+		};
 
-				try {
-					Runnable executeTry = () -> executeTry(
-						sampleGenerator, trySource, countTries, countChecks,
-						onFalsified, onSatisfied, onError, iterableGenSource.lock()
-					);
-					executorService.submit(executeTry);
-				} catch (RejectedExecutionException ignore) {
-					// This can happen when a task is submitted after
-					// the executor service has been shut down due to a falsified sample.
-				}
+		try {
+			runner.run(taskIterator);
+			return new Pair<>(falsifiedSamples, false);
+		} catch (TimeoutException timeoutException) {
+			return new Pair<>(falsifiedSamples, true);
+		}
+
+	}
+
+	private void executeTry(
+		SampleGenerator sampleGenerator,
+		MultiGenSource multiSource,
+		AtomicInteger countTries,
+		AtomicInteger countChecks,
+		ConcurrentRunner.Shutdown shutdown,
+		Consumer<FalsifiedSample> onFalsified,
+		Consumer<Sample> onSatisfied,
+		Lock generationLock
+	) {
+		try {
+			generationLock.lock();
+			Sample sample = sampleGenerator.generate(multiSource);
+			generationLock.unlock();
+			countTries.incrementAndGet();
+			TryExecutionResult tryResult = tryable.apply(sample);
+			if (tryResult.status() != TryExecutionResult.Status.INVALID) {
+				countChecks.incrementAndGet();
 			}
-			boolean timedOut = waitForAllTriesToFinishOrAtLeastOneIsFalsified(executorService, maxDuration, countChecks);
-			if (!thrownErrors.isEmpty()) {
-				ExceptionSupport.throwAsUnchecked(thrownErrors.iterator().next());
+			if (tryResult.status() == TryExecutionResult.Status.FALSIFIED) {
+				FalsifiedSample originalSample = new FalsifiedSample(sample, tryResult.throwable());
+				onFalsified.accept(originalSample);
+				shutdown.shutdown();
 			}
-			return new Pair<>(falsifiedSamples, timedOut);
+			if (tryResult.status() == TryExecutionResult.Status.SATISFIED) {
+				onSatisfied.accept(sample);
+			}
+		} finally {
+			generationLock.unlock();
 		}
 	}
 
@@ -178,57 +203,6 @@ public class PropertyCase {
 		return randomized.seed() == null
 				   ? new RandomGenSource()
 				   : new RandomGenSource(randomized.seed());
-	}
-
-	private boolean waitForAllTriesToFinishOrAtLeastOneIsFalsified(
-		ExecutorService executorService, Duration timeout,
-		AtomicInteger countChecks
-	) {
-		boolean timeoutOccurred = false;
-		try {
-			executorService.shutdown();
-			timeoutOccurred = !executorService.awaitTermination(timeout.toMillis(), TimeUnit.MILLISECONDS);
-		} catch (InterruptedException e) {
-			executorService.shutdownNow();
-		}
-		if (timeoutOccurred) {
-			executorService.shutdownNow();
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	private void executeTry(
-		SampleGenerator sampleGenerator,
-		MultiGenSource multiSource,
-		AtomicInteger countTries,
-		AtomicInteger countChecks,
-		Consumer<FalsifiedSample> onFalsified,
-		Consumer<Sample> onSatisfied,
-		Consumer<Throwable> onError,
-		Lock generationLock
-	) {
-		try {
-			generationLock.lock();
-			Sample sample = sampleGenerator.generate(multiSource);
-			generationLock.unlock();
-			countTries.incrementAndGet();
-			TryExecutionResult tryResult = tryable.apply(sample);
-			if (tryResult.status() != TryExecutionResult.Status.INVALID) {
-				countChecks.incrementAndGet();
-			}
-			if (tryResult.status() == TryExecutionResult.Status.FALSIFIED) {
-				FalsifiedSample originalSample = new FalsifiedSample(sample, tryResult.throwable());
-				onFalsified.accept(originalSample);
-			}
-			if (tryResult.status() == TryExecutionResult.Status.SATISFIED) {
-				onSatisfied.accept(sample);
-			}
-		} catch (Throwable t) {
-			generationLock.unlock();
-			onError.accept(t);
-		}
 	}
 
 	private void shrink(FalsifiedSample originalSample, Collection<FalsifiedSample> falsifiedSamples) {
