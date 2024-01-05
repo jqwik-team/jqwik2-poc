@@ -391,7 +391,7 @@ class ExhaustiveGenerationTests {
 	@Example
 	void lists() {
 		Generator<Integer> ints0to10 = new IntegerGenerator(-1, 2);
-		Generator<List<Integer>> lists = new ListGenerator<>(ints0to10, 2);
+		Generator<List<Integer>> lists = new ListGenerator<>(ints0to10, 0, 2);
 
 		ExhaustiveSource<?> exhaustive = lists.exhaustive().get();
 		assertThat(exhaustive.maxCount()).isEqualTo(21L);
@@ -424,9 +424,39 @@ class ExhaustiveGenerationTests {
 	}
 
 	@Example
+	void listsWithMinSize() {
+		Generator<Integer> ints0to10 = new IntegerGenerator(-1, 2);
+		Generator<List<Integer>> lists = new ListGenerator<>(ints0to10, 2, 2);
+
+		ExhaustiveSource<?> exhaustive = lists.exhaustive().get();
+		assertThat(exhaustive.maxCount()).isEqualTo(16L);
+
+		List<List<Integer>> allValues = collectAll(exhaustive, lists);
+		assertThat(allValues).hasSize(16);
+		assertThat(allValues).containsExactly(
+			List.of(0, 0),
+			List.of(0, 1),
+			List.of(0, 2),
+			List.of(0, -1),
+			List.of(1, 0),
+			List.of(1, 1),
+			List.of(1, 2),
+			List.of(1, -1),
+			List.of(2, 0),
+			List.of(2, 1),
+			List.of(2, 2),
+			List.of(2, -1),
+			List.of(-1, 0),
+			List.of(-1, 1),
+			List.of(-1, 2),
+			List.of(-1, -1)
+		);
+	}
+
+	@Example
 	void generateSampleWithIntsAndLists() {
 		IntegerGenerator ints1 = new IntegerGenerator(0, 10);
-		ListGenerator<Integer> lists2 = new ListGenerator<>(new IntegerGenerator(0, 4), 2);
+		ListGenerator<Integer> lists2 = new ListGenerator<>(new IntegerGenerator(0, 4), 0, 2);
 
 		SampleGenerator sampleGenerator = SampleGenerator.from(ints1, lists2);
 

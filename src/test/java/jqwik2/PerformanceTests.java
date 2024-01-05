@@ -25,7 +25,7 @@ class PerformanceTests {
 	@Example
 	void compare_jqwik2poc_with_jqwik() throws Exception {
 		IntegerGenerator randomInteger = new IntegerGenerator(-10, 100);
-		ListGenerator<Integer> randomList = new ListGenerator<>(randomInteger, 100);
+		ListGenerator<Integer> randomList = new ListGenerator<>(randomInteger, 0, 100);
 		Generator<List<Integer>> randomListWithEdgeCases = WithEdgeCasesDecorator.decorate(randomList, 0.05, 10);
 
 		int count = 100_000;

@@ -17,7 +17,7 @@ class SampleGenerationTests {
 	@Example
 	void generateRandomSample() {
 		Generator<Integer> ints = new IntegerGenerator(-100, 100);
-		Generator<List<Integer>> lists = new ListGenerator<>(ints, 5);
+		Generator<List<Integer>> lists = new ListGenerator<>(ints, 0, 5);
 
 		GenRecorder recorder1 = new GenRecorder(new RandomGenSource("41"));
 		GenRecorder recorder2 = new GenRecorder(new RandomGenSource("42"));
@@ -37,7 +37,7 @@ class SampleGenerationTests {
 	@Example
 	void useRandomSampleGenerator() {
 		Generator<Integer> ints = new IntegerGenerator(-100, 100);
-		Generator<List<Integer>> lists = new ListGenerator<>(ints, 5);
+		Generator<List<Integer>> lists = new ListGenerator<>(ints, 0, 5);
 
 		for (int i = 0; i < 10; i++) {
 
@@ -77,7 +77,7 @@ class SampleGenerationTests {
 		);
 		Generator<List<Integer>> lists =
 			WithEdgeCasesDecorator.decorate(
-				new ListGenerator<>(ints, 5),
+				new ListGenerator<>(ints, 0, 5),
 				0.5, 100
 			);
 

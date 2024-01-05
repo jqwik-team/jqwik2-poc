@@ -10,10 +10,12 @@ import static jqwik2.api.recording.Recording.*;
 
 public class ListGenerator<T> implements Generator<List<T>> {
 	private final Generator<T> elementGenerator;
+	private final int minSize;
 	private final int maxSize;
 
-	public ListGenerator(Generator<T> elementGenerator, int maxSize) {
+	public ListGenerator(Generator<T> elementGenerator, int minSize, int maxSize) {
 		this.elementGenerator = elementGenerator;
+		this.minSize = minSize;
 		this.maxSize = maxSize;
 	}
 
@@ -34,13 +36,14 @@ public class ListGenerator<T> implements Generator<List<T>> {
 
 	private int chooseSize(GenSource head) {
 		GenSource.Atom sizeSource = head.atom();
-		return sizeSource.choose(maxSize + 1);
+		int sizeRange = maxSize - minSize;
+		return sizeSource.choose(sizeRange + 1) + minSize;
 	}
 
 	@Override
 	public Generator<List<T>> decorate(Function<Generator<?>, Generator<?>> decorator) {
 		Generator<T> decoratedElementGenerator = elementGenerator.decorate(decorator);
-		return (Generator<List<T>>) decorator.apply(new ListGenerator<>(decoratedElementGenerator, maxSize));
+		return (Generator<List<T>>) decorator.apply(new ListGenerator<>(decoratedElementGenerator, minSize, maxSize));
 	}
 
 	@Override
@@ -50,10 +53,14 @@ public class ListGenerator<T> implements Generator<List<T>> {
 
 	private Collection<Recording> edgeCaseRecordings() {
 		Set<Recording> recordings = new LinkedHashSet<>();
-		recordings.add(tree(atom(0), list()));
-		elementGenerator.edgeCases().forEach(elementEdgeCase -> {
-			recordings.add(tree(atom(1), list(elementEdgeCase)));
-		});
+		if (minSize == 0) {
+			recordings.add(tree(atom(0), list()));
+		}
+		if (minSize <= 1 && maxSize >= 1) {
+			elementGenerator.edgeCases().forEach(elementEdgeCase -> {
+				recordings.add(tree(atom(1), list(elementEdgeCase)));
+			});
+		}
 		return recordings;
 	}
 
@@ -61,10 +68,9 @@ public class ListGenerator<T> implements Generator<List<T>> {
 	public Optional<ExhaustiveSource<?>> exhaustive() {
 		return elementGenerator.exhaustive().flatMap(
 			elementSource -> Optional.of(ExhaustiveSource.tree(
-				ExhaustiveSource.atom(maxSize),
+				ExhaustiveSource.atom(maxSize-minSize),
 				head -> ExhaustiveSource.list(chooseSize(head), elementSource)
 			)));
 	}
-
 
 }

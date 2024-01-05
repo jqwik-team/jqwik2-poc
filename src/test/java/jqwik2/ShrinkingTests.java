@@ -64,7 +64,7 @@ public class ShrinkingTests {
 	@Example
 	void shrinkListOfInts() {
 		IntegerGenerator ints = new IntegerGenerator(-10, 100);
-		Generator<List<Integer>> listOfInts = new ListGenerator<>(ints, 5);
+		Generator<List<Integer>> listOfInts = new ListGenerator<>(ints, 0, 5);
 
 		// [-10, 50, -5]
 		ListRecording listRecording = list(
@@ -118,7 +118,7 @@ public class ShrinkingTests {
 	@Example
 	void shrinkListWithProperty() {
 		IntegerGenerator ints = new IntegerGenerator(-10, 100);
-		Generator<List<Integer>> listOfInts = new ListGenerator<>(ints, 5);
+		Generator<List<Integer>> listOfInts = new ListGenerator<>(ints, 0, 5);
 
 		// [-10, 50, -5]
 		ListRecording listRecording = list(

@@ -91,7 +91,7 @@ class EdgeCasesTests {
 	void allListEdgeCases() {
 		// Edge cases = 0, 1, 10
 		Generator<Integer> ints = new IntegerGenerator(0, 10);
-		Generator<List<Integer>> lists = new ListGenerator<>(ints, 5);
+		Generator<List<Integer>> lists = new ListGenerator<>(ints, 0, 5);
 
 		Set<List<Integer>> generatedEdgeCases = collectAllEdgeCases(lists);
 
@@ -102,6 +102,14 @@ class EdgeCasesTests {
 		);
 	}
 
+	@Example
+	void allListEdgeCasesWithSizeLargerThan1() {
+		Generator<Integer> ints = new IntegerGenerator(0, 10);
+		Generator<List<Integer>> lists = new ListGenerator<>(ints, 2, 5);
+
+		Set<List<Integer>> generatedEdgeCases = collectAllEdgeCases(lists);
+		assertThat(generatedEdgeCases).isEmpty();
+	}
 
 	public static <T> Set<T> collectAllEdgeCases(Generator<T> generator) {
 		Set<T> generatedEdgeCases = new LinkedHashSet<>();

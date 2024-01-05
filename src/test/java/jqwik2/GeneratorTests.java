@@ -117,7 +117,7 @@ class GeneratorTests {
 		@Example
 		void listOfInts() {
 			IntegerGenerator ints = new IntegerGenerator(-10, 100);
-			Generator<List<Integer>> listOfInts = new ListGenerator<>(ints, 5);
+			Generator<List<Integer>> listOfInts = new ListGenerator<>(ints, 0, 5);
 
 			RandomGenSource source = new RandomGenSource("42");
 
@@ -129,9 +129,23 @@ class GeneratorTests {
 		}
 
 		@Example
+		void listOfCertainSize() {
+			IntegerGenerator ints = new IntegerGenerator(-10, 100);
+			Generator<List<Integer>> listOfInts = new ListGenerator<>(ints, 1, 2);
+
+			RandomGenSource source = new RandomGenSource("42");
+
+			for (int i = 0; i < 10; i++) {
+				List<Integer> value = listOfInts.generate(source);
+				// System.out.println("value=" + value);
+				assertThat(value).hasSizeBetween(1, 2);
+			}
+		}
+
+		@Example
 		void listOfIntsWithEdgeCases() {
 			IntegerGenerator ints = new IntegerGenerator(-100, 100);
-			Generator<List<Integer>> listOfInts = new ListGenerator<>(ints, 5);
+			Generator<List<Integer>> listOfInts = new ListGenerator<>(ints, 0, 5);
 			Generator<List<Integer>> listWithEdgeCases = WithEdgeCasesDecorator.decorate(listOfInts, 0.5, 10);
 
 			RandomGenSource source = new RandomGenSource("42");
@@ -182,7 +196,7 @@ class GeneratorTests {
 		@Example
 		void listOfInts() {
 			IntegerGenerator ints = new IntegerGenerator(-10, 100);
-			Generator<List<Integer>> generator = new ListGenerator<>(ints, 5);
+			Generator<List<Integer>> generator = new ListGenerator<>(ints, 0, 5);
 
 			RandomGenSource source = new RandomGenSource("42");
 
@@ -229,7 +243,7 @@ class GeneratorTests {
 		@Example
 		void exhaustedRecording() {
 			IntegerGenerator ints = new IntegerGenerator(0, 100);
-			ListGenerator<Integer> listOfInts = new ListGenerator<>(ints, 5);
+			ListGenerator<Integer> listOfInts = new ListGenerator<>(ints, 0, 5);
 
 			assertThatThrownBy(() -> {
 				RecordedSource recorded = new RecordedSource(tree(
@@ -242,7 +256,7 @@ class GeneratorTests {
 		@Example
 		void exhaustedRecordingWithBackUp() {
 			IntegerGenerator ints = new IntegerGenerator(0, 100);
-			ListGenerator<Integer> listOfInts = new ListGenerator<>(ints, 5);
+			ListGenerator<Integer> listOfInts = new ListGenerator<>(ints, 0, 5);
 
 			Recording recording = tree(
 				atom(3), list(atom(10))
