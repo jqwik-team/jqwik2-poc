@@ -1,4 +1,4 @@
-package jqwik2;
+package jqwik2.internal.generators;
 
 import java.util.*;
 import java.util.function.*;

@@ -5,10 +5,19 @@ import java.util.function.*;
 
 import jqwik2.api.recording.*;
 import jqwik2.internal.*;
+import jqwik2.internal.generators.*;
 
 public interface Generator<T> {
 
 	T generate(GenSource source);
+
+	default Generator<List<T>> list(int minSize, int maxSize) {
+		return new ListGenerator<T>(this, minSize, maxSize);
+	}
+
+	default <R> Generator<R> map(Function<T, R> mapper) {
+		return new GeneratorMap<>(this, mapper);
+	}
 
 	default Iterable<Recording> edgeCases() {
 		return Set.of();

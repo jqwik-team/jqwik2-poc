@@ -40,6 +40,7 @@ public class ListGenerator<T> implements Generator<List<T>> {
 		return sizeSource.choose(sizeRange + 1) + minSize;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Generator<List<T>> decorate(Function<Generator<?>, Generator<?>> decorator) {
 		Generator<T> decoratedElementGenerator = elementGenerator.decorate(decorator);
@@ -54,11 +55,11 @@ public class ListGenerator<T> implements Generator<List<T>> {
 	private Collection<Recording> edgeCaseRecordings() {
 		Set<Recording> recordings = new LinkedHashSet<>();
 		if (minSize == 0) {
-			recordings.add(tree(atom(0), list()));
+			recordings.add(tree(atom(0), Recording.list()));
 		}
 		if (minSize <= 1 && maxSize >= 1) {
 			elementGenerator.edgeCases().forEach(elementEdgeCase -> {
-				recordings.add(tree(atom(1), list(elementEdgeCase)));
+				recordings.add(tree(atom(1), Recording.list(elementEdgeCase)));
 			});
 		}
 		return recordings;
@@ -68,7 +69,7 @@ public class ListGenerator<T> implements Generator<List<T>> {
 	public Optional<ExhaustiveSource<?>> exhaustive() {
 		return elementGenerator.exhaustive().flatMap(
 			elementSource -> Optional.of(ExhaustiveSource.tree(
-				ExhaustiveSource.atom(maxSize-minSize),
+				ExhaustiveSource.atom(maxSize - minSize),
 				head -> ExhaustiveSource.list(chooseSize(head), elementSource)
 			)));
 	}
