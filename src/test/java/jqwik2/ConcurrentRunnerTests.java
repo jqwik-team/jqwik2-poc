@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.*;
 import java.util.function.*;
 
 import jqwik2.internal.*;
-import org.assertj.core.api.*;
 
 import net.jqwik.api.*;
 
@@ -70,7 +69,7 @@ class ConcurrentRunnerTests {
 			final int factor = i;
 			tasks.add(shutdown -> {
 				sleepInThread(100 * factor);
-				sleep(100 * factor);
+				sleep(50 * factor);
 				// System.out.println("Task " + counter.get() + " running");
 				counter.incrementAndGet();
 			});
@@ -82,6 +81,39 @@ class ConcurrentRunnerTests {
 			System.out.println("Timeout occurred: " + timeoutException.getMessage());
 		}
 		assertThat(counter.get()).isGreaterThanOrEqualTo(2);
+	}
+
+	@Property
+	void runSuccessfullyWithShutdown(@ForAll("services") Pair<String, Supplier<ExecutorService>> pair) throws Exception {
+		String name = pair.first();
+		ExecutorService service = pair.second().get();
+
+		time("runWithShutdown: " + name, 1, () -> runSuccessfullyWithShutdown(service));
+	}
+
+	private static void runSuccessfullyWithShutdown(ExecutorService service) throws TimeoutException {
+		ConcurrentRunner runner = new ConcurrentRunner(service, Duration.ofSeconds(10));
+		AtomicInteger countAll = new AtomicInteger();
+		AtomicInteger countShutdowns = new AtomicInteger();
+		List<ConcurrentRunner.Task> tasks = new ArrayList<>();
+		for (int i = 0; i < 100; i++) {
+			tasks.add(shutdown -> {
+				sleepInThread(10);
+				sleep(10);
+				countAll.incrementAndGet();
+				if (countAll.get() >= 50 && countAll.get() % 3 == 0) {
+					shutdown.shutdown();
+					countShutdowns.incrementAndGet();
+				}
+			});
+		}
+		runner.run(tasks.iterator());
+
+		// System.out.println("countAll      : " + countAll.get());
+		// System.out.println("countShutdowns: " + countShutdowns.get());
+
+		assertThat(countAll.get()).isLessThanOrEqualTo(100);
+		assertThat(countShutdowns.get()).isGreaterThanOrEqualTo(1);
 	}
 
 	private static void sleep(int millis) {
