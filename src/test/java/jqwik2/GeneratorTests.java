@@ -40,6 +40,17 @@ class GeneratorTests {
 			assertThat(values).containsExactlyInAnyOrder(-10, 0, 100);
 		}
 
+		@Example
+		void filteredExhaustiveGeneration() {
+			Generator<Integer> evenNumbers = new IntegerGenerator(-10, 100).filter(i -> i % 2 == 0);
+			ExhaustiveSource<?> exhaustive = evenNumbers.exhaustive().get();
+			assertThat(exhaustive.maxCount()).isEqualTo(111L);
+
+			var values = ExhaustiveGenerationTests.collectAll(exhaustive, evenNumbers);
+			assertThat(values).hasSize(56);
+			assertThat(values).contains(-10, 0, 100);
+		}
+
 	}
 
 	@Group

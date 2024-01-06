@@ -493,8 +493,10 @@ class ExhaustiveGenerationTests {
 	public static <T> List<T> collectAll(ExhaustiveSource<?> exhaustiveSource, Generator<T> generator) {
 		List<T> allValues = new ArrayList<>();
 		for (GenSource genSource : exhaustiveSource) {
-			T value = generator.generate(genSource);
-			allValues.add(value);
+			try {
+				T value = generator.generate(genSource);
+				allValues.add(value);
+			} catch (CannotGenerateException ignore) {}
 		}
 		return allValues;
 	}

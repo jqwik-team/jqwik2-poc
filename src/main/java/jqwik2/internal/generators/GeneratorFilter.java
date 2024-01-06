@@ -1,10 +1,10 @@
 package jqwik2.internal.generators;
 
+import java.util.*;
 import java.util.function.*;
 
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
-import jqwik2.internal.*;
 import jqwik2.internal.recording.*;
 
 public class GeneratorFilter<T> implements Generator<T> {
@@ -34,14 +34,17 @@ public class GeneratorFilter<T> implements Generator<T> {
 		);
 	}
 
+	@Override
+	public Optional<ExhaustiveSource<?>> exhaustive() {
+		return generator.exhaustive();//.map(exhaustive -> exhaustive.filter(filter));
+	}
+
 	private T generateUntilAccepted(GenSource source) {
 		for (int i = 0; i < maxMisses; i++) {
-			try {
-				T value = generator.generate(source);
-				if (filter.test(value)) {
-					return value;
-				}
-			} catch (CannotGenerateException ignore) {}
+			T value = generator.generate(source);
+			if (filter.test(value)) {
+				return value;
+			}
 		}
 		String message = String.format("%s missed more than %s times.", toString(), maxMisses);
 		throw new TooManyFilterMissesException(message);
