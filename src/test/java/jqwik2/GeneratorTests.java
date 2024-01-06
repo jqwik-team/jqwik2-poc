@@ -3,6 +3,7 @@ package jqwik2;
 import java.util.*;
 
 import jqwik2.api.*;
+import jqwik2.api.Shrinkable;
 import jqwik2.api.recording.*;
 import jqwik2.internal.*;
 import jqwik2.internal.generators.*;
@@ -51,6 +52,22 @@ class GeneratorTests {
 			assertThat(values).contains(-10, 0, 100);
 		}
 
+		@Example
+		void filteredShrinking() {
+			IntegerGenerator ints = new IntegerGenerator(-1000, 1000);
+			Generator<Integer> evenInts = ints.filter(i -> i % 2 == 0);
+
+			GenSource source = new RecordedSource(atom(996, 1)); // -996
+
+			Shrinkable<Integer> shrinkable = new ShrinkableGenerator<>(evenInts).generate(source);
+
+			shrinkable.shrink().forEach(s -> {
+				assertThat(s.recording()).isLessThan(shrinkable.recording());
+				assertThat(s.value() % 2).isEqualTo(0);
+				// System.out.println("shrink recording: " + s.recording());
+				// System.out.println("shrink value: " + s.value());
+			});
+		}
 	}
 
 	@Group
