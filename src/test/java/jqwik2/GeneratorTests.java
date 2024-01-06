@@ -18,6 +18,31 @@ import static org.assertj.core.api.Assertions.*;
 class GeneratorTests {
 
 	@Group
+	class Filtering {
+		@Example
+		void mapIntsToStrings() {
+			Generator<Integer> divisibleBy3 = new IntegerGenerator(-100, 100).filter(i -> i % 3 == 0);
+
+			RandomGenSource source = new RandomGenSource("42");
+
+			for (int i = 0; i < 20; i++) {
+				int value = divisibleBy3.generate(source);
+				assertThat(value).isBetween(-100, 100);
+				assertThat(value % 3).isEqualTo(0);
+			}
+		}
+
+		@Example
+		void filteredEdgeCases() {
+			Generator<Integer> evenNumbers = new IntegerGenerator(-10, 100).filter(i -> i % 2 == 0);
+
+			var values = EdgeCasesTests.collectAllEdgeCases(evenNumbers);
+			assertThat(values).containsExactlyInAnyOrder(-10, 0, 100);
+		}
+
+	}
+
+	@Group
 	class Mapping {
 
 		@Example

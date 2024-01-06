@@ -115,13 +115,7 @@ class EdgeCasesTests {
 		Set<T> generatedEdgeCases = new LinkedHashSet<>();
 		Iterable<Recording> recordings = generator.edgeCases();
 		for (Recording recording : recordings) {
-			GenSource source = new RecordedSource(recording);
-			try {
-				T value = generator.generate(source);
-				generatedEdgeCases.add(value);
-			} catch (CannotGenerateException e) {
-				// ignore
-			}
+			generator.fromRecording(recording).ifPresent(generatedEdgeCases::add);
 		}
 		return generatedEdgeCases;
 	}

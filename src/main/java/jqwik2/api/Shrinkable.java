@@ -15,9 +15,10 @@ public interface Shrinkable<T> extends Comparable<Shrinkable<T>> {
 	Stream<Shrinkable<T>> shrink();
 
 	default T regenerate() {
-		return generator().generate(new RecordedSource(recording()));
+		return generator().fromRecording(recording()).orElseThrow();
 	}
 
+	@SuppressWarnings("unchecked")
 	default Shrinkable<Object> asGeneric() {
 		return (Shrinkable<Object>) this;
 	}

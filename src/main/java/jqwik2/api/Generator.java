@@ -6,6 +6,7 @@ import java.util.function.*;
 import jqwik2.api.recording.*;
 import jqwik2.internal.*;
 import jqwik2.internal.generators.*;
+import jqwik2.internal.recording.*;
 
 public interface Generator<T> {
 
@@ -19,12 +20,25 @@ public interface Generator<T> {
 		return new GeneratorMap<>(this, mapper);
 	}
 
+	default Generator<T> filter(Predicate<T> filter) {
+		return new GeneratorFilter<>(this, filter, 10000);
+	}
+
 	default Iterable<Recording> edgeCases() {
 		return Set.of();
 	}
 
 	default Optional<ExhaustiveSource<?>> exhaustive() {
 		return Optional.empty();
+	}
+
+	default Optional<T> fromRecording(Recording recording) {
+		try {
+			var value = generate(new RecordedSource(recording));
+			return Optional.of(value);
+		} catch (CannotGenerateException ignore) {
+			return Optional.empty();
+		}
 	}
 
 	/**
