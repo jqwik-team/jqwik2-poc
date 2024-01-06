@@ -1,6 +1,7 @@
 package jqwik2;
 
 import java.util.*;
+import java.util.concurrent.atomic.*;
 
 import jqwik2.api.*;
 import jqwik2.internal.*;
@@ -220,9 +221,8 @@ class ExhaustiveGenerationTests {
 
 			List<Sample> allSamples = new ArrayList<>();
 			for (SampleSource multiGenSource : exhaustiveGenSource) {
-				Sample sample = sampleGenerator.generate(multiGenSource);
-				// System.out.println(sample);
-				allSamples.add(sample);
+				var optionalSample = sampleGenerator.generate(multiGenSource);
+				optionalSample.ifPresent(allSamples::add);
 			}
 			assertThat(allSamples).hasSize(121);
 
@@ -231,11 +231,12 @@ class ExhaustiveGenerationTests {
 			assertThat(values).contains(List.of(10, 5));
 
 			// Second iteration
-			int count = 0;
+			AtomicInteger count = new AtomicInteger(0);
 			for (SampleSource multiGenSource : exhaustiveGenSource) {
-				count++;
+				var optionalSample = sampleGenerator.generate(multiGenSource);
+				optionalSample.ifPresent(i -> count.incrementAndGet());
 			}
-			assertThat(count).isEqualTo(121);
+			assertThat(count).hasValue(121);
 		}
 
 		private static void assertAtom(ExhaustiveAtom exhaustiveAtom, int... expected) {
@@ -465,13 +466,12 @@ class ExhaustiveGenerationTests {
 		assertThat(exhaustiveGenSource.maxCount()).isEqualTo(341);
 
 		List<Sample> allSamples = new ArrayList<>();
-		for (SampleSource multiGenSource : exhaustiveGenSource) {
-			Sample sample = sampleGenerator.generate(multiGenSource);
-			// System.out.println(sample);
-			allSamples.add(sample);
+		for (SampleSource sampleSource : exhaustiveGenSource) {
+			var optionalSample = sampleGenerator.generate(sampleSource);
+			optionalSample.ifPresent(allSamples::add);
 		}
 		assertThat(allSamples).hasSameSizeAs(new HashSet<>(allSamples));
-		assertThat(allSamples).hasSize(217);
+		assertThat(allSamples).hasSize(186);
 
 		List<List<Object>> values = allSamples.stream().map(Sample::values).toList();
 		assertThat(values).contains(List.of(0, List.of()));
@@ -484,11 +484,12 @@ class ExhaustiveGenerationTests {
 		assertThat(values).contains(List.of(10, List.of(4, 4)));
 
 		// Second iteration
-		int count = 0;
-		for (SampleSource multiGenSource : exhaustiveGenSource) {
-			count++;
+		AtomicInteger count = new AtomicInteger(0);
+		for (SampleSource sampleSource : exhaustiveGenSource) {
+			var optionalSample = sampleGenerator.generate(sampleSource);
+			optionalSample.ifPresent(i -> count.incrementAndGet());
 		}
-		assertThat(count).isEqualTo(217);
+		assertThat(count).hasValue(186);
 	}
 
 	public static <T> List<T> collectAll(ExhaustiveSource<?> exhaustiveSource, Generator<T> generator) {

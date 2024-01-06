@@ -16,14 +16,22 @@ public class SampleGenerator {
 		this.generators = generators;
 	}
 
-	public Sample generate(SampleSource multiSource) {
+	public Optional<Sample> generate(SampleSource multiSource) {
 		List<GenSource> genSources = multiSource.sources(generators.size());
 		List<Shrinkable<Object>> shrinkables = new ArrayList<>();
-		for (int i = 0; i < generators.size(); i++) {
-			Generator<Object> generator = generators.get(i);
-			shrinkables.add(createShrinkable(genSources.get(i), generator));
+		try {
+			for (int i = 0; i < generators.size(); i++) {
+				Generator<Object> generator = generators.get(i);
+				shrinkables.add(createShrinkable(genSources.get(i), generator));
+			}
+		} catch (CannotGenerateException cge) {
+			return Optional.empty();
 		}
-		return new Sample(shrinkables);
+		return Optional.of(new Sample(shrinkables));
+	}
+
+	public Sample generate_OLD(SampleSource multiSource) {
+		return generate(multiSource).get();
 	}
 
 	private static List<Generator<Object>> toObjectGenerators(List<Generator<?>> generators) {
@@ -36,7 +44,7 @@ public class SampleGenerator {
 		return new ShrinkableGenerator<>(generator).generate(source);
 	}
 
-	public Sample generate(List<GenSource> sources) {
+	public Optional<Sample> generate(List<GenSource> sources) {
 		return generate(SampleSource.of(sources));
 	}
 

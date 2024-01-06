@@ -166,21 +166,23 @@ public class PropertyCase {
 	) {
 		try {
 			generationLock.lock();
-			Sample sample = sampleGenerator.generate(multiSource);
+			Optional<Sample> optionalSample = sampleGenerator.generate(multiSource);
 			generationLock.unlock();
-			countTries.incrementAndGet();
-			TryExecutionResult tryResult = tryable.apply(sample);
-			if (tryResult.status() != TryExecutionResult.Status.INVALID) {
-				countChecks.incrementAndGet();
-			}
-			if (tryResult.status() == TryExecutionResult.Status.FALSIFIED) {
-				FalsifiedSample originalSample = new FalsifiedSample(sample, tryResult.throwable());
-				onFalsified.accept(originalSample);
-				shutdown.shutdown();
-			}
-			if (tryResult.status() == TryExecutionResult.Status.SATISFIED) {
-				onSatisfied.accept(sample);
-			}
+			optionalSample.ifPresent(sample -> {
+				countTries.incrementAndGet();
+				TryExecutionResult tryResult = tryable.apply(sample);
+				if (tryResult.status() != TryExecutionResult.Status.INVALID) {
+					countChecks.incrementAndGet();
+				}
+				if (tryResult.status() == TryExecutionResult.Status.FALSIFIED) {
+					FalsifiedSample originalSample = new FalsifiedSample(sample, tryResult.throwable());
+					onFalsified.accept(originalSample);
+					shutdown.shutdown();
+				}
+				if (tryResult.status() == TryExecutionResult.Status.SATISFIED) {
+					onSatisfied.accept(sample);
+				}
+			});
 		} finally {
 			generationLock.unlock();
 		}

@@ -39,13 +39,11 @@ class SampleGenerationTests {
 		Generator<Integer> ints = new IntegerGenerator(-100, 100);
 		Generator<List<Integer>> lists = new ListGenerator<>(ints, 0, 5);
 
+		RandomGenSource randomGenSource = new RandomGenSource();
 		for (int i = 0; i < 10; i++) {
-
 			SampleGenerator sampleGenerator = SampleGenerator.from(ints, lists);
-			RandomGenSource randomGenSource = new RandomGenSource();
-			Sample sample = sampleGenerator.generate(
-				List.of(randomGenSource.split(), randomGenSource.split())
-			);
+			List<GenSource> sources = List.of(randomGenSource.split(), randomGenSource.split());
+			Sample sample = sampleGenerator.generate(sources).orElseThrow();
 			// System.out.println("sample = " + sample.values());
 
 			List<Object> regeneratedValues = sample.regenerateValues();
@@ -62,7 +60,7 @@ class SampleGenerationTests {
 		SampleGenerator sampleGenerator = SampleGenerator.from(withEdgeCases);
 		for (int i = 0; i < 100; i++) {
 			RandomGenSource randomGenSource = new RandomGenSource();
-			Sample sample = sampleGenerator.generate(List.of(randomGenSource));
+			Sample sample = sampleGenerator.generate(List.of(randomGenSource)).orElseThrow();
 			values.add((Integer) sample.values().getFirst());
 		}
 		assertThat(values).contains(
@@ -88,7 +86,8 @@ class SampleGenerationTests {
 		SampleGenerator sampleGenerator = SampleGenerator.from(intsWithEdgeCases, lists);
 		for (int i = 0; i < 100; i++) {
 			RandomGenSource randomGenSource = new RandomGenSource();
-			Sample sample = sampleGenerator.generate(List.of(randomGenSource.split(), randomGenSource.split()));
+			List<GenSource> sources = List.of(randomGenSource.split(), randomGenSource.split());
+			Sample sample = sampleGenerator.generate(sources).orElseThrow();
 			// System.out.println("sample = " + sample.values());
 
 			values.add(sample.values());
