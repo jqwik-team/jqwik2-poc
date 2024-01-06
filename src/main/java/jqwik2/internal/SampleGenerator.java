@@ -16,7 +16,7 @@ public class SampleGenerator {
 		this.generators = generators;
 	}
 
-	public Sample generate(MultiGenSource multiSource) {
+	public Sample generate(SampleSource multiSource) {
 		List<GenSource> genSources = multiSource.sources(generators.size());
 		List<Shrinkable<Object>> shrinkables = new ArrayList<>();
 		for (int i = 0; i < generators.size(); i++) {
@@ -36,8 +36,8 @@ public class SampleGenerator {
 		return new ShrinkableGenerator<>(generator).generate(source);
 	}
 
-	public Sample generate(GenSource... sources) {
-		return generate(MultiGenSource.of(sources));
+	public Sample generate(List<GenSource> sources) {
+		return generate(SampleSource.of(sources));
 	}
 
 }

@@ -219,7 +219,7 @@ class ExhaustiveGenerationTests {
 			assertThat(exhaustiveGenSource.maxCount()).isEqualTo(121);
 
 			List<Sample> allSamples = new ArrayList<>();
-			for (MultiGenSource multiGenSource : exhaustiveGenSource) {
+			for (SampleSource multiGenSource : exhaustiveGenSource) {
 				Sample sample = sampleGenerator.generate(multiGenSource);
 				// System.out.println(sample);
 				allSamples.add(sample);
@@ -232,7 +232,7 @@ class ExhaustiveGenerationTests {
 
 			// Second iteration
 			int count = 0;
-			for (MultiGenSource multiGenSource : exhaustiveGenSource) {
+			for (SampleSource multiGenSource : exhaustiveGenSource) {
 				count++;
 			}
 			assertThat(count).isEqualTo(121);
@@ -455,7 +455,7 @@ class ExhaustiveGenerationTests {
 
 	@Example
 	void generateSampleWithIntsAndLists() {
-		IntegerGenerator ints1 = new IntegerGenerator(0, 10);
+		Generator<Integer> ints1 = new IntegerGenerator(0, 10).filter(i -> i % 2 == 0);
 		ListGenerator<Integer> lists2 = new ListGenerator<>(new IntegerGenerator(0, 4), 0, 2);
 
 		SampleGenerator sampleGenerator = SampleGenerator.from(ints1, lists2);
@@ -465,12 +465,13 @@ class ExhaustiveGenerationTests {
 		assertThat(exhaustiveGenSource.maxCount()).isEqualTo(341);
 
 		List<Sample> allSamples = new ArrayList<>();
-		for (MultiGenSource multiGenSource : exhaustiveGenSource) {
+		for (SampleSource multiGenSource : exhaustiveGenSource) {
 			Sample sample = sampleGenerator.generate(multiGenSource);
 			// System.out.println(sample);
 			allSamples.add(sample);
 		}
-		assertThat(allSamples).hasSize(341);
+		assertThat(allSamples).hasSameSizeAs(new HashSet<>(allSamples));
+		assertThat(allSamples).hasSize(217);
 
 		List<List<Object>> values = allSamples.stream().map(Sample::values).toList();
 		assertThat(values).contains(List.of(0, List.of()));
@@ -484,10 +485,10 @@ class ExhaustiveGenerationTests {
 
 		// Second iteration
 		int count = 0;
-		for (MultiGenSource multiGenSource : exhaustiveGenSource) {
+		for (SampleSource multiGenSource : exhaustiveGenSource) {
 			count++;
 		}
-		assertThat(count).isEqualTo(341);
+		assertThat(count).isEqualTo(217);
 	}
 
 	public static <T> List<T> collectAll(ExhaustiveSource<?> exhaustiveSource, Generator<T> generator) {

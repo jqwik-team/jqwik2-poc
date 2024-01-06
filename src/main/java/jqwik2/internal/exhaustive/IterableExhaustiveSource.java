@@ -4,7 +4,7 @@ import java.util.*;
 
 import jqwik2.api.*;
 
-public class IterableExhaustiveSource implements IterableGenSource {
+public class IterableExhaustiveSource implements IterableSampleSource {
 	private final List<? extends ExhaustiveSource<?>> exhaustiveSources;
 
 	public static IterableExhaustiveSource from(Generator<?>... generators) {
@@ -32,14 +32,14 @@ public class IterableExhaustiveSource implements IterableGenSource {
 	}
 
 	@Override
-	public Iterator<MultiGenSource> iterator() {
+	public Iterator<SampleSource> iterator() {
 		if (exhaustiveSources.isEmpty()) {
 			return Collections.emptyIterator();
 		}
 		return new ExhaustiveGenSourceIterator(exhaustiveSources);
 	}
 
-	private static class ExhaustiveGenSourceIterator implements Iterator<MultiGenSource> {
+	private static class ExhaustiveGenSourceIterator implements Iterator<SampleSource> {
 
 		private final List<? extends ExhaustiveSource<?>> sources;
 
@@ -78,12 +78,12 @@ public class IterableExhaustiveSource implements IterableGenSource {
 		}
 
 		@Override
-		public MultiGenSource next() {
+		public SampleSource next() {
 			hasNextBeenInvoked = true;
 			List<? extends GenSource> realSources = sources.stream()
 														   .map(ExhaustiveSource::current)
 														   .toList();
-			return MultiGenSource.of(realSources);
+			return SampleSource.of(realSources);
 		}
 	}
 }

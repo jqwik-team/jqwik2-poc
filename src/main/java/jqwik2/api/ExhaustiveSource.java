@@ -51,8 +51,4 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 	default T current() {
 		return (T) new RecordedSource(recording());
 	}
-
-	default <E> ExhaustiveSource<?> filter(Predicate<E> filter) {
-		return new FilteredExhaustiveSource<>(this, filter);
-	}
 }

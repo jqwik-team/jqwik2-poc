@@ -94,7 +94,7 @@ public class ShrinkingTests {
 		// 9999
 		GenSource source = new RecordedSource(atom(9999, 0));
 
-		Sample sample = SampleGenerator.from(ints).generate(source);
+		Sample sample = SampleGenerator.from(ints).generate(List.of(source));
 
 		Tryable tryable = Tryable.from(args -> {
 			int i = (int) args.get(0);
@@ -131,7 +131,7 @@ public class ShrinkingTests {
 		);
 		GenSource source = new RecordedSource(treeRecording);
 
-		Sample sample = SampleGenerator.from(listOfInts).generate(source);
+		Sample sample = SampleGenerator.from(listOfInts).generate(List.of(source));
 
 		Tryable tryable = Tryable.from(args -> {
 			List<Integer> list = (List<Integer>) args.get(0);
@@ -162,7 +162,7 @@ public class ShrinkingTests {
 		GenSource source1 = new RecordedSource(atom(9999, 1)); // -9999
 		GenSource source2 = new RecordedSource(atom(50)); // 50
 
-		Sample sample = SampleGenerator.from(gen1, gen2).generate(source1, source2);
+		Sample sample = SampleGenerator.from(gen1, gen2).generate(List.of(source1, source2));
 
 		Tryable tryable = Tryable.from(args -> {
 			int i1 = (int) args.get(0);
@@ -191,7 +191,7 @@ public class ShrinkingTests {
 		// 9999
 		GenSource source = new RecordedSource(atom(9999, 0));
 
-		Sample sample = SampleGenerator.from(ints).generate(source);
+		Sample sample = SampleGenerator.from(ints).generate(List.of(source));
 
 		Tryable tryable = Tryable.from(args -> {
 			int i = (int) args.get(0);

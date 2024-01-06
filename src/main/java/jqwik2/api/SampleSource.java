@@ -3,21 +3,22 @@ package jqwik2.api;
 import java.util.*;
 
 /**
- * A multi gen source is used to provide gen sources for more than one parameter.
+ * A multi gen source is used to provide gen sources for more than one parameter,
+ * but just a single sample.
  */
-public interface MultiGenSource {
+public interface SampleSource {
 
-	static MultiGenSource of(GenSource...sources) {
+	static SampleSource of(GenSource...sources) {
 		return new SimpleMultiSource(List.of(sources));
 	}
 
-	static MultiGenSource of(List<? extends GenSource> sources) {
+	static SampleSource of(List<? extends GenSource> sources) {
 		return new SimpleMultiSource(sources);
 	}
 
 	List<GenSource> sources(int size);
 
-	class SimpleMultiSource implements MultiGenSource {
+	class SimpleMultiSource implements SampleSource {
 		private final List<? extends GenSource> sources;
 
 		public SimpleMultiSource(List<? extends GenSource> sources) {

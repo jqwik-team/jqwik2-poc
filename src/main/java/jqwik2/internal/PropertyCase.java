@@ -36,7 +36,7 @@ public class PropertyCase {
 	}
 
 	private PropertyRunResult runRandomized(PropertyRunConfiguration.Randomized randomized) {
-		IterableGenSource iterableGenSource = randomSource(randomized);
+		IterableSampleSource iterableGenSource = randomSource(randomized);
 		int maxTries = randomized.maxTries();
 		boolean shrinkingEnabled = randomized.shrinkingEnabled();
 
@@ -57,7 +57,7 @@ public class PropertyCase {
 	@SuppressWarnings("OverlyLongMethod")
 	private PropertyRunResult runAndShrink(
 		List<Generator<Object>> effectiveGenerators,
-		IterableGenSource iterableGenSource,
+		IterableSampleSource iterableGenSource,
 		int maxTries,
 		boolean shrinkingEnabled,
 		Duration maxDuration,
@@ -112,7 +112,7 @@ public class PropertyCase {
 	}
 
 	private Pair<SortedSet<FalsifiedSample>, Boolean> runAndCollectFalsifiedSamples(
-		IterableGenSource iterableGenSource,
+		IterableSampleSource iterableGenSource,
 		int maxTries,
 		SampleGenerator sampleGenerator,
 		AtomicInteger countTries,
@@ -126,7 +126,7 @@ public class PropertyCase {
 		var runner = new ConcurrentRunner(executorServiceSupplier.get(), maxDuration);
 
 		var taskIterator = new Iterator<ConcurrentRunner.Task>() {
-			private final Iterator<MultiGenSource> genSources = iterableGenSource.iterator();
+			private final Iterator<SampleSource> genSources = iterableGenSource.iterator();
 			private int count = 0;
 
 			@Override
@@ -136,7 +136,7 @@ public class PropertyCase {
 
 			@Override
 			public ConcurrentRunner.Task next() {
-				MultiGenSource trySource = genSources.next();
+				SampleSource trySource = genSources.next();
 				count++;
 				return shutdown -> executeTry(
 					sampleGenerator, trySource, countTries, countChecks,
@@ -156,7 +156,7 @@ public class PropertyCase {
 
 	private void executeTry(
 		SampleGenerator sampleGenerator,
-		MultiGenSource multiSource,
+		SampleSource multiSource,
 		AtomicInteger countTries,
 		AtomicInteger countChecks,
 		ConcurrentRunner.Shutdown shutdown,
@@ -199,7 +199,7 @@ public class PropertyCase {
 		return WithEdgeCasesDecorator.decorate(generator, edgeCasesProbability, maxEdgeCases);
 	}
 
-	private static IterableGenSource randomSource(PropertyRunConfiguration.Randomized randomized) {
+	private static IterableSampleSource randomSource(PropertyRunConfiguration.Randomized randomized) {
 		return randomized.seed() == null
 				   ? new RandomGenSource()
 				   : new RandomGenSource(randomized.seed());

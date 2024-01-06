@@ -36,7 +36,7 @@ public class GeneratorFilter<T> implements Generator<T> {
 
 	@Override
 	public Optional<ExhaustiveSource<?>> exhaustive() {
-		return generator.exhaustive();//.map(exhaustive -> exhaustive.filter(filter));
+		return generator.exhaustive();
 	}
 
 	private T generateUntilAccepted(GenSource source) {

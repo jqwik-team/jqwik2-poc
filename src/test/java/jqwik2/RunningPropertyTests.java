@@ -76,7 +76,7 @@ class RunningPropertyTests {
 		assertThat(result.status()).isEqualTo(Status.SUCCESSFUL);
 		assertThat(result.countTries()).isEqualTo(10);
 		// 5 invalids - depends on random seed
-		assertThat(result.countChecks()).isEqualTo(5);
+		assertThat(result.countChecks()).isEqualTo(3);
 	}
 
 	@Example
@@ -148,12 +148,12 @@ class RunningPropertyTests {
 			randomized("4242", 100, true, 0.0)
 		);
 		assertThat(result.status()).isEqualTo(Status.FAILED);
-		assertThat(result.countTries()).isEqualTo(2); // depends on seed
+		assertThat(result.countTries()).isEqualTo(3); // depends on seed
 		assertThat(result.falsifiedSamples()).hasSizeGreaterThan(1);
 		FalsifiedSample smallest = result.falsifiedSamples().getFirst();
 		assertThat(smallest.values()).isEqualTo(List.of(45));
 		FalsifiedSample biggest = result.falsifiedSamples().getLast();
-		assertThat(biggest.values()).isEqualTo(List.of(55)); // depends on seed
+		assertThat(biggest.values()).isEqualTo(List.of(65)); // depends on seed
 	}
 
 	@Example
