@@ -12,6 +12,10 @@ import jqwik2.internal.*;
  */
 public interface RandomChoice {
 
+	interface Distribution {
+		int nextInt(RandomChoice random, int maxExcluded);
+	}
+
 	/**
 	 * Return a random value, equally distributes between 0 and maxExcluded - 1.
 	 *
@@ -19,6 +23,17 @@ public interface RandomChoice {
 	 * @return A random value between 0 and max - 1
 	 */
 	int nextInt(int maxExcluded);
+
+	/**
+	 * Return a random value between 0 and maxExcluded - 1.
+	 *
+	 * @param maxExcluded The max choice to return
+	 * @param distribution The random distribution to use
+	 * @return A random value between 0 and max - 1
+	 */
+	default int nextInt(int maxExcluded, Distribution distribution) {
+		return distribution.nextInt(this, maxExcluded);
+	}
 
 	/**
 	 * Create a new source of randomness that is independent of this one,
@@ -40,7 +55,17 @@ public interface RandomChoice {
 		}
 	}
 
+	/**
+	 * Returns a pseudorandom {@code double} value between zero (inclusive) and
+	 * one (exclusive).
+	 */
 	double nextDouble();
+
+	/**
+	 * Returns a {@code double} value pseudo-randomly chosen from a Gaussian
+	 * (normal) distribution whose mean is 0 and whose standard deviation is 1.
+	 */
+	double nextGaussian();
 
 	class XORShiftRandomChoice implements RandomChoice {
 		private final RandomGenerator random;
@@ -75,6 +100,11 @@ public interface RandomChoice {
 		@Override
 		public double nextDouble() {
 			return random.nextDouble();
+		}
+
+		@Override
+		public double nextGaussian() {
+			return random.nextGaussian();
 		}
 	}
 
