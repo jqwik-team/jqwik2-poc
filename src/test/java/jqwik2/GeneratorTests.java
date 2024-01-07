@@ -158,6 +158,56 @@ class GeneratorTests {
 			);
 		}
 
+		@Example
+		@Disabled("Not yet implemented")
+		void flatMappedExhaustiveGeneration() {
+			Generator<List<Integer>> listOfInts = new IntegerGenerator(0, 2).flatMap(
+				size -> new IntegerGenerator(0, 3).list(size, size)
+			);
+
+			var exhaustive = listOfInts.exhaustive();
+			assertThat(exhaustive).isPresent();
+			assertThat(exhaustive.get().maxCount()).isEqualTo(21);
+
+			var values = ExhaustiveGenerationTests.collectAll(exhaustive.get(), listOfInts);
+			assertThat(values).hasSize(21);
+			assertThat(values).contains(
+				List.of(),
+				List.of(0),
+				List.of(1),
+				List.of(2),
+				List.of(3),
+				List.of(0, 0),
+				List.of(3, 3)
+			);
+		}
+
+		@Example
+		@Disabled("Not yet implemented")
+		void flatMapShrinking() {
+			Generator<List<Integer>> listOfInts = new IntegerGenerator(0, 2).flatMap(
+				size -> new IntegerGenerator(0, 3).list(size, size)
+			);
+
+			// List.of(3, 3)
+			GenSource source = new RecordedSource(
+				tree(
+					atom(2),
+					tree(atom(0), list(atom(3), atom(3)))
+				)
+			);
+
+			Shrinkable<List<Integer>> shrinkable = new ShrinkableGenerator<>(listOfInts).generate(source);
+
+			shrinkable.shrink().forEach(s -> {
+				assertThat(s.recording()).isLessThan(shrinkable.recording());
+				System.out.println("shrink recording: " + s.recording());
+				System.out.println("shrink value: " + s.value());
+			});
+
+		}
+
+
 	}
 
 	@Group
