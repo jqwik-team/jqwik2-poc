@@ -24,6 +24,12 @@ public interface Generator<T> {
 		return new GeneratorFilter<>(this, filter, 10000);
 	}
 
+	default <R> Generator<R> flatMap(Function<T, Generator<R>> mapper) {
+		return new GeneratorFlatMap<>(this, mapper);
+	}
+
+
+
 	default Iterable<Recording> edgeCases() {
 		return Set.of();
 	}

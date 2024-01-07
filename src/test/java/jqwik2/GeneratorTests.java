@@ -11,7 +11,6 @@ import jqwik2.internal.recording.*;
 
 import net.jqwik.api.*;
 
-import static jqwik2.RandomDistributionTests.*;
 import static jqwik2.api.recording.Recording.list;
 import static jqwik2.api.recording.Recording.*;
 import static org.assertj.core.api.Assertions.*;
@@ -119,6 +118,26 @@ class GeneratorTests {
 				"99",
 				"100"
 			);
+		}
+
+	}
+
+
+	@Group
+	class FlatMapping {
+
+		@Example
+		void flatMapIntsToListOfInts() {
+			Generator<List<Integer>> listOfInts = new IntegerGenerator(5, 10).flatMap(
+				size -> new IntegerGenerator(-10, 10).list(size, size)
+			);
+
+			RandomGenSource source = new RandomGenSource("42");
+			for (int i = 0; i < 20; i++) {
+				List<Integer> value = listOfInts.generate(source);
+				System.out.println("value=" + value);
+				assertThat(value).hasSizeBetween(5, 10);
+			}
 		}
 
 	}
