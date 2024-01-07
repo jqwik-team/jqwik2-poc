@@ -8,10 +8,16 @@ import jqwik2.api.recording.*;
 public class IntegerGenerator implements Generator<Integer> {
 	private final int min;
 	private final int max;
+	private final RandomChoice.Distribution distribution;
 
 	public IntegerGenerator(int min, int max) {
+		this(min, max, RandomChoice.Distribution.UNIFORM);
+	}
+
+	public IntegerGenerator(int min, int max, RandomChoice.Distribution distribution) {
 		this.min = min;
 		this.max = max;
+		this.distribution = distribution;
 	}
 
 	@Override

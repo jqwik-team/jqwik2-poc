@@ -38,16 +38,16 @@ class RandomDistributionTests {
 			counts.compute(key, (k, v) -> v == null ? 1 : v + 1);
 		}
 
-		printHistogram(tries, counts);
+		// printHistogram(counts);
 	}
 
-	private static void printHistogram(int tries, Map<Integer, Integer> counts) {
-		SortedSet<Integer> keys = new TreeSet<>(counts.keySet());
+	public static <T extends Comparable<T>> void printHistogram(Map<T, Integer> counts) {
+		SortedSet<T> keys = new TreeSet<>(counts.keySet());
 		int maxValue = new TreeSet<>(counts.values()).last();
-		var scaleDown = maxValue / 100;
-		for (Integer key : keys) {
+		var scaleDown = maxValue / 100.0;
+		for (T key : keys) {
 			int count = counts.get(key);
-			int prints = count / scaleDown;
+			int prints = (int) (count / scaleDown);
 			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < prints; i++) {
 				sb.append("*");

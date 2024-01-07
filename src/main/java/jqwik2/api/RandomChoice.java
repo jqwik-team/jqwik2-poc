@@ -13,6 +13,8 @@ import jqwik2.internal.*;
 public interface RandomChoice {
 
 	interface Distribution {
+		Distribution UNIFORM = RandomChoice::nextInt;
+
 		int nextInt(RandomChoice random, int maxExcluded);
 	}
 

@@ -11,6 +11,7 @@ import jqwik2.internal.recording.*;
 
 import net.jqwik.api.*;
 
+import static jqwik2.RandomDistributionTests.*;
 import static jqwik2.api.recording.Recording.list;
 import static jqwik2.api.recording.Recording.*;
 import static org.assertj.core.api.Assertions.*;
@@ -160,6 +161,25 @@ class GeneratorTests {
 				// System.out.println("value=" + value);
 			}
 		}
+
+		@Example
+		void intsWithGaussianDistribution() {
+			Generator<Integer> allInts = new IntegerGenerator(Integer.MIN_VALUE, Integer.MAX_VALUE, new GaussianDistribution(3));
+			RandomGenSource source = new RandomGenSource("42");
+
+			Map<Integer, Integer> counts = new HashMap<>();
+			for (int i = 0; i < 10000; i++) {
+				int value = allInts.generate(source);
+				int groupFactor = Integer.MAX_VALUE / 50;
+				int key = value / groupFactor;
+				counts.compute(key, (k, v) -> v == null ? 1 : v + 1);
+			}
+
+			// TODO: Histogram shows that its uniformally distributed, not gaussian
+			printHistogram(counts);
+		}
+
+
 	}
 
 	@Group
