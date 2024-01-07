@@ -169,16 +169,23 @@ class GeneratorTests {
 			// IntegerGenerator allInts = new IntegerGenerator(-100000, -1, new GaussianDistribution(3));
 			RandomGenSource source = new RandomGenSource("42");
 
-			Map<Integer, Integer> counts = new HashMap<>();
+			Map<Integer, Integer> histogram = new HashMap<>();
 			for (int i = 0; i < 10000; i++) {
-				int value = allInts.generate(source);
+				GenRecorder recorder = new GenRecorder(source);
+				int value = allInts.generate(recorder);
+
+				// Add to histogram with groups from -50 to +50
 				int groupFactor = Math.max(Math.abs(allInts.max()), Math.abs(allInts.min())) / 50;
 				int key = value / groupFactor;
-				counts.compute(key, (k, v) -> v == null ? 1 : v + 1);
+				histogram.compute(key, (k, v) -> v == null ? 1 : v + 1);
+
+				// Check that recorded values can be regenerated
+				RecordedSource recorded = new RecordedSource(recorder.recording());
+				assertThat(allInts.generate(recorded)).isEqualTo(value);
 			}
 
 			// Mind that 0 might be overrepresented in the histogram by factor of 2 (due to rounding)
-			printHistogram(counts);
+			// printHistogram(histogram);
 		}
 
 	}

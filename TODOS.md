@@ -2,7 +2,6 @@
     - Generator.flatMap()
     - Set of values
     - String
-- Weighted generation: BIASED, GAUSSIAN, LOGARITHMIC
 - Introduce Arbitraries
 - Add descriptions to generators
 - Give generators equality to allow caching

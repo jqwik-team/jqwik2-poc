@@ -45,6 +45,11 @@ public final class RecordedSource implements GenSource, GenSource.Atom, GenSourc
 	}
 
 	@Override
+	public int choose(int maxExcluded, RandomChoice.Distribution distribution) {
+		return choose(maxExcluded);
+	}
+
+	@Override
 	public Atom atom() {
 		if (!(recording instanceof AtomRecording)) {
 			throw new CannotGenerateException("Source is not an atom");

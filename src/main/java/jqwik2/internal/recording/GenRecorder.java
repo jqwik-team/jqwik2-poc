@@ -72,6 +72,13 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 			seeds.add(choice);
 			return choice;
 		}
+
+		@Override
+		public int choose(int maxExcluded, RandomChoice.Distribution distribution) {
+			int choice = source.choose(maxExcluded, distribution);
+			seeds.add(choice);
+			return choice;
+		}
 	}
 
 	static class ListRecorder extends AbstractRecorder<List> implements List {

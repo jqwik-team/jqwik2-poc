@@ -25,10 +25,7 @@ public interface GenSource {
 		 * @param distribution The random distribution to use
 		 * @return a choice between 0 and maxExcluded - 1
 		 */
-		default int choose(int maxExcluded, RandomChoice.Distribution distribution) {
-			// All but random sources will ignore the distribution
-			return choose(maxExcluded);
-		}
+		int choose(int maxExcluded, RandomChoice.Distribution distribution);
 	}
 
 	interface List extends GenSource {
