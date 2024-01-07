@@ -11,9 +11,11 @@ import static jqwik2.api.ExhaustiveSource.*;
 public class IntegerGenerationSupport {
 
 	private final GenSource source;
+	private final RandomChoice.Distribution distribution;
 
-	public IntegerGenerationSupport(GenSource source) {
+	public IntegerGenerationSupport(GenSource source, RandomChoice.Distribution distribution) {
 		this.source = source;
+		this.distribution = distribution;
 	}
 
 	/**
@@ -79,7 +81,7 @@ public class IntegerGenerationSupport {
 			int maxUnsigned = isMinValueOrMaxValueRequested
 								  ? Integer.MAX_VALUE
 								  : Math.max(Math.abs(min), Math.abs(max)) + 1;
-			int valueUnsigned = intSource.choose(maxUnsigned);
+			int valueUnsigned = chooseUnsignedValue(intSource, maxUnsigned);
 			int signOrMaxMin = intSource.choose(4);
 			if (signOrMaxMin == 2) {
 				// MAX_VALUE is generated for the case (max, 2),
@@ -98,9 +100,13 @@ public class IntegerGenerationSupport {
 		}
 	}
 
+	private int chooseUnsignedValue(GenSource.Atom intSource, int maxUnsigned) {
+		return intSource.choose(maxUnsigned, distribution);
+	}
+
 	private int chooseUnsignedInt(int min, int max) {
 		int range = max - min;
-		int delta = source.atom().choose(range + 1);
+		int delta = chooseUnsignedValue(source.atom(), range + 1);
 		return min + delta;
 	}
 

@@ -34,6 +34,9 @@ public interface RandomChoice {
 	 * @return A random value between 0 and max - 1
 	 */
 	default int nextInt(int maxExcluded, Distribution distribution) {
+		if (distribution == Distribution.UNIFORM) {
+			return nextInt(maxExcluded);
+		}
 		return distribution.nextInt(this, maxExcluded);
 	}
 

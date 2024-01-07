@@ -18,6 +18,17 @@ public interface GenSource {
 		 */
 		int choose(int maxExcluded);
 
+		/**
+		 * Choose a value between 0 and maxExcluded - 1.
+		 *
+		 * @param maxExcluded A value between 0 and Integer.MAX_VALUE
+		 * @param distribution The random distribution to use
+		 * @return a choice between 0 and maxExcluded - 1
+		 */
+		default int choose(int maxExcluded, RandomChoice.Distribution distribution) {
+			// All but random sources will ignore the distribution
+			return choose(maxExcluded);
+		}
 	}
 
 	interface List extends GenSource {

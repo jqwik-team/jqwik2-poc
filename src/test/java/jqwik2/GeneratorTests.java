@@ -164,21 +164,22 @@ class GeneratorTests {
 
 		@Example
 		void intsWithGaussianDistribution() {
-			Generator<Integer> allInts = new IntegerGenerator(Integer.MIN_VALUE, Integer.MAX_VALUE, new GaussianDistribution(3));
+			IntegerGenerator allInts = new IntegerGenerator(Integer.MIN_VALUE, Integer.MAX_VALUE, new GaussianDistribution(3));
+			// IntegerGenerator allInts = new IntegerGenerator(0, 1000, new GaussianDistribution(3));
+			// IntegerGenerator allInts = new IntegerGenerator(-100000, -1, new GaussianDistribution(3));
 			RandomGenSource source = new RandomGenSource("42");
 
 			Map<Integer, Integer> counts = new HashMap<>();
 			for (int i = 0; i < 10000; i++) {
 				int value = allInts.generate(source);
-				int groupFactor = Integer.MAX_VALUE / 50;
+				int groupFactor = Math.max(Math.abs(allInts.max()), Math.abs(allInts.min())) / 50;
 				int key = value / groupFactor;
 				counts.compute(key, (k, v) -> v == null ? 1 : v + 1);
 			}
 
-			// TODO: Histogram shows that its uniformally distributed, not gaussian
+			// Mind that 0 might be overrepresented in the histogram by factor of 2 (due to rounding)
 			printHistogram(counts);
 		}
-
 
 	}
 

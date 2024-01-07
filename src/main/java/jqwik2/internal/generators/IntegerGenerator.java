@@ -22,7 +22,7 @@ public class IntegerGenerator implements Generator<Integer> {
 
 	@Override
 	public Integer generate(GenSource source) {
-		return new IntegerGenerationSupport(source).chooseInt(min, max);
+		return new IntegerGenerationSupport(source, distribution).chooseInt(min, max);
 	}
 
 	@Override
@@ -33,5 +33,13 @@ public class IntegerGenerator implements Generator<Integer> {
 	@Override
 	public Optional<ExhaustiveSource<?>> exhaustive() {
 		return Optional.ofNullable(IntegerGenerationSupport.exhaustive(min, max));
+	}
+
+	public int max() {
+		return max;
+	}
+
+	public int min() {
+		return min;
 	}
 }

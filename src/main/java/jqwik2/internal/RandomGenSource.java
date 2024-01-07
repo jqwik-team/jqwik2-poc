@@ -27,6 +27,11 @@ public final class RandomGenSource implements IterableSampleSource, GenSource, G
 	}
 
 	@Override
+	public int choose(int maxExcluded, RandomChoice.Distribution distribution) {
+		return random.nextInt(maxExcluded, distribution);
+	}
+
+	@Override
 	public Atom atom() {
 		return this;
 	}
