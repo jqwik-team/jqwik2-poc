@@ -1,9 +1,12 @@
 package jqwik2.internal.generators;
 
+import java.util.*;
 import java.util.function.*;
 
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
+
+import static jqwik2.api.recording.Recording.*;
 
 public class GeneratorFlatMap<T, R>  implements Generator<R> {
 	private final Generator<T> generator;
@@ -23,6 +26,18 @@ public class GeneratorFlatMap<T, R>  implements Generator<R> {
 
 	@Override
 	public Iterable<Recording> edgeCases() {
-		return generator.edgeCases();
+		// TODO: make sure this does not run infinitely
+		Set<Recording> recordings = new LinkedHashSet<>();
+		generator.edgeCases().forEach(headRecording -> {
+			T valueToMap = generator.fromRecording(headRecording).get();
+			Generator<R> mappedValue = mapper.apply(valueToMap);
+			mappedValue.edgeCases().forEach(childRecording -> {
+				recordings.add(tree(
+					headRecording,
+					childRecording
+				));
+			});
+		});
+		return recordings;
 	}
 }

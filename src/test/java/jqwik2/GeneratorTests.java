@@ -144,6 +144,20 @@ class GeneratorTests {
 			}
 		}
 
+		@Example
+		void flatMappedEdgeCases() {
+			Generator<List<Integer>> listOfInts = new IntegerGenerator(0, 1).flatMap(
+				size -> new IntegerGenerator(0, 10).list(size, size)
+			);
+
+			var values = EdgeCasesTests.collectAllEdgeCases(listOfInts);
+			assertThat(values).containsExactlyInAnyOrder(
+				List.of(),
+				List.of(0),
+				List.of(10)
+			);
+		}
+
 	}
 
 	@Group
