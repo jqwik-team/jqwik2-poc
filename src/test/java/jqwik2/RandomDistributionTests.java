@@ -24,15 +24,35 @@ class RandomDistributionTests {
 		// printHistogram(tries, counts);
 	}
 
+	@Example
+	void biased() {
+		RandomChoice.Distribution gaussianDistribution = new BiasedDistribution(5);
+		Map<Integer, Integer> counts = new HashMap<>();
+		var tries = 1000000;
+		for (int i = 0; i < tries; i++) {
+			var maxExcluded = Integer.MAX_VALUE;
+			int gaussian = randomChoice.nextInt(maxExcluded, gaussianDistribution);
+			// Group to 100 groups
+			int groupFactor = maxExcluded / 100;
+			int key = gaussian / groupFactor;
+			counts.compute(key, (k, v) -> v == null ? 1 : v + 1);
+		}
+
+		printHistogram(tries, counts);
+	}
+
 	private static void printHistogram(int tries, Map<Integer, Integer> counts) {
 		SortedSet<Integer> keys = new TreeSet<>(counts.keySet());
+		int maxValue = new TreeSet<>(counts.values()).last();
+		var scaleDown = maxValue / 100;
 		for (Integer key : keys) {
-			int count = counts.get(key) / (tries / 4000);
+			int count = counts.get(key);
+			int prints = count / scaleDown;
 			StringBuilder sb = new StringBuilder();
-			for (int i = 0; i < count; i++) {
+			for (int i = 0; i < prints; i++) {
 				sb.append("*");
 			}
-			System.out.printf("%3d: %s%n", key, sb.toString());
+			System.out.printf("%3d [%6d]: %s%n", key, count, sb);
 		}
 	}
 
