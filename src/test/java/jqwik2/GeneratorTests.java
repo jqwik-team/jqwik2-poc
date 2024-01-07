@@ -134,9 +134,13 @@ class GeneratorTests {
 
 			RandomGenSource source = new RandomGenSource("42");
 			for (int i = 0; i < 20; i++) {
-				List<Integer> value = listOfInts.generate(source);
-				System.out.println("value=" + value);
+				GenRecorder recorder = new GenRecorder(source);
+				List<Integer> value = listOfInts.generate(recorder);
+				// System.out.println("value=" + value);
 				assertThat(value).hasSizeBetween(5, 10);
+
+				RecordedSource recorded = new RecordedSource(recorder.recording());
+				assertThat(listOfInts.generate(recorded)).isEqualTo(value);
 			}
 		}
 

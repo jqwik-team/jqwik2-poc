@@ -3,6 +3,7 @@ package jqwik2.internal.generators;
 import java.util.function.*;
 
 import jqwik2.api.*;
+import jqwik2.api.recording.*;
 
 public class GeneratorFlatMap<T, R>  implements Generator<R> {
 	private final Generator<T> generator;
@@ -15,7 +16,13 @@ public class GeneratorFlatMap<T, R>  implements Generator<R> {
 
 	@Override
 	public R generate(GenSource source) {
-		var valueToMap = generator.generate(source);
-		return mapper.apply(valueToMap).generate(source);
+		var tree = source.tree();
+		var valueToMap = generator.generate(tree.head());
+		return mapper.apply(valueToMap).generate(tree.child());
+	}
+
+	@Override
+	public Iterable<Recording> edgeCases() {
+		return generator.edgeCases();
 	}
 }
