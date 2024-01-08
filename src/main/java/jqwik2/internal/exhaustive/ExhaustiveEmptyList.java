@@ -5,12 +5,7 @@ import jqwik2.api.*;
 public class ExhaustiveEmptyList extends ExhaustiveList {
 
 	public ExhaustiveEmptyList() {
-		// TODO: This is a hack to make ExhaustiveList work with empty lists
 		super(0, null);
-	}
-
-	public int size() {
-		return 0;
 	}
 
 	@Override
@@ -33,12 +28,13 @@ public class ExhaustiveEmptyList extends ExhaustiveList {
 
 	@Override
 	public boolean advance() {
-		return advanceThisOrUp();
-	}
-
-	@Override
-	public void setSucc(Exhaustive<?> exhaustive) {
-		// ignore
+		if (succ().isPresent()) {
+			return succ().get().advance();
+		}
+		if (prev().isEmpty()) {
+			return false;
+		}
+		return prev().get().advanceThisOrUp();
 	}
 
 	@Override
