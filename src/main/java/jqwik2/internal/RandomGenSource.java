@@ -9,6 +9,9 @@ import jqwik2.api.recording.*;
 public final class RandomGenSource implements IterableSampleSource, GenSource, GenSource.Atom, GenSource.List, GenSource.Tree {
 	private final RandomChoice random;
 
+	// TODO: Replace this with polymorphic approach on subclasses of RandomGenSource
+	private Class<? extends GenSource> currentType = GenSource.class;
+
 	public RandomGenSource() {
 		this(RandomChoice.create());
 	}
@@ -33,17 +36,32 @@ public final class RandomGenSource implements IterableSampleSource, GenSource, G
 
 	@Override
 	public Atom atom() {
-		return this;
+		return trySwitchTo(Atom.class);
 	}
 
 	@Override
 	public List list() {
-		return this;
+		return trySwitchTo(List.class);
 	}
 
 	@Override
 	public Tree tree() {
-		return this;
+		return trySwitchTo(Tree.class);
+	}
+
+	private <T extends GenSource> RandomGenSource trySwitchTo(Class<T> targetType) {
+		if (currentType == GenSource.class) {
+			currentType = targetType;
+			return this;
+		} else if (currentType == targetType) {
+			return this;
+		} else {
+			String message = "Source of type %s cannot be used as %s".formatted(
+				currentType.getSimpleName(),
+				targetType.getSimpleName()
+			);
+			throw new CannotGenerateException(message);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
