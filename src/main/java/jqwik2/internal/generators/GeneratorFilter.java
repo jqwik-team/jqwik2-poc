@@ -35,7 +35,7 @@ public class GeneratorFilter<T> implements Generator<T> {
 	}
 
 	@Override
-	public Optional<ExhaustiveSource<?>> exhaustive() {
+	public Optional<? extends ExhaustiveSource<?>> exhaustive() {
 		return generator.exhaustive();
 	}
 

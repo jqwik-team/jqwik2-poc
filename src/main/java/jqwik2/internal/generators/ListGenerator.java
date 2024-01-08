@@ -66,12 +66,11 @@ public class ListGenerator<T> implements Generator<List<T>> {
 	}
 
 	@Override
-	public Optional<ExhaustiveSource<?>> exhaustive() {
-		return elementGenerator.exhaustive().flatMap(
-			elementSource -> Optional.of(ExhaustiveSource.tree(
-				ExhaustiveSource.atom(maxSize - minSize),
-				head -> Optional.of(ExhaustiveSource.list(chooseSize(head), elementSource))
-			)));
+	public Optional<? extends ExhaustiveSource<?>> exhaustive() {
+		return ExhaustiveSource.tree(
+			ExhaustiveSource.atom(maxSize - minSize),
+			head -> ExhaustiveSource.list(chooseSize(head), elementGenerator.exhaustive())
+		);
 	}
 
 }

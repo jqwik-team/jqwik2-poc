@@ -64,8 +64,8 @@ public class ExhaustiveAtom extends AbstractExhaustiveSource<GenSource.Atom> {
 
 	@Override
 	public void setSucc(Exhaustive<?> exhaustive) {
-		super.setSucc(exhaustive);
 		choices.getLast().setSucc(exhaustive);
+		super.setSucc(exhaustive);
 	}
 
 	public Recording recording() {

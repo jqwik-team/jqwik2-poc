@@ -7,11 +7,11 @@ import jqwik2.api.*;
 import jqwik2.api.recording.*;
 
 public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> {
-	private final Function<GenSource, Optional<ExhaustiveSource<?>>> childCreator;
+	private final Function<GenSource, Optional<? extends ExhaustiveSource<?>>> childCreator;
 	private final ExhaustiveSource<?> head;
-	private Optional<ExhaustiveSource<?>> optionalChild = Optional.empty();
+	private Optional<? extends ExhaustiveSource<?>> optionalChild = Optional.empty();
 
-	public ExhaustiveTree(ExhaustiveSource<?> head, Function<GenSource, Optional<ExhaustiveSource<?>>> childCreator) {
+	public ExhaustiveTree(ExhaustiveSource<?> head, Function<GenSource, Optional<? extends ExhaustiveSource<?>>> childCreator) {
 		this.childCreator = childCreator;
 		this.head = head;
 		creatAndChainChild();
@@ -29,7 +29,7 @@ public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> {
 	public long maxCount() {
 		long sum = 0;
 		for (GenSource genSource : head) {
-			Optional<ExhaustiveSource<?>> optionalChild = childCreator.apply(genSource);
+			Optional<? extends ExhaustiveSource<?>> optionalChild = childCreator.apply(genSource);
 			if (optionalChild.isPresent()) {
 				sum += optionalChild.get().maxCount();
 			} else {

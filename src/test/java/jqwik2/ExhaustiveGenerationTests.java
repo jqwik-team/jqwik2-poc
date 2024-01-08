@@ -93,7 +93,7 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void exhaustiveAtom() {
-			ExhaustiveAtom atom = ExhaustiveSource.atom(1, 2, 3);
+			ExhaustiveAtom atom = ExhaustiveSource.atom(1, 2, 3).get();
 			assertThat(atom.maxCount()).isEqualTo(24L);
 
 			assertAtom(atom, 0, 0, 0);
@@ -136,8 +136,8 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void twoConcatenatedExhaustiveAtoms() {
-			ExhaustiveAtom first = ExhaustiveSource.atom(2);
-			ExhaustiveAtom second = ExhaustiveSource.atom(1);
+			ExhaustiveAtom first = ExhaustiveSource.atom(2).get();
+			ExhaustiveAtom second = ExhaustiveSource.atom(1).get();
 
 			first.chain(second);
 			assertThat(first.maxCount()).isEqualTo(6L);
@@ -172,7 +172,7 @@ class ExhaustiveGenerationTests {
 		void exhaustiveAtomWithRanges() {
 			ExhaustiveAtom atom = ExhaustiveSource.atom(
 				range(2, 3), range(3, 4), value(4)
-			);
+			).get();
 			assertThat(atom.maxCount()).isEqualTo(4L);
 
 			assertAtom(atom, 2, 3, 4);
@@ -186,11 +186,12 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void orAtom() {
-			ExhaustiveAtom atom1 = ExhaustiveSource.atom(range(0, 1), value(0));
-			ExhaustiveAtom atom2 = ExhaustiveSource.atom(range(0, 2), value(1));
-			ExhaustiveAtom atom3 = ExhaustiveSource.atom(value(2), value(3));
 
-			OrAtom atom = ExhaustiveSource.or(atom1, atom2, atom3);
+			OrAtom atom = ExhaustiveSource.or(
+					ExhaustiveSource.atom(range(0, 1), value(0)),
+					ExhaustiveSource.atom(range(0, 2), value(1)),
+					ExhaustiveSource.atom(value(2), value(3))
+			).get();
 
 			assertThat(atom.maxCount()).isEqualTo(6L);
 			assertAtom(atom, 0, 0);
@@ -263,7 +264,7 @@ class ExhaustiveGenerationTests {
 	class ExhaustiveTrees {
 		@Example
 		void exhaustiveList() {
-			ExhaustiveList list = ExhaustiveSource.list(2, atom(2));
+			ExhaustiveList list = ExhaustiveSource.list(2, atom(2)).get();
 			assertThat(list.maxCount()).isEqualTo(9L);
 
 			assertList(list, 0, 0);
@@ -289,7 +290,7 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void exhaustiveEmptyList() {
-			ExhaustiveList list = ExhaustiveSource.list(0, atom(2));
+			ExhaustiveList list = ExhaustiveSource.list(0, atom(2)).get();
 			assertThat(list.maxCount()).isEqualTo(1L);
 
 			assertThat(list.size()).isEqualTo(0);
@@ -311,8 +312,8 @@ class ExhaustiveGenerationTests {
 		void exhaustiveTree() {
 			ExhaustiveTree tree = ExhaustiveSource.tree(
 				ExhaustiveSource.atom(2),
-				head -> Optional.of(list(head.atom().choose(3), atom(2)))
-			);
+				head -> list(head.atom().choose(3), atom(2))
+			).get();
 
 			assertThat(tree.maxCount()).isEqualTo(13L);
 			assertTree(tree, 0);

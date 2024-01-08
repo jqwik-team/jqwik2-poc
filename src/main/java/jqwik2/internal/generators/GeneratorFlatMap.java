@@ -44,15 +44,14 @@ public class GeneratorFlatMap<T, R> implements Generator<R> {
 	}
 
 	@Override
-	public Optional<ExhaustiveSource<?>> exhaustive() {
-		return generator.exhaustive().flatMap(
-			exhaustiveHead -> Optional.of(ExhaustiveSource.tree(
-				exhaustiveHead,
-				head -> {
-					T headValue = generator.generate(head);
-					Generator<R> childGenerator = mapper.apply(headValue);
-					return childGenerator.exhaustive();
-				}
-			)));
+	public Optional<? extends ExhaustiveSource<?>> exhaustive() {
+		return ExhaustiveSource.tree(
+				generator.exhaustive(),
+			head -> {
+				T headValue = generator.generate(head);
+				Generator<R> childGenerator = mapper.apply(headValue);
+				return childGenerator.exhaustive();
+			}
+		);
 	}
 }

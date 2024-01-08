@@ -8,10 +8,6 @@ public class OrAtom extends AbstractExhaustiveSource<GenSource.Atom> {
 	private final java.util.List<ExhaustiveAtom> alternatives;
 	private int currentAlternative = 0;
 
-	public OrAtom(ExhaustiveAtom... alternatives) {
-		this(java.util.List.of(alternatives));
-	}
-
 	public OrAtom(java.util.List<ExhaustiveAtom> alternatives) {
 		if (alternatives.isEmpty()) {
 			throw new IllegalArgumentException("Must have at least one atom");

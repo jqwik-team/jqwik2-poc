@@ -9,14 +9,6 @@ import jqwik2.internal.recording.*;
 
 public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<ExhaustiveSource<T>>, Iterable<T> {
 
-	static ExhaustiveAtom atom(int... maxChoices) {
-		return new ExhaustiveAtom(maxChoices);
-	}
-
-	static ExhaustiveAtom atom(ExhaustiveChoice.Range... ranges) {
-		return new ExhaustiveAtom(ranges);
-	}
-
 	static ExhaustiveChoice.Range range(int min, int max) {
 		return new ExhaustiveChoice.Range(min, max);
 	}
@@ -25,15 +17,46 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 		return range(value, value);
 	}
 
-	static OrAtom or(ExhaustiveAtom... atoms) {
-		return new OrAtom(atoms);
+	static Optional<ExhaustiveAtom> atom(int... maxChoices) {
+		ExhaustiveAtom exhaustiveAtom = new ExhaustiveAtom(maxChoices);
+		if (exhaustiveAtom.maxCount() == Exhaustive.INFINITE) {
+			return Optional.empty();
+		}
+		return Optional.of(exhaustiveAtom);
 	}
 
-	static ExhaustiveList list(int size, ExhaustiveSource<?> elementSource) {
-		if (size == 0) {
-			return new ExhaustiveEmptyList();
+	static Optional<ExhaustiveAtom> atom(ExhaustiveChoice.Range... ranges) {
+		ExhaustiveAtom exhaustiveAtom = new ExhaustiveAtom(ranges);
+		if (exhaustiveAtom.maxCount() == Exhaustive.INFINITE) {
+			return Optional.empty();
 		}
-		return new ExhaustiveList(size, elementSource);
+		return Optional.of(exhaustiveAtom);
+	}
+
+	static Optional<OrAtom> or(Optional<ExhaustiveAtom>... atoms) {
+		if (Arrays.stream(atoms).anyMatch(Optional::isEmpty)) {
+			return Optional.empty();
+		}
+		List<ExhaustiveAtom> atomList = Arrays.stream(atoms).map(Optional::get).toList();
+		OrAtom orAtom = new OrAtom(atomList);
+		if (orAtom.maxCount() == Exhaustive.INFINITE) {
+			return Optional.empty();
+		}
+		return Optional.of(orAtom);
+	}
+
+	static Optional<ExhaustiveList> list(int size, Optional<? extends ExhaustiveSource<?>> elementSource) {
+		if (size == 0) {
+			return Optional.of(new ExhaustiveEmptyList());
+		}
+		if (elementSource.isEmpty()) {
+			return Optional.empty();
+		}
+		ExhaustiveList exhaustiveList = new ExhaustiveList(size, elementSource.get());
+		if (exhaustiveList.maxCount() == Exhaustive.INFINITE) {
+			return Optional.empty();
+		}
+		return Optional.of(exhaustiveList);
 	}
 
 	/**
@@ -42,8 +65,15 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 	 * @param head         Source for head value
 	 * @param childCreator Function to create child source based on head value
 	 */
-	static ExhaustiveTree tree(ExhaustiveSource<?> head, Function<GenSource, Optional<ExhaustiveSource<?>>> childCreator) {
-		return new ExhaustiveTree(head, childCreator);
+	static Optional<ExhaustiveTree> tree(Optional<? extends ExhaustiveSource<?>> head, Function<GenSource, Optional<? extends ExhaustiveSource<?>>> childCreator) {
+		if (head.isEmpty()) {
+			return Optional.empty();
+		}
+		ExhaustiveTree exhaustiveTree = new ExhaustiveTree(head.get(), childCreator);
+		if (exhaustiveTree.maxCount() == Exhaustive.INFINITE) {
+			return Optional.empty();
+		}
+		return Optional.of(exhaustiveTree);
 	}
 
 	Recording recording();

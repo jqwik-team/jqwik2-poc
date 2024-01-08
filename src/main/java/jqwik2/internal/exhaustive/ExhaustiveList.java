@@ -62,8 +62,8 @@ public class ExhaustiveList extends AbstractExhaustiveSource<GenSource.List> {
 
 	@Override
 	public void setSucc(Exhaustive<?> exhaustive) {
-		super.setSucc(exhaustive);
 		elements.getLast().setSucc(exhaustive);
+		super.setSucc(exhaustive);
 	}
 
 	@Override

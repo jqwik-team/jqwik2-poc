@@ -186,7 +186,7 @@ class GeneratorTests {
 			Generator<Integer> intsFromInts = new IntegerGenerator(0, 2).flatMap(
 				size -> new IntegerGenerator(0, size) {
 					@Override
-					public Optional<ExhaustiveSource<?>> exhaustive() {
+					public Optional<? extends ExhaustiveSource<?>> exhaustive() {
 						return Optional.empty();
 					}
 				}

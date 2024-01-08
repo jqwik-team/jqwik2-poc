@@ -27,7 +27,7 @@ public class GeneratorMap<T, R> implements Generator<R> {
 	}
 
 	@Override
-	public Optional<ExhaustiveSource<?>> exhaustive() {
+	public Optional<? extends ExhaustiveSource<?>> exhaustive() {
 		return generator.exhaustive();
 	}
 
