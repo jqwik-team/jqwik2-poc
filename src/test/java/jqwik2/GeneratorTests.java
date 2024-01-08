@@ -182,6 +182,21 @@ class GeneratorTests {
 		}
 
 		@Example
+		void flatMappedExhaustiveDoesNotExists() {
+			Generator<Integer> intsFromInts = new IntegerGenerator(0, 2).flatMap(
+				size -> new IntegerGenerator(0, size) {
+					@Override
+					public Optional<ExhaustiveSource<?>> exhaustive() {
+						return Optional.empty();
+					}
+				}
+			);
+
+			var exhaustive = intsFromInts.exhaustive();
+			assertThat(exhaustive).isEmpty();
+		}
+
+		@Example
 		@Disabled("Not yet implemented")
 		void flatMapShrinking() {
 			Generator<List<Integer>> listOfInts = new IntegerGenerator(0, 2).flatMap(
