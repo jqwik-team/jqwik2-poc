@@ -159,7 +159,6 @@ class GeneratorTests {
 		}
 
 		@Example
-		@Disabled("Not yet implemented")
 		void flatMappedExhaustiveGeneration() {
 			Generator<List<Integer>> listOfInts = new IntegerGenerator(0, 2).flatMap(
 				size -> new IntegerGenerator(0, 3).list(size, size)
