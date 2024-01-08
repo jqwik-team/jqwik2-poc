@@ -70,7 +70,7 @@ public class ListGenerator<T> implements Generator<List<T>> {
 		return elementGenerator.exhaustive().flatMap(
 			elementSource -> Optional.of(ExhaustiveSource.tree(
 				ExhaustiveSource.atom(maxSize - minSize),
-				head -> ExhaustiveSource.list(chooseSize(head), elementSource)
+				head -> Optional.of(ExhaustiveSource.list(chooseSize(head), elementSource))
 			)));
 	}
 

@@ -51,8 +51,7 @@ public class GeneratorFlatMap<T, R> implements Generator<R> {
 				head -> {
 					T headValue = generator.generate(head);
 					Generator<R> childGenerator = mapper.apply(headValue);
-					// TODO: Must handle if exhaustive is not present!
-					return childGenerator.exhaustive().get();
+					return childGenerator.exhaustive();
 				}
 			)));
 	}

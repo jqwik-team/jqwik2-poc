@@ -311,7 +311,7 @@ class ExhaustiveGenerationTests {
 		void exhaustiveTree() {
 			ExhaustiveTree tree = ExhaustiveSource.tree(
 				ExhaustiveSource.atom(2),
-				head -> list(head.atom().choose(3), atom(2))
+				head -> Optional.of(list(head.atom().choose(3), atom(2)))
 			);
 
 			assertThat(tree.maxCount()).isEqualTo(13L);

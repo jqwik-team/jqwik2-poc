@@ -1,5 +1,6 @@
 package jqwik2.api;
 
+import java.util.*;
 import java.util.function.*;
 
 import jqwik2.api.recording.*;
@@ -41,7 +42,7 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 	 * @param head         Source for head value
 	 * @param childCreator Function to create child source based on head value
 	 */
-	static ExhaustiveTree tree(ExhaustiveSource<?> head, Function<GenSource, ExhaustiveSource<?>> childCreator) {
+	static ExhaustiveTree tree(ExhaustiveSource<?> head, Function<GenSource, Optional<ExhaustiveSource<?>>> childCreator) {
 		return new ExhaustiveTree(head, childCreator);
 	}
 

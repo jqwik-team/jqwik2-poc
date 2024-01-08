@@ -3,6 +3,13 @@ package jqwik2.api;
 import java.util.*;
 
 public interface Exhaustive<T extends Exhaustive<T>> extends Cloneable {
+
+	long INFINITE = Long.MAX_VALUE;
+
+	/**
+	 * Return an upper bound on the number of values this exhaustive source can generate.
+	 * If the number of values is infinite, return {@code INFINITE}.
+	 */
 	long maxCount();
 
 	/**

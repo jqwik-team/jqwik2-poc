@@ -2,61 +2,41 @@ package jqwik2.internal.exhaustive;
 
 import java.util.*;
 import java.util.function.*;
-import java.util.stream.*;
 
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
 
 public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> {
-	private final Function<GenSource, ExhaustiveSource<?>> childCreator;
+	private final Function<GenSource, Optional<ExhaustiveSource<?>>> childCreator;
 	private final ExhaustiveSource<?> head;
-	private ExhaustiveSource<?> child;
+	private Optional<ExhaustiveSource<?>> optionalChild = Optional.empty();
 
-	public ExhaustiveTree(ExhaustiveChoice.Range range, Function<Integer, ExhaustiveSource<?>> childCreator) {
-		this(new ExhaustiveAtom(range), childCreatorFromSource(childCreator));
-	}
-
-	private static Function<GenSource, ExhaustiveSource<?>> childCreatorFromSource(Function<Integer, ExhaustiveSource<?>> childCreator) {
-		return source -> {
-			int size = source.atom().choose(Integer.MAX_VALUE);
-			return childCreator.apply(size);
-		};
-	}
-
-	public ExhaustiveTree(ExhaustiveSource<?> head, Function<GenSource, ExhaustiveSource<?>> childCreator) {
+	public ExhaustiveTree(ExhaustiveSource<?> head, Function<GenSource, Optional<ExhaustiveSource<?>>> childCreator) {
 		this.childCreator = childCreator;
 		this.head = head;
 		creatAndChainChild();
 	}
 
 	private void creatAndChainChild() {
-		child = childCreator.apply(head.current());
-		head.chain(child);
-		succ().ifPresent(succ -> child.setSucc(succ));
-	}
-
-	private static List<Integer> createHeads(ExhaustiveChoice.Range range) {
-		return IntStream.range(range.min(), range.max() + 1)
-						.boxed()
-						.collect(Collectors.toList());
-	}
-
-	private List<ExhaustiveSource<?>> createChildren() {
-		ExhaustiveSource<?> iterator = head.clone();
-		List<ExhaustiveSource<?>> result = new ArrayList<>();
-		while (true) {
-			result.add(childCreator.apply(iterator.current()));
-			if (!iterator.advance()) {
-				break;
-			}
-		}
-		return result;
+		optionalChild = childCreator.apply(head.current());
+		optionalChild.ifPresent(child -> {
+			head.chain(child);
+			succ().ifPresent(child::setSucc);
+		});
 	}
 
 	@Override
 	public long maxCount() {
-		// TODO: Optimize to not create all children
-		return createChildren().stream().mapToLong(ExhaustiveSource::maxCount).sum();
+		long sum = 0;
+		for (GenSource genSource : head) {
+			Optional<ExhaustiveSource<?>> optionalChild = childCreator.apply(genSource);
+			if (optionalChild.isPresent()) {
+				sum += optionalChild.get().maxCount();
+			} else {
+				return Exhaustive.INFINITE;
+			}
+		}
+		return sum;
 	}
 
 	@Override
@@ -99,11 +79,14 @@ public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> {
 	@Override
 	public void setSucc(Exhaustive<?> exhaustive) {
 		super.setSucc(exhaustive);
-		child.setSucc(exhaustive);
+		optionalChild.ifPresent(child -> child.setSucc(exhaustive));
 	}
 
 	@Override
 	public Recording recording() {
-		return Recording.tree(head.recording(), child.recording());
+		return Recording.tree(
+			head.recording(),
+			optionalChild.get().recording() // TODO: Handle empty optional
+		);
 	}
 }
