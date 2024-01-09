@@ -6,6 +6,10 @@ import jqwik2.api.recording.*;
 
 public class EdgeCasesSupport {
 
+	public static Iterable<Recording> any() {
+		return Collections.singletonList(Recording.atom());
+	}
+
 	public static Set<Recording> forAtom(Integer... maxChoicesIncluded) {
 		Set<Recording> result = new LinkedHashSet<>();
 		minMaxEdgeCases(Arrays.asList(maxChoicesIncluded), 0, new ArrayList<>(), result);

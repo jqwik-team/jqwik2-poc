@@ -24,11 +24,13 @@ class GeneratorTests {
 		Generator<Integer> just42 = new JustGenerator<>(42);
 
 		GenSource source = GenSource.any();
-
 		for (int i = 0; i < 10; i++) {
 			Integer value = just42.generate(source);
 			assertThat(value).isEqualTo(42);
 		}
+
+		var edgeCases = EdgeCasesTests.collectAllEdgeCases(just42);
+		assertThat(edgeCases).containsExactly(42);
 
 		var exhaustiveSource = just42.exhaustive();
 		assertThat(exhaustiveSource).isPresent();
