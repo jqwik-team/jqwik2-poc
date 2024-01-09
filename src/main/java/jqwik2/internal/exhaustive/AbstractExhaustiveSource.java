@@ -4,7 +4,7 @@ import java.util.*;
 
 import jqwik2.api.*;
 
-abstract class AbstractExhaustiveSource<T extends GenSource> extends AbstractExhaustive<ExhaustiveSource<T>> implements ExhaustiveSource<T> {
+public abstract class AbstractExhaustiveSource<T extends GenSource> extends AbstractExhaustive<ExhaustiveSource<T>> implements ExhaustiveSource<T> {
 
 	@Override
 	public Iterator<T> iterator() {

@@ -23,12 +23,19 @@ class GeneratorTests {
 	void justGenerator() {
 		Generator<Integer> just42 = new JustGenerator<>(42);
 
-		GenSource source = GenSource.NULL;
+		GenSource source = GenSource.any();
 
 		for (int i = 0; i < 10; i++) {
 			Integer value = just42.generate(source);
 			assertThat(value).isEqualTo(42);
 		}
+
+		var exhaustiveSource = just42.exhaustive();
+		assertThat(exhaustiveSource).isPresent();
+		assertThat(exhaustiveSource.get().maxCount()).isEqualTo(1);
+
+		var values = ExhaustiveGenerationTests.collectAll(exhaustiveSource.get(), just42);
+		assertThat(values).containsExactly(42);
 	}
 
 	@Group
