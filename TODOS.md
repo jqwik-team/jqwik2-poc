@@ -1,5 +1,6 @@
 - Additional generators
-    - Generator.flatMap()
+    - Empty / Null Generator 
+    - Just a value
     - Set of values
     - String
 - Introduce Arbitraries
