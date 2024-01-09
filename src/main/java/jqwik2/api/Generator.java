@@ -25,8 +25,7 @@ public interface Generator<T> {
 	}
 
 	default Generator<Set<T>> set(int minSize, int maxSize) {
-		return new ListGenerator<T>(this, minSize, maxSize, Collections.singleton(FeatureExtractor.identity()))
-				   .map(LinkedHashSet::new);
+		return new SetGenerator<>(this, minSize, maxSize);
 	}
 
 	default <R> Generator<R> map(Function<T, R> mapper) {
