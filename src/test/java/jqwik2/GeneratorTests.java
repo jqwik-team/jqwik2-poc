@@ -379,6 +379,52 @@ class GeneratorTests {
 	}
 
 	@Group
+	class Sets {
+
+		@Example
+		void setsOfInts() {
+			Generator<Set<Integer>> setOfInts = new IntegerGenerator(-10, 100).set(0, 5);
+
+			RandomGenSource source = new RandomGenSource("42");
+
+			for (int i = 0; i < 10; i++) {
+				Set<Integer> value = setOfInts.generate(source);
+				// System.out.println("value=" + value);
+				assertThat(value).hasSizeLessThanOrEqualTo(5);
+			}
+		}
+
+		@Example
+		@Disabled
+		void setOfCertainSize() {
+			Generator<List<Integer>> listOfInts = new IntegerGenerator(-10, 100).list(1, 2);
+
+			RandomGenSource source = new RandomGenSource("42");
+
+			for (int i = 0; i < 10; i++) {
+				List<Integer> value = listOfInts.generate(source);
+				// System.out.println("value=" + value);
+				assertThat(value).hasSizeBetween(1, 2);
+			}
+		}
+
+		@Example
+		@Disabled
+		void listOfIntsWithEdgeCases() {
+			Generator<List<Integer>> listOfInts = new IntegerGenerator(-100, 100).list(0, 5);
+			Generator<List<Integer>> listWithEdgeCases = WithEdgeCasesDecorator.decorate(listOfInts, 0.5, 10);
+
+			RandomGenSource source = new RandomGenSource("42");
+
+			for (int i = 0; i < 50; i++) {
+				List<Integer> value = listWithEdgeCases.generate(source);
+				// System.out.println("value=" + value);
+				assertThat(value).hasSizeLessThanOrEqualTo(5);
+			}
+		}
+	}
+
+	@Group
 	class WithRecorder {
 
 		@Example

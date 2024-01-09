@@ -12,11 +12,18 @@ public class ListGenerator<T> implements Generator<List<T>> {
 	private final Generator<T> elementGenerator;
 	private final int minSize;
 	private final int maxSize;
+	private final Set<FeatureExtractor<T>> featureExtractors;
 
 	public ListGenerator(Generator<T> elementGenerator, int minSize, int maxSize) {
+		this(elementGenerator, minSize, maxSize, Collections.emptySet());
+	}
+
+	public ListGenerator(Generator<T> elementGenerator, int minSize, int maxSize, Set<FeatureExtractor<T>> featureExtractors) {
 		this.elementGenerator = elementGenerator;
 		this.minSize = minSize;
 		this.maxSize = maxSize;
+
+		this.featureExtractors = featureExtractors;
 	}
 
 	@Override
@@ -28,8 +35,17 @@ public class ListGenerator<T> implements Generator<List<T>> {
 		GenSource.List elementsSource = listSource.child().list();
 		for (int i = 0; i < size; i++) {
 			GenSource elementSource = elementsSource.nextElement();
-			T element = elementGenerator.generate(elementSource);
-			elements.add(element);
+			while (true) {
+				T element = elementGenerator.generate(elementSource);
+				boolean elementIsUniqueWithRegardToExtractors =
+					featureExtractors.stream().allMatch(
+						extractor -> extractor.isUniqueIn(element, elements)
+					);
+				if (elementIsUniqueWithRegardToExtractors) {
+					elements.add(element);
+					break;
+				}
+			}
 		}
 		return elements;
 	}
