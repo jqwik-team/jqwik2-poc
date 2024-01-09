@@ -7,11 +7,13 @@ public class ExhaustiveList extends AbstractExhaustiveSource<GenSource.List> {
 
 	private final int size;
 	private final ExhaustiveSource<?> elementSource;
+	private final boolean isSet;
 	private final java.util.List<ExhaustiveSource<?>> elements = new java.util.ArrayList<>();
 
-	public ExhaustiveList(int size, ExhaustiveSource<?> elementSource) {
+	public ExhaustiveList(int size, ExhaustiveSource<?> elementSource, boolean isSet) {
 		this.size = size;
 		this.elementSource = elementSource;
+		this.isSet = isSet;
 		createElements(size, elementSource);
 	}
 
@@ -31,11 +33,13 @@ public class ExhaustiveList extends AbstractExhaustiveSource<GenSource.List> {
 
 	@Override
 	public long maxCount() {
+		// TODO: Consider isSet
 		return elements.getFirst().maxCount();
 	}
 
 	@Override
 	protected boolean tryAdvance() {
+		// TODO: Consider isSet
 		return elements.getLast().advanceThisOrUp();
 	}
 
@@ -46,7 +50,7 @@ public class ExhaustiveList extends AbstractExhaustiveSource<GenSource.List> {
 
 	@Override
 	public ExhaustiveSource<GenSource.List> clone() {
-		return new ExhaustiveList(elements.size(), elementSource);
+		return new ExhaustiveList(elements.size(), elementSource, isSet);
 	}
 
 	@Override

@@ -19,7 +19,7 @@ public class SetGenerator<T> extends AbstractCollectionGenerator<T, Set<T>> {
 	public Optional<? extends ExhaustiveSource<?>> exhaustive() {
 		return ExhaustiveSource.tree(
 			ExhaustiveSource.atom(maxSize - minSize),
-			head -> ExhaustiveSource.list(chooseSize(head), elementGenerator.exhaustive())
+			head -> ExhaustiveSource.list(chooseSize(head), elementGenerator.exhaustive(), true)
 		);
 	}
 
