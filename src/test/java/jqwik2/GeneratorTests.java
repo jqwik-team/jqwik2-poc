@@ -2,8 +2,8 @@ package jqwik2;
 
 import java.util.*;
 
-import jqwik2.api.*;
 import jqwik2.api.Shrinkable;
+import jqwik2.api.*;
 import jqwik2.api.recording.*;
 import jqwik2.internal.*;
 import jqwik2.internal.generators.*;
@@ -17,7 +17,6 @@ import static org.assertj.core.api.Assertions.*;
 
 @Group
 class GeneratorTests {
-
 
 	@Example
 	void justGenerator() {
@@ -165,7 +164,6 @@ class GeneratorTests {
 
 	}
 
-
 	@Group
 	class FlatMapping {
 
@@ -263,7 +261,6 @@ class GeneratorTests {
 			});
 
 		}
-
 
 	}
 
@@ -395,32 +392,52 @@ class GeneratorTests {
 		}
 
 		@Example
-		@Disabled
-		void setOfCertainSize() {
-			Generator<List<Integer>> listOfInts = new IntegerGenerator(-10, 100).list(1, 2);
+		void setOfFixedSize() {
+			Generator<Set<Integer>> setOfInts = new IntegerGenerator(0, 15).set(10, 10);
 
 			RandomGenSource source = new RandomGenSource("42");
 
 			for (int i = 0; i < 10; i++) {
-				List<Integer> value = listOfInts.generate(source);
+				Set<Integer> value = setOfInts.generate(source);
 				// System.out.println("value=" + value);
-				assertThat(value).hasSizeBetween(1, 2);
+				assertThat(value).hasSize(10);
 			}
 		}
 
 		@Example
-		@Disabled
-		void listOfIntsWithEdgeCases() {
-			Generator<List<Integer>> listOfInts = new IntegerGenerator(-100, 100).list(0, 5);
-			Generator<List<Integer>> listWithEdgeCases = WithEdgeCasesDecorator.decorate(listOfInts, 0.5, 10);
+		void setEdgeCases() {
+			Generator<Set<Integer>> setOfInts = new IntegerGenerator(0, 15).set(0, 10);
+			Set<Set<Integer>> edgeCases = EdgeCasesTests.collectAllEdgeCases(setOfInts);
+			assertThat(edgeCases).containsExactlyInAnyOrder(
+				Set.of(),
+				Set.of(0),
+				Set.of(15)
+			);
+		}
 
-			RandomGenSource source = new RandomGenSource("42");
+		@Example
+		void setExhaustiveGeneration() {
+			Generator<Set<Integer>> setOfInts = new IntegerGenerator(0, 3).set(0, 2);
 
-			for (int i = 0; i < 50; i++) {
-				List<Integer> value = listWithEdgeCases.generate(source);
-				// System.out.println("value=" + value);
-				assertThat(value).hasSizeLessThanOrEqualTo(5);
-			}
+			Optional<? extends ExhaustiveSource<?>> exhaustive = setOfInts.exhaustive();
+			assertThat(exhaustive).isPresent();
+			//assertThat(exhaustive.get().maxCount()).isEqualTo(11);
+
+			List<Set<Integer>> all = ExhaustiveGenerationTests.collectAll(exhaustive.get(), setOfInts);
+			assertThat(all).hasSize(11);
+			assertThat(all).containsExactlyInAnyOrder(
+				Set.of(),
+				Set.of(0),
+				Set.of(1),
+				Set.of(2),
+				Set.of(3),
+				Set.of(0, 1),
+				Set.of(0, 2),
+				Set.of(0, 3),
+				Set.of(1, 2),
+				Set.of(1, 3),
+				Set.of(2, 3)
+			);
 		}
 	}
 
