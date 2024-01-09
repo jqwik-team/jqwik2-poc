@@ -21,7 +21,7 @@ class GeneratorTests {
 
 	@Example
 	void justGenerator() {
-		Generator<Integer> just42 = new JustGenerator<>(42);
+		Generator<Integer> just42 = Generator.just(42);
 
 		GenSource source = GenSource.any();
 		for (int i = 0; i < 10; i++) {
@@ -38,6 +38,27 @@ class GeneratorTests {
 
 		var values = ExhaustiveGenerationTests.collectAll(exhaustiveSource.get(), just42);
 		assertThat(values).containsExactly(42);
+	}
+
+	@Example
+	void createGenerator() {
+		Generator<List<String>> createA = Generator.create(() -> List.of("a"));
+
+		GenSource source = GenSource.any();
+		for (int i = 0; i < 10; i++) {
+			List<String> value = createA.generate(source);
+			assertThat(value).isEqualTo(List.of("a"));
+		}
+
+		var edgeCases = EdgeCasesTests.collectAllEdgeCases(createA);
+		assertThat(edgeCases).containsExactly(List.of("a"));
+
+		var exhaustiveSource = createA.exhaustive();
+		assertThat(exhaustiveSource).isPresent();
+		assertThat(exhaustiveSource.get().maxCount()).isEqualTo(1);
+
+		var values = ExhaustiveGenerationTests.collectAll(exhaustiveSource.get(), createA);
+		assertThat(values).containsExactly(List.of("a"));
 	}
 
 	@Group
@@ -237,8 +258,8 @@ class GeneratorTests {
 
 			shrinkable.shrink().forEach(s -> {
 				assertThat(s.recording()).isLessThan(shrinkable.recording());
-				System.out.println("shrink recording: " + s.recording());
-				System.out.println("shrink value: " + s.value());
+				// System.out.println("shrink recording: " + s.recording());
+				// System.out.println("shrink value: " + s.value());
 			});
 
 		}

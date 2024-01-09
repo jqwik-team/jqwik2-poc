@@ -10,6 +10,14 @@ import jqwik2.internal.recording.*;
 
 public interface Generator<T> {
 
+	static <T> Generator<T> just(T value) {
+		return create(() -> value);
+	}
+
+	static <T> Generator<T> create(Supplier<T> supplier) {
+		return new CreateGenerator<>(supplier);
+	}
+
 	T generate(GenSource source);
 
 	default Generator<List<T>> list(int minSize, int maxSize) {
@@ -27,8 +35,6 @@ public interface Generator<T> {
 	default <R> Generator<R> flatMap(Function<T, Generator<R>> mapper) {
 		return new GeneratorFlatMap<>(this, mapper);
 	}
-
-
 
 	default Iterable<Recording> edgeCases() {
 		return Set.of();
