@@ -24,7 +24,7 @@ class ListShrinker {
 	}
 
 	private Stream<List<Recording>> shrinkIndividually() {
-		return IntStream.range(0, elements.size() - 1)
+		return IntStream.range(0, elements.size())
 						.boxed()
 						.flatMap(this::shrinkElement);
 	}
@@ -41,8 +41,16 @@ class ListShrinker {
 	}
 
 	private Stream<List<Recording>> reorder() {
-		List<Recording> reorderedChildren = new ArrayList<>(elements);
-		Collections.sort(reorderedChildren);
+		var reorderedChildren = sortAscending(elements);
+		if (reorderedChildren.equals(elements)) {
+			return Stream.empty();
+		}
 		return Stream.of(reorderedChildren);
+	}
+
+	private List<Recording> sortAscending(List<Recording> recordings) {
+		List<Recording> reorderedChildren = new ArrayList<>(recordings);
+		Collections.sort(reorderedChildren);
+		return reorderedChildren;
 	}
 }

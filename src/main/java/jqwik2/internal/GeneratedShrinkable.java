@@ -17,7 +17,7 @@ public record GeneratedShrinkable<T>(T value, Generator<T> generator, Recording 
 								//       Where is the random source coming from?
 								GenRecorder source = new GenRecorder(new RecordedSource(s));
 								T value = generator.generate(source);
-								return (Shrinkable<T>) new GeneratedShrinkable<>(value, generator, s);
+								return (Shrinkable<T>) new GeneratedShrinkable<>(value, generator, source.recording());
 							} catch (CannotGenerateException e) {
 								return null;
 							}

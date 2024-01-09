@@ -197,7 +197,6 @@ class GeneratorTests {
 		}
 
 		@Example
-		@Disabled("Not yet implemented")
 		void flatMapShrinking() {
 			Generator<List<Integer>> listOfInts = new IntegerGenerator(0, 2).flatMap(
 				size -> new IntegerGenerator(0, 3).list(size, size)
@@ -212,6 +211,7 @@ class GeneratorTests {
 			);
 
 			Shrinkable<List<Integer>> shrinkable = new ShrinkableGenerator<>(listOfInts).generate(source);
+			// System.out.println("value: " + shrinkable.value());
 
 			shrinkable.shrink().forEach(s -> {
 				assertThat(s.recording()).isLessThan(shrinkable.recording());

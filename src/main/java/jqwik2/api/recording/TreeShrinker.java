@@ -11,6 +11,7 @@ class TreeShrinker {
 		this.child = treeRecording.child();
 	}
 
+	// TODO: Try to shrink structure atom(size), list(size, elements...) explicitly by shrinking size in larger steps
 	Stream<TreeRecording> shrink() {
 		return Stream.concat(
 			shrinkHead(),
