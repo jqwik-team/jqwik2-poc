@@ -2,6 +2,23 @@ package jqwik2.api;
 
 public interface GenSource {
 
+	GenSource NULL = new GenSource() {
+		@Override
+		public Atom atom() {
+			return null;
+		}
+
+		@Override
+		public List list() {
+			return null;
+		}
+
+		@Override
+		public Tree tree() {
+			return null;
+		}
+	};
+
 	Atom atom();
 
 	List list();

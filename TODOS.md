@@ -1,8 +1,7 @@
 - Additional generators
-    - Empty / Null Generator 
-    - Just a value
     - Set of values
     - String
+    - Empty / Null Generator
 - Introduce Arbitraries
 - Add descriptions to generators
 - Give generators equality to allow caching

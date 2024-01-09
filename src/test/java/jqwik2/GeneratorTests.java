@@ -18,6 +18,19 @@ import static org.assertj.core.api.Assertions.*;
 @Group
 class GeneratorTests {
 
+
+	@Example
+	void justGenerator() {
+		Generator<Integer> just42 = new JustGenerator<>(42);
+
+		GenSource source = GenSource.NULL;
+
+		for (int i = 0; i < 10; i++) {
+			Integer value = just42.generate(source);
+			assertThat(value).isEqualTo(42);
+		}
+	}
+
 	@Group
 	class Filtering {
 		@Example
