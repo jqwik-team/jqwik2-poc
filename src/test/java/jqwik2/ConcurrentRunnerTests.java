@@ -16,13 +16,15 @@ import static org.assertj.core.api.Assertions.*;
 
 class ConcurrentRunnerTests {
 
+	public static final String NEW_VIRTUAL_THREAD_PER_TASK_EXECUTOR = "newVirtualThreadPerTaskExecutor";
+
 	@Provide
 	Arbitrary<Pair<String, Supplier<ExecutorService>>> services() {
 		return Arbitraries.of(
 			new Pair<>("newSingleThreadExecutor", () -> Executors.newSingleThreadExecutor()),
 			new Pair<>("newFixedThreadPool", () -> Executors.newFixedThreadPool(2)),
 			new Pair<>("newCachedThreadPool", () -> Executors.newCachedThreadPool()),
-			new Pair<>("newVirtualThreadPerTaskExecutor", () -> Executors.newVirtualThreadPerTaskExecutor())
+			new Pair<>(NEW_VIRTUAL_THREAD_PER_TASK_EXECUTOR, () -> Executors.newVirtualThreadPerTaskExecutor())
 		);
 	}
 
@@ -58,18 +60,18 @@ class ConcurrentRunnerTests {
 		String name = pair.first();
 		ExecutorService service = pair.second().get();
 
-		time("runWithTimeout: " + name, 1, () -> runSuccessfullyWithTimeout(service));
+		time("runWithTimeout: " + name, 1, () -> runSuccessfullyWithTimeout(service, name));
 	}
 
-	private static void runSuccessfullyWithTimeout(ExecutorService service) {
+	private static void runSuccessfullyWithTimeout(ExecutorService service, String name) {
 		ConcurrentRunner runner = new ConcurrentRunner(service, Duration.ofSeconds(1));
 		AtomicInteger counter = new AtomicInteger();
 		List<ConcurrentRunner.Task> tasks = new ArrayList<>();
 		for (int i = 0; i < 50; i++) {
 			final int factor = i;
 			tasks.add(shutdown -> {
-				sleepInThread(100 * factor);
-				sleep(50 * factor);
+				sleepInThread(75 * factor);
+				sleep(75 * factor);
 				// System.out.println("Task " + counter.get() + " running");
 				counter.incrementAndGet();
 			});
@@ -80,7 +82,10 @@ class ConcurrentRunnerTests {
 		} catch (TimeoutException timeoutException) {
 			// System.out.println("Timeout occurred: " + timeoutException.getMessage());
 		}
-		assertThat(counter.get()).isGreaterThanOrEqualTo(1);
+		if (!name.equals(NEW_VIRTUAL_THREAD_PER_TASK_EXECUTOR)) {
+			// For virtual threads we can't be sure that at least one task has already be completed
+			assertThat(counter.get()).isGreaterThanOrEqualTo(1);
+		}
 	}
 
 	@Property
