@@ -26,13 +26,13 @@ public class GeneratorFlatMap<T, R> implements Generator<R> {
 
 	@Override
 	public Iterable<Recording> edgeCases() {
-		// TODO: make sure this does not run infinitely
+		// TODO: make sure this does not run infinitely in highly nested cases
 		Set<Recording> recordings = new LinkedHashSet<>();
 		generator.edgeCases().forEach(headRecording -> {
 			Optional<T> optional = generator.fromRecording(headRecording);
-			optional.ifPresent(valueToMap -> {
-				Generator<R> mappedValue = mapper.apply(valueToMap);
-				mappedValue.edgeCases().forEach(childRecording -> {
+			optional.ifPresent(headValue -> {
+				Generator<R> childGenerator = mapper.apply(headValue);
+				childGenerator.edgeCases().forEach(childRecording -> {
 					recordings.add(tree(
 						headRecording,
 						childRecording
