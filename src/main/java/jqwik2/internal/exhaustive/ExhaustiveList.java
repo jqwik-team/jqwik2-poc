@@ -34,7 +34,12 @@ public class ExhaustiveList extends AbstractExhaustiveSource<GenSource.List> {
 	@Override
 	public long maxCount() {
 		// TODO: Consider isSet
-		return elements.getFirst().maxCount();
+		double maxCountDouble = Math.pow(elementSource.maxCount(), size);
+		if (maxCountDouble > Long.MAX_VALUE) {
+			return Exhaustive.INFINITE;
+		} else {
+			return (long) maxCountDouble;
+		}
 	}
 
 	@Override

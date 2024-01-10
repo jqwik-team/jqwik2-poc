@@ -8,7 +8,7 @@ public abstract class AbstractExhaustiveSource<T extends GenSource> extends Abst
 
 	@Override
 	public Iterator<T> iterator() {
-		return new Iterator<T>() {
+		return new Iterator<>() {
 			private boolean hasNext = true;
 			private ExhaustiveSource<T> exhaustive = AbstractExhaustiveSource.this.clone();
 
