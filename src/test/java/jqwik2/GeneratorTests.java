@@ -421,7 +421,7 @@ class GeneratorTests {
 
 			Optional<? extends ExhaustiveSource<?>> exhaustive = setOfInts.exhaustive();
 			assertThat(exhaustive).isPresent();
-			//assertThat(exhaustive.get().maxCount()).isEqualTo(11);
+			assertThat(exhaustive.get().maxCount()).isEqualTo(11);
 
 			List<Set<Integer>> all = ExhaustiveGenerationTests.collectAll(exhaustive.get(), setOfInts);
 			assertThat(all).hasSize(11);

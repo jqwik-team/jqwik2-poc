@@ -1,5 +1,4 @@
 - Additional generators
-    - Set of values
     - String
     - Empty / Null Generator
 - Introduce Arbitraries

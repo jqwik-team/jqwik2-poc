@@ -1,28 +1,47 @@
 package jqwik2.internal.exhaustive;
 
+import java.util.*;
+
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
 
-public class ExhaustiveSet extends AbstractExhaustiveSource<GenSource.List> {
+public class ExhaustiveSet extends ExhaustiveList {
 
-	private final int size;
-	private final ExhaustiveSource<?> elementSource;
-	private final java.util.List<ExhaustiveSource<?>> elements = new java.util.ArrayList<>();
+	private Set<Set<Recording>> traversedSets = new HashSet<>();
 
 	public ExhaustiveSet(int size, ExhaustiveSource<?> elementSource) {
-		this.size = size;
-		this.elementSource = elementSource;
-		createElements(size, elementSource);
+		super(size, elementSource);
+		if (!isCurrentANewSet()) {
+			advanceToNextSet();
+		}
 	}
 
-	private void createElements(int size, ExhaustiveSource<?> elementSource) {
-		for (int i = 0; i < size; i++) {
-			ExhaustiveSource<?> current = elementSource.clone();
-			elements.add(current);
-			if (i > 0) {
-				elements.get(i - 1).chain(current);
+	private boolean advanceToNextSet() {
+		if (size < 2) {
+			return elements.getFirst().advance();
+		}
+		while (true) {
+			boolean advanced = elements.getFirst().advance();
+			if (!advanced) {
+				break;
+			}
+			if (isCurrentANewSet()) {
+				return true;
 			}
 		}
+		return false;
+	}
+
+	private boolean isCurrentANewSet() {
+		ListRecording current = (ListRecording) recording();
+		Set<Recording> setRecording = new HashSet<>(current.elements());
+		if (!traversedSets.contains(setRecording)
+				&& current.elements().size() == setRecording.size()
+		) {
+			traversedSets.add(setRecording);
+			return true;
+		}
+		return false;
 	}
 
 	public int size() {
@@ -31,24 +50,29 @@ public class ExhaustiveSet extends AbstractExhaustiveSource<GenSource.List> {
 
 	@Override
 	public long maxCount() {
-		// TODO: Consider isSet
-		double maxCountDouble = Math.pow(elementSource.maxCount(), size);
-		if (maxCountDouble > Long.MAX_VALUE) {
-			return Exhaustive.INFINITE;
-		} else {
-			return (long) maxCountDouble;
+		long maxCountElement = elementSource.maxCount();
+		if (maxCountElement < size) {
+			return 0;
 		}
+		return binomialCoefficient(maxCountElement, size);
+	}
+
+	private long binomialCoefficient(long maxCountElement, int size) {
+		long result = 1;
+		for (int i = 0; i < size; i++) {
+			// To prevent overflow
+			if (Long.MAX_VALUE / (maxCountElement - i) < result) {
+				return Long.MAX_VALUE;
+			}
+			result *= maxCountElement - i;
+			result /= i + 1;
+		}
+		return result;
 	}
 
 	@Override
 	protected boolean tryAdvance() {
-		// TODO: Consider isSet
-		return elements.getLast().advanceThisOrUp();
-	}
-
-	@Override
-	public void reset() {
-		elements.forEach(ExhaustiveSource::reset);
+		return advanceToNextSet();
 	}
 
 	@Override
@@ -58,7 +82,7 @@ public class ExhaustiveSet extends AbstractExhaustiveSource<GenSource.List> {
 
 	@Override
 	public boolean advance() {
-		if (elements.getFirst().advance()) {
+		if (advanceToNextSet()) {
 			return true;
 		}
 		if (prev().isEmpty()) {
@@ -68,21 +92,10 @@ public class ExhaustiveSet extends AbstractExhaustiveSource<GenSource.List> {
 	}
 
 	@Override
-	public void setSucc(Exhaustive<?> exhaustive) {
-		elements.getLast().setSucc(exhaustive);
-		super.setSucc(exhaustive);
-	}
-
-	@Override
 	public String toString() {
 		return "ExhaustiveSet{" +
 				   "size=" + size +
 				   ", elementSource=" + elementSource +
 				   '}';
-	}
-
-	@Override
-	public Recording recording() {
-		return Recording.list(elements.stream().map(ExhaustiveSource::recording).toList());
 	}
 }

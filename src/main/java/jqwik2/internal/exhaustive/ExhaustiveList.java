@@ -5,9 +5,9 @@ import jqwik2.api.recording.*;
 
 public class ExhaustiveList extends AbstractExhaustiveSource<GenSource.List> {
 
-	private final int size;
-	private final ExhaustiveSource<?> elementSource;
-	private final java.util.List<ExhaustiveSource<?>> elements = new java.util.ArrayList<>();
+	protected final int size;
+	protected final ExhaustiveSource<?> elementSource;
+	protected final java.util.List<ExhaustiveSource<?>> elements = new java.util.ArrayList<>();
 
 	public ExhaustiveList(int size, ExhaustiveSource<?> elementSource) {
 		this.size = size;
@@ -77,6 +77,8 @@ public class ExhaustiveList extends AbstractExhaustiveSource<GenSource.List> {
 
 	@Override
 	public Recording recording() {
-		return Recording.list(elements.stream().map(ExhaustiveSource::recording).toList());
+		return Recording.list(
+			elements.stream().map(ExhaustiveSource::recording).toList()
+		);
 	}
 }
