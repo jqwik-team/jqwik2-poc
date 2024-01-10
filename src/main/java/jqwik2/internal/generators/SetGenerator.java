@@ -16,7 +16,7 @@ public class SetGenerator<T> extends AbstractCollectionGenerator<T, Set<T>> {
 	}
 
 	@Override
-	public Optional<? extends ExhaustiveSource<?>> exhaustive() {
+	public Optional<ExhaustiveSource<?>> exhaustive() {
 		return ExhaustiveSource.tree(
 			ExhaustiveSource.atom(maxSize - minSize),
 			head -> ExhaustiveSource.set(chooseSize(head), elementGenerator.exhaustive())

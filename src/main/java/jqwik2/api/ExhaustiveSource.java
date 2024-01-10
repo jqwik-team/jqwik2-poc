@@ -9,8 +9,8 @@ import jqwik2.internal.recording.*;
 
 public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<ExhaustiveSource<T>>, Iterable<T> {
 
-	static <T extends GenSource> Optional<ExhaustiveSource<T>> any() {
-		ExhaustiveSource<T> any = new AnyExhaustiveSource<>();
+	static Optional<ExhaustiveSource<?>> any() {
+		ExhaustiveSource<?> any = new AnyExhaustiveSource<>();
 		return Optional.of(any);
 	}
 
@@ -22,7 +22,7 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 		return range(value, value);
 	}
 
-	static Optional<ExhaustiveAtom> atom(int... maxChoices) {
+	static Optional<ExhaustiveSource<?>> atom(int... maxChoices) {
 		ExhaustiveAtom exhaustiveAtom = new ExhaustiveAtom(maxChoices);
 		if (exhaustiveAtom.maxCount() == Exhaustive.INFINITE) {
 			return Optional.empty();
@@ -30,7 +30,7 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 		return Optional.of(exhaustiveAtom);
 	}
 
-	static Optional<? extends ExhaustiveSource<?>> atom(ExhaustiveChoice.Range... ranges) {
+	static Optional<ExhaustiveSource<?>> atom(ExhaustiveChoice.Range... ranges) {
 		ExhaustiveAtom exhaustiveAtom = new ExhaustiveAtom(ranges);
 		if (exhaustiveAtom.maxCount() == Exhaustive.INFINITE) {
 			return Optional.empty();
@@ -38,11 +38,11 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 		return Optional.of(exhaustiveAtom);
 	}
 
-	static Optional<? extends ExhaustiveSource<?>> or(Optional<? extends ExhaustiveSource<?>>... atoms) {
-		if (Arrays.stream(atoms).anyMatch(Optional::isEmpty)) {
+	static Optional<ExhaustiveSource<?>> or(Optional<ExhaustiveSource<?>>... alternatives) {
+		if (Arrays.stream(alternatives).anyMatch(Optional::isEmpty)) {
 			return Optional.empty();
 		}
-		List<? extends ExhaustiveSource<?>> atomList = Arrays.stream(atoms).map(Optional::get).toList();
+		List<? extends ExhaustiveSource<?>> atomList = Arrays.stream(alternatives).map(Optional::get).toList();
 		ExhaustiveOr exhaustiveOr = new ExhaustiveOr(atomList);
 		if (exhaustiveOr.maxCount() == Exhaustive.INFINITE) {
 			return Optional.empty();
@@ -50,7 +50,7 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 		return Optional.of(exhaustiveOr);
 	}
 
-	static Optional<? extends ExhaustiveSource<?>> list(int size, Optional<? extends ExhaustiveSource<?>> elementSource) {
+	static Optional<ExhaustiveSource<?>> list(int size, Optional<? extends ExhaustiveSource<?>> elementSource) {
 		if (elementSource.isEmpty()) {
 			return Optional.empty();
 		}
@@ -64,7 +64,7 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 		return Optional.of(exhaustiveList);
 	}
 
-	static Optional<? extends ExhaustiveSource<?>> set(int size, Optional<? extends ExhaustiveSource<?>> elementSource) {
+	static Optional<ExhaustiveSource<?>> set(int size, Optional<? extends ExhaustiveSource<?>> elementSource) {
 		if (elementSource.isEmpty()) {
 			return Optional.empty();
 		}
@@ -84,7 +84,7 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 	 * @param head         Source for head value
 	 * @param childCreator Function to create child source based on head value
 	 */
-	static Optional<ExhaustiveTree> tree(Optional<? extends ExhaustiveSource<?>> head, Function<GenSource, Optional<? extends ExhaustiveSource<?>>> childCreator) {
+	static Optional<ExhaustiveSource<?>> tree(Optional<ExhaustiveSource<?>> head, Function<GenSource, Optional<ExhaustiveSource<?>>> childCreator) {
 		if (head.isEmpty()) {
 			return Optional.empty();
 		}

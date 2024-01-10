@@ -44,7 +44,7 @@ public class GeneratorFlatMap<T, R> implements Generator<R> {
 	}
 
 	@Override
-	public Optional<? extends ExhaustiveSource<?>> exhaustive() {
+	public Optional<ExhaustiveSource<?>> exhaustive() {
 		return ExhaustiveSource.tree(
 				generator.exhaustive(),
 			head -> {

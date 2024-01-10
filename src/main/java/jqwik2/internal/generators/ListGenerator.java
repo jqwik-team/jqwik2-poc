@@ -27,7 +27,7 @@ public class ListGenerator<T> extends AbstractCollectionGenerator<T, List<T>> {
 	}
 
 	@Override
-	public Optional<? extends ExhaustiveSource<?>> exhaustive() {
+	public Optional<ExhaustiveSource<?>> exhaustive() {
 		return ExhaustiveSource.tree(
 			ExhaustiveSource.atom(maxSize - minSize),
 			head -> ExhaustiveSource.list(chooseSize(head), elementGenerator.exhaustive())

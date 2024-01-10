@@ -25,10 +25,6 @@ public class ExhaustiveList extends AbstractExhaustiveSource<GenSource.List> {
 		}
 	}
 
-	public int size() {
-		return size;
-	}
-
 	@Override
 	public long maxCount() {
 		double maxCountDouble = Math.pow(elementSource.maxCount(), size);

@@ -25,7 +25,7 @@ public class CreateGenerator<T> implements Generator<T> {
 	}
 
 	@Override
-	public Optional<? extends ExhaustiveSource<?>> exhaustive() {
+	public Optional<ExhaustiveSource<?>> exhaustive() {
 		return ExhaustiveSource.any();
 	}
 }

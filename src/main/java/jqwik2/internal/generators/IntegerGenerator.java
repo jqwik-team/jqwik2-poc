@@ -31,7 +31,7 @@ public class IntegerGenerator implements Generator<Integer> {
 	}
 
 	@Override
-	public Optional<? extends ExhaustiveSource<?>> exhaustive() {
+	public Optional<ExhaustiveSource<?>> exhaustive() {
 		return IntegerGenerationSupport.exhaustive(min, max);
 	}
 

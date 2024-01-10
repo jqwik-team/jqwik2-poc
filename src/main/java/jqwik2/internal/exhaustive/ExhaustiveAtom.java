@@ -35,10 +35,6 @@ public class ExhaustiveAtom extends AbstractExhaustiveSource<GenSource.Atom> {
 		}
 	}
 
-	public int cardinality() {
-		return choices.size();
-	}
-
 	@Override
 	public long maxCount() {
 		if (choices.isEmpty()) {

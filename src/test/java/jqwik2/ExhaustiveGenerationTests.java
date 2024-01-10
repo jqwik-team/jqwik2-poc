@@ -93,7 +93,7 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void exhaustiveAtom() {
-			ExhaustiveAtom atom = ExhaustiveSource.atom(1, 2, 3).get();
+			ExhaustiveAtom atom = (ExhaustiveAtom) ExhaustiveSource.atom(1, 2, 3).get();
 			assertThat(atom.maxCount()).isEqualTo(24L);
 
 			assertAtom(atom, 0, 0, 0);
@@ -136,8 +136,8 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void twoConcatenatedExhaustiveAtoms() {
-			ExhaustiveAtom first = ExhaustiveSource.atom(2).get();
-			ExhaustiveAtom second = ExhaustiveSource.atom(1).get();
+			ExhaustiveAtom first = (ExhaustiveAtom) ExhaustiveSource.atom(2).get();
+			ExhaustiveAtom second = (ExhaustiveAtom) ExhaustiveSource.atom(1).get();
 
 			first.chain(second);
 			assertThat(first.maxCount()).isEqualTo(6L);
@@ -188,9 +188,9 @@ class ExhaustiveGenerationTests {
 		void orAtom() {
 
 			ExhaustiveOr atom = (ExhaustiveOr) ExhaustiveSource.or(
-					(Optional<ExhaustiveAtom>) atom(range(0, 1), value(0)),
-					(Optional<ExhaustiveAtom>) atom(range(0, 2), value(1)),
-					(Optional<ExhaustiveAtom>) atom(value(2), value(3))
+				atom(range(0, 1), value(0)),
+				atom(range(0, 2), value(1)),
+				atom(value(2), value(3))
 			).get();
 
 			assertThat(atom.maxCount()).isEqualTo(6L);
@@ -307,7 +307,7 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void exhaustiveTree() {
-			ExhaustiveTree tree = ExhaustiveSource.tree(
+			ExhaustiveTree tree = (ExhaustiveTree) ExhaustiveSource.tree(
 				ExhaustiveSource.atom(2),
 				head -> list(head.atom().choose(3), atom(2))
 			).get();
