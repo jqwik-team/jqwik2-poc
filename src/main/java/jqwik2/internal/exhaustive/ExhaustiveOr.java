@@ -19,7 +19,7 @@ public class ExhaustiveOr extends AbstractExhaustiveSource<GenSource> {
 
 	@Override
 	public long maxCount() {
-		return alternatives.stream().mapToLong(ExhaustiveSource::maxCount).sum();
+		return sumUpToLongMAX(alternatives.stream().mapToLong(ExhaustiveSource::maxCount));
 	}
 
 	@Override

@@ -1,6 +1,8 @@
 package jqwik2.internal.exhaustive;
 
 import java.util.*;
+import java.util.concurrent.atomic.*;
+import java.util.stream.*;
 
 import jqwik2.api.*;
 
@@ -25,4 +27,18 @@ public abstract class AbstractExhaustiveSource<T extends GenSource> extends Abst
 			}
 		};
 	}
+
+	protected long sumUpToLongMAX(LongStream longStream) {
+		AtomicLong sum = new AtomicLong(0);
+		longStream.takeWhile(l -> {
+			if (l <= (Long.MAX_VALUE - sum.get())) {
+				sum.addAndGet(l);
+			} else {
+				sum.set(Long.MAX_VALUE);
+			}
+			return sum.get() < Long.MAX_VALUE;
+		}).count();
+		return sum.get();
+	}
+
 }
