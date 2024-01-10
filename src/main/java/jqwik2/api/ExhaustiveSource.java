@@ -51,14 +51,6 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 	}
 
 	static Optional<ExhaustiveList> list(int size, Optional<? extends ExhaustiveSource<?>> elementSource) {
-		return list(size, elementSource, false);
-	}
-
-	static Optional<ExhaustiveList> list(
-		int size,
-		Optional<? extends ExhaustiveSource<?>> elementSource,
-		boolean isSet
-	) {
 		if (size == 0) {
 			// TODO: Should be able to use any() here but type variance makes it difficult
 			return Optional.of(new ExhaustiveEmptyList());
@@ -66,11 +58,28 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 		if (elementSource.isEmpty()) {
 			return Optional.empty();
 		}
-		ExhaustiveList exhaustiveList = new ExhaustiveList(size, elementSource.get(), isSet);
+		ExhaustiveList exhaustiveList = new ExhaustiveList(size, elementSource.get());
 		if (exhaustiveList.maxCount() == Exhaustive.INFINITE) {
 			return Optional.empty();
 		}
 		return Optional.of(exhaustiveList);
+	}
+
+	static Optional<? extends ExhaustiveSource<?>> set(
+		int size,
+		Optional<? extends ExhaustiveSource<?>> elementSource
+	) {
+		if (elementSource.isEmpty()) {
+			return Optional.empty();
+		}
+		if (size == 0) {
+			return any();
+		}
+		ExhaustiveSet exhaustiveSet = new ExhaustiveSet(size, elementSource.get());
+		if (exhaustiveSet.maxCount() == Exhaustive.INFINITE) {
+			return Optional.empty();
+		}
+		return Optional.of(exhaustiveSet);
 	}
 
 	/**

@@ -5,7 +5,7 @@ import jqwik2.api.*;
 public class ExhaustiveEmptyList extends ExhaustiveList {
 
 	public ExhaustiveEmptyList() {
-		super(0, null, false);
+		super(0, null);
 	}
 
 	@Override

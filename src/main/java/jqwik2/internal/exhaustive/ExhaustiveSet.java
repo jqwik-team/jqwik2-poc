@@ -3,13 +3,13 @@ package jqwik2.internal.exhaustive;
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
 
-public class ExhaustiveList extends AbstractExhaustiveSource<GenSource.List> {
+public class ExhaustiveSet extends AbstractExhaustiveSource<GenSource.List> {
 
 	private final int size;
 	private final ExhaustiveSource<?> elementSource;
 	private final java.util.List<ExhaustiveSource<?>> elements = new java.util.ArrayList<>();
 
-	public ExhaustiveList(int size, ExhaustiveSource<?> elementSource) {
+	public ExhaustiveSet(int size, ExhaustiveSource<?> elementSource) {
 		this.size = size;
 		this.elementSource = elementSource;
 		createElements(size, elementSource);
@@ -31,6 +31,7 @@ public class ExhaustiveList extends AbstractExhaustiveSource<GenSource.List> {
 
 	@Override
 	public long maxCount() {
+		// TODO: Consider isSet
 		double maxCountDouble = Math.pow(elementSource.maxCount(), size);
 		if (maxCountDouble > Long.MAX_VALUE) {
 			return Exhaustive.INFINITE;
@@ -41,6 +42,7 @@ public class ExhaustiveList extends AbstractExhaustiveSource<GenSource.List> {
 
 	@Override
 	protected boolean tryAdvance() {
+		// TODO: Consider isSet
 		return elements.getLast().advanceThisOrUp();
 	}
 
@@ -51,7 +53,7 @@ public class ExhaustiveList extends AbstractExhaustiveSource<GenSource.List> {
 
 	@Override
 	public ExhaustiveSource<GenSource.List> clone() {
-		return new ExhaustiveList(elements.size(), elementSource);
+		return new ExhaustiveSet(elements.size(), elementSource);
 	}
 
 	@Override
@@ -73,7 +75,7 @@ public class ExhaustiveList extends AbstractExhaustiveSource<GenSource.List> {
 
 	@Override
 	public String toString() {
-		return "ExhaustiveList{" +
+		return "ExhaustiveSet{" +
 				   "size=" + size +
 				   ", elementSource=" + elementSource +
 				   '}';
