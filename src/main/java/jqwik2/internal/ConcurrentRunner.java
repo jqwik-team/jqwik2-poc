@@ -25,6 +25,7 @@ public class ConcurrentRunner {
 		this.timeout = timeout;
 	}
 
+	@SuppressWarnings("OverlyLongMethod")
 	public void run(Iterator<ConcurrentRunner.Task> taskIterator) throws TimeoutException {
 		List<Throwable> uncaughtErrors = Collections.synchronizedList(new ArrayList<>());
 		List<Future<?>> submittedTasks = Collections.synchronizedList(new ArrayList<>());

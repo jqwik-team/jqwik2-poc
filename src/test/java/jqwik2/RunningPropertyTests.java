@@ -196,7 +196,6 @@ class RunningPropertyTests {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
 			}
 			return true;
 		});
@@ -237,8 +236,11 @@ class RunningPropertyTests {
 			)
 		);
 		assertThat(result.status()).isEqualTo(Status.ABORTED);
-		assertThat(result.abortionReason()).isPresent();
-		assertThat(result.timedOut()).isTrue();
+		assertThat(result.abortionReason()).describedAs("has abortion reason").isPresent();
+		if (result.abortionReason().get() instanceof TimeoutException) {
+			// In rare cases the timeout will be too late for the RTE to be caught
+			assertThat(result.timedOut()).describedAs("has timed out").isTrue();
+		}
 	}
 
 	@Example
