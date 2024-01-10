@@ -38,16 +38,16 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 		return Optional.of(exhaustiveAtom);
 	}
 
-	static Optional<? extends ExhaustiveSource<?>> or(Optional<ExhaustiveAtom>... atoms) {
+	static Optional<? extends ExhaustiveSource<?>> or(Optional<? extends ExhaustiveSource<?>>... atoms) {
 		if (Arrays.stream(atoms).anyMatch(Optional::isEmpty)) {
 			return Optional.empty();
 		}
-		List<ExhaustiveAtom> atomList = Arrays.stream(atoms).map(Optional::get).toList();
-		OrAtom orAtom = new OrAtom(atomList);
-		if (orAtom.maxCount() == Exhaustive.INFINITE) {
+		List<? extends ExhaustiveSource<?>> atomList = Arrays.stream(atoms).map(Optional::get).toList();
+		ExhaustiveOr exhaustiveOr = new ExhaustiveOr(atomList);
+		if (exhaustiveOr.maxCount() == Exhaustive.INFINITE) {
 			return Optional.empty();
 		}
-		return Optional.of(orAtom);
+		return Optional.of(exhaustiveOr);
 	}
 
 	static Optional<? extends ExhaustiveSource<?>> list(int size, Optional<? extends ExhaustiveSource<?>> elementSource) {

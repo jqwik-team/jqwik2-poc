@@ -187,7 +187,7 @@ class ExhaustiveGenerationTests {
 		@Example
 		void orAtom() {
 
-			OrAtom atom = (OrAtom) ExhaustiveSource.or(
+			ExhaustiveOr atom = (ExhaustiveOr) ExhaustiveSource.or(
 					(Optional<ExhaustiveAtom>) atom(range(0, 1), value(0)),
 					(Optional<ExhaustiveAtom>) atom(range(0, 2), value(1)),
 					(Optional<ExhaustiveAtom>) atom(value(2), value(3))
@@ -245,8 +245,8 @@ class ExhaustiveGenerationTests {
 			assertAtom(expected, fixed);
 		}
 
-		private static void assertAtom(OrAtom exhaustiveAtom, int... expected) {
-			GenSource.Atom fixed = exhaustiveAtom.current();
+		private static void assertAtom(ExhaustiveOr exhaustiveAtom, int... expected) {
+			GenSource.Atom fixed = (GenSource.Atom) exhaustiveAtom.current();
 			assertAtom(expected, fixed);
 		}
 

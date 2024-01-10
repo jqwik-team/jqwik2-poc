@@ -1,31 +1,30 @@
 package jqwik2.internal.exhaustive;
 
+import java.util.*;
+
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
 
-public class OrAtom extends AbstractExhaustiveSource<GenSource.Atom> {
+public class ExhaustiveOr extends AbstractExhaustiveSource<GenSource> {
 
-	private final java.util.List<ExhaustiveAtom> alternatives;
+	private final java.util.List<? extends ExhaustiveSource<?>> alternatives;
 	private int currentAlternative = 0;
 
-	public OrAtom(java.util.List<ExhaustiveAtom> alternatives) {
+	public ExhaustiveOr(java.util.List<? extends ExhaustiveSource<?>> alternatives) {
 		if (alternatives.isEmpty()) {
-			throw new IllegalArgumentException("Must have at least one atom");
-		}
-		if (alternatives.stream().map(ExhaustiveAtom::cardinality).distinct().count() != 1) {
-			throw new IllegalArgumentException("All atoms must have the same cardinality");
+			throw new IllegalArgumentException("Must have at least one alternative");
 		}
 		this.alternatives = alternatives;
 	}
 
 	@Override
 	public long maxCount() {
-		return alternatives.stream().mapToLong(ExhaustiveAtom::maxCount).sum();
+		return alternatives.stream().mapToLong(ExhaustiveSource::maxCount).sum();
 	}
 
 	@Override
 	protected boolean tryAdvance() {
-		if (currentAtom().advanceThisOrUp()) {
+		if (currentAlternative().advanceThisOrUp()) {
 			return true;
 		}
 		if (currentAlternative < alternatives.size() - 1) {
@@ -40,25 +39,25 @@ public class OrAtom extends AbstractExhaustiveSource<GenSource.Atom> {
 	@Override
 	public void reset() {
 		currentAlternative = 0;
-		alternatives.forEach(ExhaustiveAtom::reset);
+		alternatives.forEach(ExhaustiveSource::reset);
 	}
 
 	@Override
-	public ExhaustiveSource<GenSource.Atom> clone() {
-		java.util.List<ExhaustiveAtom> alternativesClones =
+	public ExhaustiveOr clone() {
+		List<? extends ExhaustiveSource<?>> alternativesClones =
 			alternatives.stream()
-						.map(ExhaustiveAtom::clone)
+						.map(Exhaustive::clone)
 						.toList();
-		return new OrAtom(alternativesClones);
+		return new ExhaustiveOr(alternativesClones);
 	}
 
-	private ExhaustiveAtom currentAtom() {
+	private ExhaustiveSource<?> currentAlternative() {
 		return alternatives.get(currentAlternative);
 	}
 
 	@Override
 	public Recording recording() {
-		return currentAtom().recording();
+		return currentAlternative().recording();
 	}
 
 	@Override
@@ -69,7 +68,7 @@ public class OrAtom extends AbstractExhaustiveSource<GenSource.Atom> {
 
 	@Override
 	public String toString() {
-		return "OrAtom{" +
+		return "ExhaustiveOr{" +
 				   "alternatives=" + alternatives +
 				   ", current=" + currentAlternative +
 				   '}';
