@@ -81,6 +81,12 @@ public class ExhaustiveSet extends ExhaustiveList {
 	}
 
 	@Override
+	public void reset() {
+		super.reset();
+		traversedSets.clear();
+	}
+
+	@Override
 	public boolean advance() {
 		if (advanceToNextSet()) {
 			return true;
