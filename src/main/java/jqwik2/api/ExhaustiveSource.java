@@ -30,7 +30,7 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 		return Optional.of(exhaustiveAtom);
 	}
 
-	static Optional<ExhaustiveAtom> atom(ExhaustiveChoice.Range... ranges) {
+	static Optional<? extends ExhaustiveSource<?>> atom(ExhaustiveChoice.Range... ranges) {
 		ExhaustiveAtom exhaustiveAtom = new ExhaustiveAtom(ranges);
 		if (exhaustiveAtom.maxCount() == Exhaustive.INFINITE) {
 			return Optional.empty();
@@ -38,7 +38,7 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 		return Optional.of(exhaustiveAtom);
 	}
 
-	static Optional<OrAtom> or(Optional<ExhaustiveAtom>... atoms) {
+	static Optional<? extends ExhaustiveSource<?>> or(Optional<ExhaustiveAtom>... atoms) {
 		if (Arrays.stream(atoms).anyMatch(Optional::isEmpty)) {
 			return Optional.empty();
 		}
@@ -50,13 +50,12 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 		return Optional.of(orAtom);
 	}
 
-	static Optional<ExhaustiveList> list(int size, Optional<? extends ExhaustiveSource<?>> elementSource) {
-		if (size == 0) {
-			// TODO: Should be able to use any() here but type variance makes it difficult
-			return Optional.of(new ExhaustiveEmptyList());
-		}
+	static Optional<? extends ExhaustiveSource<?>> list(int size, Optional<? extends ExhaustiveSource<?>> elementSource) {
 		if (elementSource.isEmpty()) {
 			return Optional.empty();
+		}
+		if (size == 0) {
+			return Optional.of(new ExhaustiveEmptyCollection());
 		}
 		ExhaustiveList exhaustiveList = new ExhaustiveList(size, elementSource.get());
 		if (exhaustiveList.maxCount() == Exhaustive.INFINITE) {
@@ -65,15 +64,12 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 		return Optional.of(exhaustiveList);
 	}
 
-	static Optional<? extends ExhaustiveSource<?>> set(
-		int size,
-		Optional<? extends ExhaustiveSource<?>> elementSource
-	) {
+	static Optional<? extends ExhaustiveSource<?>> set(int size, Optional<? extends ExhaustiveSource<?>> elementSource) {
 		if (elementSource.isEmpty()) {
 			return Optional.empty();
 		}
 		if (size == 0) {
-			return any();
+			return Optional.of(new ExhaustiveEmptyCollection());
 		}
 		ExhaustiveSet exhaustiveSet = new ExhaustiveSet(size, elementSource.get());
 		if (exhaustiveSet.maxCount() == Exhaustive.INFINITE) {

@@ -170,7 +170,7 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void exhaustiveAtomWithRanges() {
-			ExhaustiveAtom atom = ExhaustiveSource.atom(
+			ExhaustiveAtom atom = (ExhaustiveAtom) ExhaustiveSource.atom(
 				range(2, 3), range(3, 4), value(4)
 			).get();
 			assertThat(atom.maxCount()).isEqualTo(4L);
@@ -187,10 +187,10 @@ class ExhaustiveGenerationTests {
 		@Example
 		void orAtom() {
 
-			OrAtom atom = ExhaustiveSource.or(
-					ExhaustiveSource.atom(range(0, 1), value(0)),
-					ExhaustiveSource.atom(range(0, 2), value(1)),
-					ExhaustiveSource.atom(value(2), value(3))
+			OrAtom atom = (OrAtom) ExhaustiveSource.or(
+					(Optional<ExhaustiveAtom>) atom(range(0, 1), value(0)),
+					(Optional<ExhaustiveAtom>) atom(range(0, 2), value(1)),
+					(Optional<ExhaustiveAtom>) atom(value(2), value(3))
 			).get();
 
 			assertThat(atom.maxCount()).isEqualTo(6L);
@@ -264,7 +264,7 @@ class ExhaustiveGenerationTests {
 	class ExhaustiveTrees {
 		@Example
 		void exhaustiveList() {
-			ExhaustiveList list = ExhaustiveSource.list(2, atom(2)).get();
+			ExhaustiveSource<?> list = ExhaustiveSource.list(2, atom(2)).get();
 			assertThat(list.maxCount()).isEqualTo(9L);
 
 			assertList(list, 0, 0);
@@ -290,15 +290,12 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void exhaustiveEmptyList() {
-			ExhaustiveList list = ExhaustiveSource.list(0, atom(2)).get();
+			ExhaustiveSource<?> list = ExhaustiveSource.list(0, atom(2)).get();
 			assertThat(list.maxCount()).isEqualTo(1L);
-
-			assertThat(list.size()).isEqualTo(0);
-
 			assertThat(list.advance()).isFalse();
 		}
 
-		private void assertList(ExhaustiveList list, int... expected) {
+		private void assertList(ExhaustiveSource<?> list, int... expected) {
 			GenSource.List fixedList = (GenSource.List) list.current();
 			for (int i = 0; i < expected.length; i++) {
 				var atom = fixedList.nextElement().atom();

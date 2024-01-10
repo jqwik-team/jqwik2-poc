@@ -1,12 +1,9 @@
 package jqwik2.internal.exhaustive;
 
 import jqwik2.api.*;
+import jqwik2.api.recording.*;
 
-public class ExhaustiveEmptyList extends ExhaustiveList {
-
-	public ExhaustiveEmptyList() {
-		super(0, null);
-	}
+public class ExhaustiveEmptyCollection extends AbstractExhaustiveSource<GenSource.List>{
 
 	@Override
 	public long maxCount() {
@@ -22,8 +19,18 @@ public class ExhaustiveEmptyList extends ExhaustiveList {
 	}
 
 	@Override
-	public ExhaustiveSource<GenSource.List> clone() {
-		return new ExhaustiveEmptyList();
+	protected boolean tryAdvance() {
+		return false;
+	}
+
+	@Override
+	public void reset() {
+
+	}
+
+	@Override
+	public ExhaustiveEmptyCollection clone() {
+		return new ExhaustiveEmptyCollection();
 	}
 
 	@Override
@@ -39,6 +46,11 @@ public class ExhaustiveEmptyList extends ExhaustiveList {
 
 	@Override
 	public String toString() {
-		return "ExhaustiveEmptyList";
+		return "ExhaustiveEmptyCollection";
+	}
+
+	@Override
+	public Recording recording() {
+		return Recording.list();
 	}
 }

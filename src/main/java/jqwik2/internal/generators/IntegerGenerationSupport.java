@@ -5,6 +5,7 @@ import java.util.*;
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
 import jqwik2.api.support.*;
+import jqwik2.internal.exhaustive.*;
 
 import static jqwik2.api.ExhaustiveSource.*;
 
@@ -61,8 +62,8 @@ public class IntegerGenerationSupport {
 			return atom(range);
 		}
 		return or(
-			atom(range(0, max), value(0)),
-			atom(range(1, Math.abs(min)), value(1))
+				(Optional<ExhaustiveAtom>) atom(range(0, max), value(0)),
+				(Optional<ExhaustiveAtom>) atom(range(1, Math.abs(min)), value(1))
 		);
 	}
 
