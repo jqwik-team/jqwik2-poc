@@ -1,6 +1,7 @@
 package jqwik2.internal.generators;
 
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.function.*;
 
 import jqwik2.api.*;
@@ -11,6 +12,7 @@ import static jqwik2.api.recording.Recording.*;
 public class GeneratorFlatMap<T, R> implements Generator<R> {
 	private final Generator<T> generator;
 	private final Function<T, Generator<R>> mapper;
+	private final Map<T, Generator<R>> cache = new ConcurrentHashMap<>();
 
 	public GeneratorFlatMap(Generator<T> generator, Function<T, Generator<R>> mapper) {
 		this.generator = generator;
@@ -21,8 +23,8 @@ public class GeneratorFlatMap<T, R> implements Generator<R> {
 	public R generate(GenSource source) {
 		var tree = source.tree();
 		var valueToMap = generator.generate(tree.head());
-		// TODO: The dependent generator could be cached by its source recording
-		return mapper.apply(valueToMap).generate(tree.child());
+		Generator<R> rGenerator = cache.computeIfAbsent(valueToMap, mapper::apply);
+		return rGenerator.generate(tree.child());
 	}
 
 	@Override
@@ -47,7 +49,7 @@ public class GeneratorFlatMap<T, R> implements Generator<R> {
 	@Override
 	public Optional<ExhaustiveSource<?>> exhaustive() {
 		return ExhaustiveSource.tree(
-				generator.exhaustive(),
+			generator.exhaustive(),
 			head -> {
 				T headValue = generator.generate(head);
 				Generator<R> childGenerator = mapper.apply(headValue);
