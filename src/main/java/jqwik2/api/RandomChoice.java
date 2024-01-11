@@ -2,6 +2,7 @@ package jqwik2.api;
 
 import java.util.random.*;
 
+import jqwik2.*;
 import jqwik2.internal.*;
 
 /**
@@ -14,6 +15,10 @@ public interface RandomChoice {
 
 	interface Distribution {
 		Distribution UNIFORM = RandomChoice::nextInt;
+
+		static Distribution biased(int bias) {
+			return new BiasedDistribution(bias);
+		}
 
 		int nextInt(RandomChoice random, int maxExcluded);
 	}
