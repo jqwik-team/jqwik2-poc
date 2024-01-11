@@ -21,6 +21,7 @@ public class GeneratorFlatMap<T, R> implements Generator<R> {
 	public R generate(GenSource source) {
 		var tree = source.tree();
 		var valueToMap = generator.generate(tree.head());
+		// TODO: The dependent generator could be cached by its source recording
 		return mapper.apply(valueToMap).generate(tree.child());
 	}
 

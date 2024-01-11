@@ -3,7 +3,6 @@
     - Empty / Null Generator
 - Introduce Arbitraries
 - Add descriptions to generators
-- Give generators equality to allow caching
 - Introduce Jqwik or JqwikSession object as public entry point
 - PropertyCase Execution
     - Fail if ratio checks/tries is too low
@@ -11,10 +10,13 @@
     - Allow rerun with previously falsified samples (starting with smallest)
       => Rerun will improve shrinking!
     - Allow execution with exhaustive generation
-- Exhaustive generation
-    - Make maxCount() calculation stable against overflow
 - Add GenSource.Tuple
 - Stateful generators
+- Statistics
+  - Collect and report statistics
+  - Generate until a statistical measurement is supposed to be stable.
+    See   https://www.youtube.com/watch?v=NcJOiQlzlXQ&list=PLvL2NEhYV4ZvCRCVlXTfB6-d09K3r0Sxa
+
 - Shrinking (https://www.drmaciver.com/2019/01/notes-on-test-case-reduction/)
     - Compare shrinkables due to full length if different recording types are
       compared
@@ -29,3 +31,4 @@
     - Show shrinking progress on console
 - Jupiter Extension
 - Target-based generation and shrinking
+- Give generators equality to allow caching (Is that still necessary?)
