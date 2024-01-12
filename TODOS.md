@@ -1,15 +1,27 @@
 - Additional generators
     - String
     - Empty / Null Generator
+
 - Introduce Arbitraries
+  - List, Set
+  - map, flatMap
+  
 - Add descriptions to generators
-- Introduce Jqwik or JqwikSession object as public entry point
-- PropertyCase Execution
-    - Fail if ratio checks/tries is too low
+
+- JqwikProperty
+    - Allow configuration of
+      - tries
+      - seed
+      - shrinking
+      - timeout
     - Save seed and falsified samples to disk (.jqwik folder)
     - Allow rerun with previously falsified samples (starting with smallest)
       => Rerun will improve shrinking!
     - Allow execution with exhaustive generation
+    - Report falsified samples, tries, seed
+
+- PropertyCase Execution
+    - Fail if ratio checks/tries is too low
 - Add GenSource.Tuple
 - Stateful generators
 - Statistics

@@ -13,7 +13,10 @@ class JqwikPropertyTests {
 	void propertyWith1ParameterSucceeds() {
 		var property = new JqwikProperty();
 
-		PropertyRunResult result = property.forAll(Numbers.integers()).check(i -> true);
+		PropertyRunResult result = property.forAll(Numbers.integers()).check(i -> {
+			assertThat(i).isInstanceOf(Integer.class);
+			return true;
+		});
 		assertThat(result.isSuccessful()).isTrue();
 		assertThat(result.countTries()).isEqualTo(100);
 		assertThat(result.countChecks()).isEqualTo(100);
@@ -45,4 +48,44 @@ class JqwikPropertyTests {
 		assertThat(result.countTries()).isEqualTo(1);
 		assertThat(result.countChecks()).isEqualTo(1);
 	}
+
+	@Example
+	void failingPropertyThrowIfNotSuccessful() {
+		var property = new JqwikProperty(true);
+
+		assertThatThrownBy(
+			() -> property.forAll(Numbers.integers()).check(i -> false)
+		).isInstanceOf(AssertionError.class)
+		 .hasMessageContaining("failed");
+	}
+
+	@Example
+	void propertyWith2ParametersSucceeds() {
+		var property = new JqwikProperty();
+
+		PropertyRunResult result = property.forAll(
+			Values.just(1),
+			Values.just(2)
+		).verify((i1, i2) -> {
+			assertThat(i1).isEqualTo(1);
+			assertThat(i2).isEqualTo(2);
+		});
+		assertThat(result.isSuccessful()).isTrue();
+		assertThat(result.countTries()).isEqualTo(100);
+		assertThat(result.countChecks()).isEqualTo(100);
+	}
+
+	@Example
+	void propertyWith2ParametersFails() {
+		var property = new JqwikProperty();
+
+		PropertyRunResult result = property.forAll(
+			Values.just(1),
+			Values.just(2)
+		).verify((i1, i2) -> {
+			fail("failed");
+		});
+		assertThat(result.isFailed()).isTrue();
+	}
+
 }
