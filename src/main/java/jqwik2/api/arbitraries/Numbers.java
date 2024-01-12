@@ -1,4 +1,4 @@
-package net.jqwik.api.arbitraries;
+package jqwik2.api.arbitraries;
 
 import jqwik2.api.*;
 import jqwik2.internal.*;

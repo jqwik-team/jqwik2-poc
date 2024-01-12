@@ -1,8 +1,7 @@
 package jqwik2;
 
-import jqwik2.api.*;
 import jqwik2.api.Arbitrary;
-import org.assertj.core.api.*;
+import jqwik2.api.arbitraries.*;
 
 import net.jqwik.api.*;
 
@@ -13,7 +12,7 @@ class ArbitraryTests {
 	@Property(tries = 10)
 	void anIntegerArbitrary() {
 		for (int i = 0; i < 10; i++) {
-			Arbitrary<Integer> ints = net.jqwik.api.arbitraries.Numbers.integers();
+			Arbitrary<Integer> ints = Numbers.integers();
 			int sample = ints.sample();
 			// System.out.println(sample);
 			assertThat(sample).isBetween(Integer.MIN_VALUE, Integer.MAX_VALUE);
