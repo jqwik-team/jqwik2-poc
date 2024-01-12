@@ -25,7 +25,7 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 
 	public Recording recording() {
 		if (concreteRecorder == null) {
-			throw new IllegalStateException("Recording has not been started");
+			return Recording.EMPTY;
 		}
 		return concreteRecorder.recording();
 	}

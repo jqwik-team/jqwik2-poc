@@ -6,6 +6,8 @@ import java.util.stream.*;
 public sealed interface Recording extends Comparable<Recording>
 	permits AtomRecording, ListRecording, TreeRecording {
 
+	Recording EMPTY = atom();
+
 	Stream<? extends Recording> shrink();
 
 	default boolean isomorphicTo(Recording other) {

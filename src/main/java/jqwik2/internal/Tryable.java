@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.function.*;
 
 import jqwik2.api.*;
+import jqwik2.api.support.*;
 import org.opentest4j.*;
 
 /**
@@ -38,6 +39,9 @@ public interface Tryable extends Function<List<Object>, TryExecutionResult> {
 				return new TryExecutionResult(TryExecutionResult.Status.FALSIFIED, ae);
 			} catch (TestAbortedException tae) {
 				return new TryExecutionResult(TryExecutionResult.Status.INVALID, tae);
+			} catch (Throwable t) {
+				ExceptionSupport.rethrowIfBlacklisted(t);
+				return new TryExecutionResult(TryExecutionResult.Status.FALSIFIED, t);
 			}
 		};
 	}

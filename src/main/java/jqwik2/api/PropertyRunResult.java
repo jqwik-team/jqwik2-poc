@@ -30,5 +30,17 @@ public record PropertyRunResult(
 		 */
 		FAILED
 	}
+
+	public boolean isSuccessful() {
+		return status == Status.SUCCESSFUL;
+	}
+
+	public boolean isFailed() {
+		return status == Status.FAILED;
+	}
+
+	public boolean isAborted() {
+		return status == Status.ABORTED;
+	}
 }
 

@@ -3,6 +3,7 @@ package jqwik2;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
 import java.util.function.*;
 
 import jqwik2.api.Assume;
@@ -216,31 +217,55 @@ class RunningPropertyTests {
 	}
 
 	@Example
-	void abortWithTimeout() {
+	void failWithTimeout() {
 
 		Tryable tryable = Tryable.from(args -> {
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(5000);
 			} catch (InterruptedException e) {
 				throw new RuntimeException(e);
 			}
 		});
 
-		PropertyCase propertyCase = new PropertyCase(List.of(new IntegerGenerator(0, 100)), tryable);
+		Generator<?> anyGenerator = new IntegerGenerator(0, 100);
+		PropertyCase propertyCase = new PropertyCase(List.of(anyGenerator), tryable);
 
 		PropertyRunResult result = propertyCase.run(
 			randomized(
-				"42", 1000, false, 0.0,
-				Duration.ofMillis(100),
+				"42", 100, false, 0.0,
+				Duration.ofMillis(500),
 				Executors::newSingleThreadExecutor
 			)
 		);
-		assertThat(result.status()).isEqualTo(Status.ABORTED);
-		assertThat(result.abortionReason()).describedAs("has abortion reason").isPresent();
-		if (result.abortionReason().get() instanceof TimeoutException) {
+		assertThat(result.status()).isEqualTo(Status.FAILED);
+		// assertThat(result.abortionReason()).describedAs("has abortion reason").isPresent();
+		// if (result.abortionReason().get() instanceof TimeoutException) {
 			// In rare cases the timeout will be too late for the RTE to be caught
 			assertThat(result.timedOut()).describedAs("has timed out").isTrue();
-		}
+		// }
+	}
+
+	@Example
+	void abort() {
+
+		Tryable tryable = Tryable.from(args -> {
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+		});
+
+		var abortion = new RuntimeException("I fail!");
+		Generator<?> aFailingGenerator = (Generator<Object>) source -> {
+			throw abortion;
+		};
+
+		PropertyCase propertyCase = new PropertyCase(List.of(aFailingGenerator), tryable);
+
+		PropertyRunResult result = propertyCase.run(randomized(100));
+		assertThat(result.status()).isEqualTo(Status.ABORTED);
+		assertThat(result.abortionReason()).hasValue(abortion);
 	}
 
 	@Example

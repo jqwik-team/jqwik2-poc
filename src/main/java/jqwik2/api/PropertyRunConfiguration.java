@@ -23,7 +23,7 @@ public sealed interface PropertyRunConfiguration {
 	}
 
 	static PropertyRunConfiguration randomized(String seed, int maxTries) {
-		return randomized(seed, maxTries, true, 0.05, Duration.ofSeconds(10), DEFAULT_EXECUTOR_SERVICE_SUPPLIER);
+		return randomized(seed, maxTries, true, 0.05, Duration.ofMinutes(10), DEFAULT_EXECUTOR_SERVICE_SUPPLIER);
 	}
 
 	static PropertyRunConfiguration randomized(
