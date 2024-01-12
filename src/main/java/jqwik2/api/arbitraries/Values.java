@@ -1,6 +1,7 @@
 package jqwik2.api.arbitraries;
 
 import jqwik2.api.*;
+import jqwik2.internal.generators.*;
 
 public class Values {
 
@@ -10,7 +11,7 @@ public class Values {
 		return new Arbitrary<>() {
 			@Override
 			public Generator<T> generator() {
-				return Generator.just(value);
+				return BaseGenerators.just(value);
 			}
 		};
 	}

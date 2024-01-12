@@ -10,14 +10,6 @@ import jqwik2.internal.recording.*;
 
 public interface Generator<T> {
 
-	static <T> Generator<T> just(T value) {
-		return create(() -> value);
-	}
-
-	static <T> Generator<T> create(Supplier<T> supplier) {
-		return new CreateGenerator<>(supplier);
-	}
-
 	T generate(GenSource source);
 
 	default Generator<List<T>> list(int minSize, int maxSize) {

@@ -20,7 +20,7 @@ class GeneratorTests {
 
 	@Example
 	void justGenerator() {
-		Generator<Integer> just42 = Generator.just(42);
+		Generator<Integer> just42 = BaseGenerators.just(42);
 
 		GenSource source = GenSource.any();
 		for (int i = 0; i < 10; i++) {
@@ -41,7 +41,7 @@ class GeneratorTests {
 
 	@Example
 	void createGenerator() {
-		Generator<List<String>> createA = Generator.create(() -> List.of("a"));
+		Generator<List<String>> createA = BaseGenerators.create(() -> List.of("a"));
 
 		GenSource source = GenSource.any();
 		for (int i = 0; i < 10; i++) {

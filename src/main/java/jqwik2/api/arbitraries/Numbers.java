@@ -12,7 +12,7 @@ public class Numbers {
 		return new Arbitrary<Integer>() {
 			@Override
 			public Generator<Integer> generator() {
-				IntegerGenerator integerGenerator = new IntegerGenerator(Integer.MIN_VALUE, Integer.MAX_VALUE, RandomChoice.Distribution.biased(5));
+				Generator<Integer> integerGenerator = BaseGenerators.integers(Integer.MIN_VALUE, Integer.MAX_VALUE, RandomChoice.Distribution.biased(5));
 				return WithEdgeCasesDecorator.decorate(integerGenerator, 0.05, 100);
 			}
 		};
