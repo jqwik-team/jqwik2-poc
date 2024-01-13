@@ -9,10 +9,10 @@
 - Add descriptions to generators
 
 - JqwikProperty
+    - Report falsified samples, tries, seed, effective generation strategy
     - Save seed and falsified samples to disk (.jqwik folder)
     - Allow rerun with previously falsified samples (starting with smallest)
       => Rerun will improve shrinking!
-    - Report falsified samples, tries, seed
 
 - PropertyCase Execution
     - Fail if ratio checks/tries is too low

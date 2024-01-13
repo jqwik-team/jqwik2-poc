@@ -141,9 +141,10 @@ class JqwikPropertyTests {
 		assertThat(resultExhaustive.isSuccessful()).isTrue();
 		assertThat(resultExhaustive.countTries()).isEqualTo(8);
 
+		// 100 * 2 > 100 => randomized generation
 		PropertyRunResult resultRandomized = property.forAll(
-			Numbers.integers(),
-			Numbers.integers()
+			Numbers.integers().between(1, 100),
+			Numbers.integers().between(0, 1)
 		).verify((i1, i2) -> {});
 		assertThat(resultRandomized.isSuccessful()).isTrue();
 		assertThat(resultRandomized.countTries()).isEqualTo(100);
