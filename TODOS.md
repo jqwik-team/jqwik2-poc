@@ -35,6 +35,7 @@
     - Shrink with a timeout
     - Shrink in passes?
     - Show shrinking progress on console
+    - Reduce list by improved binary search: https://notebook.drmaciver.com/posts/2019-04-30-13:03.html
 - Jupiter Extension
 - Target-based generation and shrinking
 - Give generators equality to allow caching (Is that still necessary?)
