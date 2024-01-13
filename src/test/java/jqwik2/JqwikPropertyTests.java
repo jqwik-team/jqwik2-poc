@@ -103,7 +103,7 @@ class JqwikPropertyTests {
 	}
 
 	@Example
-	void exhaustiveProperty() {
+	void exhaustiveGenerationStrategy() {
 		PropertyRunStrategy strategy = PropertyRunStrategy.create(
 			100, Duration.ofMinutes(10), null,
 			PropertyRunStrategy.Shrinking.OFF,
@@ -125,5 +125,28 @@ class JqwikPropertyTests {
 		assertThat(result.countChecks()).isEqualTo(8);
 	}
 
+	@Example
+	void smartGenerationProperty() {
+		PropertyRunStrategy strategy = PropertyRunStrategy.create(
+			100, Duration.ofMinutes(10), RandomChoice.generateRandomSeed(),
+			PropertyRunStrategy.Shrinking.OFF,
+			PropertyRunStrategy.Generation.SMART
+		);
+		var property = new JqwikProperty(strategy);
+
+		PropertyRunResult resultExhaustive = property.forAll(
+			Numbers.integers().between(0, 3),
+			Numbers.integers().between(1, 2)
+		).verify((i1, i2) -> {});
+		assertThat(resultExhaustive.isSuccessful()).isTrue();
+		assertThat(resultExhaustive.countTries()).isEqualTo(8);
+
+		PropertyRunResult resultRandomized = property.forAll(
+			Numbers.integers(),
+			Numbers.integers()
+		).verify((i1, i2) -> {});
+		assertThat(resultRandomized.isSuccessful()).isTrue();
+		assertThat(resultRandomized.countTries()).isEqualTo(100);
+	}
 
 }

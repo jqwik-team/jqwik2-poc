@@ -6,32 +6,31 @@ import jqwik2.api.*;
 
 public class IterableExhaustiveSource implements IterableSampleSource {
 	private final List<? extends ExhaustiveSource<?>> exhaustiveSources;
+	private final long maxCount;
 
-	public static IterableExhaustiveSource from(Generator<?>... generators) {
+	public static Optional<IterableExhaustiveSource> from(Generator<?>... generators) {
 		return from(Arrays.asList(generators));
 	}
 
-	public static IterableExhaustiveSource from(List<Generator<?>> generators) {
-		List<? extends ExhaustiveSource<?>> list =
-			generators.stream()
-				  .map(Generator::exhaustive)
-				  .map(exhaustiveSource -> exhaustiveSource.orElseThrow(
-					  () -> {
-						  String message = "All generators must be exhaustive";
-						  return new IllegalArgumentException(message);
-					  }
-				  ))
-				  .toList();
-		return new IterableExhaustiveSource(list);
+	public static Optional<IterableExhaustiveSource> from(List<Generator<?>> generators) {
+		List<ExhaustiveSource<?>> sources = new ArrayList<>();
+		for (Generator<?> generator : generators) {
+			Optional<ExhaustiveSource<?>> exhaustiveSource = generator.exhaustive();
+			if (exhaustiveSource.isEmpty()) {
+				return Optional.empty();
+			}
+			sources.add(exhaustiveSource.get());
+		}
+		var maxCount = calculateMaxCount(sources);
+		if (maxCount == Exhaustive.INFINITE) {
+			return Optional.empty();
+		}
+		return Optional.of(new IterableExhaustiveSource(sources, maxCount));
 	}
 
-	private IterableExhaustiveSource(List<? extends ExhaustiveSource<?>> exhaustiveSources) {
-		this.exhaustiveSources = exhaustiveSources;
-	}
-
-	public long maxCount() {
+	private static long calculateMaxCount(List<? extends ExhaustiveSource<?>> sources) {
 		long acc = 1;
-		for (ExhaustiveSource<?> exhaustiveSource : exhaustiveSources) {
+		for (ExhaustiveSource<?> exhaustiveSource : sources) {
 			long maxCount = exhaustiveSource.maxCount();
 			if (maxCount == Exhaustive.INFINITE) {
 				return Exhaustive.INFINITE;
@@ -45,6 +44,15 @@ public class IterableExhaustiveSource implements IterableSampleSource {
 			acc = acc * maxCount;
 		}
 		return acc;
+	}
+
+	private IterableExhaustiveSource(List<? extends ExhaustiveSource<?>> exhaustiveSources, long maxCount) {
+		this.exhaustiveSources = exhaustiveSources;
+		this.maxCount = maxCount;
+	}
+
+	public long maxCount() {
+		return maxCount;
 	}
 
 	@Override

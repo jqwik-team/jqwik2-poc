@@ -216,28 +216,31 @@ class ExhaustiveGenerationTests {
 
 			SampleGenerator sampleGenerator = SampleGenerator.from(ints1, ints2);
 
-			IterableExhaustiveSource exhaustiveGenSource = IterableExhaustiveSource.from(ints1, ints2);
+			Optional<IterableExhaustiveSource> optionalExhaustive = IterableExhaustiveSource.from(ints1, ints2);
+			assertThat(optionalExhaustive).isPresent();
 
-			assertThat(exhaustiveGenSource.maxCount()).isEqualTo(121);
+			optionalExhaustive.ifPresent(exhaustiveGenSource -> {
+				assertThat(exhaustiveGenSource.maxCount()).isEqualTo(121);
 
-			List<Sample> allSamples = new ArrayList<>();
-			for (SampleSource multiGenSource : exhaustiveGenSource) {
-				var optionalSample = sampleGenerator.generate(multiGenSource);
-				optionalSample.ifPresent(allSamples::add);
-			}
-			assertThat(allSamples).hasSize(121);
+				List<Sample> allSamples = new ArrayList<>();
+				for (SampleSource multiGenSource : exhaustiveGenSource) {
+					var optionalSample = sampleGenerator.generate(multiGenSource);
+					optionalSample.ifPresent(allSamples::add);
+				}
+				assertThat(allSamples).hasSize(121);
 
-			List<List<Object>> values = allSamples.stream().map(Sample::values).toList();
-			assertThat(values).contains(List.of(0, -5));
-			assertThat(values).contains(List.of(10, 5));
+				List<List<Object>> values = allSamples.stream().map(Sample::values).toList();
+				assertThat(values).contains(List.of(0, -5));
+				assertThat(values).contains(List.of(10, 5));
 
-			// Second iteration
-			AtomicInteger count = new AtomicInteger(0);
-			for (SampleSource multiGenSource : exhaustiveGenSource) {
-				var optionalSample = sampleGenerator.generate(multiGenSource);
-				optionalSample.ifPresent(i -> count.incrementAndGet());
-			}
-			assertThat(count).hasValue(121);
+				// Second iteration
+				AtomicInteger count = new AtomicInteger(0);
+				for (SampleSource multiGenSource : exhaustiveGenSource) {
+					var optionalSample = sampleGenerator.generate(multiGenSource);
+					optionalSample.ifPresent(i -> count.incrementAndGet());
+				}
+				assertThat(count).hasValue(121);
+			});
 		}
 
 		private static void assertAtom(ExhaustiveAtom exhaustiveAtom, int... expected) {
@@ -459,35 +462,39 @@ class ExhaustiveGenerationTests {
 
 		SampleGenerator sampleGenerator = SampleGenerator.from(ints1, lists2);
 
-		IterableExhaustiveSource exhaustiveGenSource = IterableExhaustiveSource.from(ints1, lists2);
+		Optional<IterableExhaustiveSource> optionalExhaustive = IterableExhaustiveSource.from(ints1, lists2);
+		assertThat(optionalExhaustive).isPresent();
 
-		assertThat(exhaustiveGenSource.maxCount()).isEqualTo(341);
+		optionalExhaustive.ifPresent(exhaustiveGenSource -> {
 
-		List<Sample> allSamples = new ArrayList<>();
-		for (SampleSource sampleSource : exhaustiveGenSource) {
-			var optionalSample = sampleGenerator.generate(sampleSource);
-			optionalSample.ifPresent(allSamples::add);
-		}
-		assertThat(allSamples).hasSameSizeAs(new HashSet<>(allSamples));
-		assertThat(allSamples).hasSize(186);
+			assertThat(exhaustiveGenSource.maxCount()).isEqualTo(341);
 
-		List<List<Object>> values = allSamples.stream().map(Sample::values).toList();
-		assertThat(values).contains(List.of(0, List.of()));
-		assertThat(values).contains(List.of(10, List.of()));
-		assertThat(values).contains(List.of(0, List.of(0)));
-		assertThat(values).contains(List.of(0, List.of(4)));
-		assertThat(values).contains(List.of(10, List.of(0)));
-		assertThat(values).contains(List.of(10, List.of(4)));
-		assertThat(values).contains(List.of(0, List.of(0, 0)));
-		assertThat(values).contains(List.of(10, List.of(4, 4)));
+			List<Sample> allSamples = new ArrayList<>();
+			for (SampleSource sampleSource : exhaustiveGenSource) {
+				var optionalSample = sampleGenerator.generate(sampleSource);
+				optionalSample.ifPresent(allSamples::add);
+			}
+			assertThat(allSamples).hasSameSizeAs(new HashSet<>(allSamples));
+			assertThat(allSamples).hasSize(186);
 
-		// Second iteration
-		AtomicInteger count = new AtomicInteger(0);
-		for (SampleSource sampleSource : exhaustiveGenSource) {
-			var optionalSample = sampleGenerator.generate(sampleSource);
-			optionalSample.ifPresent(i -> count.incrementAndGet());
-		}
-		assertThat(count).hasValue(186);
+			List<List<Object>> values = allSamples.stream().map(Sample::values).toList();
+			assertThat(values).contains(List.of(0, List.of()));
+			assertThat(values).contains(List.of(10, List.of()));
+			assertThat(values).contains(List.of(0, List.of(0)));
+			assertThat(values).contains(List.of(0, List.of(4)));
+			assertThat(values).contains(List.of(10, List.of(0)));
+			assertThat(values).contains(List.of(10, List.of(4)));
+			assertThat(values).contains(List.of(0, List.of(0, 0)));
+			assertThat(values).contains(List.of(10, List.of(4, 4)));
+
+			// Second iteration
+			AtomicInteger count = new AtomicInteger(0);
+			for (SampleSource sampleSource : exhaustiveGenSource) {
+				var optionalSample = sampleGenerator.generate(sampleSource);
+				optionalSample.ifPresent(i -> count.incrementAndGet());
+			}
+			assertThat(count).hasValue(186);
+		});
 	}
 
 	public static <T> List<T> collectAll(ExhaustiveSource<?> exhaustiveSource, Generator<T> generator) {

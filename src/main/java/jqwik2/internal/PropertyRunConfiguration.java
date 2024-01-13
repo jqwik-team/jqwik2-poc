@@ -23,12 +23,15 @@ public interface PropertyRunConfiguration {
 	IterableSampleSource source();
 
 	static PropertyRunConfiguration randomized(String seed, int maxTries) {
-		return randomized(seed, maxTries, true, Duration.ofMinutes(10), DEFAULT_EXECUTOR_SERVICE_SUPPLIER);
+		return randomized(
+			seed, maxTries, true,
+			Duration.ofMinutes(10),
+			DEFAULT_EXECUTOR_SERVICE_SUPPLIER
+		);
 	}
 
 	static PropertyRunConfiguration randomized(
-		String seed, int maxTries,
-		boolean shrinkingEnabled
+		String seed, int maxTries, boolean shrinkingEnabled
 	) {
 		return randomized(
 			seed, maxTries,
@@ -39,8 +42,7 @@ public interface PropertyRunConfiguration {
 	}
 
 	static PropertyRunConfiguration randomized(
-		String seed, int maxTries,
-		boolean shrinkingEnabled,
+		String seed, int maxTries, boolean shrinkingEnabled,
 		Duration maxRuntime,
 		Supplier<ExecutorService> supplyExecutorService
 	) {
@@ -64,14 +66,37 @@ public interface PropertyRunConfiguration {
 		Supplier<ExecutorService> supplyExecutorService,
 		List<Generator<?>> generators
 	) {
+		var sampleSources =
+			IterableExhaustiveSource.from(generators)
+									.orElseThrow(() -> {
+										var message = "Exhaustive generation is not possible for given generators";
+										return new IllegalArgumentException(message);
+									});
 		return new Configuration(
 			null, maxTries,
 			false,
 			maxRuntime,
 			supplyExecutorService,
-			() -> IterableExhaustiveSource.from(generators)
+			() -> sampleSources
 		);
 	}
+
+	static PropertyRunConfiguration smart(
+		String seed, int maxTries, Duration maxRuntime,
+		boolean shrinkingEnabled,
+		Supplier<ExecutorService> supplyExecutorService,
+		List<Generator<?>> generators
+	) {
+		return IterableExhaustiveSource.from(generators).map(
+			exhaustiveSource -> (PropertyRunConfiguration) new Configuration(
+				null, maxTries,
+				false,
+				maxRuntime,
+				supplyExecutorService,
+				() -> exhaustiveSource
+			)).orElseGet(() -> randomized(seed, maxTries, shrinkingEnabled, maxRuntime, supplyExecutorService));
+	}
+
 }
 
 record Configuration(

@@ -28,7 +28,7 @@ public interface PropertyRunStrategy {
 	enum Generation {
 		RANDOMIZED,
 		EXHAUSTIVE,
-		SMART_EXHAUSTIVE
+		SMART // Use exhaustive if maxCount <= maxTries, otherwise use randomized
 	}
 
 	enum Shrinking {

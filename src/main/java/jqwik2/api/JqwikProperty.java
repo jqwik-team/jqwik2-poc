@@ -37,22 +37,34 @@ public class JqwikProperty {
 	}
 
 	private PropertyRunConfiguration buildConfiguration(List<Generator<?>> generators) {
-		if (strategy.generation() == PropertyRunStrategy.Generation.RANDOMIZED)
-			return PropertyRunConfiguration.randomized(
-				strategy.seed().orElse(null),
+		return switch (strategy.generation()) {
+			case RANDOMIZED -> PropertyRunConfiguration.randomized(
+				strategy.seed().orElseThrow(() -> new IllegalStateException("Randomized Generation requires a seed")),
 				strategy.maxTries(),
-				strategy.shrinking() == PropertyRunStrategy.Shrinking.FULL,
+				isShrinkingEnabled(),
 				strategy.maxRuntime(),
 				PropertyRunConfiguration.DEFAULT_EXECUTOR_SERVICE_SUPPLIER
 			);
-		if (strategy.generation() == PropertyRunStrategy.Generation.EXHAUSTIVE)
-			return PropertyRunConfiguration.exhaustive(
+			case EXHAUSTIVE -> PropertyRunConfiguration.exhaustive(
 				strategy.maxTries(),
 				strategy.maxRuntime(),
 				PropertyRunConfiguration.DEFAULT_EXECUTOR_SERVICE_SUPPLIER,
 				generators
 			);
-		throw new IllegalArgumentException("Unsupported generation strategy: " + strategy.generation());
+			case SMART -> PropertyRunConfiguration.smart(
+				strategy.seed().orElseThrow(() -> new IllegalStateException("Randomized Generation requires a seed")),
+				strategy.maxTries(),
+				strategy.maxRuntime(),
+				isShrinkingEnabled(),
+				PropertyRunConfiguration.DEFAULT_EXECUTOR_SERVICE_SUPPLIER,
+				generators
+			);
+			case null, default -> throw new IllegalArgumentException("Unsupported generation strategy: " + strategy.generation());
+		};
+	}
+
+	private boolean isShrinkingEnabled() {
+		return strategy.shrinking() == PropertyRunStrategy.Shrinking.FULL;
 	}
 
 	public interface PropertyVerifier1<T1> {
