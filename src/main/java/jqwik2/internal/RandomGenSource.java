@@ -24,6 +24,10 @@ public final class RandomGenSource implements IterableSampleSource, GenSource, G
 		this.random = random;
 	}
 
+	public Optional<String> seed() {
+		return random.seed();
+	}
+
 	@Override
 	public int choose(int maxExcluded) {
 		return random.nextInt(maxExcluded);

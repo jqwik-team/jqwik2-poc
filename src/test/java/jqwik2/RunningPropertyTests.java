@@ -3,7 +3,6 @@ package jqwik2;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.*;
 import java.util.function.*;
 
 import jqwik2.api.Assume;
@@ -29,7 +28,7 @@ class RunningPropertyTests {
 		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
-			randomized("42", 10, false, 0.0)
+			randomized("42", 10, false)
 		);
 		assertThat(result.status()).isEqualTo(Status.SUCCESSFUL);
 		assertThat(result.countTries()).isEqualTo(10);
@@ -51,7 +50,7 @@ class RunningPropertyTests {
 		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
-			randomized("42", 10, false, 0.0)
+			randomized("42", 10, false)
 		);
 		assertThat(result.status()).isEqualTo(Status.SUCCESSFUL);
 		assertThat(result.countTries()).isEqualTo(10);
@@ -72,7 +71,7 @@ class RunningPropertyTests {
 		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
-			randomized("42", 10, false, 0.0)
+			randomized("42", 10, false)
 		);
 		assertThat(result.status()).isEqualTo(Status.SUCCESSFUL);
 		assertThat(result.countTries()).isEqualTo(10);
@@ -94,7 +93,7 @@ class RunningPropertyTests {
 		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
-			randomized("42", 10, false, 0.0)
+			randomized("42", 10, false)
 		);
 		assertThat(result.status()).isEqualTo(Status.FAILED);
 		assertThat(result.countTries()).isEqualTo(1);
@@ -120,7 +119,7 @@ class RunningPropertyTests {
 		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
-			randomized("42", 10, false, 0.0)
+			randomized("42", 10, false)
 		);
 		assertThat(result.status()).isEqualTo(Status.FAILED);
 		FalsifiedSample smallest = result.falsifiedSamples().getFirst();
@@ -146,7 +145,7 @@ class RunningPropertyTests {
 		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
-			randomized("4242", 100, true, 0.0)
+			randomized("4242", 100, true)
 		);
 		assertThat(result.status()).isEqualTo(Status.FAILED);
 		assertThat(result.countTries()).isEqualTo(3); // depends on seed
@@ -177,7 +176,7 @@ class RunningPropertyTests {
 
 		PropertyRunResult result = propertyCase.run(
 			randomized(
-				"42", 1000, false, 0.0,
+				"42", 1000, false,
 				Duration.ofSeconds(10),
 				Executors::newCachedThreadPool
 			)
@@ -205,7 +204,7 @@ class RunningPropertyTests {
 
 		PropertyRunResult result = propertyCase.run(
 			randomized(
-				"42", 1000, false, 0.0,
+				"42", 1000, false,
 				Duration.ofSeconds(1),
 				Executors::newSingleThreadExecutor
 			)
@@ -232,7 +231,7 @@ class RunningPropertyTests {
 
 		PropertyRunResult result = propertyCase.run(
 			randomized(
-				"42", 100, false, 0.0,
+				"42", 100, false,
 				Duration.ofMillis(500),
 				Executors::newSingleThreadExecutor
 			)
@@ -282,7 +281,7 @@ class RunningPropertyTests {
 
 		PropertyRunResult result = propertyCase.run(
 			randomized(
-				"42", 10, true, 0.0,
+				"42", 10, true,
 				Duration.ofSeconds(10),
 				Executors::newCachedThreadPool
 			)
@@ -296,7 +295,6 @@ class RunningPropertyTests {
 	void reproduceSameSamplesWithSameSeed(@ForAll long seed) {
 		reproduceSameSamplesTwice(
 			seed,
-			0.0,
 			Executors::newCachedThreadPool
 		);
 	}
@@ -305,7 +303,6 @@ class RunningPropertyTests {
 	void reproduceSameSamplesWithSingleThreadExecutor(@ForAll long seed) {
 		reproduceSameSamplesTwice(
 			seed,
-			0.0,
 			Executors::newSingleThreadExecutor
 		);
 	}
@@ -314,12 +311,11 @@ class RunningPropertyTests {
 	void reproduceSameSamplesEvenWithEdgeCases(@ForAll long seed) {
 		reproduceSameSamplesTwice(
 			seed,
-			0.5,
 			Executors::newCachedThreadPool
 		);
 	}
 
-	private static void reproduceSameSamplesTwice(long seed, double edgeCasesProbability, Supplier<ExecutorService> serviceSupplier) {
+	private static void reproduceSameSamplesTwice(long seed, Supplier<ExecutorService> serviceSupplier) {
 		List<Generator<?>> generators = List.of(
 			new IntegerGenerator(0, 100)
 		);
@@ -331,7 +327,7 @@ class RunningPropertyTests {
 		propertyCase.onSuccessful(samples1::add);
 
 		PropertyRunConfiguration runConfiguration = randomized(
-			Long.toString(seed), 10, false, edgeCasesProbability,
+			Long.toString(seed), 10, false,
 			Duration.ofSeconds(10),
 			serviceSupplier
 		);

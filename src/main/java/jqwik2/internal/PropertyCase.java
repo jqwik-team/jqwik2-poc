@@ -28,42 +28,30 @@ public class PropertyCase {
 		this.onSatisfied = onSuccessful;
 	}
 
-	public PropertyRunResult run(PropertyRunConfiguration runConfiguration) {
-		return switch (runConfiguration) {
-			case PropertyRunConfiguration.Randomized randomized -> runRandomized(randomized);
-			case null, default -> throw new IllegalArgumentException("Unsupported run configuration: " + runConfiguration);
-		};
-	}
-
-	private PropertyRunResult runRandomized(PropertyRunConfiguration.Randomized randomized) {
-		IterableSampleSource iterableGenSource = randomSource(randomized);
-		int maxTries = randomized.maxTries();
-		boolean shrinkingEnabled = randomized.shrinkingEnabled();
-
-		int maxEdgeCases = Math.max(maxTries, 10);
-		double edgeCasesProbability = randomized.edgeCasesProbability();
-		List<Generator<Object>> effectiveGenerators = withEdgeCases(edgeCasesProbability, maxEdgeCases);
+	public PropertyRunResult run(PropertyRunConfiguration configuration) {
+		IterableSampleSource iterableGenSource = randomSource(configuration);
+		int maxTries = configuration.maxTries();
+		boolean shrinkingEnabled = configuration.shrinkingEnabled();
 
 		return runAndShrink(
-			effectiveGenerators,
 			iterableGenSource,
 			maxTries,
 			shrinkingEnabled,
-			randomized.maxRuntime(),
-			randomized.supplyExecutorService()
+			configuration.maxRuntime(),
+			configuration.supplyExecutorService()
 		);
 	}
 
 	@SuppressWarnings("OverlyLongMethod")
 	private PropertyRunResult runAndShrink(
-		List<Generator<Object>> effectiveGenerators,
 		IterableSampleSource iterableGenSource,
 		int maxTries,
 		boolean shrinkingEnabled,
 		Duration maxDuration,
 		Supplier<ExecutorService> executorServiceSupplier
 	) {
-		SampleGenerator sampleGenerator = new SampleGenerator(effectiveGenerators);
+		var genericGenerators = generators.stream().map(Generator::asGeneric).toList();
+		SampleGenerator sampleGenerator = new SampleGenerator(genericGenerators);
 
 		AtomicInteger countTries = new AtomicInteger(0);
 		AtomicInteger countChecks = new AtomicInteger(0);
@@ -188,23 +176,8 @@ public class PropertyCase {
 		}
 	}
 
-	private List<Generator<Object>> withEdgeCases(double edgeCasesProbability, int maxEdgeCases) {
-		return generators.stream()
-						 .map(gen -> decorateWithEdgeCases(gen.asGeneric(), edgeCasesProbability, maxEdgeCases))
-						 .toList();
-	}
-
-	private static Generator<Object> decorateWithEdgeCases(Generator<Object> generator, double edgeCasesProbability, int maxEdgeCases) {
-		if (edgeCasesProbability <= 0.0) {
-			return generator;
-		}
-		return WithEdgeCasesDecorator.decorate(generator, edgeCasesProbability, maxEdgeCases);
-	}
-
-	private static IterableSampleSource randomSource(PropertyRunConfiguration.Randomized randomized) {
-		return randomized.seed() == null
-				   ? new RandomGenSource()
-				   : new RandomGenSource(randomized.seed());
+	private static IterableSampleSource randomSource(PropertyRunConfiguration configuration) {
+		return configuration.source();
 	}
 
 	private void shrink(FalsifiedSample originalSample, Collection<FalsifiedSample> falsifiedSamples) {

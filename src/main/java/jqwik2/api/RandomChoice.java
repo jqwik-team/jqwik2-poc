@@ -1,5 +1,6 @@
 package jqwik2.api;
 
+import java.util.*;
 import java.util.random.*;
 
 import jqwik2.*;
@@ -53,6 +54,8 @@ public interface RandomChoice {
 	 */
 	RandomChoice split();
 
+	Optional<String> seed();
+
 	static RandomChoice create() {
 		return new XORShiftRandomChoice();
 	}
@@ -79,8 +82,10 @@ public interface RandomChoice {
 
 	class XORShiftRandomChoice implements RandomChoice {
 		private final RandomGenerator random;
+		private final String seed;
 
 		private XORShiftRandomChoice(String seed) {
+			this.seed = seed;
 			try {
 				this.random = new XORShiftRandom(Long.parseLong(seed));
 			} catch (NumberFormatException nfe) {
@@ -95,6 +100,7 @@ public interface RandomChoice {
 
 		private XORShiftRandomChoice(XORShiftRandom random) {
 			this.random = random;
+			this.seed = null;
 		}
 
 		@Override
@@ -105,6 +111,11 @@ public interface RandomChoice {
 		@Override
 		public RandomChoice split() {
 			return new XORShiftRandomChoice(new XORShiftRandom(random.nextLong()));
+		}
+
+		@Override
+		public Optional<String> seed() {
+			return Optional.ofNullable(seed);
 		}
 
 		@Override
