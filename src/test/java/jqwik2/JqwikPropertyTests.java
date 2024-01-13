@@ -51,7 +51,8 @@ class JqwikPropertyTests {
 
 	@Example
 	void failingPropertyThrowIfNotSuccessful() {
-		var property = new JqwikProperty(true);
+		var property = new JqwikProperty();
+		property.failIfNotSuccessful(true);
 
 		assertThatThrownBy(
 			() -> property.forAll(Numbers.integers()).check(i -> false)

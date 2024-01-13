@@ -4,13 +4,9 @@ import jqwik2.internal.*;
 
 public class JqwikProperty {
 
-	private final boolean failIfNotSuccessful;
+	private boolean failIfNotSuccessful = false;
 
-	public JqwikProperty() {
-		this(false);
-	}
-
-	public JqwikProperty(boolean failIfNotSuccessful) {
+	public void failIfNotSuccessful(boolean failIfNotSuccessful) {
 		this.failIfNotSuccessful = failIfNotSuccessful;
 	}
 
