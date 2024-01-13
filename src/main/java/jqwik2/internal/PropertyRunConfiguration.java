@@ -1,10 +1,10 @@
-package jqwik2.api;
+package jqwik2.internal;
 
 import java.time.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 
-import jqwik2.internal.*;
+import jqwik2.api.*;
 
 public interface PropertyRunConfiguration {
 
@@ -19,10 +19,6 @@ public interface PropertyRunConfiguration {
 	boolean shrinkingEnabled();
 
 	IterableSampleSource source();
-
-	static PropertyRunConfiguration randomized(int maxTries) {
-		return randomized(null, maxTries);
-	}
 
 	static PropertyRunConfiguration randomized(String seed, int maxTries) {
 		return randomized(seed, maxTries, true, Duration.ofMinutes(10), DEFAULT_EXECUTOR_SERVICE_SUPPLIER);

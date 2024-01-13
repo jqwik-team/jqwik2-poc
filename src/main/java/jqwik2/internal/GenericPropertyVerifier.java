@@ -10,15 +10,17 @@ import org.opentest4j.*;
 public class GenericPropertyVerifier<T1, T2>
 	implements PropertyVerifier1<T1>, PropertyVerifier2<T1, T2> {
 
+	private final PropertyRunConfiguration configuration;
 	private final boolean failIfNotSuccessful;
 	private final Arbitrary<T1> arbitrary1;
 	private final Arbitrary<T2> arbitrary2;
 
-	public GenericPropertyVerifier(boolean failIfNotSuccessful, Arbitrary<T1> arbitrary) {
-		this(failIfNotSuccessful, arbitrary, null);
+	public GenericPropertyVerifier(PropertyRunConfiguration configuration, boolean failIfNotSuccessful, Arbitrary<T1> arbitrary) {
+		this(configuration, failIfNotSuccessful, arbitrary, null);
 	}
 
-	public GenericPropertyVerifier(boolean failIfNotSuccessful, Arbitrary<T1> arbitrary1, Arbitrary<T2> arbitrary2) {
+	public GenericPropertyVerifier(PropertyRunConfiguration configuration, boolean failIfNotSuccessful, Arbitrary<T1> arbitrary1, Arbitrary<T2> arbitrary2) {
+		this.configuration = configuration;
 		this.failIfNotSuccessful = failIfNotSuccessful;
 		this.arbitrary1 = arbitrary1;
 		this.arbitrary2 = arbitrary2;
@@ -67,7 +69,7 @@ public class GenericPropertyVerifier<T1, T2>
 
 	private PropertyRunResult run(List<Generator<?>> generators, Tryable tryable) {
 		var propertyCase = new PropertyCase(generators, tryable);
-		var result = propertyCase.run(configuration());
+		var result = propertyCase.run(configuration);
 		return failIfNotSuccessful(result);
 	}
 
@@ -106,10 +108,6 @@ public class GenericPropertyVerifier<T1, T2>
 	@Override
 	public PropertyRunResult verify(V1<T1> verifier) {
 		return check(verifier.asCheck());
-	}
-
-	private PropertyRunConfiguration configuration() {
-		return PropertyRunConfiguration.randomized(100);
 	}
 
 	@FunctionalInterface

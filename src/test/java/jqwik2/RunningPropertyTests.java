@@ -13,7 +13,7 @@ import jqwik2.internal.generators.*;
 
 import net.jqwik.api.*;
 
-import static jqwik2.api.PropertyRunConfiguration.*;
+import static jqwik2.internal.PropertyRunConfiguration.*;
 import static org.assertj.core.api.Assertions.*;
 
 class RunningPropertyTests {
@@ -262,7 +262,7 @@ class RunningPropertyTests {
 
 		PropertyCase propertyCase = new PropertyCase(List.of(aFailingGenerator), tryable);
 
-		PropertyRunResult result = propertyCase.run(randomized(100));
+		PropertyRunResult result = propertyCase.run(randomized(RandomChoice.generateRandomSeed(), 100));
 		assertThat(result.status()).isEqualTo(Status.ABORTED);
 		assertThat(result.abortionReason()).hasValue(abortion);
 	}

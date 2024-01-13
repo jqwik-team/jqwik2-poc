@@ -1,5 +1,7 @@
 package jqwik2;
 
+import java.time.*;
+
 import jqwik2.api.*;
 import jqwik2.api.arbitraries.*;
 
@@ -87,6 +89,17 @@ class JqwikPropertyTests {
 			fail("failed");
 		});
 		assertThat(result.isFailed()).isTrue();
+	}
+
+	@Example
+	void propertyDefaultStrategyReporting() {
+		var property = new JqwikProperty();
+		PropertyRunStrategy strategy = property.strategy();
+
+		assertThat(strategy.maxTries()).isEqualTo(100);
+		assertThat(strategy.maxRuntime()).isEqualTo(Duration.ofMinutes(10));
+		assertThat(strategy.shrinking()).isEqualTo(PropertyRunStrategy.Shrinking.FULL);
+		assertThat(strategy.generation()).isEqualTo(PropertyRunStrategy.Generation.RANDOMIZED);
 	}
 
 }
