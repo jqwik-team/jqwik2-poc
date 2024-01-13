@@ -9,7 +9,6 @@
 - Add descriptions to generators
 
 - JqwikProperty
-    - Allow execution with exhaustive generation
     - Save seed and falsified samples to disk (.jqwik folder)
     - Allow rerun with previously falsified samples (starting with smallest)
       => Rerun will improve shrinking!

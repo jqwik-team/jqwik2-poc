@@ -1,10 +1,12 @@
 package jqwik2.internal;
 
 import java.time.*;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 
 import jqwik2.api.*;
+import jqwik2.internal.exhaustive.*;
 
 public interface PropertyRunConfiguration {
 
@@ -46,22 +48,9 @@ public interface PropertyRunConfiguration {
 			seed, maxTries,
 			shrinkingEnabled,
 			maxRuntime,
-			supplyExecutorService
+			supplyExecutorService,
+			() -> randomSource(seed)
 		);
-	}
-
-}
-
-record Configuration(
-	String seed, int maxTries,
-	boolean shrinkingEnabled,
-	Duration maxRuntime,
-	Supplier<ExecutorService> supplyExecutorService
-) implements PropertyRunConfiguration {
-
-	@Override
-	public IterableSampleSource source() {
-		return randomSource(seed);
 	}
 
 	private static IterableSampleSource randomSource(String seed) {
@@ -70,4 +59,30 @@ record Configuration(
 				   : new RandomGenSource(seed);
 	}
 
+	static PropertyRunConfiguration exhaustive(
+		int maxTries, Duration maxRuntime,
+		Supplier<ExecutorService> supplyExecutorService,
+		List<Generator<?>> generators
+	) {
+		return new Configuration(
+			null, maxTries,
+			false,
+			maxRuntime,
+			supplyExecutorService,
+			() -> IterableExhaustiveSource.from(generators)
+		);
+	}
+}
+
+record Configuration(
+	String seed, int maxTries,
+	boolean shrinkingEnabled,
+	Duration maxRuntime,
+	Supplier<ExecutorService> supplyExecutorService,
+	Supplier<IterableSampleSource> supplySource
+) implements PropertyRunConfiguration {
+	@Override
+	public IterableSampleSource source() {
+		return supplySource.get();
+	}
 }

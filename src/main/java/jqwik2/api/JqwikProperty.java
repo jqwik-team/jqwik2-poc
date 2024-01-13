@@ -1,5 +1,7 @@
 package jqwik2.api;
 
+import java.util.*;
+
 import jqwik2.internal.*;
 
 public class JqwikProperty {
@@ -24,26 +26,33 @@ public class JqwikProperty {
 	}
 
 	public <T1> PropertyVerifier1<T1> forAll(Arbitrary<T1> arbitrary) {
-		return new GenericPropertyVerifier<>(configuration(), failIfNotSuccessful, arbitrary);
+		return new GenericPropertyVerifier<>(this::buildConfiguration, failIfNotSuccessful, arbitrary);
 	}
 
 	public <T1, T2> PropertyVerifier2<T1, T2> forAll(
 		Arbitrary<T1> arbitrary1,
 		Arbitrary<T2> arbitrary2
 	) {
-		return new GenericPropertyVerifier<>(configuration(), failIfNotSuccessful, arbitrary1, arbitrary2);
+		return new GenericPropertyVerifier<>(this::buildConfiguration, failIfNotSuccessful, arbitrary1, arbitrary2);
 	}
 
-	private PropertyRunConfiguration configuration() {
-		if (strategy.generation() != PropertyRunStrategy.Generation.RANDOMIZED)
-			throw new IllegalArgumentException("Only randomized generation is supported at the moment");
-		return PropertyRunConfiguration.randomized(
-			strategy.seed().orElse(null),
-			strategy.maxTries(),
-			strategy.shrinking() == PropertyRunStrategy.Shrinking.FULL,
-			strategy.maxRuntime(),
-			PropertyRunConfiguration.DEFAULT_EXECUTOR_SERVICE_SUPPLIER
-		);
+	private PropertyRunConfiguration buildConfiguration(List<Generator<?>> generators) {
+		if (strategy.generation() == PropertyRunStrategy.Generation.RANDOMIZED)
+			return PropertyRunConfiguration.randomized(
+				strategy.seed().orElse(null),
+				strategy.maxTries(),
+				strategy.shrinking() == PropertyRunStrategy.Shrinking.FULL,
+				strategy.maxRuntime(),
+				PropertyRunConfiguration.DEFAULT_EXECUTOR_SERVICE_SUPPLIER
+			);
+		if (strategy.generation() == PropertyRunStrategy.Generation.EXHAUSTIVE)
+			return PropertyRunConfiguration.exhaustive(
+				strategy.maxTries(),
+				strategy.maxRuntime(),
+				PropertyRunConfiguration.DEFAULT_EXECUTOR_SERVICE_SUPPLIER,
+				generators
+			);
+		throw new IllegalArgumentException("Unsupported generation strategy: " + strategy.generation());
 	}
 
 	public interface PropertyVerifier1<T1> {

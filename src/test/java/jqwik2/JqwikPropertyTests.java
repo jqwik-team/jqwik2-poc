@@ -102,4 +102,28 @@ class JqwikPropertyTests {
 		assertThat(strategy.generation()).isEqualTo(PropertyRunStrategy.Generation.RANDOMIZED);
 	}
 
+	@Example
+	void exhaustiveProperty() {
+		PropertyRunStrategy strategy = PropertyRunStrategy.create(
+			100, Duration.ofMinutes(10), null,
+			PropertyRunStrategy.Shrinking.OFF,
+			PropertyRunStrategy.Generation.EXHAUSTIVE
+		);
+		var property = new JqwikProperty(strategy);
+
+		PropertyRunResult result = property.forAll(
+			Numbers.integers().between(0, 3),
+			Numbers.integers().between(1, 2)
+		).verify((i1, i2) -> {
+			// System.out.println(i1 + " " + i2);
+			assertThat(i1).isBetween(0, 3);
+			assertThat(i2).isBetween(1, 2);
+		});
+
+		assertThat(result.isSuccessful()).isTrue();
+		assertThat(result.countTries()).isEqualTo(8);
+		assertThat(result.countChecks()).isEqualTo(8);
+	}
+
+
 }

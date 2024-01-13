@@ -80,6 +80,11 @@ public interface Generator<T> {
 		}
 
 		@Override
+		public Optional<ExhaustiveSource<?>> exhaustive() {
+			return generator.exhaustive();
+		}
+
+		@Override
 		public Generator<T> decorate(Function<Generator<?>, Generator<?>> decorator) {
 			return generator.decorate(decorator);
 		}

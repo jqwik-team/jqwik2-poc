@@ -8,8 +8,12 @@ public class IterableExhaustiveSource implements IterableSampleSource {
 	private final List<? extends ExhaustiveSource<?>> exhaustiveSources;
 
 	public static IterableExhaustiveSource from(Generator<?>... generators) {
+		return from(Arrays.asList(generators));
+	}
+
+	public static IterableExhaustiveSource from(List<Generator<?>> generators) {
 		List<? extends ExhaustiveSource<?>> list =
-			Arrays.stream(generators)
+			generators.stream()
 				  .map(Generator::exhaustive)
 				  .map(exhaustiveSource -> exhaustiveSource.orElseThrow(
 					  () -> {
@@ -26,9 +30,21 @@ public class IterableExhaustiveSource implements IterableSampleSource {
 	}
 
 	public long maxCount() {
-		return exhaustiveSources.stream()
-								.mapToLong(ExhaustiveSource::maxCount)
-								.reduce(1, (a, b) -> a * b);
+		long acc = 1;
+		for (ExhaustiveSource<?> exhaustiveSource : exhaustiveSources) {
+			long maxCount = exhaustiveSource.maxCount();
+			if (maxCount == Exhaustive.INFINITE) {
+				return Exhaustive.INFINITE;
+			}
+			if (maxCount == 0) {
+				return 0;
+			}
+			if (Exhaustive.INFINITE / acc < maxCount) {
+				return Exhaustive.INFINITE;
+			}
+			acc = acc * maxCount;
+		}
+		return acc;
 	}
 
 	@Override

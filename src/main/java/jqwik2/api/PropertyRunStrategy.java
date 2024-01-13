@@ -11,6 +11,10 @@ public interface PropertyRunStrategy {
 		Generation.RANDOMIZED
 	);
 
+	static PropertyRunStrategy create(int maxTries, Duration maxRuntime, String seed, Shrinking shrinking, Generation generation) {
+		return new DefaultStrategy(maxTries, maxRuntime, Optional.ofNullable(seed), shrinking, generation);
+	}
+
 	int maxTries();
 
 	Duration maxRuntime();
@@ -23,7 +27,8 @@ public interface PropertyRunStrategy {
 
 	enum Generation {
 		RANDOMIZED,
-		EXHAUSTIVE
+		EXHAUSTIVE,
+		SMART_EXHAUSTIVE
 	}
 
 	enum Shrinking {

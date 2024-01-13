@@ -152,28 +152,28 @@ public class PropertyCase {
 		Consumer<Sample> onSatisfied,
 		Lock generationLock
 	) {
+		Optional<Sample> optionalSample;
 		try {
 			generationLock.lock();
-			Optional<Sample> optionalSample = sampleGenerator.generate(multiSource);
-			generationLock.unlock();
-			optionalSample.ifPresent(sample -> {
-				countTries.incrementAndGet();
-				TryExecutionResult tryResult = tryable.apply(sample);
-				if (tryResult.status() != TryExecutionResult.Status.INVALID) {
-					countChecks.incrementAndGet();
-				}
-				if (tryResult.status() == TryExecutionResult.Status.FALSIFIED) {
-					FalsifiedSample originalSample = new FalsifiedSample(sample, tryResult.throwable());
-					onFalsified.accept(originalSample);
-					shutdown.shutdown();
-				}
-				if (tryResult.status() == TryExecutionResult.Status.SATISFIED) {
-					onSatisfied.accept(sample);
-				}
-			});
+			optionalSample = sampleGenerator.generate(multiSource);
 		} finally {
 			generationLock.unlock();
 		}
+		optionalSample.ifPresent(sample -> {
+			countTries.incrementAndGet();
+			TryExecutionResult tryResult = tryable.apply(sample);
+			if (tryResult.status() != TryExecutionResult.Status.INVALID) {
+				countChecks.incrementAndGet();
+			}
+			if (tryResult.status() == TryExecutionResult.Status.FALSIFIED) {
+				FalsifiedSample originalSample = new FalsifiedSample(sample, tryResult.throwable());
+				onFalsified.accept(originalSample);
+				shutdown.shutdown();
+			}
+			if (tryResult.status() == TryExecutionResult.Status.SATISFIED) {
+				onSatisfied.accept(sample);
+			}
+		});
 	}
 
 	private static IterableSampleSource randomSource(PropertyRunConfiguration configuration) {
