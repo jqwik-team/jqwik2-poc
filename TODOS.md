@@ -3,21 +3,16 @@
     - Empty / Null Generator
 
 - Introduce Arbitraries
-  - List, Set
-  - map, flatMap
-  
+    - List, Set
+    - map, flatMap
+
 - Add descriptions to generators
 
 - JqwikProperty
-    - Allow configuration of
-      - tries
-      - seed
-      - shrinking
-      - timeout
+    - Allow execution with exhaustive generation
     - Save seed and falsified samples to disk (.jqwik folder)
     - Allow rerun with previously falsified samples (starting with smallest)
       => Rerun will improve shrinking!
-    - Allow execution with exhaustive generation
     - Report falsified samples, tries, seed
 
 - PropertyCase Execution
@@ -25,9 +20,9 @@
 - Add GenSource.Tuple
 - Stateful generators
 - Statistics
-  - Collect and report statistics
-  - Generate until a statistical measurement is supposed to be stable.
-    See   https://www.youtube.com/watch?v=NcJOiQlzlXQ&list=PLvL2NEhYV4ZvCRCVlXTfB6-d09K3r0Sxa
+    - Collect and report statistics
+    - Generate until a statistical measurement is supposed to be stable.
+      See   https://www.youtube.com/watch?v=NcJOiQlzlXQ&list=PLvL2NEhYV4ZvCRCVlXTfB6-d09K3r0Sxa
 
 - Shrinking (https://www.drmaciver.com/2019/01/notes-on-test-case-reduction/)
     - Compare shrinkables due to full length if different recording types are
