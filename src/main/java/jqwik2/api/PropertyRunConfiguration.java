@@ -6,7 +6,7 @@ import java.util.function.*;
 
 import jqwik2.internal.*;
 
-public sealed interface PropertyRunConfiguration {
+public interface PropertyRunConfiguration {
 
 	Supplier<ExecutorService> DEFAULT_EXECUTOR_SERVICE_SUPPLIER = Executors::newSingleThreadExecutor;
 

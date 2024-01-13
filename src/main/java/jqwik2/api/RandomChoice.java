@@ -35,7 +35,7 @@ public interface RandomChoice {
 	/**
 	 * Return a random value between 0 and maxExcluded - 1.
 	 *
-	 * @param maxExcluded The max choice to return
+	 * @param maxExcluded  The max choice to return
 	 * @param distribution The random distribution to use
 	 * @return A random value between 0 and max - 1
 	 */
@@ -56,16 +56,17 @@ public interface RandomChoice {
 
 	Optional<String> seed();
 
+	// TODO: Make RandomChoice implementation configurable
 	static RandomChoice create() {
-		return new XORShiftRandomChoice();
+		return new XORShiftRandomChoice(generateRandomSeed());
+	}
+
+	static String generateRandomSeed() {
+		return Long.toString(System.nanoTime());
 	}
 
 	static RandomChoice create(String seed) {
-		try {
-			return new XORShiftRandomChoice(seed);
-		} catch (NumberFormatException nfe) {
-			throw new IllegalArgumentException(String.format("[%s] is not a valid random randomSeed.", seed));
-		}
+		return new XORShiftRandomChoice(seed);
 	}
 
 	/**
@@ -92,10 +93,6 @@ public interface RandomChoice {
 				String message = String.format("[%s] is not a valid random randomSeed.", seed);
 				throw new IllegalArgumentException(message);
 			}
-		}
-
-		private XORShiftRandomChoice() {
-			this(new XORShiftRandom());
 		}
 
 		private XORShiftRandomChoice(XORShiftRandom random) {
