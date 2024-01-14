@@ -13,6 +13,7 @@
 - JqwikProperty
     - Report falsified samples, tries, seed, effective generation strategy
     - Save seed and falsified samples to disk (.jqwik folder)
+      See: https://hypothesis.readthedocs.io/en/latest/database.html
     - Allow rerun with previously falsified samples (starting with smallest)
       => Rerun will improve shrinking!
 
