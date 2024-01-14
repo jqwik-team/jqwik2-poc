@@ -65,7 +65,8 @@ class JqwikPropertyTests {
 
 	@Example
 	void propertyWith2ParametersSucceeds() {
-		var property = new JqwikProperty();
+		var property = new JqwikProperty()
+						   .withGeneration(PropertyRunStrategy.GenerationMode.RANDOMIZED);
 
 		PropertyRunResult result = property.forAll(
 			Values.just(1),
@@ -111,7 +112,7 @@ class JqwikPropertyTests {
 		assertThat(strategy.maxTries()).isEqualTo(100);
 		assertThat(strategy.maxRuntime()).isEqualTo(Duration.ofMinutes(10));
 		assertThat(strategy.shrinking()).isEqualTo(PropertyRunStrategy.ShrinkingMode.FULL);
-		assertThat(strategy.generation()).isEqualTo(PropertyRunStrategy.GenerationMode.RANDOMIZED);
+		assertThat(strategy.generation()).isEqualTo(PropertyRunStrategy.GenerationMode.SMART);
 		assertThat(strategy.edgeCases()).isEqualTo(PropertyRunStrategy.EdgeCasesMode.MIXIN);
 	}
 

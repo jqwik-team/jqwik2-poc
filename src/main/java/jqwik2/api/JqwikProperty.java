@@ -102,6 +102,18 @@ public class JqwikProperty {
 		return id;
 	}
 
+	public JqwikProperty withGeneration(PropertyRunStrategy.GenerationMode generationMode) {
+		PropertyRunStrategy clonedStrategy = PropertyRunStrategy.create(
+			strategy.maxTries(),
+			strategy.maxRuntime(),
+			strategy.seed().orElse(null),
+			strategy.shrinking(),
+			generationMode,
+			strategy.edgeCases()
+		);
+		return new JqwikProperty(id, clonedStrategy);
+	}
+
 	public interface PropertyVerifier1<T1> {
 		PropertyRunResult check(C1<T1> checker);
 

@@ -6,10 +6,12 @@ import java.util.*;
 public interface PropertyRunStrategy {
 
 	PropertyRunStrategy DEFAULT = new DefaultStrategy(
-		100, Duration.ofMinutes(10), Optional.of(RandomChoice.generateRandomSeed()),
-		ShrinkingMode.FULL,
-		GenerationMode.RANDOMIZED,
-		EdgeCasesMode.MIXIN
+		JqwikDefaults.defaultMaxTries(),
+		JqwikDefaults.defaultMaxDuration(),
+		Optional.of(RandomChoice.generateRandomSeed()),
+		JqwikDefaults.defaultShrinkingMode(),
+		JqwikDefaults.defaultGenerationMode(),
+		JqwikDefaults.defaultEdgeCasesMode()
 	);
 
 	static PropertyRunStrategy create(
