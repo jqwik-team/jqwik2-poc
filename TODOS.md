@@ -7,6 +7,8 @@
     - map, flatMap
 
 - Add descriptions to generators
+  - Can target type of map / flatMap be inferred for description?
+    E.g. by generating a single sample and using its type?
 
 - JqwikProperty
     - Report falsified samples, tries, seed, effective generation strategy
