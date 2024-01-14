@@ -7,14 +7,14 @@ public interface PropertyRunStrategy {
 
 	PropertyRunStrategy DEFAULT = new DefaultStrategy(
 		100, Duration.ofMinutes(10), Optional.of(RandomChoice.generateRandomSeed()),
-		Shrinking.FULL,
-		Generation.RANDOMIZED,
-		EdgeCases.MIXIN
+		ShrinkingMode.FULL,
+		GenerationMode.RANDOMIZED,
+		EdgeCasesMode.MIXIN
 	);
 
 	static PropertyRunStrategy create(
 		int maxTries, Duration maxRuntime, String seed,
-		Shrinking shrinking, Generation generation, EdgeCases edgeCases
+		ShrinkingMode shrinking, GenerationMode generation, EdgeCasesMode edgeCases
 	) {
 		return new DefaultStrategy(maxTries, maxRuntime, Optional.ofNullable(seed), shrinking, generation, edgeCases);
 	}
@@ -25,24 +25,24 @@ public interface PropertyRunStrategy {
 
 	Optional<String> seed();
 
-	Shrinking shrinking();
+	ShrinkingMode shrinking();
 
-	Generation generation();
+	GenerationMode generation();
 
-    EdgeCases edgeCases();
+    EdgeCasesMode edgeCases();
 
-	enum Generation {
+	enum GenerationMode {
 		RANDOMIZED,
 		EXHAUSTIVE,
 		SMART // Use exhaustive if maxCount <= maxTries, otherwise use randomized
 	}
 
-	enum Shrinking {
+	enum ShrinkingMode {
 		OFF,
 		FULL
 	}
 
-	enum EdgeCases {
+	enum EdgeCasesMode {
 		OFF, // Do not generate edge cases explicitly
 		MIXIN // Mix edge cases into random generation
 	}
@@ -52,7 +52,7 @@ public interface PropertyRunStrategy {
 record DefaultStrategy(
 	int maxTries, Duration maxRuntime,
 	Optional<String> seed,
-	Shrinking shrinking,
-	Generation generation,
-	EdgeCases edgeCases
+	ShrinkingMode shrinking,
+	GenerationMode generation,
+	EdgeCasesMode edgeCases
 ) implements PropertyRunStrategy {}

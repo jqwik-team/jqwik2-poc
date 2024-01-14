@@ -72,7 +72,7 @@ public class JqwikProperty {
 	}
 
 	private boolean isShrinkingEnabled() {
-		return strategy.shrinking() == PropertyRunStrategy.Shrinking.FULL;
+		return strategy.shrinking() == PropertyRunStrategy.ShrinkingMode.FULL;
 	}
 
 	public interface PropertyVerifier1<T1> {

@@ -99,17 +99,17 @@ class JqwikPropertyTests {
 
 		assertThat(strategy.maxTries()).isEqualTo(100);
 		assertThat(strategy.maxRuntime()).isEqualTo(Duration.ofMinutes(10));
-		assertThat(strategy.shrinking()).isEqualTo(PropertyRunStrategy.Shrinking.FULL);
-		assertThat(strategy.generation()).isEqualTo(PropertyRunStrategy.Generation.RANDOMIZED);
+		assertThat(strategy.shrinking()).isEqualTo(PropertyRunStrategy.ShrinkingMode.FULL);
+		assertThat(strategy.generation()).isEqualTo(PropertyRunStrategy.GenerationMode.RANDOMIZED);
 	}
 
 	@Example
 	void exhaustiveGenerationStrategy() {
 		PropertyRunStrategy strategy = PropertyRunStrategy.create(
 			100, Duration.ofMinutes(10), null,
-			PropertyRunStrategy.Shrinking.OFF,
-			PropertyRunStrategy.Generation.EXHAUSTIVE,
-			PropertyRunStrategy.EdgeCases.OFF
+			PropertyRunStrategy.ShrinkingMode.OFF,
+			PropertyRunStrategy.GenerationMode.EXHAUSTIVE,
+			PropertyRunStrategy.EdgeCasesMode.OFF
 		);
 		var property = new JqwikProperty(strategy);
 
@@ -131,9 +131,9 @@ class JqwikPropertyTests {
 	void smartGenerationProperty() {
 		PropertyRunStrategy strategy = PropertyRunStrategy.create(
 			100, Duration.ofMinutes(10), RandomChoice.generateRandomSeed(),
-			PropertyRunStrategy.Shrinking.OFF,
-			PropertyRunStrategy.Generation.SMART,
-			PropertyRunStrategy.EdgeCases.MIXIN
+			PropertyRunStrategy.ShrinkingMode.OFF,
+			PropertyRunStrategy.GenerationMode.SMART,
+			PropertyRunStrategy.EdgeCasesMode.MIXIN
 		);
 		var property = new JqwikProperty(strategy);
 
@@ -157,9 +157,9 @@ class JqwikPropertyTests {
 	void edgeCasesGenerationProperty() {
 		PropertyRunStrategy strategy = PropertyRunStrategy.create(
 			1000, Duration.ofMinutes(10), RandomChoice.generateRandomSeed(),
-			PropertyRunStrategy.Shrinking.OFF,
-			PropertyRunStrategy.Generation.SMART,
-			PropertyRunStrategy.EdgeCases.MIXIN
+			PropertyRunStrategy.ShrinkingMode.OFF,
+			PropertyRunStrategy.GenerationMode.SMART,
+			PropertyRunStrategy.EdgeCasesMode.MIXIN
 		);
 		var property = new JqwikProperty(strategy);
 
