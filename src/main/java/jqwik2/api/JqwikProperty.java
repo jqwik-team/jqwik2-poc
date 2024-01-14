@@ -7,6 +7,7 @@ import jqwik2.internal.*;
 public class JqwikProperty {
 
 	private final PropertyRunStrategy strategy;
+	private final String id;
 	private boolean failIfNotSuccessful = false;
 
 	public JqwikProperty() {
@@ -14,6 +15,28 @@ public class JqwikProperty {
 	}
 
 	public JqwikProperty(PropertyRunStrategy strategy) {
+		this(defaultId(), strategy);
+	}
+
+	public JqwikProperty(String myId) {
+		this(myId, PropertyRunStrategy.DEFAULT);
+	}
+
+	private static String defaultId() {
+		StackTraceElement[] stackTrace = new RuntimeException().getStackTrace();
+		for (StackTraceElement element : stackTrace) {
+			if (!element.getClassName().equals(JqwikProperty.class.getName())) {
+				return element.getClassName() + "#" + element.getMethodName();
+			}
+		}
+		throw new IllegalStateException("Could not determine default id for property");
+	}
+
+	public JqwikProperty(String id, PropertyRunStrategy strategy) {
+		if (id == null || id.isEmpty()) {
+			throw new IllegalArgumentException("id must not be null");
+		}
+		this.id = id;
 		this.strategy = strategy;
 	}
 
@@ -73,6 +96,10 @@ public class JqwikProperty {
 
 	private boolean isShrinkingEnabled() {
 		return strategy.shrinking() == PropertyRunStrategy.ShrinkingMode.FULL;
+	}
+
+	public String id() {
+		return id;
 	}
 
 	public interface PropertyVerifier1<T1> {

@@ -92,6 +92,17 @@ class JqwikPropertyTests {
 		assertThat(result.isFailed()).isTrue();
 	}
 
+
+	@Example
+	void propertyId() {
+		var propertyWithDefaultId = new JqwikProperty();
+		String defaultId = getClass().getName() + "#" + "propertyId";
+		assertThat(propertyWithDefaultId.id()).isEqualTo(defaultId);
+
+		var propertyWithExplicitId = new JqwikProperty("myId");
+		assertThat(propertyWithExplicitId.id()).isEqualTo("myId");
+	}
+
 	@Example
 	void propertyDefaultStrategyReporting() {
 		var property = new JqwikProperty();
@@ -101,6 +112,7 @@ class JqwikPropertyTests {
 		assertThat(strategy.maxRuntime()).isEqualTo(Duration.ofMinutes(10));
 		assertThat(strategy.shrinking()).isEqualTo(PropertyRunStrategy.ShrinkingMode.FULL);
 		assertThat(strategy.generation()).isEqualTo(PropertyRunStrategy.GenerationMode.RANDOMIZED);
+		assertThat(strategy.edgeCases()).isEqualTo(PropertyRunStrategy.EdgeCasesMode.MIXIN);
 	}
 
 	@Example
