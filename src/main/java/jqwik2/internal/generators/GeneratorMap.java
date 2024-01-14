@@ -32,7 +32,7 @@ public class GeneratorMap<T, R> implements Generator<R> {
 	}
 
 	@Override
-	public Generator<R> decorate(Function<Generator<?>, Generator<?>> decorator) {
+	public Generator<R> decorate(DecoratorFunction decorator) {
 		return new GeneratorMap<>(generator.decorate(decorator), mapper);
 	}
 }

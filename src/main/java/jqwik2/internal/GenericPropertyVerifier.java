@@ -13,16 +13,18 @@ public class GenericPropertyVerifier<T1, T2>
 
 	private final Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig;
 	private final boolean failIfNotSuccessful;
+	private final List<Generator.DecoratorFunction> decorators;
 	private final Arbitrary<T1> arbitrary1;
 	private final Arbitrary<T2> arbitrary2;
 
-	public GenericPropertyVerifier(Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig, boolean failIfNotSuccessful, Arbitrary<T1> arbitrary) {
-		this(supplyConfig, failIfNotSuccessful, arbitrary, null);
+	public GenericPropertyVerifier(Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig, boolean failIfNotSuccessful, List<Generator.DecoratorFunction> decorators, Arbitrary<T1> arbitrary) {
+		this(supplyConfig, failIfNotSuccessful, decorators, arbitrary, null);
 	}
 
-	public GenericPropertyVerifier(Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig, boolean failIfNotSuccessful, Arbitrary<T1> arbitrary1, Arbitrary<T2> arbitrary2) {
+	public GenericPropertyVerifier(Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig, boolean failIfNotSuccessful, List<Generator.DecoratorFunction> decorators, Arbitrary<T1> arbitrary1, Arbitrary<T2> arbitrary2) {
 		this.supplyConfig = supplyConfig;
 		this.failIfNotSuccessful = failIfNotSuccessful;
+		this.decorators = decorators;
 		this.arbitrary1 = arbitrary1;
 		this.arbitrary2 = arbitrary2;
 	}
@@ -31,12 +33,29 @@ public class GenericPropertyVerifier<T1, T2>
 	@Override
 	public PropertyRunResult check(C1<T1> checker) {
 		return run(
-			List.of(arbitrary1.generator()),
+			generators(arbitrary1),
 			safeTryable(args -> {
 				T1 v1 = (T1) args.get(0);
 				return checker.check(v1);
 			})
 		);
+	}
+
+	private List<Generator<?>> generators(Arbitrary<?> ... arbitraries) {
+		List<Generator<?>> generators = new ArrayList<>();
+		for (Arbitrary<?> a : arbitraries) {
+			Generator<?> generator = decorate(a.generator());
+			generators.add(generator);
+		}
+		return generators;
+	}
+
+	private Generator<?> decorate(Generator<?> generator) {
+		Generator<?> toDecorate = generator;
+		for (Generator.DecoratorFunction decorator : decorators) {
+			toDecorate = decorator.apply(toDecorate);
+		}
+		return toDecorate;
 	}
 
 	@SuppressWarnings("unchecked")

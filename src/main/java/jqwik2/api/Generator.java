@@ -52,7 +52,8 @@ public interface Generator<T> {
 	/**
 	 * Override if generator has inner generators that need to be decorated as well.
 	 */
-	default Generator<T> decorate(Function<Generator<?>, Generator<?>> decorator) {
+	@SuppressWarnings("unchecked")
+	default Generator<T> decorate(DecoratorFunction decorator) {
 		return (Generator<T>) decorator.apply(this);
 	}
 
@@ -60,6 +61,8 @@ public interface Generator<T> {
 	default Generator<Object> asGeneric() {
 		return (Generator<Object>) this;
 	}
+
+	interface DecoratorFunction extends Function<Generator<?>, Generator<?>> {}
 
 	class Decorator<T> implements Generator<T> {
 
@@ -85,7 +88,7 @@ public interface Generator<T> {
 		}
 
 		@Override
-		public Generator<T> decorate(Function<Generator<?>, Generator<?>> decorator) {
+		public Generator<T> decorate(DecoratorFunction decorator) {
 			return generator.decorate(decorator);
 		}
 

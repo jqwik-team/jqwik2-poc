@@ -29,7 +29,6 @@ class DefaultIntegerArbitrary implements IntegerArbitrary {
 
 	@Override
 	public Generator<Integer> generator() {
-		Generator<Integer> integerGenerator = BaseGenerators.integers(min, max, RandomChoice.Distribution.biased(5));
-		return WithEdgeCasesDecorator.decorate(integerGenerator, 0.05, 100);
+		return BaseGenerators.integers(min, max, RandomChoice.Distribution.biased(5));
 	}
 }

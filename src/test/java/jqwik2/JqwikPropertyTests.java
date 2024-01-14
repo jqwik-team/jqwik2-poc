@@ -1,6 +1,7 @@
 package jqwik2;
 
 import java.time.*;
+import java.util.*;
 
 import jqwik2.api.*;
 import jqwik2.api.arbitraries.*;
@@ -107,7 +108,8 @@ class JqwikPropertyTests {
 		PropertyRunStrategy strategy = PropertyRunStrategy.create(
 			100, Duration.ofMinutes(10), null,
 			PropertyRunStrategy.Shrinking.OFF,
-			PropertyRunStrategy.Generation.EXHAUSTIVE
+			PropertyRunStrategy.Generation.EXHAUSTIVE,
+			PropertyRunStrategy.EdgeCases.OFF
 		);
 		var property = new JqwikProperty(strategy);
 
@@ -130,7 +132,8 @@ class JqwikPropertyTests {
 		PropertyRunStrategy strategy = PropertyRunStrategy.create(
 			100, Duration.ofMinutes(10), RandomChoice.generateRandomSeed(),
 			PropertyRunStrategy.Shrinking.OFF,
-			PropertyRunStrategy.Generation.SMART
+			PropertyRunStrategy.Generation.SMART,
+			PropertyRunStrategy.EdgeCases.MIXIN
 		);
 		var property = new JqwikProperty(strategy);
 
@@ -148,6 +151,24 @@ class JqwikPropertyTests {
 		).verify((i1, i2) -> {});
 		assertThat(resultRandomized.isSuccessful()).isTrue();
 		assertThat(resultRandomized.countTries()).isEqualTo(100);
+	}
+
+	@Example
+	void edgeCasesGenerationProperty() {
+		PropertyRunStrategy strategy = PropertyRunStrategy.create(
+			1000, Duration.ofMinutes(10), RandomChoice.generateRandomSeed(),
+			PropertyRunStrategy.Shrinking.OFF,
+			PropertyRunStrategy.Generation.SMART,
+			PropertyRunStrategy.EdgeCases.MIXIN
+		);
+		var property = new JqwikProperty(strategy);
+
+		List<Integer> values = Collections.synchronizedList(new ArrayList<>());
+		PropertyRunResult resultExhaustive = property.forAll(Numbers.integers()).verify(values::add);
+		assertThat(resultExhaustive.isSuccessful()).isTrue();
+		assertThat(resultExhaustive.countTries()).isEqualTo(1000);
+
+		assertThat(values).contains(0, 1, -1, Integer.MAX_VALUE, Integer.MIN_VALUE);
 	}
 
 }

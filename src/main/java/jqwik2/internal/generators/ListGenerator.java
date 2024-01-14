@@ -21,7 +21,7 @@ public class ListGenerator<T> extends AbstractCollectionGenerator<T, List<T>> {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Generator<List<T>> decorate(Function<Generator<?>, Generator<?>> decorator) {
+	public Generator<List<T>> decorate(DecoratorFunction decorator) {
 		Generator<T> decoratedElementGenerator = elementGenerator.decorate(decorator);
 		return (Generator<List<T>>) decorator.apply(new ListGenerator<>(decoratedElementGenerator, minSize, maxSize));
 	}

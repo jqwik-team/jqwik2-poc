@@ -9,10 +9,16 @@ import jqwik2.internal.recording.*;
 public class WithEdgeCasesDecorator<T> extends Generator.Decorator<T> {
 
 	public static <T> Generator<T> decorate(Generator<T> generator, double edgeCasesProbability, int maxEdgeCases) {
-		if (edgeCasesProbability <= 0.0) {
-			return generator;
-		}
-		return generator.decorate(g -> new WithEdgeCasesDecorator<>(g, edgeCasesProbability, maxEdgeCases));
+		return generator.decorate(function(edgeCasesProbability, maxEdgeCases));
+	}
+
+	public static DecoratorFunction function(double edgeCasesProbability, int maxEdgeCases) {
+		return g -> {
+			if (edgeCasesProbability <= 0.0) {
+				return g;
+			}
+			return new WithEdgeCasesDecorator<>(g.asGeneric(), edgeCasesProbability, maxEdgeCases);
+		};
 	}
 
 	private final double edgeCasesProbability;

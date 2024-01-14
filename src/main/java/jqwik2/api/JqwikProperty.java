@@ -26,14 +26,22 @@ public class JqwikProperty {
 	}
 
 	public <T1> PropertyVerifier1<T1> forAll(Arbitrary<T1> arbitrary) {
-		return new GenericPropertyVerifier<>(this::buildConfiguration, failIfNotSuccessful, arbitrary);
+		return new GenericPropertyVerifier<>(this::buildConfiguration, failIfNotSuccessful, decorators(), arbitrary);
+	}
+
+	private List<Generator.DecoratorFunction> decorators() {
+		return switch (strategy.edgeCases()) {
+			case MIXIN -> List.of(WithEdgeCasesDecorator.function(0.05, 100));
+			case OFF -> List.of();
+			case null, default -> throw new IllegalArgumentException("Unsupported edge cases mode: " + strategy.edgeCases());
+		};
 	}
 
 	public <T1, T2> PropertyVerifier2<T1, T2> forAll(
 		Arbitrary<T1> arbitrary1,
 		Arbitrary<T2> arbitrary2
 	) {
-		return new GenericPropertyVerifier<>(this::buildConfiguration, failIfNotSuccessful, arbitrary1, arbitrary2);
+		return new GenericPropertyVerifier<>(this::buildConfiguration, failIfNotSuccessful, decorators(), arbitrary1, arbitrary2);
 	}
 
 	private PropertyRunConfiguration buildConfiguration(List<Generator<?>> generators) {
