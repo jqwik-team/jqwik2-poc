@@ -47,8 +47,18 @@ public record AtomRecording(List<Integer> choices) implements Recording {
 	}
 
 	@Override
+	public String serialize() {
+		return "a[%s]".formatted(listOfChoices());
+	}
+
+	@Override
 	public String toString() {
+		return "atom{%s}".formatted(listOfChoices());
+	}
+
+	private String listOfChoices() {
 		List<String> listOfStrings = choices.stream().map(Object::toString).toList();
-		return "atom{%s}".formatted(String.join(", ", listOfStrings));
+		String listOfChoices = String.join(",", listOfStrings);
+		return listOfChoices;
 	}
 }

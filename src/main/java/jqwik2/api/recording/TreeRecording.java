@@ -30,6 +30,11 @@ public record TreeRecording(Recording head, Recording child) implements Recordin
 	}
 
 	@Override
+	public String serialize() {
+		throw new UnsupportedOperationException("Not yet implemented");
+	}
+
+	@Override
 	public String toString() {
 		return "tree{%s, %s}".formatted(head, child);
 	}

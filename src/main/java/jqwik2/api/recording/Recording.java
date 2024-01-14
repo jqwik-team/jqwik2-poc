@@ -8,7 +8,15 @@ public sealed interface Recording extends Comparable<Recording>
 
 	Recording EMPTY = atom();
 
+	static Recording deserialize(String serialized) {
+		if (serialized.equals("a[]"))
+			return EMPTY;
+		return null;
+	}
+
 	Stream<? extends Recording> shrink();
+
+	String serialize();
 
 	default boolean isomorphicTo(Recording other) {
 		return false;

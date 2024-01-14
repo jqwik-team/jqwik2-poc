@@ -53,6 +53,11 @@ public record ListRecording(List<Recording> elements) implements Recording {
 	}
 
 	@Override
+	public String serialize() {
+		throw new UnsupportedOperationException("Not yet implemented");
+	}
+
+	@Override
 	public String toString() {
 		List<String> elementsString = elements.stream().map(Object::toString).toList();
 		return "list{%s}".formatted(String.join(",", elementsString));

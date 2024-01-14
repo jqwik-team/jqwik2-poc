@@ -1,5 +1,7 @@
 package jqwik2;
 
+import jqwik2.api.recording.*;
+
 import net.jqwik.api.*;
 
 import static jqwik2.api.recording.Recording.list;
@@ -7,6 +9,28 @@ import static jqwik2.api.recording.Recording.*;
 import static org.assertj.core.api.Assertions.*;
 
 class RecordingTests {
+
+	@Group
+	class Serialization {
+
+		@Example
+		void empty() {
+			String serialized = EMPTY.serialize();
+			assertThat(serialized).isEqualTo("a[]");
+			assertThat(Recording.deserialize(serialized))
+				.isEqualTo(EMPTY);
+		}
+
+		@Example
+		void atoms() {
+			AtomRecording atom = atom(1, 2, 3);
+			String serialized = atom.serialize();
+			assertThat(serialized).isEqualTo("a[1,2,3]");
+			assertThat(Recording.deserialize(serialized))
+				.isEqualTo(atom);
+		}
+
+	}
 
 	@Example
 	void recordingsCanBeCompared() {
