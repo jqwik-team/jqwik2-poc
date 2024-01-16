@@ -58,7 +58,6 @@ public record AtomRecording(List<Integer> choices) implements Recording {
 
 	private String listOfChoices() {
 		List<String> listOfStrings = choices.stream().map(Object::toString).toList();
-		String listOfChoices = String.join(",", listOfStrings);
-		return listOfChoices;
+		return String.join(":", listOfStrings);
 	}
 }

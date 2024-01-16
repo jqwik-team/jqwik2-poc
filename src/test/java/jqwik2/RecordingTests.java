@@ -25,9 +25,14 @@ class RecordingTests {
 		void atoms() {
 			AtomRecording atom = atom(1, 2, 3);
 			String serialized = atom.serialize();
-			assertThat(serialized).isEqualTo("a[1,2,3]");
-			assertThat(Recording.deserialize(serialized))
-				.isEqualTo(atom);
+			assertThat(serialized).isEqualTo("a[1:2:3]");
+			assertThat(Recording.deserialize(serialized)).isEqualTo(atom);
+
+			assertSerializeDeserialize(atom(1, 2));
+		}
+
+		private void assertSerializeDeserialize(Recording recording) {
+			assertThat(Recording.deserialize(recording.serialize())).isEqualTo(recording);
 		}
 
 	}
