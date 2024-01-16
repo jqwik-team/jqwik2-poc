@@ -2,7 +2,7 @@ package jqwik2.api.recording;
 
 import java.util.*;
 
-class RecordingDeserialization {
+class Serialization {
 
 	static Recording deserialize(String serialized) {
 		if (serialized == null || serialized.isBlank()) {
@@ -32,6 +32,13 @@ class RecordingDeserialization {
 
 	private static String serializedContents(String serialized) {
 		return serialized.substring(2, serialized.length() - 1);
+	}
+
+	public static String serializeAtom(List<Integer> choices) {
+		var listOfChoices = String.join(":",choices.stream()
+										   .map(String::valueOf)
+										   .toList());
+		return "a[%s]".formatted(listOfChoices);
 	}
 
 }

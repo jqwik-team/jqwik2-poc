@@ -48,7 +48,7 @@ public record AtomRecording(List<Integer> choices) implements Recording {
 
 	@Override
 	public String serialize() {
-		return "a[%s]".formatted(listOfChoices());
+		return Serialization.serializeAtom(choices);
 	}
 
 	@Override
