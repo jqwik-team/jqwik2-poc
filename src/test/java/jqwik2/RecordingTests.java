@@ -31,6 +31,17 @@ class RecordingTests {
 			assertSerializeDeserialize(atom(1, 2));
 		}
 
+		@Example
+		void lists() {
+			ListRecording list = list(atom(1), atom(2, 3));
+			String serialized = list.serialize();
+			assertThat(serialized).isEqualTo("l[a[1]:a[2:3]]");
+			assertThat(Recording.deserialize(serialized)).isEqualTo(list);
+
+			assertSerializeDeserialize(list(atom(1, 2, 3, 4)));
+			assertSerializeDeserialize(list());
+		}
+
 		private void assertSerializeDeserialize(Recording recording) {
 			assertThat(Recording.deserialize(recording.serialize())).isEqualTo(recording);
 		}

@@ -1,21 +1,77 @@
 package jqwik2.api.recording;
 
 import java.util.*;
+import java.util.stream.*;
 
 class Serialization {
 
+	public static final char ATOM = 'a';
+	public static final char LIST = 'l';
+
+	public static final char START_CONTENT = '[';
+	public static final char END_CONTENT = ']';
+	public static final char CONTENT_SEPARATOR = ':';
+
 	static Recording deserialize(String serialized) {
 		if (serialized == null || serialized.isBlank()) {
-			throw new IllegalArgumentException("Invalid recording serialization: " + serialized);
+			throw new IllegalArgumentException("Invalid serialized recording: " + serialized);
 		}
 		char choice = serialized.charAt(0);
 		switch (choice) {
-			case 'a':
+			case ATOM:
 				return deserializeAtom(serialized);
+			case LIST:
+				return deserializeList(serialized);
 			default:
 				throw new IllegalArgumentException("Unknown recording type: " + choice);
 		}
 	}
+
+	private static Recording deserializeList(String serialized) {
+		if (serialized.length() < 3) {
+			throw new IllegalArgumentException("Invalid serialized list recording: " + serialized);
+		}
+		String elementsPart = serializedContents(serialized);
+		return new ListRecording(deserializeParts(elementsPart));
+	}
+
+	private static List<Recording> deserializeParts(String partsString) {
+		List<Recording> elements = new ArrayList<>();
+		int start = 0;
+		int end = 0;
+		while (end < partsString.length()) {
+			char c = partsString.charAt(end);
+			if (c == START_CONTENT) {
+				end += skipToEndOfElement(partsString, end);
+			} else if (c == CONTENT_SEPARATOR) {
+				elements.add(deserialize(partsString.substring(start, end)));
+				start = end + 1;
+			}
+			end++;
+		}
+		String lastPart = partsString.substring(start, end);
+		if (!lastPart.isBlank()) {
+			elements.add(deserialize(lastPart));
+		}
+		return elements;
+	}
+
+	private static int skipToEndOfElement(String partsString, int end) {
+		char c;
+		int skip = 0;
+		int nesting = 1;
+		while (nesting > 0) {
+			skip++;
+			c = partsString.charAt(end + skip);
+			if (c == START_CONTENT) {
+				nesting++;
+			} else if (c == END_CONTENT) {
+				nesting--;
+			}
+		}
+		return skip;
+	}
+
 	static Recording deserializeAtom(String serialized) {
 		if (serialized.length() < 3) {
 			throw new IllegalArgumentException("Invalid serialized atom recording: " + serialized);
@@ -26,7 +82,6 @@ class Serialization {
 									  .map(Integer::parseInt)
 									  .toList();
 		if (choices.isEmpty()) return Recording.EMPTY;
-
 		return new AtomRecording(choices);
 	}
 
@@ -35,10 +90,23 @@ class Serialization {
 	}
 
 	public static String serializeAtom(List<Integer> choices) {
-		var listOfChoices = String.join(":",choices.stream()
-										   .map(String::valueOf)
-										   .toList());
-		return "a[%s]".formatted(listOfChoices);
+		var listOfChoices = listOfChoices(choices);
+		return ATOM + "[%s]".formatted(listOfChoices);
 	}
 
+	private static String listOfChoices(List<Integer> choices) {
+		return choices.stream()
+					  .map(String::valueOf)
+					  .collect(Collectors.joining(":"));
+	}
+
+	public static String serializeList(List<Recording> elements) {
+		return LIST + "[%s]".formatted(listOfElements(elements));
+	}
+
+	private static String listOfElements(List<Recording> elements) {
+		return elements.stream()
+					   .map(Recording::serialize)
+					   .collect(Collectors.joining(":"));
+	}
 }

@@ -54,7 +54,7 @@ public record ListRecording(List<Recording> elements) implements Recording {
 
 	@Override
 	public String serialize() {
-		throw new UnsupportedOperationException("Not yet implemented");
+		return Serialization.serializeList(elements);
 	}
 
 	@Override
