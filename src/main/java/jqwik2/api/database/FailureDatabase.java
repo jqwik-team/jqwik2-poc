@@ -2,21 +2,17 @@ package jqwik2.api.database;
 
 import java.util.*;
 
-import jqwik2.api.*;
 import jqwik2.api.recording.*;
 
 public interface FailureDatabase {
 
-	record PropertyFailure(
-		PropertyRunResult.Status status,
-		Set<List<Recording>> falsifiedSamples
-	) {}
+	void saveFailure(String propertyId, SampleRecording recording);
 
-	void saveFailure(String id, PropertyFailure failure);
+	void deleteFailure(String propertyId, SampleRecording recording);
 
-	void deleteFailure(String id, PropertyFailure failure);
+	void deleteProperty(String propertyId);
 
-	Optional<PropertyFailure> loadFailure(String id);
+	Set<SampleRecording> loadFailures(String propertyId);
 
 	void clear();
 }

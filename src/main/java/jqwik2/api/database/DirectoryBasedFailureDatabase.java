@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 
+import jqwik2.api.recording.*;
 import jqwik2.api.support.*;
 
 public class DirectoryBasedFailureDatabase implements FailureDatabase {
@@ -26,18 +27,47 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 	}
 
 	@Override
-	public void saveFailure(String id, PropertyFailure failure) {
+	public void saveFailure(String id, SampleRecording recording) {
+		try {
+			var pathNormalizedId = id;
+			Path failureDirectory = databasePath.resolve(pathNormalizedId);
+			if (Files.notExists(failureDirectory)) {
+				Files.createDirectories(failureDirectory);
+			}
+			try {
+				var sampleId = recording.hashCode();
+				Path samplePath = failureDirectory.resolve("sample-" + sampleId);
+				if (Files.notExists(samplePath)) {
+					var sampleFile = Files.createFile(samplePath);
+					try (var writer = Files.newBufferedWriter(sampleFile)) {
+						try {
+							writer.write(recording.serialize());
+						} catch (IOException e) {
+							ExceptionSupport.throwAsUnchecked(e);
+						}
+					}
+				}
+			} catch (Exception e) {
+				ExceptionSupport.throwAsUnchecked(e);
+			}
+		} catch (IOException e) {
+			ExceptionSupport.throwAsUnchecked(e);
+		}
+	}
+
+	@Override
+	public void deleteFailure(String propertyId, SampleRecording recording) {
 
 	}
 
 	@Override
-	public void deleteFailure(String id, PropertyFailure failure) {
+	public void deleteProperty(String propertyId) {
 
 	}
 
 	@Override
-	public Optional<PropertyFailure> loadFailure(String id) {
-		return Optional.empty();
+	public Set<SampleRecording> loadFailures(String propertyId) {
+		return Collections.emptySet();
 	}
 
 	@Override
