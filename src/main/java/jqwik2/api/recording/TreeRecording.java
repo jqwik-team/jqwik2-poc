@@ -31,7 +31,7 @@ public record TreeRecording(Recording head, Recording child) implements Recordin
 
 	@Override
 	public String serialize() {
-		throw new UnsupportedOperationException("Not yet implemented");
+		return Serialization.serializeTree(head, child);
 	}
 
 	@Override

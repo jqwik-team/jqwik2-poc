@@ -42,6 +42,16 @@ class RecordingTests {
 			assertSerializeDeserialize(list());
 		}
 
+		@Example
+		void trees() {
+			TreeRecording tree = tree(atom(1), atom(2, 3));
+			String serialized = tree.serialize();
+			assertThat(serialized).isEqualTo("t[a[1]:a[2:3]]");
+			assertThat(Recording.deserialize(serialized)).isEqualTo(tree);
+
+			assertSerializeDeserialize(tree(atom(1, 2, 3, 4), list(atom(1), atom(2, 3))));
+		}
+
 		private void assertSerializeDeserialize(Recording recording) {
 			assertThat(Recording.deserialize(recording.serialize())).isEqualTo(recording);
 		}
