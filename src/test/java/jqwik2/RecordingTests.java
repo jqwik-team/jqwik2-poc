@@ -52,6 +52,17 @@ class RecordingTests {
 			assertSerializeDeserialize(tree(atom(1, 2, 3, 4), list(atom(1), atom(2, 3))));
 		}
 
+		@Example
+		void nestedRecording() {
+			TreeRecording nested = tree(atom(1, 2, 3), list(
+				atom(99),
+				tree(atom(1, 2, 3), list(atom(1), atom(2, 3))),
+				list(atom(11), tree(atom(12), atom(13)))
+			));
+
+			assertSerializeDeserialize(nested);
+		}
+
 		private void assertSerializeDeserialize(Recording recording) {
 			assertThat(Recording.deserialize(recording.serialize())).isEqualTo(recording);
 		}
