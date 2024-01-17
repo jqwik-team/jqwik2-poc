@@ -13,6 +13,10 @@ class Serialization {
 	public static final char END_CONTENT = ']';
 	public static final char CONTENT_SEPARATOR = ':';
 
+	static SampleRecording deserializeSample(String serialized) {
+		return new SampleRecording(deserializeParts(serialized));
+	}
+
 	static Recording deserialize(String serialized) {
 		if (serialized == null || serialized.isBlank()) {
 			throw new IllegalArgumentException("Invalid serialized recording: " + serialized);
@@ -104,6 +108,11 @@ class Serialization {
 	private static String serializedContents(String serialized) {
 		return serialized.substring(2, serialized.length() - 1);
 	}
+
+	public static String serializeSample(List<Recording> recordings) {
+		return recordings.stream().map(Recording::serialize).collect(Collectors.joining(":"));
+	}
+
 
 	public static String serializeAtom(List<Integer> choices) {
 		var listOfChoices = listOfChoices(choices);

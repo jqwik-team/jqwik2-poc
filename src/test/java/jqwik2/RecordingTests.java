@@ -1,5 +1,7 @@
 package jqwik2;
 
+import java.util.*;
+
 import jqwik2.api.recording.*;
 
 import net.jqwik.api.*;
@@ -61,6 +63,20 @@ class RecordingTests {
 			));
 
 			assertSerializeDeserialize(nested);
+		}
+
+		@Example
+		void sampleRecording() {
+			SampleRecording sample = new SampleRecording(List.of(
+				atom(1),
+				atom(2),
+				atom(3)
+			));
+
+			var serialized = sample.serialize();
+			assertThat(serialized).isEqualTo("a[1]:a[2]:a[3]");
+
+			assertThat(SampleRecording.deserialize(serialized)).isEqualTo(sample);
 		}
 
 		private void assertSerializeDeserialize(Recording recording) {
