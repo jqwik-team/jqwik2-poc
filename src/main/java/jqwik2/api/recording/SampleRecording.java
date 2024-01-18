@@ -10,7 +10,7 @@ public record SampleRecording(List<Recording> recordings) {
 	}
 
 	public String serialize() {
-		return Serialization.serializeSample(recordings);
+		return Serialization.serialize(this);
 	}
 
 }

@@ -31,12 +31,12 @@ public record TreeRecording(Recording head, Recording child) implements Recordin
 
 	@Override
 	public String serialize() {
-		return Serialization.serializeTree(head, child);
+		return Serialization.serialize(this);
 	}
 
 	@Override
 	public String toString() {
-		return "tree{%s, %s}".formatted(head, child);
+		return serialize();
 	}
 
 }

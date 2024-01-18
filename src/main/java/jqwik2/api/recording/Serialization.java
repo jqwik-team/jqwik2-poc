@@ -109,13 +109,12 @@ class Serialization {
 		return serialized.substring(2, serialized.length() - 1);
 	}
 
-	public static String serializeSample(List<Recording> recordings) {
-		return recordings.stream().map(Recording::serialize).collect(Collectors.joining(":"));
+	static String serialize(SampleRecording recording) {
+		return recording.recordings().stream().map(Recording::serialize).collect(Collectors.joining(":"));
 	}
 
-
-	public static String serializeAtom(List<Integer> choices) {
-		var listOfChoices = listOfChoices(choices);
+	static String serialize(AtomRecording recording) {
+		var listOfChoices = listOfChoices(recording.choices());
 		return ATOM + "[%s]".formatted(listOfChoices);
 	}
 
@@ -125,8 +124,8 @@ class Serialization {
 					  .collect(Collectors.joining(":"));
 	}
 
-	public static String serializeList(List<Recording> elements) {
-		return LIST + "[%s]".formatted(listOfElements(elements));
+	static String serialize(ListRecording recording) {
+		return LIST + "[%s]".formatted(listOfElements(recording.elements()));
 	}
 
 	private static String listOfElements(List<Recording> elements) {
@@ -135,7 +134,7 @@ class Serialization {
 					   .collect(Collectors.joining(":"));
 	}
 
-	static String serializeTree(Recording head, Recording child) {
-		return TREE + "[%s:%s]".formatted(head.serialize(), child.serialize());
+	static String serialize(TreeRecording recording) {
+		return TREE + "[%s:%s]".formatted(recording.head().serialize(), recording.child().serialize());
 	}
 }

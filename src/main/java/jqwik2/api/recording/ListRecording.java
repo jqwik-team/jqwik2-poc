@@ -54,13 +54,12 @@ public record ListRecording(List<Recording> elements) implements Recording {
 
 	@Override
 	public String serialize() {
-		return Serialization.serializeList(elements);
+		return Serialization.serialize(this);
 	}
 
 	@Override
 	public String toString() {
-		List<String> elementsString = elements.stream().map(Object::toString).toList();
-		return "list{%s}".formatted(String.join(",", elementsString));
+		return serialize();
 	}
 
 }
