@@ -83,4 +83,17 @@ class FailureDatabaseTests {
 		database.deleteProperty("id1"); // idempotent
 		database.deleteProperty("id2"); // non existant id
 	}
+
+	@Example
+	void clear() {
+		var sample1 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(2)));
+		var sample2 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(3)));
+
+		database.saveFailure("id1", sample1);
+		database.saveFailure("id2", sample2);
+
+		database.clear();
+		assertThat(database.loadFailures("id1")).isEmpty();
+		assertThat(database.loadFailures("id2")).isEmpty();
+	}
 }
