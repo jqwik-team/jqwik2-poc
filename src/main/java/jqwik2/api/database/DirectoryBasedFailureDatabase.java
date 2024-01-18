@@ -100,16 +100,24 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 			return Files.list(propertyDirectory)
 						.filter(Files::isRegularFile)
 						.filter(path -> path.getFileName().toString().startsWith(SAMPLEFILE_PREFIX))
-						.toList().stream().map(this::loadSample).collect(Collectors.toSet());
+						.map(this::loadSample)
+						.filter(Optional::isPresent)
+						.map(Optional::get)
+						.collect(Collectors.toSet());
 
 		});
 	}
 
-	private SampleRecording loadSample(Path path) {
+	private Optional<SampleRecording> loadSample(Path path) {
 		return ExceptionSupport.runUnchecked(() -> {
 			var lines = Files.readAllLines(path);
 			var serialized = String.join("", lines);
-			return SampleRecording.deserialize(serialized);
+			try {
+				return Optional.of(SampleRecording.deserialize(serialized));
+			} catch (Exception e) {
+				System.out.println("Could not deserialize sample recording: " + serialized);
+				return Optional.empty();
+			}
 		});
 	}
 

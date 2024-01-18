@@ -27,12 +27,11 @@ class FailureDatabaseTests {
 	@AfterExample
 	void deleteDatabase() throws IOException {
 		database.clear();
-		// System.out.println(basePath);
 		Files.deleteIfExists(basePath);
 	}
 
 	@Example
-	void saveAndReloadFailures() {
+	void saveAndLoadFailures() {
 		var sample1 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(2)));
 		var sample2 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(3)));
 		var sample3 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(2), Recording.atom(3)));
@@ -48,6 +47,28 @@ class FailureDatabaseTests {
 
 		assertThat(failures).hasSize(4);
 		assertThat(failures).contains(sample1, sample2, sample3, sample4);
+	}
+
+	@Example
+	void loadFailuresIgnoresSamplesThatCannotBeDeserialized() throws IOException {
+		var sample1 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(2)));
+		var sample2 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(3)));
+		var sample3 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(2), Recording.atom(3)));
+		var sample4 = new SampleRecording(List.of(Recording.atom(2), Recording.atom(1)));
+
+
+		database.saveFailure("id1", sample1);
+		database.saveFailure("id1", sample2);
+		database.saveFailure("id1", sample3);
+		database.saveFailure("id1", sample4);
+
+		var sample4File = basePath.resolve("id1").resolve("sample-" + sample4.hashCode());
+		assertThat(sample4File).exists();
+		Files.writeString(sample4File, "cannot:be:deserialized", StandardOpenOption.TRUNCATE_EXISTING);
+
+		Set<SampleRecording> failures = database.loadFailures("id1");
+		assertThat(failures).hasSize(3);
+		assertThat(failures).contains(sample1, sample2, sample3);
 	}
 
 	@Example
