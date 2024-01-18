@@ -3,6 +3,7 @@ package jqwik2.api;
 import java.util.*;
 import java.util.stream.*;
 
+import jqwik2.api.recording.*;
 import jqwik2.internal.shrinking.*;
 
 public record Sample(List<Shrinkable<Object>> shrinkables) implements Comparable<Sample> {
@@ -21,31 +22,13 @@ public record Sample(List<Shrinkable<Object>> shrinkables) implements Comparable
 		return new SampleShrinker(this).shrink();
 	}
 
-	@Override
-	public int compareTo(Sample other) {
-		List<Shrinkable<Object>> mySortedShrinkables = new ArrayList<>(shrinkables);
-		Collections.sort(mySortedShrinkables);
-		List<Shrinkable<Object>> otherSortedShrinkables = new ArrayList<>(other.shrinkables);
-		Collections.sort(otherSortedShrinkables);
-		int sortedChildrenComparison = compareShrinkables(mySortedShrinkables, otherSortedShrinkables);
-		if (sortedChildrenComparison != 0) {
-			return sortedChildrenComparison;
-		}
-		return compareShrinkables(shrinkables, other.shrinkables);
+	public SampleRecording recording() {
+		return new SampleRecording(shrinkables.stream().map(Shrinkable::recording).toList());
 	}
 
-	private int compareShrinkables(List<Shrinkable<Object>> left, List<Shrinkable<Object>> right) {
-		int sizeComparison = Integer.compare(left.size(), right.size());
-		if (sizeComparison != 0) {
-			return sizeComparison;
-		}
-		for (int i = 0; i < left.size(); i++) {
-			int childComparison = left.get(i).compareTo(right.get(i));
-			if (childComparison != 0) {
-				return childComparison;
-			}
-		}
-		return 0;
+	@Override
+	public int compareTo(Sample other) {
+		return this.recording().compareTo(other.recording());
 	}
 
 	@Override

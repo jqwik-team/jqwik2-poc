@@ -86,7 +86,9 @@ class RecordingTests {
 	}
 
 	@Example
-	void recordingsCanBeCompared() {
+	void compareRecording() {
+		assertThat(atom(2)).isGreaterThan(atom(1));
+
 		assertThat(atom(1, 0)).isLessThan(atom(1, 1));
 		assertThat(atom(1)).isLessThan(atom(1, 1));
 		assertThat(atom(0, 1)).isLessThan(atom(1, 1));
@@ -124,6 +126,15 @@ class RecordingTests {
 				tree(atom(0), atom(1))
 			)
 		).isEqualTo(0);
+	}
+
+	@Example
+	void compareSampleRecordings() {
+		SampleRecording sample = new SampleRecording(atom(2));
+
+		assertThat(sample).isGreaterThan(new SampleRecording(atom(1)));
+		assertThat(sample).isLessThan(new SampleRecording(atom(3)));
+		assertThat(sample.compareTo(new SampleRecording(atom(2)))).isEqualTo(0);
 	}
 
 	@Example
@@ -165,6 +176,24 @@ class RecordingTests {
 		).isTrue();
 		assertThat(
 			tree(atom(1, 0), atom(1, 0)).isomorphicTo(tree(atom(1, 1), list()))
+		).isFalse();
+	}
+
+	@Example
+	void isomorphismSampleRecording() {
+		assertThat(
+			new SampleRecording(atom(1, 0))
+				.isomorphicTo(new SampleRecording(atom(1, 1)))
+		).isTrue();
+
+		assertThat(
+			new SampleRecording(atom(1))
+				.isomorphicTo(new SampleRecording(atom(1, 1)))
+		).isFalse();
+
+		assertThat(
+			new SampleRecording(atom(1), atom(2))
+				.isomorphicTo(new SampleRecording(atom(1)))
 		).isFalse();
 	}
 }
