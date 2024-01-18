@@ -15,4 +15,6 @@ public interface FailureDatabase {
 	Set<SampleRecording> loadFailures(String propertyId);
 
 	void clear();
+
+	Set<String> failingProperties();
 }

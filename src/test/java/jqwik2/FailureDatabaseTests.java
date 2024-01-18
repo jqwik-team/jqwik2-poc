@@ -95,5 +95,21 @@ class FailureDatabaseTests {
 		database.clear();
 		assertThat(database.loadFailures("id1")).isEmpty();
 		assertThat(database.loadFailures("id2")).isEmpty();
+		assertThat(database.failingProperties()).isEmpty();
+	}
+
+	@Example
+	void propertyIds() {
+		var sample1 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(2)));
+		var sample2 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(3)));
+		var sample3 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(4)));
+
+		database.saveFailure("id1", sample1);
+		database.saveFailure("id2", sample2);
+		database.saveFailure("id3 and some", sample3);
+
+		database.failingProperties();
+		assertThat(database.failingProperties())
+			.containsExactlyInAnyOrder("id1", "id2", "id3 and some");
 	}
 }

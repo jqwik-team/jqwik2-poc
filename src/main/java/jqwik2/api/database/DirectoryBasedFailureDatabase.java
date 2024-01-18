@@ -10,6 +10,7 @@ import jqwik2.api.support.*;
 
 public class DirectoryBasedFailureDatabase implements FailureDatabase {
 	public static final String SAMPLEFILE_PREFIX = "sample-";
+	public static final String IDFILENAME = "ID";
 	private final Path databasePath;
 
 	public DirectoryBasedFailureDatabase(Path databasePath) {
@@ -61,8 +62,27 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 		Path propertyDirectory = databasePath.resolve(idBasedFileName);
 		if (createIfNecessary && Files.notExists(propertyDirectory)) {
 			Files.createDirectories(propertyDirectory);
+			createIdFile(id, idBasedFileName, propertyDirectory);
 		}
 		return propertyDirectory;
+	}
+
+	private static void createIdFile(String id, String idBasedFileName, Path propertyDirectory) throws IOException {
+		if (!idBasedFileName.equals(id)) {
+			var idFile = propertyDirectory.resolve(IDFILENAME);
+			Files.write(idFile, id.getBytes());
+		}
+	}
+
+	private static String propertyId(Path propertyDirectory) {
+		return ExceptionSupport.runUnchecked(() -> {
+			var idFile = propertyDirectory.resolve(IDFILENAME);
+			if (Files.notExists(idFile)) {
+				return propertyDirectory.getFileName().toString();
+			} else {
+				return new String(Files.readAllBytes(idFile));
+			}
+		});
 	}
 
 	private String toFileName(String id) {
@@ -121,11 +141,16 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 
 	@Override
 	public void clear() {
-		try {
-			deleteAllIn(databasePath);
-		} catch (IOException e) {
-			ExceptionSupport.throwAsUnchecked(e);
-		}
+		ExceptionSupport.runUnchecked(() -> deleteAllIn(databasePath));
+	}
+
+	@Override
+	public Set<String> failingProperties() {
+		return ExceptionSupport.runUnchecked(
+			() -> Files.list(databasePath)
+					   .filter(Files::isDirectory)
+					   .map(path -> propertyId(path))
+					   .collect(Collectors.toSet()));
 	}
 
 	private void deleteAllIn(Path path) throws IOException {
