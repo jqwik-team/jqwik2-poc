@@ -72,7 +72,7 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 
 	@Override
 	public Set<SampleRecording> loadFailures(String propertyId) {
-		try {
+		return ExceptionSupport.runUnchecked(() -> {
 			var propertyDirectory = propertyDirectory(propertyId, false);
 			if (Files.notExists(propertyDirectory)) {
 				return Collections.emptySet();
@@ -81,24 +81,27 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 						.filter(Files::isRegularFile)
 						.filter(path -> path.getFileName().toString().startsWith(SAMPLEFILE_PREFIX))
 						.toList().stream().map(this::loadSample).collect(Collectors.toSet());
-		} catch (IOException e) {
-			return ExceptionSupport.throwAsUnchecked(e);
-		}
+
+		});
 	}
 
 	private SampleRecording loadSample(Path path) {
-		try {
+		return ExceptionSupport.runUnchecked(() -> {
 			var lines = Files.readAllLines(path);
 			var serialized = String.join("", lines);
 			return SampleRecording.deserialize(serialized);
-		} catch (IOException e) {
-			return ExceptionSupport.throwAsUnchecked(e);
-		}
+		});
 	}
 
 	@Override
 	public void deleteFailure(String propertyId, SampleRecording recording) {
-
+		ExceptionSupport.runUnchecked(() -> {
+			var propertyDirectory = propertyDirectory(propertyId, true);
+			var samplePath = samplePath(recording, propertyDirectory);
+			if (Files.exists(samplePath)) {
+				Files.delete(samplePath);
+			}
+		});
 	}
 
 	@Override
