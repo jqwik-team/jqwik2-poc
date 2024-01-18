@@ -9,7 +9,7 @@ import jqwik2.api.recording.*;
 import jqwik2.api.support.*;
 
 public class DirectoryBasedFailureDatabase implements FailureDatabase {
-	public static final String SAMPLEFILE_PREFIX = "sample-";
+	public static final String SAMPLEFILE_PREFIX = "sample#";
 	public static final String IDFILENAME = "ID";
 	private final Path databasePath;
 
@@ -54,7 +54,7 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 
 	private static Path samplePath(SampleRecording recording, Path propertyDirectory) {
 		var sampleId = recording.hashCode();
-		return propertyDirectory.resolve("sample-" + sampleId);
+		return propertyDirectory.resolve(SAMPLEFILE_PREFIX + sampleId);
 	}
 
 	private Path propertyDirectory(String id, boolean createIfNecessary) throws IOException {

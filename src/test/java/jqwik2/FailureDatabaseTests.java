@@ -8,8 +8,10 @@ import jqwik2.api.database.*;
 import jqwik2.api.recording.*;
 
 import net.jqwik.api.*;
+import net.jqwik.api.constraints.*;
 import net.jqwik.api.lifecycle.*;
 
+import static jqwik2.api.recording.Recording.*;
 import static org.assertj.core.api.Assertions.*;
 
 class FailureDatabaseTests {
@@ -24,6 +26,11 @@ class FailureDatabaseTests {
 		database = new DirectoryBasedFailureDatabase(basePath);
 	}
 
+	@BeforeTry
+	void clearDatabase() {
+		database.clear();
+	}
+
 	@AfterExample
 	void deleteDatabase() throws IOException {
 		database.clear();
@@ -32,10 +39,10 @@ class FailureDatabaseTests {
 
 	@Example
 	void saveAndLoadFailures() {
-		var sample1 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(2)));
-		var sample2 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(3)));
-		var sample3 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(2), Recording.atom(3)));
-		var sample4 = new SampleRecording(List.of(Recording.atom(2), Recording.atom(1)));
+		var sample1 = new SampleRecording(List.of(atom(1), atom(2)));
+		var sample2 = new SampleRecording(List.of(atom(1), atom(3)));
+		var sample3 = new SampleRecording(List.of(atom(1), atom(2), atom(3)));
+		var sample4 = new SampleRecording(List.of(atom(2), atom(1)));
 
 
 		database.saveFailure("id1", sample1);
@@ -49,12 +56,27 @@ class FailureDatabaseTests {
 		assertThat(failures).contains(sample1, sample2, sample3, sample4);
 	}
 
+	@Property(tries = 100, shrinking = ShrinkingMode.FULL)
+	void makeSureSampleIdDoesNotCollideWithLongRecordingsAndJustOneChange(@ForAll @Size(min= 1, max = 5000) List<@IntRange(min = 0) Integer> atoms) {
+		List<Recording> longListOfAtoms = atoms.stream().map(choice -> (Recording) atom(choice)).toList();
+		ArrayList<Recording> longListOfAtoms2 = new ArrayList<>(longListOfAtoms);
+		longListOfAtoms2.set(longListOfAtoms2.size() - 1, atom(99));
+		var sample1 = new SampleRecording(longListOfAtoms);
+		var sample2 = new SampleRecording(longListOfAtoms2);
+
+		database.saveFailure("id1", sample1);
+		database.saveFailure("id1", sample2);
+
+		Set<SampleRecording> failures = database.loadFailures("id1");
+		assertThat(failures).containsExactlyInAnyOrder(sample1, sample2);
+	}
+
 	@Example
 	void loadFailuresIgnoresSamplesThatCannotBeDeserialized() throws IOException {
-		var sample1 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(2)));
-		var sample2 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(3)));
-		var sample3 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(2), Recording.atom(3)));
-		var sample4 = new SampleRecording(List.of(Recording.atom(2), Recording.atom(1)));
+		var sample1 = new SampleRecording(List.of(atom(1), atom(2)));
+		var sample2 = new SampleRecording(List.of(atom(1), atom(3)));
+		var sample3 = new SampleRecording(List.of(atom(1), atom(2), atom(3)));
+		var sample4 = new SampleRecording(List.of(atom(2), atom(1)));
 
 
 		database.saveFailure("id1", sample1);
@@ -62,7 +84,7 @@ class FailureDatabaseTests {
 		database.saveFailure("id1", sample3);
 		database.saveFailure("id1", sample4);
 
-		var sample4File = basePath.resolve("id1").resolve("sample-" + sample4.hashCode());
+		var sample4File = basePath.resolve("id1").resolve(DirectoryBasedFailureDatabase.SAMPLEFILE_PREFIX + sample4.hashCode());
 		assertThat(sample4File).exists();
 		Files.writeString(sample4File, "cannot:be:deserialized", StandardOpenOption.TRUNCATE_EXISTING);
 
@@ -73,9 +95,9 @@ class FailureDatabaseTests {
 
 	@Example
 	void saveAndDeleteFailure() {
-		var sample1 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(2)));
-		var sample2 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(3)));
-		var sample4 = new SampleRecording(List.of(Recording.atom(2), Recording.atom(1)));
+		var sample1 = new SampleRecording(List.of(atom(1), atom(2)));
+		var sample2 = new SampleRecording(List.of(atom(1), atom(3)));
+		var sample4 = new SampleRecording(List.of(atom(2), atom(1)));
 
 		database.saveFailure("id1", sample1);
 		database.saveFailure("id1", sample2);
@@ -91,8 +113,8 @@ class FailureDatabaseTests {
 
 	@Example
 	void deleteProperty() {
-		var sample1 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(2)));
-		var sample2 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(3)));
+		var sample1 = new SampleRecording(List.of(atom(1), atom(2)));
+		var sample2 = new SampleRecording(List.of(atom(1), atom(3)));
 
 		database.saveFailure("id1", sample1);
 		database.saveFailure("id1", sample2);
@@ -107,8 +129,8 @@ class FailureDatabaseTests {
 
 	@Example
 	void clear() {
-		var sample1 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(2)));
-		var sample2 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(3)));
+		var sample1 = new SampleRecording(List.of(atom(1), atom(2)));
+		var sample2 = new SampleRecording(List.of(atom(1), atom(3)));
 
 		database.saveFailure("id1", sample1);
 		database.saveFailure("id2", sample2);
@@ -121,9 +143,9 @@ class FailureDatabaseTests {
 
 	@Example
 	void propertyIds() {
-		var sample1 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(2)));
-		var sample2 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(3)));
-		var sample3 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(4)));
+		var sample1 = new SampleRecording(List.of(atom(1), atom(2)));
+		var sample2 = new SampleRecording(List.of(atom(1), atom(3)));
+		var sample3 = new SampleRecording(List.of(atom(1), atom(4)));
 
 		database.saveFailure("id1", sample1);
 		database.saveFailure("id2", sample2);
