@@ -26,30 +26,13 @@ class FailureDatabaseTests {
 
 	@AfterExample
 	void deleteDatabase() throws IOException {
-		Files.list(basePath).forEach(failureDirectory -> {
-			try {
-				System.out.println("> " + failureDirectory.getFileName() + " " + Files.isDirectory(failureDirectory));
-				Files.list(failureDirectory).forEach(samplePath -> {
-					System.out.println(">> " + samplePath.getFileName());
-					try {
-						Files.lines(samplePath).forEach(System.out::println);
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
-				});
-				// Files.deleteIfExists(failureDirectory);
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		});
-
-		System.out.println(basePath);
-		// Files.deleteIfExists(basePath);
+		database.clear();
+		// System.out.println(basePath);
+		Files.deleteIfExists(basePath);
 	}
 
 	@Example
 	void saveFailures() {
-
 		var sample1 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(2)));
 		var sample2 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(3)));
 		var sample3 = new SampleRecording(List.of(Recording.atom(1), Recording.atom(2), Recording.atom(3)));
@@ -63,7 +46,7 @@ class FailureDatabaseTests {
 
 		Set<SampleRecording> failures = database.loadFailures("id1");
 
-		// assertThat(failures).hasSize(4);
-		// assertThat(failures).contains(sample1, sample2, sample3, sample4);
+		assertThat(failures).hasSize(4);
+		assertThat(failures).contains(sample1, sample2, sample3, sample4);
 	}
 }
