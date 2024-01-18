@@ -96,7 +96,10 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 	@Override
 	public void deleteFailure(String propertyId, SampleRecording recording) {
 		ExceptionSupport.runUnchecked(() -> {
-			var propertyDirectory = propertyDirectory(propertyId, true);
+			var propertyDirectory = propertyDirectory(propertyId, false);
+			if (Files.notExists(propertyDirectory)) {
+				return;
+			}
 			var samplePath = samplePath(recording, propertyDirectory);
 			if (Files.exists(samplePath)) {
 				Files.delete(samplePath);
@@ -106,7 +109,14 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 
 	@Override
 	public void deleteProperty(String propertyId) {
-
+		ExceptionSupport.runUnchecked(() -> {
+			var propertyDirectory = propertyDirectory(propertyId, false);
+			if (Files.notExists(propertyDirectory)) {
+				return;
+			}
+			deleteAllIn(propertyDirectory);
+			Files.delete(propertyDirectory);
+		});
 	}
 
 	@Override
@@ -121,6 +131,7 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 	private void deleteAllIn(Path path) throws IOException {
 		Files.walk(path)
 			 .sorted(Comparator.reverseOrder())
+			 .filter(p -> !p.equals(path))
 			 .map(Path::toFile)
 			 .forEach(File::delete);
 	}
