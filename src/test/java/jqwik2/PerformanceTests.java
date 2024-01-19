@@ -13,11 +13,14 @@ class PerformanceTests {
 
 	// @Example
 	void testXorShiftGenerator() throws Exception {
-		java.util.random.RandomGenerator generator = new XORShiftRandom();
+		java.util.random.RandomGenerator xorShiftRandom = new XORShiftRandom();
 		int count = 100_000_000;
 		PerformanceTesting.time("XorShift", count, () -> {
-			generator.nextDouble();
-			// System.out.println(generator.nextInt(5));
+			xorShiftRandom.nextDouble();
+		});
+		java.util.random.RandomGenerator javaUtilRandom = new Random();
+		PerformanceTesting.time("java.util.Random", count, () -> {
+			javaUtilRandom.nextDouble();
 		});
 	}
 
@@ -30,7 +33,9 @@ class PerformanceTests {
 		int count = 100_000;
 
 		PerformanceTesting.time("jqwik2 generation", count, () -> {
+			// Recording slows generation down by factor of 2, but it's necessary for shrinking and reproducing failures
 			GenRecorder source = new GenRecorder(new RandomGenSource());
+			// GenSource source = new RandomGenSource();
 			randomListWithEdgeCases.generate(source);
 		});
 		// System.out.println(source.recording());
