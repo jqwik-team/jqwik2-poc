@@ -3,10 +3,12 @@
   
 - JqwikProperty
     - Save seed and falsified samples to disk (.jqwik folder)
-      See: https://hypothesis.readthedocs.io/en/latest/database.html
+      Design idea: Add PropertyRunStrategy.failureDatabase() which defaults to null database.
     - Allow rerun with previously falsified samples (starting with smallest)
       => Rerun will improve shrinking!
     - Report falsified samples, tries, seed, effective generation strategy
+
+- Allow JqwikDefaults to be changed programmatically
 
 - Introduce Arbitraries
     - map, flatMap

@@ -10,8 +10,8 @@ import jqwik2.api.support.*;
 
 public class DirectoryBasedFailureDatabase implements FailureDatabase {
 	public static final String SAMPLEFILE_PREFIX = "sample#";
-	public static final String IDFILE_NAME = "ID";
-	public static final String SEEDFILE_NAME = "seed";
+	public static final String ID_FILE_NAME = "ID";
+	public static final String SEED_FILE_NAME = "seed";
 	private final Path databasePath;
 
 	public DirectoryBasedFailureDatabase(Path databasePath) {
@@ -68,14 +68,14 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 
 	private static void createIdFile(String id, String idBasedFileName, Path propertyDirectory) throws IOException {
 		if (!idBasedFileName.equals(id)) {
-			var idFile = propertyDirectory.resolve(IDFILE_NAME);
+			var idFile = propertyDirectory.resolve(ID_FILE_NAME);
 			Files.write(idFile, id.getBytes());
 		}
 	}
 
 	private static String propertyId(Path propertyDirectory) {
 		return ExceptionSupport.runUnchecked(() -> {
-			var idFile = propertyDirectory.resolve(IDFILE_NAME);
+			var idFile = propertyDirectory.resolve(ID_FILE_NAME);
 			if (Files.notExists(idFile)) {
 				return propertyDirectory.getFileName().toString();
 			} else {
@@ -148,7 +148,7 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 
 	private Path seedFile(String propertyId) throws IOException {
 		var propertyDirectory = propertyDirectory(propertyId, true);
-		return propertyDirectory.resolve(SEEDFILE_NAME);
+		return propertyDirectory.resolve(SEED_FILE_NAME);
 	}
 
 	@Override
