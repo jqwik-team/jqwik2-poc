@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.*;
 
 class ArbitraryTests {
 
-	@Property(tries = 10)
+	@Example
 	void anIntegerArbitrary() {
 		for (int i = 0; i < 10; i++) {
 			Arbitrary<Integer> ints = Numbers.integers();
