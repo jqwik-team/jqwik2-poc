@@ -3,6 +3,7 @@ package jqwik2;
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
+import java.util.concurrent.atomic.*;
 
 import jqwik2.api.database.*;
 import jqwik2.api.recording.*;
@@ -164,5 +165,26 @@ class FailureDatabaseTests {
 		database.failingProperties();
 		assertThat(database.failingProperties())
 			.containsExactlyInAnyOrder("id1", "id2", "id3 and some");
+	}
+
+	@Example
+	void performanceTestForDatabaseOverhead(
+		@ForAll @Size(200) List<@AlphaChars @Chars({' ', ':', '#'}) @StringLength(min = 1, max = 20) String> propertyIds,
+		@ForAll @Size(200) List<@NumericChars @StringLength(min = 1, max = 20) String> seeds
+	) throws Exception {
+		AtomicInteger next = new AtomicInteger(0);
+		var repeats = 200;
+		long duration = PerformanceTesting.time("load property with seed and failures", repeats, () -> {
+			String propertyId = propertyIds.get(next.get());
+			String seed = seeds.get(next.getAndIncrement());
+
+			database.saveSeed(propertyId, seed);
+			database.saveFailure(propertyId, new SampleRecording(List.of(atom(1), atom(2))));
+			database.saveFailure(propertyId, new SampleRecording(List.of(atom(3), atom(4))));
+
+			assertThat(database.loadSeed(propertyId)).hasValue(seed);
+			assertThat(database.loadFailures(propertyId)).hasSize(2);
+		});
+		System.out.printf("Average time: %s ms%n", duration / (double) repeats);
 	}
 }

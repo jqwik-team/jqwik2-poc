@@ -11,7 +11,6 @@ import jqwik2.internal.*;
 
 import net.jqwik.api.*;
 
-import static jqwik2.PerformanceTests.*;
 import static org.assertj.core.api.Assertions.*;
 
 class ConcurrentRunnerTests {
@@ -32,7 +31,7 @@ class ConcurrentRunnerTests {
 	void runSuccessfullyToEnd(@ForAll("services") Pair<String, Supplier<ExecutorService>> pair) throws Exception {
 		String name = pair.first();
 		ExecutorService service = pair.second().get();
-		time(
+		PerformanceTesting.time(
 			"runToEnd: %s".formatted(name), 1,
 			() -> runAllTasksToEnd(service)
 		);
@@ -60,7 +59,7 @@ class ConcurrentRunnerTests {
 		String name = pair.first();
 		ExecutorService service = pair.second().get();
 
-		time("runWithTimeout: " + name, 1, () -> runSuccessfullyWithTimeout(service, name));
+		PerformanceTesting.time("runWithTimeout: " + name, 1, () -> runSuccessfullyWithTimeout(service, name));
 	}
 
 	private static void runSuccessfullyWithTimeout(ExecutorService service, String name) {
@@ -93,7 +92,7 @@ class ConcurrentRunnerTests {
 		String name = pair.first();
 		ExecutorService service = pair.second().get();
 
-		time("runWithShutdown: " + name, 1, () -> runSuccessfullyWithShutdown(service));
+		PerformanceTesting.time("runWithShutdown: " + name, 1, () -> runSuccessfullyWithShutdown(service));
 	}
 
 	private static void runSuccessfullyWithShutdown(ExecutorService service) throws TimeoutException {

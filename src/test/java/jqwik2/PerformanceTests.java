@@ -6,7 +6,6 @@ import jqwik2.api.*;
 import jqwik2.internal.*;
 import jqwik2.internal.generators.*;
 import jqwik2.internal.recording.*;
-import org.assertj.core.api.*;
 
 import net.jqwik.api.*;
 
@@ -16,7 +15,7 @@ class PerformanceTests {
 	void testXorShiftGenerator() throws Exception {
 		java.util.random.RandomGenerator generator = new XORShiftRandom();
 		int count = 100_000_000;
-		time("XorShift", count, () -> {
+		PerformanceTesting.time("XorShift", count, () -> {
 			generator.nextDouble();
 			// System.out.println(generator.nextInt(5));
 		});
@@ -30,7 +29,7 @@ class PerformanceTests {
 
 		int count = 100_000;
 
-		time("jqwik2 generation", count, () -> {
+		PerformanceTesting.time("jqwik2 generation", count, () -> {
 			GenRecorder source = new GenRecorder(new RandomGenSource());
 			randomListWithEdgeCases.generate(source);
 		});
@@ -41,16 +40,7 @@ class PerformanceTests {
 															  .generator(1000);
 
 		Random random = new Random();
-		time("jqwik1 generation", count, () -> generator.next(random));
-	}
-
-	public static void time(String label, int count, SoftAssertionsProvider.ThrowingRunnable runnable) throws Exception {
-		long start = System.currentTimeMillis();
-		for (int i = 0; i < count; i++) {
-			runnable.run();
-		}
-		long end = System.currentTimeMillis();
-		System.out.printf("[%s] Time: %d ms%n", label, end - start);
+		PerformanceTesting.time("jqwik1 generation", count, () -> generator.next(random));
 	}
 
 }

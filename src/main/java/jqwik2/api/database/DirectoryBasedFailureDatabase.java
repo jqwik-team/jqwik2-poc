@@ -10,7 +10,7 @@ import jqwik2.api.support.*;
 
 public class DirectoryBasedFailureDatabase implements FailureDatabase {
 	public static final String SAMPLEFILE_PREFIX = "sample#";
-	public static final String IDFILENAME = "ID";
+	public static final String IDFILE_NAME = "ID";
 	public static final String SEEDFILE_NAME = "seed";
 	private final Path databasePath;
 
@@ -23,7 +23,7 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 		if (Files.notExists(databasePath)) {
 			try {
 				Files.createDirectories(databasePath);
-				System.out.println("Created database directory " + databasePath);
+				// System.out.println("Created database directory " + databasePath);
 				if (!databasePath.toFile().canWrite()) {
 					throw new IOException("Cannot write to " + databasePath);
 				}
@@ -68,14 +68,14 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 
 	private static void createIdFile(String id, String idBasedFileName, Path propertyDirectory) throws IOException {
 		if (!idBasedFileName.equals(id)) {
-			var idFile = propertyDirectory.resolve(IDFILENAME);
+			var idFile = propertyDirectory.resolve(IDFILE_NAME);
 			Files.write(idFile, id.getBytes());
 		}
 	}
 
 	private static String propertyId(Path propertyDirectory) {
 		return ExceptionSupport.runUnchecked(() -> {
-			var idFile = propertyDirectory.resolve(IDFILENAME);
+			var idFile = propertyDirectory.resolve(IDFILE_NAME);
 			if (Files.notExists(idFile)) {
 				return propertyDirectory.getFileName().toString();
 			} else {
