@@ -34,7 +34,7 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 	}
 
 	@Override
-	public void saveFailure(String propertyId, SampleRecording recording) {
+	public void saveFailingSample(String propertyId, SampleRecording recording) {
 		ExceptionSupport.runUnchecked(() -> {
 			var propertyDirectory = propertyDirectory(propertyId, true);
 			var samplePath = samplePath(recording, propertyDirectory);
@@ -90,7 +90,7 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 	}
 
 	@Override
-	public Set<SampleRecording> loadFailures(String propertyId) {
+	public Set<SampleRecording> loadFailingSamples(String propertyId) {
 		return ExceptionSupport.runUnchecked(() -> {
 			var propertyDirectory = propertyDirectory(propertyId, false);
 			if (Files.notExists(propertyDirectory)) {
@@ -138,6 +138,10 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 	public void saveSeed(String propertyId, String seed) {
 		ExceptionSupport.runUnchecked(() -> {
 			var seedFile = seedFile(propertyId);
+			if (seed == null) {
+				Files.deleteIfExists(seedFile);
+				return;
+			}
 			Files.writeString(seedFile, seed, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 		});
 	}

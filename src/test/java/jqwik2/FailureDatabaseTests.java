@@ -45,12 +45,12 @@ class FailureDatabaseTests {
 		var sample4 = new SampleRecording(List.of(atom(2), atom(1)));
 
 
-		database.saveFailure("id1", sample1);
-		database.saveFailure("id1", sample2);
-		database.saveFailure("id1", sample3);
-		database.saveFailure("id1", sample4);
+		database.saveFailingSample("id1", sample1);
+		database.saveFailingSample("id1", sample2);
+		database.saveFailingSample("id1", sample3);
+		database.saveFailingSample("id1", sample4);
 
-		Set<SampleRecording> failures = database.loadFailures("id1");
+		Set<SampleRecording> failures = database.loadFailingSamples("id1");
 
 		assertThat(failures).hasSize(4);
 		assertThat(failures).contains(sample1, sample2, sample3, sample4);
@@ -64,10 +64,10 @@ class FailureDatabaseTests {
 		var sample1 = new SampleRecording(longListOfAtoms);
 		var sample2 = new SampleRecording(longListOfAtoms2);
 
-		database.saveFailure("id1", sample1);
-		database.saveFailure("id1", sample2);
+		database.saveFailingSample("id1", sample1);
+		database.saveFailingSample("id1", sample2);
 
-		Set<SampleRecording> failures = database.loadFailures("id1");
+		Set<SampleRecording> failures = database.loadFailingSamples("id1");
 		assertThat(failures).containsExactlyInAnyOrder(sample1, sample2);
 	}
 
@@ -79,16 +79,16 @@ class FailureDatabaseTests {
 		var sample4 = new SampleRecording(List.of(atom(2), atom(1)));
 
 
-		database.saveFailure("id1", sample1);
-		database.saveFailure("id1", sample2);
-		database.saveFailure("id1", sample3);
-		database.saveFailure("id1", sample4);
+		database.saveFailingSample("id1", sample1);
+		database.saveFailingSample("id1", sample2);
+		database.saveFailingSample("id1", sample3);
+		database.saveFailingSample("id1", sample4);
 
 		var sample4File = basePath.resolve("id1").resolve(DirectoryBasedFailureDatabase.SAMPLEFILE_PREFIX + sample4.hashCode());
 		assertThat(sample4File).exists();
 		Files.writeString(sample4File, "cannot:be:deserialized", StandardOpenOption.TRUNCATE_EXISTING);
 
-		Set<SampleRecording> failures = database.loadFailures("id1");
+		Set<SampleRecording> failures = database.loadFailingSamples("id1");
 		assertThat(failures).hasSize(3);
 		assertThat(failures).contains(sample1, sample2, sample3);
 	}
@@ -99,11 +99,11 @@ class FailureDatabaseTests {
 		var sample2 = new SampleRecording(List.of(atom(1), atom(3)));
 		var sample4 = new SampleRecording(List.of(atom(2), atom(1)));
 
-		database.saveFailure("id1", sample1);
-		database.saveFailure("id1", sample2);
+		database.saveFailingSample("id1", sample1);
+		database.saveFailingSample("id1", sample2);
 
 		database.deleteFailure("id1", sample1);
-		Set<SampleRecording> failures = database.loadFailures("id1");
+		Set<SampleRecording> failures = database.loadFailingSamples("id1");
 		assertThat(failures).hasSize(1);
 		assertThat(failures).contains(sample2);
 
@@ -116,11 +116,11 @@ class FailureDatabaseTests {
 		var sample1 = new SampleRecording(List.of(atom(1), atom(2)));
 		var sample2 = new SampleRecording(List.of(atom(1), atom(3)));
 
-		database.saveFailure("id1", sample1);
-		database.saveFailure("id1", sample2);
+		database.saveFailingSample("id1", sample1);
+		database.saveFailingSample("id1", sample2);
 
 		database.deleteProperty("id1");
-		Set<SampleRecording> failures = database.loadFailures("id1");
+		Set<SampleRecording> failures = database.loadFailingSamples("id1");
 		assertThat(failures).isEmpty();
 
 		database.deleteProperty("id1"); // idempotent
@@ -132,12 +132,12 @@ class FailureDatabaseTests {
 		var sample1 = new SampleRecording(List.of(atom(1), atom(2)));
 		var sample2 = new SampleRecording(List.of(atom(1), atom(3)));
 
-		database.saveFailure("id1", sample1);
-		database.saveFailure("id2", sample2);
+		database.saveFailingSample("id1", sample1);
+		database.saveFailingSample("id2", sample2);
 
 		database.clear();
-		assertThat(database.loadFailures("id1")).isEmpty();
-		assertThat(database.loadFailures("id2")).isEmpty();
+		assertThat(database.loadFailingSamples("id1")).isEmpty();
+		assertThat(database.loadFailingSamples("id2")).isEmpty();
 		assertThat(database.failingProperties()).isEmpty();
 	}
 
@@ -152,14 +152,25 @@ class FailureDatabaseTests {
 	}
 
 	@Example
+	void saveFailureInOneGo() {
+		var sample1 = new SampleRecording(List.of(atom(1), atom(2)));
+		var sample2 = new SampleRecording(List.of(atom(1), atom(3)));
+		Set<SampleRecording> failedSamples = Set.of(sample1, sample2);
+		database.saveFailure("id1", "1234567890", failedSamples);
+
+		assertThat(database.loadSeed("id1")).hasValue("1234567890");
+		assertThat(database.loadFailingSamples("id1")).containsExactlyInAnyOrder(sample1, sample2);
+	}
+
+	@Example
 	void propertyIds() {
 		var sample1 = new SampleRecording(List.of(atom(1), atom(2)));
 		var sample2 = new SampleRecording(List.of(atom(1), atom(3)));
 		var sample3 = new SampleRecording(List.of(atom(1), atom(4)));
 
-		database.saveFailure("id1", sample1);
-		database.saveFailure("id2", sample2);
-		database.saveFailure("id3 and some", sample3);
+		database.saveFailingSample("id1", sample1);
+		database.saveFailingSample("id2", sample2);
+		database.saveFailingSample("id3 and some", sample3);
 
 		database.failingProperties();
 		assertThat(database.failingProperties())
@@ -177,12 +188,13 @@ class FailureDatabaseTests {
 			String propertyId = propertyIds.get(next.get());
 			String seed = seeds.get(next.getAndIncrement());
 
-			database.saveSeed(propertyId, seed);
-			database.saveFailure(propertyId, new SampleRecording(List.of(atom(1), atom(2))));
-			database.saveFailure(propertyId, new SampleRecording(List.of(atom(3), atom(4))));
+			database.saveFailure(propertyId, seed, Set.of(
+				new SampleRecording(List.of(atom(1), atom(2))),
+				new SampleRecording(List.of(atom(3), atom(4)))
+			));
 
 			assertThat(database.loadSeed(propertyId)).hasValue(seed);
-			assertThat(database.loadFailures(propertyId)).hasSize(2);
+			assertThat(database.loadFailingSamples(propertyId)).hasSize(2);
 		});
 	}
 }
