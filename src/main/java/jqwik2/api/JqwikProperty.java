@@ -91,8 +91,9 @@ public class JqwikProperty {
 				generators
 			);
 			case SAMPLES -> PropertyRunConfiguration.samples(
-				strategy.samples(),
 				strategy.maxRuntime(),
+				isShrinkingEnabled(),
+				strategy.samples(),
 				PropertyRunConfiguration.DEFAULT_EXECUTOR_SERVICE_SUPPLIER
 			);
 			case null, default -> throw new IllegalArgumentException("Unsupported generation strategy: " + strategy.generation());

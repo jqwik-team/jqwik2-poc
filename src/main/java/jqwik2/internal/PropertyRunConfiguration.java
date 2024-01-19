@@ -99,14 +99,15 @@ public interface PropertyRunConfiguration {
 	}
 
 	static PropertyRunConfiguration samples(
-		List<SampleRecording> samples,
 		Duration maxRuntime,
+		boolean shrinkingEnabled,
+		List<SampleRecording> samples,
 		Supplier<ExecutorService> defaultExecutorServiceSupplier
 	) {
 		IterableSampleSource sampleSource = new RecordedSamplesSource(samples);
 		return new Configuration(
 			null, samples.size(),
-			true,
+			shrinkingEnabled,
 			maxRuntime,
 			defaultExecutorServiceSupplier,
 			() -> sampleSource

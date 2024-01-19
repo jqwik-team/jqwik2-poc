@@ -119,7 +119,7 @@ class JqwikPropertyTests {
 	}
 
 	@Example
-	void exhaustiveGenerationStrategy() {
+	void generationMode_EXHAUSTIVE() {
 		PropertyRunStrategy strategy = PropertyRunStrategy.create(
 			100, Duration.ofMinutes(10), null,
 			List.of(),
@@ -144,7 +144,7 @@ class JqwikPropertyTests {
 	}
 
 	@Example
-	void smartGenerationProperty() {
+	void generationMode_SMART() {
 		PropertyRunStrategy strategy = PropertyRunStrategy.create(
 			100, Duration.ofMinutes(10), RandomChoice.generateRandomSeed(),
 			List.of(),
@@ -171,7 +171,7 @@ class JqwikPropertyTests {
 	}
 
 	@Example
-	void edgeCasesGenerationProperty() {
+	void edgeCasesMode_MIXIN() {
 		PropertyRunStrategy strategy = PropertyRunStrategy.create(
 			1000, Duration.ofMinutes(10), RandomChoice.generateRandomSeed(),
 			List.of(),
@@ -190,7 +190,7 @@ class JqwikPropertyTests {
 	}
 
 	@Example
-	void samplesGenerationProperty() {
+	void generationMode_SAMPLES() {
 
 		var integers = Numbers.integers();
 		var generator = SampleGenerator.from(integers.generator());
