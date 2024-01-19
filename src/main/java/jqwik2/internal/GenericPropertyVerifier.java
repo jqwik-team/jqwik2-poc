@@ -12,18 +12,32 @@ public class GenericPropertyVerifier<T1, T2>
 	implements PropertyVerifier1<T1>, PropertyVerifier2<T1, T2> {
 
 	private final Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig;
-	private final boolean failIfNotSuccessful;
+	private final BiConsumer<PropertyRunResult, Throwable> onFailed;
+	private final Consumer<Optional<Throwable>> onAborted;
 	private final List<Generator.DecoratorFunction> decorators;
 	private final Arbitrary<T1> arbitrary1;
 	private final Arbitrary<T2> arbitrary2;
 
-	public GenericPropertyVerifier(Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig, boolean failIfNotSuccessful, List<Generator.DecoratorFunction> decorators, Arbitrary<T1> arbitrary) {
-		this(supplyConfig, failIfNotSuccessful, decorators, arbitrary, null);
+	public GenericPropertyVerifier(
+		Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig,
+		BiConsumer<PropertyRunResult, Throwable> onFailed,
+		Consumer<Optional<Throwable>> onAborted,
+		List<Generator.DecoratorFunction> decorators,
+		Arbitrary<T1> arbitrary
+	) {
+		this(supplyConfig, onFailed, onAborted, decorators, arbitrary, null);
 	}
 
-	public GenericPropertyVerifier(Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig, boolean failIfNotSuccessful, List<Generator.DecoratorFunction> decorators, Arbitrary<T1> arbitrary1, Arbitrary<T2> arbitrary2) {
+	public GenericPropertyVerifier(
+		Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig,
+		BiConsumer<PropertyRunResult, Throwable> onFailed,
+		Consumer<Optional<Throwable>> onAborted,
+		List<Generator.DecoratorFunction> decorators,
+		Arbitrary<T1> arbitrary1, Arbitrary<T2> arbitrary2
+	) {
 		this.supplyConfig = supplyConfig;
-		this.failIfNotSuccessful = failIfNotSuccessful;
+		this.onFailed = onFailed;
+		this.onAborted = onAborted;
 		this.decorators = decorators;
 		this.arbitrary1 = arbitrary1;
 		this.arbitrary2 = arbitrary2;
@@ -41,7 +55,7 @@ public class GenericPropertyVerifier<T1, T2>
 		);
 	}
 
-	private List<Generator<?>> generators(Arbitrary<?> ... arbitraries) {
+	private List<Generator<?>> generators(Arbitrary<?>... arbitraries) {
 		List<Generator<?>> generators = new ArrayList<>();
 		for (Arbitrary<?> a : arbitraries) {
 			Generator<?> generator = decorate(a.generator());
@@ -90,22 +104,11 @@ public class GenericPropertyVerifier<T1, T2>
 	private PropertyRunResult run(List<Generator<?>> generators, Tryable tryable) {
 		var propertyCase = new PropertyCase(generators, tryable);
 		var result = propertyCase.run(supplyConfig.apply(generators));
-		return failIfNotSuccessful(result);
-	}
-
-	private PropertyRunResult failIfNotSuccessful(PropertyRunResult result) {
-		if (!failIfNotSuccessful) {
-			return result;
+		if (result.isFailed()) {
+			onFailed.accept(result, failureException(result.falsifiedSamples()));
 		}
 		if (result.isAborted()) {
-			var abortionException =
-				result.abortionReason()
-					  .orElse(new TestAbortedException("Property aborted for unknown reason"));
-			ExceptionSupport.throwAsUnchecked(abortionException);
-		}
-		if (result.isFailed()) {
-			var failureException = failureException(result.falsifiedSamples());
-			ExceptionSupport.throwAsUnchecked(failureException);
+			onAborted.accept(result.abortionReason());
 		}
 		return result;
 	}

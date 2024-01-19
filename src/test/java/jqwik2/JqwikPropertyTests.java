@@ -2,16 +2,24 @@ package jqwik2;
 
 import java.time.*;
 import java.util.*;
+import java.util.function.*;
 
+import jqwik2.api.Arbitrary;
+import jqwik2.api.Assume;
 import jqwik2.api.*;
 import jqwik2.api.arbitraries.*;
 import jqwik2.api.recording.*;
+import jqwik2.api.support.*;
 import jqwik2.internal.*;
+import org.opentest4j.*;
 
 import net.jqwik.api.*;
 
+import static jqwik2.api.recording.Recording.list;
 import static jqwik2.api.recording.Recording.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 class JqwikPropertyTests {
 
@@ -56,14 +64,51 @@ class JqwikPropertyTests {
 	}
 
 	@Example
-	void failingPropertyThrowIfNotSuccessful() {
+	void failingPropertyThrowsExceptionWhenFailed() {
 		var property = new JqwikProperty();
-		property.failIfNotSuccessful(true);
+		property.onFailed((result, throwable) -> {
+			ExceptionSupport.throwAsUnchecked(throwable);
+		});
 
 		assertThatThrownBy(
-			() -> property.forAll(Numbers.integers()).check(i -> false)
+			() -> property.forAll(Values.just(42)).check(i -> false)
 		).isInstanceOf(AssertionError.class)
 		 .hasMessageContaining("failed");
+	}
+
+	@Example
+	void abortedPropertyThrowsAbortionErrorWhenAborted() {
+		var property = new JqwikProperty();
+		property.onAbort(abortionReason -> {
+			abortionReason.ifPresent(ExceptionSupport::throwAsUnchecked);
+			throw new TestAbortedException("Property aborted for unknown reason");
+		});
+
+		var throwingArbitrary = new Arbitrary<Integer>() {
+			@Override
+			public Generator<Integer> generator() {
+				throw new TestAbortedException("Property aborted because of thrown exception");
+			}
+		};
+		assertThatThrownBy(
+			() -> property.forAll(throwingArbitrary).verify(i -> {})
+		).isInstanceOf(TestAbortedException.class);
+	}
+
+	@Example
+	void onFailureNotification() {
+		var property = new JqwikProperty();
+
+		BiConsumer<PropertyRunResult, Throwable> consumer1 = mock(BiConsumer.class);
+		BiConsumer<PropertyRunResult, Throwable> consumer2 = mock(BiConsumer.class);
+		property.onFailed(consumer1);
+		property.onFailed(consumer2);
+
+		PropertyRunResult result = property.forAll(Values.just(10)).check(i -> false);
+		assertThat(result.isFailed()).isTrue();
+
+		verify(consumer1).accept(any(PropertyRunResult.class), any(AssertionError.class));
+		verify(consumer2).accept(any(PropertyRunResult.class), any(AssertionError.class));
 	}
 
 	@Example
@@ -191,7 +236,6 @@ class JqwikPropertyTests {
 
 	@Example
 	void generationMode_SAMPLES() {
-
 		var integers = Numbers.integers();
 		var generator = SampleGenerator.from(integers.generator());
 		var randomSampleSource = SampleSource.of(new RandomGenSource());

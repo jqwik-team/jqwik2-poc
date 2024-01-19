@@ -1,6 +1,7 @@
 package jqwik2.api;
 
 import java.util.*;
+import java.util.function.*;
 
 import jqwik2.internal.*;
 
@@ -8,7 +9,8 @@ public class JqwikProperty {
 
 	private final PropertyRunStrategy strategy;
 	private final String id;
-	private boolean failIfNotSuccessful = false;
+	private Set<BiConsumer<PropertyRunResult, Throwable>> onFailureHandlers = new LinkedHashSet<>();
+	private Set<Consumer<Optional<Throwable>>> onAbortHandlers = new LinkedHashSet<>();
 
 	public JqwikProperty() {
 		this(PropertyRunStrategy.DEFAULT);
@@ -40,16 +42,15 @@ public class JqwikProperty {
 		this.strategy = strategy;
 	}
 
-	public void failIfNotSuccessful(boolean failIfNotSuccessful) {
-		this.failIfNotSuccessful = failIfNotSuccessful;
-	}
-
 	public PropertyRunStrategy strategy() {
 		return strategy;
 	}
 
 	public <T1> PropertyVerifier1<T1> forAll(Arbitrary<T1> arbitrary) {
-		return new GenericPropertyVerifier<>(this::buildConfiguration, failIfNotSuccessful, decorators(), arbitrary);
+		return new GenericPropertyVerifier<>(
+			this::buildConfiguration, this::onFailed, this::onAborted,
+			decorators(), arbitrary
+		);
 	}
 
 	private List<Generator.DecoratorFunction> decorators() {
@@ -64,7 +65,18 @@ public class JqwikProperty {
 		Arbitrary<T1> arbitrary1,
 		Arbitrary<T2> arbitrary2
 	) {
-		return new GenericPropertyVerifier<>(this::buildConfiguration, failIfNotSuccessful, decorators(), arbitrary1, arbitrary2);
+		return new GenericPropertyVerifier<>(
+			this::buildConfiguration, this::onFailed, this::onAborted,
+			decorators(), arbitrary1, arbitrary2
+		);
+	}
+
+	private void onFailed(PropertyRunResult result, Throwable throwable) {
+		onFailureHandlers.forEach(h -> h.accept(result, throwable));
+	}
+
+	private void onAborted(Optional<Throwable> abortionReason) {
+		onAbortHandlers.forEach(h -> h.accept(abortionReason));
 	}
 
 	private PropertyRunConfiguration buildConfiguration(List<Generator<?>> generators) {
@@ -106,6 +118,15 @@ public class JqwikProperty {
 
 	public String id() {
 		return id;
+	}
+
+
+	public void onFailed(BiConsumer<PropertyRunResult, Throwable> onFailureHandler) {
+		this.onFailureHandlers.add(onFailureHandler);
+	}
+
+	public void onAbort(Consumer<Optional<Throwable>> onAbortHandler) {
+		this.onAbortHandlers.add(onAbortHandler);
 	}
 
 	public JqwikProperty withGeneration(PropertyRunStrategy.GenerationMode generationMode) {
