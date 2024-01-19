@@ -6,6 +6,8 @@ import jqwik2.api.*;
 
 public class BaseGenerators {
 
+	public static final int DEFAULT_COLLECTION_SIZE = 255;
+
 	private BaseGenerators() {}
 
 	public static Generator<Integer> integers(int min, int max) {

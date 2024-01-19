@@ -1,5 +1,7 @@
 package jqwik2;
 
+import java.util.*;
+
 import jqwik2.api.Arbitrary;
 import jqwik2.api.arbitraries.*;
 
@@ -7,7 +9,7 @@ import net.jqwik.api.*;
 
 import static org.assertj.core.api.Assertions.*;
 
-class ArbitraryTests {
+class ArbitrariesTests {
 
 	@Example
 	void integers() {
@@ -31,10 +33,10 @@ class ArbitraryTests {
 	@Example
 	void lists() {
 		for (int i = 0; i < 10; i++) {
-			Arbitrary<List<Integer>> ints = Numbers.integers().list();
+			Arbitrary<List<Integer>> ints = Numbers.integers().list().ofSize(5);
 			List<Integer> sample = ints.sample();
 			System.out.println(sample);
-			// assertThat(sample).isBetween(Integer.MIN_VALUE, Integer.MAX_VALUE);
+			assertThat(sample).hasSize(5);
 		}
 	}
 }
