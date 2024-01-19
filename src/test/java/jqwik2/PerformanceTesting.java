@@ -13,7 +13,11 @@ public class PerformanceTesting {
 		}
 		long end = System.currentTimeMillis();
 		var duration = end - start;
-		System.out.printf("[%s] Time: %d ms%n", label, duration);
+		String averageLabel = "";
+		if (count > 1) {
+			averageLabel = ", Average: %f ms (in %d tries)".formatted(duration / (double) count, count);
+		}
+		System.out.printf("[%s] Time: %d ms%s%n", label, duration, averageLabel);
 		return duration;
 	}
 }

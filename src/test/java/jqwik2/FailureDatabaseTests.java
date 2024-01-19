@@ -23,7 +23,6 @@ class FailureDatabaseTests {
 	@BeforeExample
 	void setupDatabase() throws IOException {
 		basePath = Files.createTempDirectory("jqwik-failures").toAbsolutePath();
-		System.out.println("Created database directory " + basePath);
 		database = new DirectoryBasedFailureDatabase(basePath);
 	}
 
@@ -174,7 +173,7 @@ class FailureDatabaseTests {
 	) throws Exception {
 		AtomicInteger next = new AtomicInteger(0);
 		var repeats = 200;
-		long duration = PerformanceTesting.time("load property with seed and failures", repeats, () -> {
+		PerformanceTesting.time("load property with seed and failures", repeats, () -> {
 			String propertyId = propertyIds.get(next.get());
 			String seed = seeds.get(next.getAndIncrement());
 
@@ -185,6 +184,5 @@ class FailureDatabaseTests {
 			assertThat(database.loadSeed(propertyId)).hasValue(seed);
 			assertThat(database.loadFailures(propertyId)).hasSize(2);
 		});
-		System.out.printf("Average time: %s ms%n", duration / (double) repeats);
 	}
 }
