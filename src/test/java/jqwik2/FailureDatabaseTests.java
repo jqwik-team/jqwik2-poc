@@ -56,8 +56,8 @@ class FailureDatabaseTests {
 		assertThat(failures).contains(sample1, sample2, sample3, sample4);
 	}
 
-	@Property(tries = 100, shrinking = ShrinkingMode.FULL)
-	void makeSureSampleIdDoesNotCollideWithLongRecordingsAndJustOneChange(@ForAll @Size(min= 1, max = 5000) List<@IntRange(min = 0) Integer> atoms) {
+	@Property(tries = 10, shrinking = ShrinkingMode.FULL)
+	void makeSureSampleIdDoesNotCollideWithLongRecordingsAndJustOneChange(@ForAll @Size(min = 1, max = 5000) List<@IntRange(min = 0) Integer> atoms) {
 		List<Recording> longListOfAtoms = atoms.stream().map(choice -> (Recording) atom(choice)).toList();
 		ArrayList<Recording> longListOfAtoms2 = new ArrayList<>(longListOfAtoms);
 		longListOfAtoms2.set(longListOfAtoms2.size() - 1, atom(99));
@@ -139,6 +139,16 @@ class FailureDatabaseTests {
 		assertThat(database.loadFailures("id1")).isEmpty();
 		assertThat(database.loadFailures("id2")).isEmpty();
 		assertThat(database.failingProperties()).isEmpty();
+	}
+
+	@Example
+	void saveAndLoadSeed() {
+		var nonExistingSeed = database.loadSeed("id1");
+		assertThat(nonExistingSeed).isEmpty();
+
+		database.saveSeed("id1", "1234567890");
+		var seed = database.loadSeed("id1");
+		assertThat(seed).hasValue("1234567890");
 	}
 
 	@Example

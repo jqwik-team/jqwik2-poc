@@ -17,4 +17,8 @@ public interface FailureDatabase {
 	void clear();
 
 	Set<String> failingProperties();
+
+	void saveSeed(String propertyId, String seed);
+
+	Optional<String> loadSeed(String propertyId);
 }

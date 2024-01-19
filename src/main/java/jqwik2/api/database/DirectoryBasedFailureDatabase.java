@@ -11,6 +11,7 @@ import jqwik2.api.support.*;
 public class DirectoryBasedFailureDatabase implements FailureDatabase {
 	public static final String SAMPLEFILE_PREFIX = "sample#";
 	public static final String IDFILENAME = "ID";
+	public static final String SEEDFILE_NAME = "seed";
 	private final Path databasePath;
 
 	public DirectoryBasedFailureDatabase(Path databasePath) {
@@ -33,9 +34,9 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 	}
 
 	@Override
-	public void saveFailure(String id, SampleRecording recording) {
-		try {
-			var propertyDirectory = propertyDirectory(id, true);
+	public void saveFailure(String propertyId, SampleRecording recording) {
+		ExceptionSupport.runUnchecked(() -> {
+			var propertyDirectory = propertyDirectory(propertyId, true);
 			var samplePath = samplePath(recording, propertyDirectory);
 			if (Files.notExists(samplePath)) {
 				var sampleFile = Files.createFile(samplePath);
@@ -47,9 +48,7 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 					}
 				}
 			}
-		} catch (IOException e) {
-			ExceptionSupport.throwAsUnchecked(e);
-		}
+		});
 	}
 
 	private static Path samplePath(SampleRecording recording, Path propertyDirectory) {
@@ -132,6 +131,30 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 			if (Files.exists(samplePath)) {
 				Files.delete(samplePath);
 			}
+		});
+	}
+
+	@Override
+	public void saveSeed(String propertyId, String seed) {
+		ExceptionSupport.runUnchecked(() -> {
+			var seedFile = seedFile(propertyId);
+			Files.writeString(seedFile, seed, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+		});
+	}
+
+	private Path seedFile(String propertyId) throws IOException {
+		var propertyDirectory = propertyDirectory(propertyId, true);
+		return propertyDirectory.resolve(SEEDFILE_NAME);
+	}
+
+	@Override
+	public Optional<String> loadSeed(String propertyId) {
+		return ExceptionSupport.runUnchecked(() -> {
+			var seedFile = seedFile(propertyId);
+			if (Files.notExists(seedFile)) {
+				return Optional.empty();
+			}
+			return Optional.of(Files.readString(seedFile));
 		});
 	}
 
