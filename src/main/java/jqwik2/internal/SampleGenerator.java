@@ -30,10 +30,6 @@ public class SampleGenerator {
 		return Optional.of(new Sample(shrinkables));
 	}
 
-	public Sample generate_OLD(SampleSource multiSource) {
-		return generate(multiSource).get();
-	}
-
 	private static List<Generator<Object>> toObjectGenerators(List<Generator<?>> generators) {
 		return generators.stream()
 						 .map(Generator::asGeneric)

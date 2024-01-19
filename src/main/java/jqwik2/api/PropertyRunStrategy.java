@@ -3,12 +3,15 @@ package jqwik2.api;
 import java.time.*;
 import java.util.*;
 
+import jqwik2.api.recording.*;
+
 public interface PropertyRunStrategy {
 
 	PropertyRunStrategy DEFAULT = new DefaultStrategy(
 		JqwikDefaults.defaultMaxTries(),
 		JqwikDefaults.defaultMaxDuration(),
 		Optional.of(RandomChoice.generateRandomSeed()),
+		List.of(),
 		JqwikDefaults.defaultShrinkingMode(),
 		JqwikDefaults.defaultGenerationMode(),
 		JqwikDefaults.defaultEdgeCasesMode()
@@ -16,9 +19,10 @@ public interface PropertyRunStrategy {
 
 	static PropertyRunStrategy create(
 		int maxTries, Duration maxRuntime, String seed,
+		List<SampleRecording> samples,
 		ShrinkingMode shrinking, GenerationMode generation, EdgeCasesMode edgeCases
 	) {
-		return new DefaultStrategy(maxTries, maxRuntime, Optional.ofNullable(seed), shrinking, generation, edgeCases);
+		return new DefaultStrategy(maxTries, maxRuntime, Optional.ofNullable(seed), samples, shrinking, generation, edgeCases);
 	}
 
 	int maxTries();
@@ -33,10 +37,13 @@ public interface PropertyRunStrategy {
 
     EdgeCasesMode edgeCases();
 
+	List<SampleRecording> samples();
+
 	enum GenerationMode {
 		RANDOMIZED,
 		EXHAUSTIVE,
-		SMART // Use exhaustive if maxCount <= maxTries, otherwise use randomized
+		SMART, // Use exhaustive if maxCount <= maxTries, otherwise use randomized,
+		SAMPLES
 	}
 
 	enum ShrinkingMode {
@@ -54,6 +61,7 @@ public interface PropertyRunStrategy {
 record DefaultStrategy(
 	int maxTries, Duration maxRuntime,
 	Optional<String> seed,
+	List<SampleRecording> samples,
 	ShrinkingMode shrinking,
 	GenerationMode generation,
 	EdgeCasesMode edgeCases

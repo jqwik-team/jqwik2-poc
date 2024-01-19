@@ -90,6 +90,11 @@ public class JqwikProperty {
 				PropertyRunConfiguration.DEFAULT_EXECUTOR_SERVICE_SUPPLIER,
 				generators
 			);
+			case SAMPLES -> PropertyRunConfiguration.samples(
+				strategy.samples(),
+				strategy.maxRuntime(),
+				PropertyRunConfiguration.DEFAULT_EXECUTOR_SERVICE_SUPPLIER
+			);
 			case null, default -> throw new IllegalArgumentException("Unsupported generation strategy: " + strategy.generation());
 		};
 	}
@@ -107,6 +112,7 @@ public class JqwikProperty {
 			strategy.maxTries(),
 			strategy.maxRuntime(),
 			strategy.seed().orElse(null),
+			strategy.samples(),
 			strategy.shrinking(),
 			generationMode,
 			strategy.edgeCases()

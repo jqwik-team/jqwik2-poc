@@ -1,21 +1,21 @@
-- Additional generators
-    - String
-    - Empty / Null Generator
+- JqwikProperty
+    - Save seed and falsified samples to disk (.jqwik folder)
+      See: https://hypothesis.readthedocs.io/en/latest/database.html
+    - Allow rerun with previously falsified samples (starting with smallest)
+      => Rerun will improve shrinking!
+    - Report falsified samples, tries, seed, effective generation strategy
 
 - Introduce Arbitraries
     - List, Set
     - map, flatMap
 
-- Add descriptions to generators
-  - Can target type of map / flatMap be inferred for description?
-    E.g. by generating a single sample and using its type?
+- Additional generators
+    - String
+    - Empty / Null Generator
 
-- JqwikProperty
-    - Report falsified samples, tries, seed, effective generation strategy
-    - Save seed and falsified samples to disk (.jqwik folder)
-      See: https://hypothesis.readthedocs.io/en/latest/database.html
-    - Allow rerun with previously falsified samples (starting with smallest)
-      => Rerun will improve shrinking!
+- Add descriptions to generators
+    - Can target type of map / flatMap be inferred for description?
+      E.g. by generating a single sample and using its type?
 
 - PropertyCase Execution
     - Fail if ratio checks/tries is too low
@@ -38,7 +38,8 @@
     - Shrink with a timeout
     - Shrink in passes?
     - Show shrinking progress on console
-    - Reduce list by improved binary search: https://notebook.drmaciver.com/posts/2019-04-30-13:03.html
+    - Reduce list by improved binary
+      search: https://notebook.drmaciver.com/posts/2019-04-30-13:03.html
 - Jupiter Extension
 - Target-based generation and shrinking
 - Give generators equality to allow caching (Is that still necessary?)

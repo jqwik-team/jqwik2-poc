@@ -5,9 +5,12 @@ import java.util.*;
 
 import jqwik2.api.*;
 import jqwik2.api.arbitraries.*;
+import jqwik2.api.recording.*;
+import jqwik2.internal.*;
 
 import net.jqwik.api.*;
 
+import static jqwik2.api.recording.Recording.*;
 import static org.assertj.core.api.Assertions.*;
 
 class JqwikPropertyTests {
@@ -93,7 +96,6 @@ class JqwikPropertyTests {
 		assertThat(result.isFailed()).isTrue();
 	}
 
-
 	@Example
 	void propertyId() {
 		var propertyWithDefaultId = new JqwikProperty();
@@ -120,6 +122,7 @@ class JqwikPropertyTests {
 	void exhaustiveGenerationStrategy() {
 		PropertyRunStrategy strategy = PropertyRunStrategy.create(
 			100, Duration.ofMinutes(10), null,
+			List.of(),
 			PropertyRunStrategy.ShrinkingMode.OFF,
 			PropertyRunStrategy.GenerationMode.EXHAUSTIVE,
 			PropertyRunStrategy.EdgeCasesMode.OFF
@@ -144,6 +147,7 @@ class JqwikPropertyTests {
 	void smartGenerationProperty() {
 		PropertyRunStrategy strategy = PropertyRunStrategy.create(
 			100, Duration.ofMinutes(10), RandomChoice.generateRandomSeed(),
+			List.of(),
 			PropertyRunStrategy.ShrinkingMode.OFF,
 			PropertyRunStrategy.GenerationMode.SMART,
 			PropertyRunStrategy.EdgeCasesMode.MIXIN
@@ -170,6 +174,7 @@ class JqwikPropertyTests {
 	void edgeCasesGenerationProperty() {
 		PropertyRunStrategy strategy = PropertyRunStrategy.create(
 			1000, Duration.ofMinutes(10), RandomChoice.generateRandomSeed(),
+			List.of(),
 			PropertyRunStrategy.ShrinkingMode.OFF,
 			PropertyRunStrategy.GenerationMode.SMART,
 			PropertyRunStrategy.EdgeCasesMode.MIXIN
@@ -182,6 +187,48 @@ class JqwikPropertyTests {
 		assertThat(resultExhaustive.countTries()).isEqualTo(1000);
 
 		assertThat(values).contains(0, 1, -1, Integer.MAX_VALUE, Integer.MIN_VALUE);
+	}
+
+	@Example
+	void samplesGenerationProperty() {
+
+		var integers = Numbers.integers();
+		var generator = SampleGenerator.from(integers.generator());
+		var randomSampleSource = SampleSource.of(new RandomGenSource());
+		List<SampleRecording> sampleRecordings = new ArrayList<>();
+		List<Integer> sampleValues = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			generator.generate(randomSampleSource).ifPresent(sample -> {
+				sampleRecordings.add(sample.recording());
+				sampleValues.add((Integer) sample.values().get(0));
+			});
+		}
+
+		// Add non-fitting recording, which should be ignored
+		sampleRecordings.add(new SampleRecording(list(atom(0))));
+
+		// Add sample with too many parts, which should be ignored
+		sampleRecordings.add(new SampleRecording(
+			atom(42, 1),
+			atom(0)
+		));
+
+		// System.out.println(samples);
+		// System.out.println(values);
+
+		PropertyRunStrategy strategy = PropertyRunStrategy.create(
+			1000, Duration.ofMinutes(10), RandomChoice.generateRandomSeed(),
+			sampleRecordings,
+			PropertyRunStrategy.ShrinkingMode.OFF,
+			PropertyRunStrategy.GenerationMode.SAMPLES,
+			PropertyRunStrategy.EdgeCasesMode.MIXIN
+		);
+		var property = new JqwikProperty(strategy);
+
+		List<Integer> values = Collections.synchronizedList(new ArrayList<>());
+		PropertyRunResult resultExhaustive = property.forAll(integers).verify(values::add);
+		assertThat(resultExhaustive.countTries()).isEqualTo(sampleValues.size());
+		assertThat(values).isEqualTo(sampleValues);
 	}
 
 }

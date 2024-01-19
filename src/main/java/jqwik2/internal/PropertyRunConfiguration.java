@@ -6,6 +6,7 @@ import java.util.concurrent.*;
 import java.util.function.*;
 
 import jqwik2.api.*;
+import jqwik2.api.recording.*;
 import jqwik2.internal.exhaustive.*;
 
 public interface PropertyRunConfiguration {
@@ -96,6 +97,22 @@ public interface PropertyRunConfiguration {
 				() -> exhaustiveSource
 			)).orElseGet(() -> randomized(seed, maxTries, shrinkingEnabled, maxRuntime, supplyExecutorService));
 	}
+
+	static PropertyRunConfiguration samples(
+		List<SampleRecording> samples,
+		Duration maxRuntime,
+		Supplier<ExecutorService> defaultExecutorServiceSupplier
+	) {
+		IterableSampleSource sampleSource = new RecordedSamplesSource(samples);
+		return new Configuration(
+			null, samples.size(),
+			true,
+			maxRuntime,
+			defaultExecutorServiceSupplier,
+			() -> sampleSource
+		);
+	}
+
 
 }
 
