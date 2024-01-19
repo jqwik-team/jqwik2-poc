@@ -16,4 +16,8 @@ public interface Arbitrary<T> {
 	default ListArbitrary<T> list() {
 		return new DefaultListArbitrary<>(this);
 	}
+
+	default SetArbitrary<T> set() {
+		return new DefaultSetArbitrary<>(this);
+	}
 }

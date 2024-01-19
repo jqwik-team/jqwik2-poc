@@ -35,7 +35,17 @@ class ArbitrariesTests {
 		for (int i = 0; i < 10; i++) {
 			Arbitrary<List<Integer>> ints = Numbers.integers().list().ofSize(5);
 			List<Integer> sample = ints.sample();
-			System.out.println(sample);
+			// System.out.println(sample);
+			assertThat(sample).hasSize(5);
+		}
+	}
+
+	@Example
+	void sets() {
+		for (int i = 0; i < 10; i++) {
+			Arbitrary<Set<Integer>> ints = Numbers.integers().set().ofSize(5);
+			Set<Integer> sample = ints.sample();
+			// System.out.println(sample);
 			assertThat(sample).hasSize(5);
 		}
 	}

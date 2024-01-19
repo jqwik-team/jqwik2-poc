@@ -6,7 +6,6 @@
     - Report falsified samples, tries, seed, effective generation strategy
 
 - Introduce Arbitraries
-    - Set
     - map, flatMap
 
 - Additional generators
