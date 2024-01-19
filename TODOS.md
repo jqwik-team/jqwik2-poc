@@ -1,3 +1,6 @@
+- Refactoring
+    - Replace GenSource.Tree with GenSource.Tuple
+  
 - JqwikProperty
     - Save seed and falsified samples to disk (.jqwik folder)
       See: https://hypothesis.readthedocs.io/en/latest/database.html
