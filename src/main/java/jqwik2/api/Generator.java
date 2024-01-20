@@ -42,7 +42,7 @@ public interface Generator<T> {
 
 	default Optional<T> fromRecording(Recording recording) {
 		try {
-			var value = generate(new RecordedSource(recording));
+			var value = generate(RecordedSource.of(recording));
 			return Optional.of(value);
 		} catch (CannotGenerateException ignore) {
 			return Optional.empty();

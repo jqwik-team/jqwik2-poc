@@ -50,7 +50,7 @@ public class ShrinkingTests {
 		IntegerGenerator ints = new IntegerGenerator(-10, 100);
 
 		// -10
-		GenSource source = new RecordedSource(atom(10, 1));
+		GenSource source = RecordedSource.of(atom(10, 1));
 
 		Shrinkable<Integer> shrinkable = new ShrinkableGenerator<>(ints).generate(source);
 
@@ -75,7 +75,7 @@ public class ShrinkingTests {
 		TreeRecording treeRecording = tree(
 			atom(3), listRecording
 		);
-		GenSource source = new RecordedSource(treeRecording);
+		GenSource source = RecordedSource.of(treeRecording);
 
 		Shrinkable<List<Integer>> shrinkable = new ShrinkableGenerator<>(listOfInts).generate(source);
 
@@ -92,7 +92,7 @@ public class ShrinkingTests {
 		IntegerGenerator ints = new IntegerGenerator(-100000, 100000);
 
 		// 9999
-		GenSource source = new RecordedSource(atom(9999, 0));
+		GenSource source = RecordedSource.of(atom(9999, 0));
 
 		SampleGenerator sampleGenerator = SampleGenerator.from(ints);
 		Sample sample = sampleGenerator.generate(List.of(source)).orElseThrow();
@@ -130,7 +130,7 @@ public class ShrinkingTests {
 		TreeRecording treeRecording = tree(
 			atom(3), listRecording
 		);
-		GenSource source = new RecordedSource(treeRecording);
+		GenSource source = RecordedSource.of(treeRecording);
 
 		SampleGenerator sampleGenerator = SampleGenerator.from(listOfInts);
 		Sample sample = sampleGenerator.generate(List.of(source)).orElseThrow();
@@ -161,8 +161,8 @@ public class ShrinkingTests {
 		IntegerGenerator gen1 = new IntegerGenerator(-100000, 100000);
 		IntegerGenerator gen2 = new IntegerGenerator(0, 100);
 
-		GenSource source1 = new RecordedSource(atom(9999, 1)); // -9999
-		GenSource source2 = new RecordedSource(atom(50)); // 50
+		GenSource source1 = RecordedSource.of(atom(9999, 1)); // -9999
+		GenSource source2 = RecordedSource.of(atom(50)); // 50
 
 		SampleGenerator sampleGenerator = SampleGenerator.from(gen1, gen2);
 		Sample sample = sampleGenerator.generate(List.of(source1, source2)).orElseThrow();
@@ -192,7 +192,7 @@ public class ShrinkingTests {
 		IntegerGenerator ints = new IntegerGenerator(-100000, 100000);
 
 		// 9999
-		GenSource source = new RecordedSource(atom(9999, 0));
+		GenSource source = RecordedSource.of(atom(9999, 0));
 
 		SampleGenerator sampleGenerator = SampleGenerator.from(ints);
 		Sample sample = sampleGenerator.generate(List.of(source)).orElseThrow();

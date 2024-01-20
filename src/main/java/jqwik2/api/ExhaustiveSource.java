@@ -99,7 +99,7 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 
 	@SuppressWarnings("unchecked")
 	default T current() {
-		return (T) new RecordedSource(recording());
+		return (T) RecordedSource.of(recording());
 	}
 
 	class AnyExhaustiveSource<T extends GenSource> extends AbstractExhaustiveSource<T> {

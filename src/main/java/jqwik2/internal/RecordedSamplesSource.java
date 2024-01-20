@@ -39,7 +39,7 @@ class RecordedSamplesSource implements IterableSampleSource {
 			SampleRecording recording = recordingIterator.next();
 			List<? extends GenSource> recordedSources =
 				recording.recordings().stream()
-						 .map(RecordedSource::new)
+						 .map(RecordedSource::of)
 						 .toList();
 			return SampleSource.of(recordedSources);
 		}

@@ -99,7 +99,7 @@ class GeneratorTests {
 			IntegerGenerator ints = new IntegerGenerator(-1000, 1000);
 			Generator<Integer> evenInts = ints.filter(i -> i % 2 == 0);
 
-			GenSource source = new RecordedSource(atom(996, 1)); // -996
+			GenSource source = RecordedSource.of(atom(996, 1)); // -996
 
 			Shrinkable<Integer> shrinkable = new ShrinkableGenerator<>(evenInts).generate(source);
 
@@ -180,7 +180,7 @@ class GeneratorTests {
 				// System.out.println("value=" + value);
 				assertThat(value).hasSizeBetween(5, 10);
 
-				RecordedSource recorded = new RecordedSource(recorder.recording());
+				RecordedSource recorded = RecordedSource.of(recorder.recording());
 				assertThat(listOfInts.generate(recorded)).isEqualTo(value);
 			}
 		}
@@ -244,7 +244,7 @@ class GeneratorTests {
 			);
 
 			// List.of(3, 3)
-			GenSource source = new RecordedSource(
+			GenSource source = RecordedSource.of(
 				tree(
 					atom(2),
 					tree(atom(0), list(atom(3), atom(3)))
@@ -321,7 +321,7 @@ class GeneratorTests {
 				histogram.compute(key, (k, v) -> v == null ? 1 : v + 1);
 
 				// Check that recorded values can be regenerated
-				RecordedSource recorded = new RecordedSource(recorder.recording());
+				RecordedSource recorded = RecordedSource.of(recorder.recording());
 				assertThat(allInts.generate(recorded)).isEqualTo(value);
 			}
 
@@ -454,7 +454,7 @@ class GeneratorTests {
 				Integer value = generator.generate(recorder);
 				assertThat(value).isNotNull();
 
-				RecordedSource recorded = new RecordedSource(recorder.recording());
+				RecordedSource recorded = RecordedSource.of(recorder.recording());
 				assertThat(generator.generate(recorded))
 					.isEqualTo(value);
 			}
@@ -470,7 +470,7 @@ class GeneratorTests {
 				Integer value = generator.generate(recorder);
 				assertThat(value).isNotNull();
 
-				RecordedSource recorded = new RecordedSource(recorder.recording());
+				RecordedSource recorded = RecordedSource.of(recorder.recording());
 				assertThat(generator.generate(recorded))
 					.isEqualTo(value);
 			}
@@ -488,7 +488,7 @@ class GeneratorTests {
 				List<Integer> value = generator.generate(recorder);
 				assertThat(value).isNotNull();
 
-				RecordedSource recorded = new RecordedSource(recorder.recording());
+				RecordedSource recorded = RecordedSource.of(recorder.recording());
 				assertThat(generator.generate(recorded))
 					.isEqualTo(value);
 			}
@@ -502,7 +502,7 @@ class GeneratorTests {
 		void valid() {
 			IntegerGenerator ints = new IntegerGenerator(-10, 100);
 
-			GenSource source = new RecordedSource(atom(10, 0));
+			GenSource source = RecordedSource.of(atom(10, 0));
 			Integer value = ints.generate(source);
 			assertThat(value).isEqualTo(10);
 		}
@@ -512,12 +512,12 @@ class GeneratorTests {
 			IntegerGenerator ints = new IntegerGenerator(-10, 100);
 
 			assertThatThrownBy(() -> {
-				RecordedSource recorded = new RecordedSource(atom(100, 1));
+				RecordedSource recorded = RecordedSource.of(atom(100, 1));
 				ints.generate(recorded);
 			}).isInstanceOf(CannotGenerateException.class);
 
 			assertThatThrownBy(() -> {
-				RecordedSource recorded = new RecordedSource(atom(100));
+				RecordedSource recorded = RecordedSource.of(atom(100));
 				ints.generate(recorded);
 			}).isInstanceOf(CannotGenerateException.class);
 
@@ -529,7 +529,7 @@ class GeneratorTests {
 			ListGenerator<Integer> listOfInts = new ListGenerator<>(ints, 0, 5);
 
 			assertThatThrownBy(() -> {
-				RecordedSource recorded = new RecordedSource(tree(
+				RecordedSource recorded = RecordedSource.of(tree(
 					atom(3), list(atom(10))
 				));
 				listOfInts.generate(recorded);
@@ -546,7 +546,7 @@ class GeneratorTests {
 			);
 
 			GenSource backUpSource = new RandomGenSource("42");
-			RecordedSource recordedSource = new RecordedSource(recording, backUpSource);
+			RecordedSource recordedSource = RecordedSource.of(recording, backUpSource);
 			GenRecorder recorder = new GenRecorder(recordedSource);
 
 			List<Integer> value = listOfInts.generate(recorder);

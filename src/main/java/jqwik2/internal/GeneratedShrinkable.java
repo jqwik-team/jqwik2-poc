@@ -15,7 +15,7 @@ public record GeneratedShrinkable<T>(T value, Generator<T> generator, Recording 
 							try {
 								// TODO: Use random backUpSource during shrinking
 								//       Where is the random source coming from?
-								GenRecorder source = new GenRecorder(new RecordedSource(s));
+								GenRecorder source = new GenRecorder(RecordedSource.of(s));
 								T value = generator.generate(source);
 								return (Shrinkable<T>) new GeneratedShrinkable<>(value, generator, source.recording());
 							} catch (CannotGenerateException e) {

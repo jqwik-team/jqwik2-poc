@@ -70,7 +70,7 @@ public class WithEdgeCasesDecorator<T> extends Generator.Decorator<T> {
 			edgeCasesCache = createEdgeCaseRecordings();
 		}
 		Recording recording = randomSource.chooseOne(edgeCasesCache);
-		return new RecordedSource(recording);
+		return RecordedSource.of(recording);
 	}
 
 	private Set<Recording> createEdgeCaseRecordings() {
