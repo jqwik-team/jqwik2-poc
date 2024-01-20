@@ -33,8 +33,7 @@ class FailureDatabaseTests {
 
 	@AfterExample
 	void deleteDatabase() throws IOException {
-		System.out.println("Deleting " + basePath);
-		// database.clear();
+		database.clear();
 		Files.deleteIfExists(basePath);
 	}
 

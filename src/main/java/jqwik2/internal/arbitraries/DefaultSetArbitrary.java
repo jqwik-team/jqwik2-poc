@@ -1,8 +1,9 @@
-package jqwik2.api.arbitraries;
+package jqwik2.internal.arbitraries;
 
 import java.util.*;
 
 import jqwik2.api.*;
+import jqwik2.api.arbitraries.*;
 import jqwik2.internal.generators.*;
 
 public class DefaultSetArbitrary<T> implements SetArbitrary<T> {

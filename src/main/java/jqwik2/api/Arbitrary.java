@@ -1,9 +1,8 @@
 package jqwik2.api;
 
-import java.util.*;
-
 import jqwik2.api.arbitraries.*;
 import jqwik2.internal.*;
+import jqwik2.internal.arbitraries.*;
 
 public interface Arbitrary<T> {
 
