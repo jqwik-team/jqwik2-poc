@@ -61,22 +61,20 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 		Path propertyDirectory = databasePath.resolve(idBasedFileName);
 		if (createIfNecessary && Files.notExists(propertyDirectory)) {
 			Files.createDirectories(propertyDirectory);
-			createIdFile(id, idBasedFileName, propertyDirectory);
+			createIdFile(id, propertyDirectory);
 		}
 		return propertyDirectory;
 	}
 
-	private static void createIdFile(String id, String idBasedFileName, Path propertyDirectory) throws IOException {
-		if (!idBasedFileName.equals(id)) {
-			var idFile = propertyDirectory.resolve(ID_FILE_NAME);
-			Files.write(idFile, id.getBytes());
-		}
+	private static void createIdFile(String id, Path propertyDirectory) throws IOException {
+		var idFile = propertyDirectory.resolve(ID_FILE_NAME);
+		Files.write(idFile, id.getBytes());
 	}
 
 	private static String propertyId(Path propertyDirectory) {
 		return ExceptionSupport.runUnchecked(() -> {
 			var idFile = propertyDirectory.resolve(ID_FILE_NAME);
-			if (Files.notExists(idFile)) {
+			if (Files.notExists(idFile)) { // The id file got lost
 				return propertyDirectory.getFileName().toString();
 			} else {
 				return new String(Files.readAllBytes(idFile));
@@ -85,8 +83,11 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 	}
 
 	private String toFileName(String id) {
-		// Replace spaces with underscores. Remove all other non-alphanumeric characters.
-		return id.replaceAll("\\s", "_").replaceAll("[^a-zA-Z0-9_]", "");
+		// Replace spaces with underscores. Remove all disallowed characters. Remove all leading dots
+		var disallowedCharsRegex = "[^a-zA-Z0-9_.#$\\-]";
+		return id.replaceAll("\\s", "_")
+				 .replaceAll(disallowedCharsRegex, "")
+				 .replaceAll("^\\.", "");
 	}
 
 	@Override

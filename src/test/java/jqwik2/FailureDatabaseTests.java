@@ -33,7 +33,8 @@ class FailureDatabaseTests {
 
 	@AfterExample
 	void deleteDatabase() throws IOException {
-		database.clear();
+		System.out.println("Deleting " + basePath);
+		// database.clear();
 		Files.deleteIfExists(basePath);
 	}
 
@@ -167,14 +168,16 @@ class FailureDatabaseTests {
 		var sample1 = new SampleRecording(List.of(atom(1), atom(2)));
 		var sample2 = new SampleRecording(List.of(atom(1), atom(3)));
 		var sample3 = new SampleRecording(List.of(atom(1), atom(4)));
+		var sample4 = new SampleRecording(List.of(atom(1), atom(5)));
 
 		database.saveFailingSample("id1", sample1);
 		database.saveFailingSample("id2", sample2);
 		database.saveFailingSample("id3 and some", sample3);
+		database.saveFailingSample(".id4", sample4);
 
 		database.failingProperties();
 		assertThat(database.failingProperties())
-			.containsExactlyInAnyOrder("id1", "id2", "id3 and some");
+			.containsExactlyInAnyOrder("id1", "id2", "id3 and some", ".id4");
 	}
 
 	@Example
