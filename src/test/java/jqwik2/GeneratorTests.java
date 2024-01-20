@@ -180,7 +180,7 @@ class GeneratorTests {
 				// System.out.println("value=" + value);
 				assertThat(value).hasSizeBetween(5, 10);
 
-				RecordedSource recorded = RecordedSource.of(recorder.recording());
+				GenSource recorded = RecordedSource.of(recorder.recording());
 				assertThat(listOfInts.generate(recorded)).isEqualTo(value);
 			}
 		}
@@ -321,7 +321,7 @@ class GeneratorTests {
 				histogram.compute(key, (k, v) -> v == null ? 1 : v + 1);
 
 				// Check that recorded values can be regenerated
-				RecordedSource recorded = RecordedSource.of(recorder.recording());
+				GenSource recorded = RecordedSource.of(recorder.recording());
 				assertThat(allInts.generate(recorded)).isEqualTo(value);
 			}
 
@@ -454,7 +454,7 @@ class GeneratorTests {
 				Integer value = generator.generate(recorder);
 				assertThat(value).isNotNull();
 
-				RecordedSource recorded = RecordedSource.of(recorder.recording());
+				GenSource recorded = RecordedSource.of(recorder.recording());
 				assertThat(generator.generate(recorded))
 					.isEqualTo(value);
 			}
@@ -470,7 +470,7 @@ class GeneratorTests {
 				Integer value = generator.generate(recorder);
 				assertThat(value).isNotNull();
 
-				RecordedSource recorded = RecordedSource.of(recorder.recording());
+				GenSource recorded = RecordedSource.of(recorder.recording());
 				assertThat(generator.generate(recorded))
 					.isEqualTo(value);
 			}
@@ -488,7 +488,7 @@ class GeneratorTests {
 				List<Integer> value = generator.generate(recorder);
 				assertThat(value).isNotNull();
 
-				RecordedSource recorded = RecordedSource.of(recorder.recording());
+				GenSource recorded = RecordedSource.of(recorder.recording());
 				assertThat(generator.generate(recorded))
 					.isEqualTo(value);
 			}
@@ -512,12 +512,12 @@ class GeneratorTests {
 			IntegerGenerator ints = new IntegerGenerator(-10, 100);
 
 			assertThatThrownBy(() -> {
-				RecordedSource recorded = RecordedSource.of(atom(100, 1));
+				GenSource recorded = RecordedSource.of(atom(100, 1));
 				ints.generate(recorded);
 			}).isInstanceOf(CannotGenerateException.class);
 
 			assertThatThrownBy(() -> {
-				RecordedSource recorded = RecordedSource.of(atom(100));
+				GenSource recorded = RecordedSource.of(atom(100));
 				ints.generate(recorded);
 			}).isInstanceOf(CannotGenerateException.class);
 
@@ -529,7 +529,7 @@ class GeneratorTests {
 			ListGenerator<Integer> listOfInts = new ListGenerator<>(ints, 0, 5);
 
 			assertThatThrownBy(() -> {
-				RecordedSource recorded = RecordedSource.of(tree(
+				GenSource recorded = RecordedSource.of(tree(
 					atom(3), list(atom(10))
 				));
 				listOfInts.generate(recorded);
@@ -546,7 +546,7 @@ class GeneratorTests {
 			);
 
 			GenSource backUpSource = new RandomGenSource("42");
-			RecordedSource recordedSource = RecordedSource.of(recording, backUpSource);
+			GenSource recordedSource = RecordedSource.of(recording, backUpSource);
 			GenRecorder recorder = new GenRecorder(recordedSource);
 
 			List<Integer> value = listOfInts.generate(recorder);

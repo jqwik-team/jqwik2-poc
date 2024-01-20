@@ -65,7 +65,7 @@ public class WithEdgeCasesDecorator<T> extends Generator.Decorator<T> {
 		return oldSource;
 	}
 
-	private RecordedSource edgeCaseSource(RandomGenSource randomSource) {
+	private GenSource edgeCaseSource(RandomGenSource randomSource) {
 		if (edgeCasesCache == null) {
 			edgeCasesCache = createEdgeCaseRecordings();
 		}

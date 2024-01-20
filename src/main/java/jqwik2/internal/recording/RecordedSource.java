@@ -6,35 +6,24 @@ import jqwik2.api.*;
 import jqwik2.api.recording.*;
 import jqwik2.internal.*;
 
-public abstract sealed class RecordedSource implements GenSource, GenSource.Atom, GenSource.List, GenSource.Tree {
+public abstract sealed class RecordedSource implements GenSource {
 	protected final GenSource backUpSource;
 
-	// TODO: Return concrete type of GenSource instead of generic RecordedSource
-	public static RecordedSource of(Recording recording) {
+	public static GenSource of(Recording recording) {
 		return RecordedSource.of(recording, null);
 	}
 
-	public static RecordedSource of(Recording recording, GenSource backUpSource) {
+	public static GenSource of(Recording recording, GenSource backUpSource) {
 		return switch (recording) {
 			case ListRecording listRecording -> new RecordedList(listRecording, backUpSource);
 			case TreeRecording treeRecording -> new RecordedTree(treeRecording, backUpSource);
 			case AtomRecording atomRecording -> new RecordedAtom(atomRecording, backUpSource);
-			case null, default -> throw new IllegalArgumentException("Unknown recording type: " + recording.getClass());
+			case null -> throw new IllegalArgumentException("Recording must not be null");
 		};
 	}
 
 	private RecordedSource(GenSource backUpSource) {
 		this.backUpSource = backUpSource;
-	}
-
-	@Override
-	public int choose(int maxExcluded) {
-		throw new CannotGenerateException("Source is not an atom");
-	}
-
-	@Override
-	public int choose(int maxExcluded, RandomChoice.Distribution distribution) {
-		throw new CannotGenerateException("Source is not an atom");
 	}
 
 	@Override
@@ -52,24 +41,9 @@ public abstract sealed class RecordedSource implements GenSource, GenSource.Atom
 		throw new CannotGenerateException("Source is not a tree");
 	}
 
-	@Override
-	public GenSource nextElement() {
-		throw new CannotGenerateException("Source is not a list");
-	}
+	private static final class RecordedList extends RecordedSource implements GenSource.List {
 
-	@Override
-	public GenSource head() {
-		throw new CannotGenerateException("Source is not a tree");
-	}
-
-	@Override
-	public GenSource child() {
-		throw new CannotGenerateException("Source is not a tree");
-	}
-
-	static final class RecordedList extends RecordedSource {
-
-		private final  Iterator<Recording> elements;
+		private final Iterator<Recording> elements;
 
 		private RecordedList(ListRecording recording, GenSource backUpSource) {
 			super(backUpSource);
@@ -94,7 +68,7 @@ public abstract sealed class RecordedSource implements GenSource, GenSource.Atom
 
 	}
 
-	static final class RecordedTree extends RecordedSource {
+	private static final class RecordedTree extends RecordedSource implements GenSource.Tree {
 
 		private final TreeRecording recording;
 
@@ -120,7 +94,7 @@ public abstract sealed class RecordedSource implements GenSource, GenSource.Atom
 
 	}
 
-	static final class RecordedAtom extends RecordedSource {
+	private static final class RecordedAtom extends RecordedSource implements GenSource.Atom {
 		private final Iterator<Integer> iterator;
 
 		private RecordedAtom(AtomRecording recording, GenSource backUpSource) {
