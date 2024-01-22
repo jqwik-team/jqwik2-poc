@@ -2,7 +2,6 @@
     - Replace GenSource.Tree with GenSource.Tuple
   
 - JqwikProperty
-    - Optimize FailureDatabase.saveFailure(..)
     - Allow rerun with previously falsified samples (starting with smallest)
       => Rerun will improve shrinking!
     - Report falsified samples, tries, seed, effective generation strategy

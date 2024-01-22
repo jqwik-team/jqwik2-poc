@@ -37,17 +37,7 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 	public void saveFailingSample(String propertyId, SampleRecording recording) {
 		ExceptionSupport.runUnchecked(() -> {
 			var propertyDirectory = propertyDirectory(propertyId, true);
-			var samplePath = samplePath(recording, propertyDirectory);
-			if (Files.notExists(samplePath)) {
-				var sampleFile = Files.createFile(samplePath);
-				try (var writer = Files.newBufferedWriter(sampleFile)) {
-					try {
-						writer.write(recording.serialize());
-					} catch (IOException e) {
-						ExceptionSupport.throwAsUnchecked(e);
-					}
-				}
-			}
+			saveSampleIn(recording, propertyDirectory);
 		});
 	}
 
@@ -195,5 +185,35 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 			 .filter(p -> !p.equals(path))
 			 .map(Path::toFile)
 			 .forEach(File::delete);
+	}
+
+	@Override
+	public void saveFailure(String propertyId, String seed, Set<SampleRecording> failingSamples) {
+		// Optimized version
+		ExceptionSupport.runUnchecked(() -> {
+			var propertyDirectory = propertyDirectory(propertyId, true);
+			deleteAllIn(propertyDirectory);
+			if (seed != null) {
+				var seedFile = seedFile(propertyId);
+				Files.writeString(seedFile, seed, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+			}
+			for (SampleRecording sample : failingSamples) {
+				saveSampleIn(sample, propertyDirectory);
+			}
+		});
+	}
+
+	private static void saveSampleIn(SampleRecording sample, Path propertyDirectory) throws IOException {
+		var samplePath = samplePath(sample, propertyDirectory);
+		if (Files.notExists(samplePath)) {
+			var sampleFile = Files.createFile(samplePath);
+			try (var writer = Files.newBufferedWriter(sampleFile)) {
+				try {
+					writer.write(sample.serialize());
+				} catch (IOException e) {
+					ExceptionSupport.throwAsUnchecked(e);
+				}
+			}
+		}
 	}
 }
