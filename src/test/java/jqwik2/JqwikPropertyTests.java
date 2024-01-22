@@ -8,9 +8,11 @@ import jqwik2.api.Arbitrary;
 import jqwik2.api.Assume;
 import jqwik2.api.*;
 import jqwik2.api.arbitraries.*;
+import jqwik2.api.database.*;
 import jqwik2.api.recording.*;
 import jqwik2.api.support.*;
 import jqwik2.internal.*;
+import org.mockito.*;
 import org.opentest4j.*;
 
 import net.jqwik.api.*;
@@ -273,6 +275,24 @@ class JqwikPropertyTests {
 		PropertyRunResult resultExhaustive = property.forAll(integers).verify(values::add);
 		assertThat(resultExhaustive.countTries()).isEqualTo(sampleValues.size());
 		assertThat(values).isEqualTo(sampleValues);
+	}
+
+	@Example
+	void failedPropertyRunWillBeSavedToFailureDatabase() {
+		var property = new JqwikProperty("myId");
+		var database = mock(FailureDatabase.class);
+		property.failureDatabase(database);
+		property.forAll(Numbers.integers()).check(i -> false);
+		verify(database).saveFailure(Mockito.eq("myId"), anyString(), anySet());
+	}
+
+	@Example
+	void successfulPropertyRunWillBeRemovedFromFailureDatabase() {
+		var property = new JqwikProperty("myId");
+		var database = mock(FailureDatabase.class);
+		property.failureDatabase(database);
+		property.forAll(Numbers.integers()).check(i -> true);
+		verify(database).deleteProperty("myId");
 	}
 
 }

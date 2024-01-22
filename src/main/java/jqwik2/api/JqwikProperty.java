@@ -2,22 +2,26 @@ package jqwik2.api;
 
 import java.util.*;
 import java.util.function.*;
+import java.util.stream.*;
 
+import jqwik2.api.database.*;
+import jqwik2.api.recording.*;
 import jqwik2.internal.*;
 
 public class JqwikProperty {
 
 	private final PropertyRunStrategy strategy;
 	private final String id;
-	private Set<BiConsumer<PropertyRunResult, Throwable>> onFailureHandlers = new LinkedHashSet<>();
-	private Set<Consumer<Optional<Throwable>>> onAbortHandlers = new LinkedHashSet<>();
-
-	public JqwikProperty() {
-		this(PropertyRunStrategy.DEFAULT);
-	}
+	private final List<BiConsumer<PropertyRunResult, Throwable>> onFailureHandlers = new ArrayList<>();
+	private final List<Consumer<Optional<Throwable>>> onAbortHandlers = new ArrayList<>();
+	private FailureDatabase database;
 
 	public JqwikProperty(PropertyRunStrategy strategy) {
 		this(defaultId(), strategy);
+	}
+
+	public JqwikProperty() {
+		this(PropertyRunStrategy.DEFAULT);
 	}
 
 	public JqwikProperty(String myId) {
@@ -40,6 +44,7 @@ public class JqwikProperty {
 		}
 		this.id = id;
 		this.strategy = strategy;
+		failureDatabase(JqwikDefaults.defaultFailureDatabase());
 	}
 
 	public PropertyRunStrategy strategy() {
@@ -122,11 +127,17 @@ public class JqwikProperty {
 
 
 	public void onFailed(BiConsumer<PropertyRunResult, Throwable> onFailureHandler) {
-		this.onFailureHandlers.add(onFailureHandler);
+		if (onFailureHandlers.contains(onFailureHandler)) {
+			return;
+		}
+		onFailureHandlers.add(onFailureHandler);
 	}
 
 	public void onAbort(Consumer<Optional<Throwable>> onAbortHandler) {
-		this.onAbortHandlers.add(onAbortHandler);
+		if (onAbortHandlers.contains(onAbortHandler)) {
+			return;
+		}
+		onAbortHandlers.add(onAbortHandler);
 	}
 
 	public JqwikProperty withGeneration(PropertyRunStrategy.GenerationMode generationMode) {
@@ -140,6 +151,22 @@ public class JqwikProperty {
 			strategy.edgeCases()
 		);
 		return new JqwikProperty(id, clonedStrategy);
+	}
+
+	public void failureDatabase(FailureDatabase database) {
+		this.database = database;
+		if (onFailureHandlers.isEmpty()) {
+			onFailureHandlers.addFirst((PropertyRunResult result, Throwable throwable) -> saveFailureToDatabase(result));
+		} else {
+			onFailureHandlers.set(0, (PropertyRunResult result, Throwable throwable) -> saveFailureToDatabase(result));
+		}
+	}
+
+	private void saveFailureToDatabase(PropertyRunResult result) {
+		Set<SampleRecording> sampleRecordings = result.falsifiedSamples().stream()
+													  .map(s -> s.sample().recording())
+													  .collect(Collectors.toSet());
+		database.saveFailure(id, strategy.seed().orElse(null), sampleRecordings);
 	}
 
 	public interface PropertyVerifier1<T1> {
