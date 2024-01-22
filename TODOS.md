@@ -2,8 +2,7 @@
     - Replace GenSource.Tree with GenSource.Tuple
   
 - JqwikProperty
-    - Save seed and falsified samples to disk (.jqwik folder)
-      Design idea: Add PropertyRunStrategy.failureDatabase() which defaults to null database.
+    - Optimize FailureDatabase.saveFailure(..)
     - Allow rerun with previously falsified samples (starting with smallest)
       => Rerun will improve shrinking!
     - Report falsified samples, tries, seed, effective generation strategy
