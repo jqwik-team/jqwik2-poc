@@ -26,6 +26,7 @@ public interface FailureDatabase {
 	 * Override for optimized implementation
 	 */
 	default void saveFailure(String propertyId, String seed, Set<SampleRecording> failingSamples) {
+		deleteProperty(propertyId);
 		saveSeed(propertyId, seed);
 		for (SampleRecording sample : failingSamples) {
 			saveFailingSample(propertyId, sample);

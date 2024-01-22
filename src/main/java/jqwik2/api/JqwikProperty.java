@@ -53,7 +53,7 @@ public class JqwikProperty {
 
 	public <T1> PropertyVerifier1<T1> forAll(Arbitrary<T1> arbitrary) {
 		return new GenericPropertyVerifier<>(
-			this::buildConfiguration, this::onFailed, this::onAborted,
+			this::buildConfiguration, this::onSuccessful, this::onFailed, this::onAborted,
 			decorators(), arbitrary
 		);
 	}
@@ -71,7 +71,7 @@ public class JqwikProperty {
 		Arbitrary<T2> arbitrary2
 	) {
 		return new GenericPropertyVerifier<>(
-			this::buildConfiguration, this::onFailed, this::onAborted,
+			this::buildConfiguration, this::onSuccessful, this::onFailed, this::onAborted,
 			decorators(), arbitrary1, arbitrary2
 		);
 	}
@@ -82,6 +82,10 @@ public class JqwikProperty {
 
 	private void onAborted(Optional<Throwable> abortionReason) {
 		onAbortHandlers.forEach(h -> h.accept(abortionReason));
+	}
+
+	private void onSuccessful() {
+		database.deleteProperty(id);
 	}
 
 	private PropertyRunConfiguration buildConfiguration(List<Generator<?>> generators) {

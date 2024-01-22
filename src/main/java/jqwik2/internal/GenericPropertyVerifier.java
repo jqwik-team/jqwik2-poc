@@ -12,6 +12,7 @@ public class GenericPropertyVerifier<T1, T2>
 	implements PropertyVerifier1<T1>, PropertyVerifier2<T1, T2> {
 
 	private final Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig;
+	private final Runnable onSuccessful;
 	private final BiConsumer<PropertyRunResult, Throwable> onFailed;
 	private final Consumer<Optional<Throwable>> onAborted;
 	private final List<Generator.DecoratorFunction> decorators;
@@ -20,22 +21,25 @@ public class GenericPropertyVerifier<T1, T2>
 
 	public GenericPropertyVerifier(
 		Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig,
+		Runnable onSuccessful,
 		BiConsumer<PropertyRunResult, Throwable> onFailed,
 		Consumer<Optional<Throwable>> onAborted,
 		List<Generator.DecoratorFunction> decorators,
 		Arbitrary<T1> arbitrary
 	) {
-		this(supplyConfig, onFailed, onAborted, decorators, arbitrary, null);
+		this(supplyConfig, onSuccessful, onFailed, onAborted, decorators, arbitrary, null);
 	}
 
 	public GenericPropertyVerifier(
 		Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig,
+		Runnable onSuccessful,
 		BiConsumer<PropertyRunResult, Throwable> onFailed,
 		Consumer<Optional<Throwable>> onAborted,
 		List<Generator.DecoratorFunction> decorators,
 		Arbitrary<T1> arbitrary1, Arbitrary<T2> arbitrary2
 	) {
 		this.supplyConfig = supplyConfig;
+		this.onSuccessful = onSuccessful;
 		this.onFailed = onFailed;
 		this.onAborted = onAborted;
 		this.decorators = decorators;
@@ -104,13 +108,22 @@ public class GenericPropertyVerifier<T1, T2>
 	private PropertyRunResult run(List<Generator<?>> generators, Tryable tryable) {
 		var propertyCase = new PropertyCase(generators, tryable);
 		var result = propertyCase.run(supplyConfig.apply(generators));
-		if (result.isFailed()) {
-			onFailed.accept(result, failureException(result.falsifiedSamples()));
-		}
-		if (result.isAborted()) {
-			onAborted.accept(result.abortionReason());
-		}
+		executeResultCallbacks(result);
 		return result;
+	}
+
+	private void executeResultCallbacks(PropertyRunResult result) {
+		switch (result.status()) {
+			case SUCCESSFUL:
+				onSuccessful.run();
+				break;
+			case FAILED:
+				onFailed.accept(result, failureException(result.falsifiedSamples()));
+				break;
+			case ABORTED:
+				onAborted.accept(result.abortionReason());
+				break;
+		}
 	}
 
 	private Throwable failureException(SortedSet<FalsifiedSample> falsifiedSamples) {
