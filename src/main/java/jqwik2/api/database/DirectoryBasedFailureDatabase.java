@@ -205,7 +205,7 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 		// Optimized version
 		ExceptionSupport.runUnchecked(() -> {
 			var propertyDirectory = propertyDirectory(propertyId, true);
-			deleteAllIn(propertyDirectory);
+			deleteAllSamples(propertyDirectory);
 			if (seed != null) {
 				var seedFile = seedFile(propertyId);
 				Files.writeString(seedFile, seed, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
@@ -214,6 +214,18 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 				saveSampleIn(sample, propertyDirectory);
 			}
 		});
+	}
+
+	private static void deleteAllSamples(Path propertyDirectory) throws IOException {
+		Files.walk(propertyDirectory)
+			 .filter(p -> p.getFileName().toString().startsWith(SAMPLEFILE_PREFIX))
+			 .forEach(p -> {
+				 try {
+					 Files.delete(p);
+				 } catch (IOException e) {
+					 ExceptionSupport.throwAsUnchecked(e);
+				 }
+			 });
 	}
 
 	private static void saveSampleIn(SampleRecording sample, Path propertyDirectory) throws IOException {
