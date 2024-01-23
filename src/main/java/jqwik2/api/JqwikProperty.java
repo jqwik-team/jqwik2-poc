@@ -39,12 +39,16 @@ public class JqwikProperty {
 	}
 
 	public JqwikProperty(String id, PropertyRunStrategy strategy) {
+		this(id, strategy, JqwikDefaults.defaultFailureDatabase());
+	}
+
+	private JqwikProperty(String id, PropertyRunStrategy strategy, FailureDatabase database) {
 		if (id == null || id.isEmpty()) {
 			throw new IllegalArgumentException("id must not be null");
 		}
 		this.id = id;
 		this.strategy = strategy;
-		failureDatabase(JqwikDefaults.defaultFailureDatabase());
+		failureDatabase(database);
 	}
 
 	public PropertyRunStrategy strategy() {
@@ -91,7 +95,7 @@ public class JqwikProperty {
 	private PropertyRunConfiguration buildConfiguration(List<Generator<?>> generators) {
 		return switch (strategy.generation()) {
 			case RANDOMIZED -> PropertyRunConfiguration.randomized(
-				strategy.seed().orElseThrow(() -> new IllegalStateException("Randomized Generation requires a seed")),
+				strategy.seedSupplier().get(),
 				strategy.maxTries(),
 				isShrinkingEnabled(),
 				strategy.maxRuntime(),
@@ -104,7 +108,7 @@ public class JqwikProperty {
 				generators
 			);
 			case SMART -> PropertyRunConfiguration.smart(
-				strategy.seed().orElseThrow(() -> new IllegalStateException("Randomized Generation requires a seed")),
+				strategy.seedSupplier().get(),
 				strategy.maxTries(),
 				strategy.maxRuntime(),
 				isShrinkingEnabled(),
@@ -148,13 +152,29 @@ public class JqwikProperty {
 		PropertyRunStrategy clonedStrategy = PropertyRunStrategy.create(
 			strategy.maxTries(),
 			strategy.maxRuntime(),
-			strategy.seed().orElse(null),
+			strategy.seedSupplier(),
 			strategy.samples(),
 			strategy.shrinking(),
 			generationMode,
-			strategy.edgeCases()
+			strategy.edgeCases(),
+			strategy.afterFailure()
 		);
-		return new JqwikProperty(id, clonedStrategy);
+		return new JqwikProperty(id, clonedStrategy, database);
+	}
+
+
+	public JqwikProperty withAfterFailure(PropertyRunStrategy.AfterFailureMode afterFailureMode) {
+		PropertyRunStrategy clonedStrategy = PropertyRunStrategy.create(
+			strategy.maxTries(),
+			strategy.maxRuntime(),
+			strategy.seedSupplier(),
+			strategy.samples(),
+			strategy.shrinking(),
+			strategy.generation(),
+			strategy.edgeCases(),
+			afterFailureMode
+		);
+		return new JqwikProperty(id, clonedStrategy, database);
 	}
 
 	public void failureDatabase(FailureDatabase database) {
@@ -170,7 +190,7 @@ public class JqwikProperty {
 		Set<SampleRecording> sampleRecordings = result.falsifiedSamples().stream()
 													  .map(s -> s.sample().recording())
 													  .collect(Collectors.toSet());
-		database.saveFailure(id, strategy.seed().orElse(null), sampleRecordings);
+		database.saveFailure(id, result.effectiveSeed().orElse(null), sampleRecordings);
 	}
 
 	public interface PropertyVerifier1<T1> {
@@ -214,5 +234,4 @@ public class JqwikProperty {
 			};
 		}
 	}
-
 }

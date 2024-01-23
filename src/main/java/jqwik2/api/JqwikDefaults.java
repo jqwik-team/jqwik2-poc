@@ -40,4 +40,8 @@ public class JqwikDefaults {
 		}
 		return defaultFailureDatabase;
 	}
+
+	static PropertyRunStrategy.AfterFailureMode defaultAfterFailureMode() {
+		return PropertyRunStrategy.AfterFailureMode.FAILED_SAMPLES;
+	}
 }

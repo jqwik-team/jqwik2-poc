@@ -2,6 +2,7 @@ package jqwik2.api;
 
 import java.time.*;
 import java.util.*;
+import java.util.function.*;
 
 import jqwik2.api.recording.*;
 
@@ -10,26 +11,33 @@ public interface PropertyRunStrategy {
 	PropertyRunStrategy DEFAULT = new DefaultStrategy(
 		JqwikDefaults.defaultMaxTries(),
 		JqwikDefaults.defaultMaxDuration(),
-		Optional.of(RandomChoice.generateRandomSeed()),
+		RandomChoice::generateRandomSeed,
 		List.of(),
 		JqwikDefaults.defaultShrinkingMode(),
 		JqwikDefaults.defaultGenerationMode(),
-		JqwikDefaults.defaultEdgeCasesMode()
+		JqwikDefaults.defaultEdgeCasesMode(),
+		JqwikDefaults.defaultAfterFailureMode()
 	);
 
 	static PropertyRunStrategy create(
-		int maxTries, Duration maxRuntime, String seed,
+		int maxTries, Duration maxRuntime, Supplier<String> seed,
 		List<SampleRecording> samples,
-		ShrinkingMode shrinking, GenerationMode generation, EdgeCasesMode edgeCases
+		ShrinkingMode shrinking, GenerationMode generation, EdgeCasesMode edgeCases, AfterFailureMode afterFailure
 	) {
-		return new DefaultStrategy(maxTries, maxRuntime, Optional.ofNullable(seed), samples, shrinking, generation, edgeCases);
+		return new DefaultStrategy(
+			maxTries, maxRuntime,
+			seed, samples,
+			shrinking, generation, edgeCases, afterFailure
+		);
 	}
 
 	int maxTries();
 
 	Duration maxRuntime();
 
-	Optional<String> seed();
+	Supplier<String> seedSupplier();
+
+	List<SampleRecording> samples();
 
 	ShrinkingMode shrinking();
 
@@ -37,7 +45,7 @@ public interface PropertyRunStrategy {
 
     EdgeCasesMode edgeCases();
 
-	List<SampleRecording> samples();
+    AfterFailureMode afterFailure();
 
 	enum GenerationMode {
 		RANDOMIZED,
@@ -56,13 +64,18 @@ public interface PropertyRunStrategy {
 		MIXIN // Mix edge cases into random generation
 	}
 
+	enum AfterFailureMode {
+		REPLAY,
+		FAILED_SAMPLES
+	}
 }
 
 record DefaultStrategy(
 	int maxTries, Duration maxRuntime,
-	Optional<String> seed,
+	Supplier<String> seedSupplier,
 	List<SampleRecording> samples,
 	ShrinkingMode shrinking,
 	GenerationMode generation,
-	EdgeCasesMode edgeCases
+	EdgeCasesMode edgeCases,
+	AfterFailureMode afterFailure
 ) implements PropertyRunStrategy {}

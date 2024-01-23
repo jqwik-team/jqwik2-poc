@@ -35,7 +35,7 @@ public class PropertyCase {
 
 		return runAndShrink(
 			iterableGenSource,
-			maxTries,
+			maxTries, configuration.effectiveSeed(),
 			shrinkingEnabled,
 			configuration.maxRuntime(),
 			configuration.supplyExecutorService()
@@ -45,7 +45,7 @@ public class PropertyCase {
 	@SuppressWarnings("OverlyLongMethod")
 	private PropertyRunResult runAndShrink(
 		IterableSampleSource iterableGenSource,
-		int maxTries,
+		int maxTries, Optional<String> effectiveSeed,
 		boolean shrinkingEnabled,
 		Duration maxDuration,
 		Supplier<ExecutorService> executorServiceSupplier
@@ -71,12 +71,12 @@ public class PropertyCase {
 					String timedOutMessage = "Timeout after " + maxDuration + " without any check being executed.";
 					Exception abortionReason = new TimeoutException(timedOutMessage);
 					return new PropertyRunResult(
-						ABORTED, countTries.get(), countChecks.get(),
+						ABORTED, countTries.get(), countChecks.get(), effectiveSeed,
 						new TreeSet<>(), Optional.of(abortionReason),
 						timedOut
 					);
 				}
-				return new PropertyRunResult(SUCCESSFUL, countTries.get(), countChecks.get(), timedOut);
+				return new PropertyRunResult(SUCCESSFUL, countTries.get(), countChecks.get(), effectiveSeed, timedOut);
 			}
 
 			FalsifiedSample originalSample = falsifiedSamples.first();
@@ -85,14 +85,14 @@ public class PropertyCase {
 			}
 
 			return new PropertyRunResult(
-				FAILED, countTries.get(), countChecks.get(),
+				FAILED, countTries.get(), countChecks.get(), effectiveSeed,
 				falsifiedSamples, Optional.empty(), timedOut
 			);
 
 		} catch (Throwable t) {
 			ExceptionSupport.rethrowIfBlacklisted(t);
 			return new PropertyRunResult(
-				ABORTED, countTries.get(), countChecks.get(),
+				ABORTED, countTries.get(), countChecks.get(), effectiveSeed,
 				new TreeSet<>(), Optional.of(t),
 				false
 			);

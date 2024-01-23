@@ -4,13 +4,14 @@ import java.util.*;
 
 public record PropertyRunResult(
 	Status status, int countTries, int countChecks,
+	Optional<String> effectiveSeed,
 	SortedSet<FalsifiedSample> falsifiedSamples,
 	Optional<Throwable> abortionReason,
 	boolean timedOut
 ) {
 
-	public PropertyRunResult(Status status, int countTries, int countChecks, boolean timedOut) {
-		this(status, countTries, countChecks, new TreeSet<>(), Optional.empty(), timedOut);
+	public PropertyRunResult(Status status, int countTries, int countChecks, Optional<String> effectiveSeed, boolean timedOut) {
+		this(status, countTries, countChecks, effectiveSeed, new TreeSet<>(), Optional.empty(), timedOut);
 	}
 
 	public enum Status {

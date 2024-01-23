@@ -5,7 +5,6 @@ import java.util.*;
 import java.util.function.*;
 
 import jqwik2.api.Arbitrary;
-import jqwik2.api.Assume;
 import jqwik2.api.*;
 import jqwik2.api.arbitraries.*;
 import jqwik2.api.database.*;
@@ -172,7 +171,8 @@ class JqwikPropertyTests {
 			List.of(),
 			PropertyRunStrategy.ShrinkingMode.OFF,
 			PropertyRunStrategy.GenerationMode.EXHAUSTIVE,
-			PropertyRunStrategy.EdgeCasesMode.OFF
+			PropertyRunStrategy.EdgeCasesMode.OFF,
+			PropertyRunStrategy.AfterFailureMode.REPLAY
 		);
 		var property = new JqwikProperty(strategy);
 
@@ -193,11 +193,12 @@ class JqwikPropertyTests {
 	@Example
 	void generationMode_SMART() {
 		PropertyRunStrategy strategy = PropertyRunStrategy.create(
-			100, Duration.ofMinutes(10), RandomChoice.generateRandomSeed(),
+			100, Duration.ofMinutes(10), RandomChoice::generateRandomSeed,
 			List.of(),
 			PropertyRunStrategy.ShrinkingMode.OFF,
 			PropertyRunStrategy.GenerationMode.SMART,
-			PropertyRunStrategy.EdgeCasesMode.MIXIN
+			PropertyRunStrategy.EdgeCasesMode.MIXIN,
+			PropertyRunStrategy.AfterFailureMode.FAILED_SAMPLES
 		);
 		var property = new JqwikProperty(strategy);
 
@@ -220,11 +221,12 @@ class JqwikPropertyTests {
 	@Example
 	void edgeCasesMode_MIXIN() {
 		PropertyRunStrategy strategy = PropertyRunStrategy.create(
-			1000, Duration.ofMinutes(10), RandomChoice.generateRandomSeed(),
+			1000, Duration.ofMinutes(10), RandomChoice::generateRandomSeed,
 			List.of(),
 			PropertyRunStrategy.ShrinkingMode.OFF,
 			PropertyRunStrategy.GenerationMode.SMART,
-			PropertyRunStrategy.EdgeCasesMode.MIXIN
+			PropertyRunStrategy.EdgeCasesMode.MIXIN,
+			PropertyRunStrategy.AfterFailureMode.FAILED_SAMPLES
 		);
 		var property = new JqwikProperty(strategy);
 
@@ -259,15 +261,13 @@ class JqwikPropertyTests {
 			atom(0)
 		));
 
-		// System.out.println(samples);
-		// System.out.println(values);
-
 		PropertyRunStrategy strategy = PropertyRunStrategy.create(
-			1000, Duration.ofMinutes(10), RandomChoice.generateRandomSeed(),
+			1000, Duration.ofMinutes(10), RandomChoice::generateRandomSeed,
 			sampleRecordings,
 			PropertyRunStrategy.ShrinkingMode.OFF,
 			PropertyRunStrategy.GenerationMode.SAMPLES,
-			PropertyRunStrategy.EdgeCasesMode.MIXIN
+			PropertyRunStrategy.EdgeCasesMode.MIXIN,
+			PropertyRunStrategy.AfterFailureMode.FAILED_SAMPLES
 		);
 		var property = new JqwikProperty(strategy);
 
@@ -293,6 +293,35 @@ class JqwikPropertyTests {
 		property.failureDatabase(database);
 		property.forAll(Numbers.integers()).check(i -> true);
 		verify(database).deleteProperty("myId");
+	}
+
+	@Example
+	void afterFailureMode_REPLAY() {
+		var property = new JqwikProperty("myId")
+						   .withAfterFailure(PropertyRunStrategy.AfterFailureMode.REPLAY);
+
+		var integers = Numbers.integers().between(-1000, 1000);
+
+		List<Integer> initiallyTriedValues = new ArrayList<>();
+		PropertyRunResult initialResult = property.forAll(integers).check(i -> {
+			initiallyTriedValues.add(i);
+			return i > -10 && i < 10;
+		});
+		assertThat(initialResult.isFailed()).isTrue();
+		assertThat(initialResult.countTries()).isGreaterThan(0);
+
+		List<Integer> replayedTriedValues = new ArrayList<>();
+		PropertyRunResult replayedResult = property.forAll(integers).check(i -> {
+			replayedTriedValues.add(i);
+			return i < 10 || i > 20;
+		});
+		assertThat(replayedResult).isEqualTo(initialResult);
+		assertThat(replayedTriedValues).isEqualTo(initiallyTriedValues);
+	}
+
+	@Example
+	void afterFailureMode_FAILED_SAMPLES() {
+		fail("not implemented");
 	}
 
 }

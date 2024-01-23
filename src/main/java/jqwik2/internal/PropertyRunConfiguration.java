@@ -17,6 +17,8 @@ public interface PropertyRunConfiguration {
 
 	int maxTries();
 
+	Optional<String> effectiveSeed();
+
 	Supplier<ExecutorService> supplyExecutorService();
 
 	boolean shrinkingEnabled();
@@ -88,14 +90,17 @@ public interface PropertyRunConfiguration {
 		Supplier<ExecutorService> supplyExecutorService,
 		List<Generator<?>> generators
 	) {
-		return IterableExhaustiveSource.from(generators).map(
-			exhaustiveSource -> (PropertyRunConfiguration) new Configuration(
-				null, maxTries,
-				false,
-				maxRuntime,
-				supplyExecutorService,
-				() -> exhaustiveSource
-			)).orElseGet(() -> randomized(seed, maxTries, shrinkingEnabled, maxRuntime, supplyExecutorService));
+		var exhaustive = IterableExhaustiveSource.from(generators);
+		if (exhaustive.isEmpty() || exhaustive.get().maxCount() > maxTries) {
+			return randomized(seed, maxTries, shrinkingEnabled, maxRuntime, supplyExecutorService);
+		}
+		return new Configuration(
+			null, maxTries,
+			false,
+			maxRuntime,
+			supplyExecutorService,
+			exhaustive::get
+		);
 	}
 
 	static PropertyRunConfiguration samples(
@@ -124,6 +129,11 @@ record Configuration(
 	Supplier<ExecutorService> supplyExecutorService,
 	Supplier<IterableSampleSource> supplySource
 ) implements PropertyRunConfiguration {
+	@Override
+	public Optional<String> effectiveSeed() {
+		return Optional.ofNullable(seed);
+	}
+
 	@Override
 	public IterableSampleSource source() {
 		return supplySource.get();
