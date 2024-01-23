@@ -2,9 +2,9 @@
     - Replace GenSource.Tree with GenSource.Tuple
   
 - JqwikProperty
-    - Allow rerun with previously falsified samples (starting with smallest)
-      => Rerun will improve shrinking!
-    - Report falsified samples, tries, seed, effective generation strategy
+    - Report all falsified samples, checks, tries, effective seed
+    - AfterFailureMode.SAMPLES_THEN_REPLAY
+    - AfterFailureMode.ANALYZE: Find as many failing samples as possible and analyze their commonalities
 
 - Allow JqwikDefaults to be changed programmatically
 
