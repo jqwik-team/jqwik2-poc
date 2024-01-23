@@ -29,7 +29,6 @@ class ArbitrariesTests {
 		assertThat(cHallo.sample()).isEqualTo("hallo");
 	}
 
-
 	@Example
 	void lists() {
 		for (int i = 0; i < 10; i++) {
@@ -53,11 +52,23 @@ class ArbitrariesTests {
 	@Example
 	void mapping() {
 		for (int i = 0; i < 10; i++) {
-			Arbitrary<String> ints = Numbers.integers().between(0, 10000)
-											.map(anInt -> Integer.toHexString(anInt));
-			String sample = ints.sample();
+			Arbitrary<String> hexInts = Numbers.integers().between(0, 10000)
+											   .map(anInt -> Integer.toHexString(anInt));
+			String sample = hexInts.sample();
 			// System.out.println(sample);
 			assertThat(Integer.valueOf(sample, 16)).isBetween(0, 10000);
+		}
+	}
+
+	@Example
+	void flatMapping() {
+		for (int i = 0; i < 10; i++) {
+			Arbitrary<List<Integer>> list = Numbers.integers().between(1, 5)
+												   .flatMap(anInt -> Values.just(anInt).list().ofSize(anInt));
+			List<Integer> sample = list.sample();
+			//System.out.println(sample);
+			assertThat(sample).hasSizeBetween(1, 5);
+			assertThat(sample).containsOnly(sample.size());
 		}
 	}
 

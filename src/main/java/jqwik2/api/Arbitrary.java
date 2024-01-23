@@ -25,4 +25,8 @@ public interface Arbitrary<T> {
 	default <R> Arbitrary<R> map(Function<T, R> mapper) {
 		return () -> Arbitrary.this.generator().map(mapper);
 	}
+
+	default <R> Arbitrary<R> flatMap(Function<T, Arbitrary<R>> mapper) {
+		return () -> Arbitrary.this.generator().flatMap(t -> mapper.apply(t).generator());
+	}
 }

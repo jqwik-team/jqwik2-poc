@@ -8,10 +8,7 @@
 
 - Allow JqwikDefaults to be changed programmatically
 
-- Introduce Arbitraries
-    - flatMap
-
-- Additional generators
+- Additional generators and arbitraries
     - String
     - Empty / Null Generator
 
@@ -43,5 +40,5 @@
     - Reduce list by improved binary
       search: https://notebook.drmaciver.com/posts/2019-04-30-13:03.html
 - Jupiter Extension
-- Target-based generation and shrinking
+- Target-based generation and shrinking (see http://proper.softlab.ntua.gr/Publications.html)
 - Give generators equality to allow caching (Is that still necessary?)
