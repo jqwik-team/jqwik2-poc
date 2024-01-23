@@ -38,10 +38,12 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 		return Optional.of(exhaustiveAtom);
 	}
 
+	@SafeVarargs
 	static Optional<ExhaustiveSource<?>> or(Optional<ExhaustiveSource<?>>... alternatives) {
 		if (Arrays.stream(alternatives).anyMatch(Optional::isEmpty)) {
 			return Optional.empty();
 		}
+		@SuppressWarnings("OptionalGetWithoutIsPresent") // It's checked above
 		List<? extends ExhaustiveSource<?>> atomList = Arrays.stream(alternatives).map(Optional::get).toList();
 		ExhaustiveOr exhaustiveOr = new ExhaustiveOr(atomList);
 		if (exhaustiveOr.maxCount() == Exhaustive.INFINITE) {
@@ -79,16 +81,16 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 	}
 
 	/**
-	 * Generate tree from given head source and child creator function
+	 * Generate an exhaustive source that reflects flat mapping one exhaustive source to another
 	 *
-	 * @param head         Source for head value
-	 * @param childCreator Function to create child source based on head value
+	 * @param from         Source for from value
+	 * @param mappingFunction Function to create child source based on from value
 	 */
-	static Optional<ExhaustiveSource<?>> tree(Optional<ExhaustiveSource<?>> head, Function<GenSource, Optional<ExhaustiveSource<?>>> childCreator) {
-		if (head.isEmpty()) {
+	static Optional<ExhaustiveSource<?>> flatMap(Optional<ExhaustiveSource<?>> from, Function<GenSource, Optional<ExhaustiveSource<?>>> mappingFunction) {
+		if (from.isEmpty()) {
 			return Optional.empty();
 		}
-		ExhaustiveTree exhaustiveTree = new ExhaustiveTree(head.get(), childCreator);
+		ExhaustiveFlatMap exhaustiveTree = new ExhaustiveFlatMap(from.get(), mappingFunction);
 		if (exhaustiveTree.maxCount() == Exhaustive.INFINITE) {
 			return Optional.empty();
 		}
@@ -119,10 +121,6 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 			return Recording.atom();
 		}
 
-		/**
-		 * Try to advance this exhaustive source locally.
-		 * Return true if successful, false if exhausted.
-		 */
 		@Override
 		protected boolean tryAdvance() {
 			return false;

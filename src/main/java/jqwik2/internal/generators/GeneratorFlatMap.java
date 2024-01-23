@@ -48,7 +48,7 @@ public class GeneratorFlatMap<T, R> implements Generator<R> {
 
 	@Override
 	public Optional<ExhaustiveSource<?>> exhaustive() {
-		return ExhaustiveSource.tree(
+		return ExhaustiveSource.flatMap(
 			generator.exhaustive(),
 			head -> {
 				T headValue = generator.generate(head);

@@ -310,7 +310,7 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void exhaustiveTree() {
-			ExhaustiveTree tree = (ExhaustiveTree) ExhaustiveSource.tree(
+			ExhaustiveFlatMap tree = (ExhaustiveFlatMap) ExhaustiveSource.flatMap(
 				ExhaustiveSource.atom(2),
 				head -> list(head.atom().choose(3), atom(2))
 			).get();
@@ -348,7 +348,7 @@ class ExhaustiveGenerationTests {
 			assertThat(tree.advance()).isFalse();
 		}
 
-		private void assertTree(ExhaustiveTree exhaustiveTree, int... expected) {
+		private void assertTree(ExhaustiveFlatMap exhaustiveTree, int... expected) {
 			GenSource.Tree tree = exhaustiveTree.current();
 			int head = tree.head().atom().choose(Integer.MAX_VALUE);
 

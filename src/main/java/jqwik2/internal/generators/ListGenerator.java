@@ -1,12 +1,8 @@
 package jqwik2.internal.generators;
 
 import java.util.*;
-import java.util.function.*;
 
 import jqwik2.api.*;
-import jqwik2.api.recording.*;
-
-import static jqwik2.api.recording.Recording.*;
 
 public class ListGenerator<T> extends AbstractCollectionGenerator<T, List<T>> {
 
@@ -28,7 +24,7 @@ public class ListGenerator<T> extends AbstractCollectionGenerator<T, List<T>> {
 
 	@Override
 	public Optional<ExhaustiveSource<?>> exhaustive() {
-		return ExhaustiveSource.tree(
+		return ExhaustiveSource.flatMap(
 			ExhaustiveSource.atom(maxSize - minSize),
 			head -> ExhaustiveSource.list(chooseSize(head), elementGenerator.exhaustive())
 		);

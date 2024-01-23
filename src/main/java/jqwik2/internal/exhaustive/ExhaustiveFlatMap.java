@@ -6,19 +6,19 @@ import java.util.function.*;
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
 
-public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> {
-	private final Function<GenSource, Optional<ExhaustiveSource<?>>> childCreator;
+public class ExhaustiveFlatMap extends AbstractExhaustiveSource<GenSource.Tree> {
+	private final Function<GenSource, Optional<ExhaustiveSource<?>>> mappingFunction;
 	private final ExhaustiveSource<?> head;
 	private Optional<? extends ExhaustiveSource<?>> optionalChild = Optional.empty();
 
-	public ExhaustiveTree(ExhaustiveSource<?> head, Function<GenSource, Optional<ExhaustiveSource<?>>> childCreator) {
-		this.childCreator = childCreator;
+	public ExhaustiveFlatMap(ExhaustiveSource<?> head, Function<GenSource, Optional<ExhaustiveSource<?>>> mappingFunction) {
+		this.mappingFunction = mappingFunction;
 		this.head = head;
 		creatAndChainChild();
 	}
 
 	private void creatAndChainChild() {
-		optionalChild = childCreator.apply(head.current());
+		optionalChild = mappingFunction.apply(head.current());
 		optionalChild.ifPresent(child -> {
 			head.chain(child);
 			succ().ifPresent(child::setSucc);
@@ -29,7 +29,7 @@ public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> {
 	public long maxCount() {
 		long sum = 0;
 		for (GenSource genSource : head) {
-			Optional<? extends ExhaustiveSource<?>> optionalChild = childCreator.apply(genSource);
+			Optional<? extends ExhaustiveSource<?>> optionalChild = mappingFunction.apply(genSource);
 			if (optionalChild.isPresent()) {
 				sum += optionalChild.get().maxCount();
 			} else {
@@ -72,8 +72,8 @@ public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> {
 	}
 
 	@Override
-	public ExhaustiveTree clone() {
-		return new ExhaustiveTree(head.clone(), childCreator);
+	public ExhaustiveFlatMap clone() {
+		return new ExhaustiveFlatMap(head.clone(), mappingFunction);
 	}
 
 	@Override
@@ -86,7 +86,8 @@ public class ExhaustiveTree extends AbstractExhaustiveSource<GenSource.Tree> {
 	public Recording recording() {
 		return Recording.tree(
 			head.recording(),
-			optionalChild.get().recording() // TODO: Handle empty optional
+			// TODO: Handle empty optional child, maybe child shouldn't be optional in the first place
+			optionalChild.get().recording()
 		);
 	}
 }

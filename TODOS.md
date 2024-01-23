@@ -1,5 +1,5 @@
 - Refactoring
-    - Replace GenSource.Tree with GenSource.Tuple
+    - Replace GenSource.Tree with GenSource.Tuple, also TreeRecording with TupleRecording
   
 - JqwikProperty
     - Report all falsified samples, checks, tries, effective seed
