@@ -11,6 +11,8 @@
 - Additional generators and arbitraries
     - String
     - Empty / Null Generator
+    - Values.of(...)
+    - Values.oneOf(...)
 
 - Add descriptions to generators
     - Can target type of map / flatMap be inferred for description?
@@ -18,8 +20,9 @@
 
 - PropertyCase Execution
     - Fail if ratio checks/tries is too low
-- Add GenSource.Tuple
+
 - Stateful generators
+
 - Statistics
     - Collect and report statistics
     - Generate until a statistical measurement is supposed to be stable.
@@ -39,6 +42,9 @@
     - Show shrinking progress on console
     - Reduce list by improved binary
       search: https://notebook.drmaciver.com/posts/2019-04-30-13:03.html
+  
 - Jupiter Extension
+
 - Target-based generation and shrinking (see http://proper.softlab.ntua.gr/Publications.html)
+
 - Give generators equality to allow caching (Is that still necessary?)
