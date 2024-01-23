@@ -204,7 +204,7 @@ class JqwikPropertyTests {
 			PropertyRunStrategy.ShrinkingMode.OFF,
 			PropertyRunStrategy.GenerationMode.SMART,
 			PropertyRunStrategy.EdgeCasesMode.MIXIN,
-			PropertyRunStrategy.AfterFailureMode.FAILED_SAMPLES
+			PropertyRunStrategy.AfterFailureMode.SAMPLES_ONLY
 		);
 		var property = new JqwikProperty(strategy);
 
@@ -232,7 +232,7 @@ class JqwikPropertyTests {
 			PropertyRunStrategy.ShrinkingMode.OFF,
 			PropertyRunStrategy.GenerationMode.SMART,
 			PropertyRunStrategy.EdgeCasesMode.MIXIN,
-			PropertyRunStrategy.AfterFailureMode.FAILED_SAMPLES
+			PropertyRunStrategy.AfterFailureMode.SAMPLES_ONLY
 		);
 		var property = new JqwikProperty(strategy);
 
@@ -273,7 +273,7 @@ class JqwikPropertyTests {
 			PropertyRunStrategy.ShrinkingMode.OFF,
 			PropertyRunStrategy.GenerationMode.SAMPLES,
 			PropertyRunStrategy.EdgeCasesMode.MIXIN,
-			PropertyRunStrategy.AfterFailureMode.FAILED_SAMPLES
+			PropertyRunStrategy.AfterFailureMode.SAMPLES_ONLY
 		);
 		var property = new JqwikProperty(strategy);
 
@@ -303,7 +303,7 @@ class JqwikPropertyTests {
 
 	@Example
 	void afterFailureMode_REPLAY() {
-		var property = new JqwikProperty("idForReplay")
+		var property = new JqwikProperty("idFor_REPLAY")
 						   .withAfterFailure(PropertyRunStrategy.AfterFailureMode.REPLAY);
 
 		var integers = Numbers.integers().between(-1000, 1000);
@@ -326,8 +326,28 @@ class JqwikPropertyTests {
 	}
 
 	@Example
-	void afterFailureMode_FAILED_SAMPLES() {
-		fail("not implemented");
+	void afterFailureMode_SAMPLES_ONLY() {
+		var property = new JqwikProperty("idFor_SAMPLES_ONLY")
+						   .withAfterFailure(PropertyRunStrategy.AfterFailureMode.SAMPLES_ONLY);
+
+		var integers = Numbers.integers().between(-1000, 1000);
+
+		PropertyRunResult initialResult = property.forAll(integers).check(i -> {
+			return i > -10 && i < 10;
+		});
+		assertThat(initialResult.isFailed()).isTrue();
+		List<Integer> falsifiedValues = initialResult.falsifiedSamples().stream()
+														   .map(s -> (Integer) s.sample().values().get(0))
+														   .toList();
+		assertThat(falsifiedValues).hasSize(2);
+
+		List<Integer> samplesOnlyValues = new ArrayList<>();
+		PropertyRunResult replayedResult = property.forAll(integers).check(i -> {
+			samplesOnlyValues.add(i);
+			return true; // In order to try all previously falsified samples
+		});
+		assertThat(replayedResult.countTries()).isEqualTo(2);
+		assertThat(samplesOnlyValues).isEqualTo(falsifiedValues);
 	}
 
 }

@@ -101,6 +101,16 @@ public class JqwikProperty {
 															.orElseGet(strategy::seedSupplier);
 					yield buildDefaultConfiguration(generators, seedSupplier);
 				}
+				case SAMPLES_ONLY -> {
+					List<SampleRecording> samples = new ArrayList<>(database.loadFailingSamples(id));
+					Collections.sort(samples); // Sorts from smallest to largest
+					yield PropertyRunConfiguration.samples(
+						strategy.maxRuntime(),
+						isShrinkingEnabled(),
+						samples,
+						PropertyRunConfiguration.DEFAULT_EXECUTOR_SERVICE_SUPPLIER
+					);
+				}
 				case null, default -> throw new IllegalStateException("Property has failed before: " + id);
 			};
 		}

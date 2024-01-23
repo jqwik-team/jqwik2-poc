@@ -66,7 +66,7 @@ public interface PropertyRunStrategy {
 
 	enum AfterFailureMode {
 		REPLAY,
-		FAILED_SAMPLES
+		SAMPLES_ONLY
 	}
 }
 
