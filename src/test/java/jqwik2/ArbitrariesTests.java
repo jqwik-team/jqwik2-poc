@@ -49,4 +49,16 @@ class ArbitrariesTests {
 			assertThat(sample).hasSize(5);
 		}
 	}
+
+	@Example
+	void mapping() {
+		for (int i = 0; i < 10; i++) {
+			Arbitrary<String> ints = Numbers.integers().between(0, 10000)
+											.map(anInt -> Integer.toHexString(anInt));
+			String sample = ints.sample();
+			// System.out.println(sample);
+			assertThat(Integer.valueOf(sample, 16)).isBetween(0, 10000);
+		}
+	}
+
 }

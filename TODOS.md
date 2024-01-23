@@ -9,7 +9,7 @@
 - Allow JqwikDefaults to be changed programmatically
 
 - Introduce Arbitraries
-    - map, flatMap
+    - flatMap
 
 - Additional generators
     - String
