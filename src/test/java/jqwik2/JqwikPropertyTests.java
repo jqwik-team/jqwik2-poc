@@ -15,6 +15,7 @@ import org.mockito.*;
 import org.opentest4j.*;
 
 import net.jqwik.api.*;
+import net.jqwik.api.lifecycle.*;
 
 import static jqwik2.api.recording.Recording.list;
 import static jqwik2.api.recording.Recording.*;
@@ -23,6 +24,11 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 class JqwikPropertyTests {
+
+	@BeforeProperty
+	void clearFailureDatabase() {
+		JqwikDefaults.defaultFailureDatabase().clear();
+	}
 
 	@Example
 	void propertyWith1ParameterSucceeds() {
@@ -47,28 +53,25 @@ class JqwikPropertyTests {
 
 	@Example
 	void propertyWith1ParameterFails() {
-		var property = new JqwikProperty();
-		property.failureDatabase(FailureDatabase.NULL);
+		var checkingProperty = new JqwikProperty("cp");
 
-		PropertyRunResult result = property.forAll(Numbers.integers()).check(i -> false);
-		assertThat(result.isFailed()).isTrue();
-		assertThat(result.countTries()).isEqualTo(1);
-		assertThat(result.countChecks()).isEqualTo(1);
+		PropertyRunResult checkingResult = checkingProperty.forAll(Numbers.integers()).check(i -> false);
+		assertThat(checkingResult.isFailed()).isTrue();
+		assertThat(checkingResult.countTries()).isEqualTo(1);
+		assertThat(checkingResult.countChecks()).isEqualTo(1);
 
-		result = property.forAll(Numbers.integers()).verify(i -> {
-			// Thread.sleep(10);
-			// System.out.println(i);
+		var verifyingProperty = new JqwikProperty("vp");
+		PropertyRunResult verifyingResult = verifyingProperty.forAll(Numbers.integers()).verify(i -> {
 			throw new AssertionError("failed");
 		});
-		assertThat(result.isFailed()).isTrue();
-		assertThat(result.countTries()).isEqualTo(1);
-		assertThat(result.countChecks()).isEqualTo(1);
+		assertThat(verifyingResult.isFailed()).isTrue();
+		assertThat(verifyingResult.countTries()).isEqualTo(1);
+		assertThat(verifyingResult.countChecks()).isEqualTo(1);
 	}
 
 	@Example
 	void failingPropertyThrowsExceptionWhenFailed() {
 		var property = new JqwikProperty();
-		property.failureDatabase(FailureDatabase.NULL);
 
 		property.onFailed((result, throwable) -> {
 			ExceptionSupport.throwAsUnchecked(throwable);
@@ -300,7 +303,7 @@ class JqwikPropertyTests {
 
 	@Example
 	void afterFailureMode_REPLAY() {
-		var property = new JqwikProperty("myId")
+		var property = new JqwikProperty("idForReplay")
 						   .withAfterFailure(PropertyRunStrategy.AfterFailureMode.REPLAY);
 
 		var integers = Numbers.integers().between(-1000, 1000);
@@ -316,7 +319,7 @@ class JqwikPropertyTests {
 		List<Integer> replayedTriedValues = new ArrayList<>();
 		PropertyRunResult replayedResult = property.forAll(integers).check(i -> {
 			replayedTriedValues.add(i);
-			return i < 10 || i > 20;
+			return i > -10 && i < 10;
 		});
 		assertThat(replayedResult).isEqualTo(initialResult);
 		assertThat(replayedTriedValues).isEqualTo(initiallyTriedValues);

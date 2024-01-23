@@ -93,9 +93,24 @@ public class JqwikProperty {
 	}
 
 	private PropertyRunConfiguration buildConfiguration(List<Generator<?>> generators) {
+		if (database.hasFailed(id)) {
+			return switch (strategy.afterFailure()) {
+				case REPLAY -> {
+					Supplier<String> seedSupplier = database.loadSeed(id)
+															.map(s -> (Supplier<String>) () -> s)
+															.orElseGet(strategy::seedSupplier);
+					yield buildDefaultConfiguration(generators, seedSupplier);
+				}
+				case null, default -> throw new IllegalStateException("Property has failed before: " + id);
+			};
+		}
+		return buildDefaultConfiguration(generators, strategy.seedSupplier());
+	}
+
+	private PropertyRunConfiguration buildDefaultConfiguration(List<Generator<?>> generators, Supplier<String> seedSupplier) {
 		return switch (strategy.generation()) {
 			case RANDOMIZED -> PropertyRunConfiguration.randomized(
-				strategy.seedSupplier().get(),
+				seedSupplier.get(),
 				strategy.maxTries(),
 				isShrinkingEnabled(),
 				strategy.maxRuntime(),
@@ -108,7 +123,7 @@ public class JqwikProperty {
 				generators
 			);
 			case SMART -> PropertyRunConfiguration.smart(
-				strategy.seedSupplier().get(),
+				seedSupplier.get(),
 				strategy.maxTries(),
 				strategy.maxRuntime(),
 				isShrinkingEnabled(),
@@ -121,7 +136,7 @@ public class JqwikProperty {
 				strategy.samples(),
 				PropertyRunConfiguration.DEFAULT_EXECUTOR_SERVICE_SUPPLIER
 			);
-			case null, default -> throw new IllegalArgumentException("Unsupported generation strategy: " + strategy.generation());
+			case null -> throw new IllegalArgumentException("Unsupported generation strategy: " + strategy.generation());
 		};
 	}
 
@@ -132,7 +147,6 @@ public class JqwikProperty {
 	public String id() {
 		return id;
 	}
-
 
 	public void onFailed(BiConsumer<PropertyRunResult, Throwable> onFailureHandler) {
 		if (onFailureHandlers.contains(onFailureHandler)) {
@@ -161,7 +175,6 @@ public class JqwikProperty {
 		);
 		return new JqwikProperty(id, clonedStrategy, database);
 	}
-
 
 	public JqwikProperty withAfterFailure(PropertyRunStrategy.AfterFailureMode afterFailureMode) {
 		PropertyRunStrategy clonedStrategy = PropertyRunStrategy.create(
