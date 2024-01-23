@@ -103,10 +103,7 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 	}
 
 	class AnyExhaustiveSource<T extends GenSource> extends AbstractExhaustiveSource<T> {
-		/**
-		 * Return an upper bound on the number of values this exhaustive source can generate.
-		 * If the number of values is infinite, return {@code INFINITE}.
-		 */
+
 		@Override
 		public long maxCount() {
 			return 1;
@@ -133,7 +130,8 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 
 		@Override
 		public ExhaustiveSource<T> clone() {
-			return this;
+			// Necessary since prev and succ can be different per instance
+			return new AnyExhaustiveSource<>();
 		}
 	}
 }

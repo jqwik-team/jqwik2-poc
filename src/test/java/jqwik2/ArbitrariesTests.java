@@ -2,6 +2,7 @@ package jqwik2;
 
 import java.util.*;
 
+import jqwik2.api.*;
 import jqwik2.api.Arbitrary;
 import jqwik2.api.arbitraries.*;
 
@@ -62,14 +63,29 @@ class ArbitrariesTests {
 
 	@Example
 	void flatMapping() {
+		Arbitrary<List<Integer>> list = Numbers.integers().between(1, 5)
+											   .flatMap(anInt -> Values.just(anInt).list().ofSize(anInt));
 		for (int i = 0; i < 10; i++) {
-			Arbitrary<List<Integer>> list = Numbers.integers().between(1, 5)
-												   .flatMap(anInt -> Values.just(anInt).list().ofSize(anInt));
 			List<Integer> sample = list.sample();
-			//System.out.println(sample);
+			// System.out.println(sample);
 			assertThat(sample).hasSizeBetween(1, 5);
 			assertThat(sample).containsOnly(sample.size());
 		}
+	}
+
+	@Example
+	void flatMappingExhaustiveGeneration() {
+		Arbitrary<List<Integer>> list = Numbers.integers().between(1, 5)
+											   .flatMap(anInt -> Values.just(anInt).list().ofMaxSize(anInt));
+
+		ExhaustiveSource<?> exhaustiveSource = list.generator().exhaustive().get();
+		assertThat(exhaustiveSource.maxCount()).isEqualTo(20);
+		int count = 0;
+		for (GenSource genSource : exhaustiveSource) {
+			count++;
+			// System.out.println(genSource);
+		}
+		assertThat(count).isEqualTo(20);
 	}
 
 }
