@@ -181,9 +181,13 @@ public class PropertyCase {
 	}
 
 	private void shrink(FalsifiedSample originalSample, Collection<FalsifiedSample> falsifiedSamples) {
-		new FullShrinker(originalSample, tryable).shrinkToEnd(
-			falsifiedSamples::add
-		);
+		FalsifiedSample best = new FullShrinker(originalSample, tryable).shrinkToEnd(ignore -> {});
+		falsifiedSamples.add(best);
+
+		// TODO: Should all shrunk examples be recorded?
+		// new FullShrinker(originalSample, tryable).shrinkToEnd(
+		// 	falsifiedSamples::add
+		// );
 	}
 
 }
