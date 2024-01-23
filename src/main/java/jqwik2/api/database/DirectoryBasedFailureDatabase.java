@@ -154,6 +154,14 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 	}
 
 	@Override
+	public boolean hasFailed(String propertyId) {
+		return ExceptionSupport.runUnchecked(() -> {
+			var propertyDirectory = propertyDirectory(propertyId, false);
+			return Files.exists(propertyDirectory);
+		});
+	}
+
+	@Override
 	public void deleteProperty(String propertyId) {
 		ExceptionSupport.runUnchecked(() -> {
 			var propertyDirectory = propertyDirectory(propertyId, false);
@@ -183,8 +191,13 @@ public class DirectoryBasedFailureDatabase implements FailureDatabase {
 		Files.walk(path)
 			 .sorted(Comparator.reverseOrder())
 			 .filter(p -> !p.equals(path))
-			 .map(Path::toFile)
-			 .forEach(File::delete);
+			 .forEach(p -> {
+				 try {
+					 Files.delete(p);
+				 } catch (IOException e) {
+					 ExceptionSupport.throwAsUnchecked(e);
+				 }
+			 });
 	}
 
 	@Override

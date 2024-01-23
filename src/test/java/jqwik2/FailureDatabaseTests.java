@@ -118,13 +118,15 @@ class FailureDatabaseTests {
 
 		database.saveFailingSample("id1", sample1);
 		database.saveFailingSample("id1", sample2);
+		assertThat(database.hasFailed("id1")).isTrue();
 
 		database.deleteProperty("id1");
-		Set<SampleRecording> failures = database.loadFailingSamples("id1");
-		assertThat(failures).isEmpty();
+		assertThat(database.hasFailed("id1")).isFalse();
+		assertThat(database.loadFailingSamples("id1")).isEmpty();
 
 		database.deleteProperty("id1"); // idempotent
 		database.deleteProperty("id2"); // non existant id
+
 	}
 
 	@Example

@@ -24,6 +24,8 @@ public interface FailureDatabase {
 
 	Optional<String> loadSeed(String propertyId);
 
+	boolean hasFailed(String propertyId);
+
 	/**
 	 * Override for optimized implementation
 	 */
@@ -69,6 +71,11 @@ public interface FailureDatabase {
 		@Override
 		public Optional<String> loadSeed(String propertyId) {
 			return Optional.empty();
+		}
+
+		@Override
+		public boolean hasFailed(String propertyId) {
+			return false;
 		}
 	}
 }
