@@ -6,8 +6,9 @@ import jqwik2.api.*;
 import jqwik2.api.recording.*;
 import jqwik2.internal.*;
 
-public abstract sealed class RecordedSource implements GenSource {
+public abstract sealed class RecordedSource<T extends Recording> implements GenSource {
 	protected final GenSource backUpSource;
+	protected final T recording;
 
 	public static GenSource of(Recording recording) {
 		return RecordedSource.of(recording, null);
@@ -22,8 +23,9 @@ public abstract sealed class RecordedSource implements GenSource {
 		};
 	}
 
-	private RecordedSource(GenSource backUpSource) {
+	private RecordedSource(T recording, GenSource backUpSource) {
 		this.backUpSource = backUpSource;
+		this.recording = recording;
 	}
 
 	@Override
@@ -41,12 +43,17 @@ public abstract sealed class RecordedSource implements GenSource {
 		throw new CannotGenerateException("Source is not a tree");
 	}
 
-	private static final class RecordedList extends RecordedSource implements GenSource.List {
+	@Override
+	public String toString() {
+		return "RecordedSource{%s}".formatted(recording.toString());
+	}
+
+	private static final class RecordedList extends RecordedSource<ListRecording> implements GenSource.List {
 
 		private final Iterator<Recording> elements;
 
 		private RecordedList(ListRecording recording, GenSource backUpSource) {
-			super(backUpSource);
+			super(recording, backUpSource);
 			this.elements = recording.elements().iterator();
 		}
 
@@ -68,13 +75,10 @@ public abstract sealed class RecordedSource implements GenSource {
 
 	}
 
-	private static final class RecordedTree extends RecordedSource implements GenSource.Tree {
-
-		private final TreeRecording recording;
+	private static final class RecordedTree extends RecordedSource<TreeRecording> implements GenSource.Tree {
 
 		private RecordedTree(TreeRecording recording, GenSource backUpSource) {
-			super(backUpSource);
-			this.recording = recording;
+			super(recording, backUpSource);
 		}
 
 		@Override
@@ -94,11 +98,11 @@ public abstract sealed class RecordedSource implements GenSource {
 
 	}
 
-	private static final class RecordedAtom extends RecordedSource implements GenSource.Atom {
+	private static final class RecordedAtom extends RecordedSource<AtomRecording> implements GenSource.Atom {
 		private final Iterator<Integer> iterator;
 
 		private RecordedAtom(AtomRecording recording, GenSource backUpSource) {
-			super(backUpSource);
+			super(recording, backUpSource);
 			this.iterator = recording.choices().iterator();
 		}
 
