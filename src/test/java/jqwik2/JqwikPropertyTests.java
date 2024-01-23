@@ -48,6 +48,7 @@ class JqwikPropertyTests {
 	@Example
 	void propertyWith1ParameterFails() {
 		var property = new JqwikProperty();
+		property.failureDatabase(FailureDatabase.NULL);
 
 		PropertyRunResult result = property.forAll(Numbers.integers()).check(i -> false);
 		assertThat(result.isFailed()).isTrue();
@@ -67,6 +68,8 @@ class JqwikPropertyTests {
 	@Example
 	void failingPropertyThrowsExceptionWhenFailed() {
 		var property = new JqwikProperty();
+		property.failureDatabase(FailureDatabase.NULL);
+
 		property.onFailed((result, throwable) -> {
 			ExceptionSupport.throwAsUnchecked(throwable);
 		});
