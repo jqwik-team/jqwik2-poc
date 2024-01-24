@@ -6,6 +6,7 @@ import java.util.stream.*;
 
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
+import jqwik2.internal.*;
 
 public class GenRecorder extends AbstractRecorder<GenSource> {
 
@@ -40,6 +41,12 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 	public List list() {
 		concreteRecorder = new ListRecorder(source.list());
 		return (List) concreteRecorder;
+	}
+
+	@Override
+	public Tuple tuple(int size) {
+		concreteRecorder = new TupleRecorder(source.tuple(size), size);
+		return (Tuple) concreteRecorder;
 	}
 
 	@Override
@@ -111,6 +118,44 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 
 	}
 
+	static class TupleRecorder extends AbstractRecorder<Tuple> implements Tuple {
+
+		private final java.util.List<AbstractRecorder<?>> elements = new ArrayList<>();
+
+		TupleRecorder(Tuple source, int size) {
+			super(source);
+			for (int i = 0; i < size; i++) {
+				AbstractRecorder<?> next = new GenRecorder(source.get(i));
+				elements.add(next);
+			}
+		}
+
+		@Override
+		public Tuple tuple(int size) {
+			if (size != elements.size()) {
+				throw new CannotGenerateException("Tuple size does not match");
+			}
+			return this;
+		}
+
+		@Override
+		Recording recording() {
+			java.util.List<Recording> elementRecordings = elements.stream()
+																  .map(AbstractRecorder::recording)
+																  .collect(Collectors.toList());
+			return Recording.tuple(elementRecordings);
+		}
+
+		@Override
+		public GenSource get(int index) {
+			if (index < 0 || index >= elements.size()) {
+				throw new CannotGenerateException("Tuple index out of bounds");
+			}
+			return elements.get(index);
+		}
+
+	}
+
 	static class TreeRecorder extends AbstractRecorder<Tree> implements Tree {
 
 		private AbstractRecorder<?> head;
@@ -166,6 +211,11 @@ abstract class AbstractRecorder<T extends GenSource> implements GenSource {
 
 	@Override
 	public List list() {
+		throw new UnsupportedOperationException("Should never be called");
+	}
+
+	@Override
+	public Tuple tuple(int size) {
 		throw new UnsupportedOperationException("Should never be called");
 	}
 

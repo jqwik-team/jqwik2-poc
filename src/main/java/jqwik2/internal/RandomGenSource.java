@@ -6,7 +6,7 @@ import java.util.function.*;
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
 
-public final class RandomGenSource implements IterableSampleSource, GenSource, GenSource.Atom, GenSource.List, GenSource.Tree {
+public final class RandomGenSource implements IterableSampleSource, GenSource, GenSource.Atom, GenSource.List, GenSource.Tuple, GenSource.Tree {
 	private final RandomChoice random;
 
 	// TODO: Replace this with polymorphic approach on subclasses of RandomGenSource
@@ -49,6 +49,11 @@ public final class RandomGenSource implements IterableSampleSource, GenSource, G
 	}
 
 	@Override
+	public Tuple tuple(int size) {
+		return trySwitchTo(Tuple.class);
+	}
+
+	@Override
 	public Tree tree() {
 		return trySwitchTo(Tree.class);
 	}
@@ -68,9 +73,13 @@ public final class RandomGenSource implements IterableSampleSource, GenSource, G
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public GenSource nextElement() {
+		return new RandomGenSource(random.split());
+	}
+
+	@Override
+	public GenSource get(int index) {
 		return new RandomGenSource(random.split());
 	}
 

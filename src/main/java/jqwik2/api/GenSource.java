@@ -11,6 +11,8 @@ public interface GenSource {
 
 	List list();
 
+	Tuple tuple(int size);
+
 	Tree tree();
 
 	interface Atom extends GenSource {
@@ -44,7 +46,11 @@ public interface GenSource {
 		GenSource child();
 	}
 
-	class AnyGenSource implements GenSource, GenSource.Atom, GenSource.List, GenSource.Tree {
+	interface Tuple extends GenSource {
+		GenSource get(int index);
+	}
+
+	class AnyGenSource implements GenSource, GenSource.Atom, GenSource.List, GenSource.Tuple, GenSource.Tree {
 		@Override
 		public Atom atom() {
 			return this;
@@ -52,6 +58,11 @@ public interface GenSource {
 
 		@Override
 		public List list() {
+			return this;
+		}
+
+		@Override
+		public Tuple tuple(int size) {
 			return this;
 		}
 
@@ -85,6 +96,11 @@ public interface GenSource {
 
 		@Override
 		public GenSource nextElement() {
+			return this;
+		}
+
+		@Override
+		public GenSource get(int index) {
 			return this;
 		}
 

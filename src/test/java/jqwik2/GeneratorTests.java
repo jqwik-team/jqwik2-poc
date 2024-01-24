@@ -493,6 +493,31 @@ class GeneratorTests {
 					.isEqualTo(value);
 			}
 		}
+
+		@Example
+		void recordTuple() {
+			RandomGenSource source = new RandomGenSource("42");
+			GenRecorder recorder = new GenRecorder(source);
+
+			GenSource.Tuple tuple = recorder.tuple(3);
+			tuple.get(0).atom().choose(5);
+			tuple.get(1).atom().choose(5);
+
+			GenSource.List list = tuple.get(2).list();
+			list.nextElement().atom().choose(10);
+			list.nextElement().atom().choose(10);
+			list.nextElement().atom().choose(10);
+
+			System.out.println(recorder.recording());
+
+			assertThat(recorder.recording()).isEqualTo(
+				Recording.tuple(
+					atom(2),
+					atom(1),
+					list(atom(8), atom(8), atom(4))
+				)
+			);
+		}
 	}
 
 	@Group

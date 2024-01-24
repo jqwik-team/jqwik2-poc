@@ -35,6 +35,11 @@ public abstract sealed class RecordedSource<T extends Recording> implements GenS
 	}
 
 	@Override
+	public Tuple tuple(int size) {
+		throw new CannotGenerateException("Source is not a tuple");
+	}
+
+	@Override
 	public List list() {
 		throw new CannotGenerateException("Source is not a list");
 	}
