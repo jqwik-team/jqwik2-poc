@@ -18,6 +18,7 @@ public abstract sealed class RecordedSource<T extends Recording> implements GenS
 		return switch (recording) {
 			case ListRecording listRecording -> new RecordedList(listRecording, backUpSource);
 			case TreeRecording treeRecording -> new RecordedTree(treeRecording, backUpSource);
+			case TupleRecording treeRecording -> null;// new RecordedTuple(tupleRecording, backUpSource);
 			case AtomRecording atomRecording -> new RecordedAtom(atomRecording, backUpSource);
 			case null -> throw new IllegalArgumentException("Recording must not be null");
 		};

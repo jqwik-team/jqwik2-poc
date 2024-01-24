@@ -7,7 +7,8 @@ class Serialization {
 
 	public static final char ATOM = 'a';
 	public static final char LIST = 'l';
-	public static final char TREE = 't';
+	public static final char TUPLE = 't';
+	public static final char TREE = 'r';
 
 	public static final char START_CONTENT = '[';
 	public static final char END_CONTENT = ']';
@@ -29,6 +30,8 @@ class Serialization {
 				return deserializeList(serialized);
 			case TREE:
 				return deserializeTree(serialized);
+			case TUPLE:
+				return deserializeTuple(serialized);
 			default:
 				throw new IllegalArgumentException("Unknown recording type: " + choice);
 		}
@@ -53,6 +56,14 @@ class Serialization {
 		}
 		String elementsPart = serializedContents(serialized);
 		return new ListRecording(deserializeParts(elementsPart));
+	}
+
+	private static Recording deserializeTuple(String serialized) {
+		if (serialized.length() < 3) { //TODO: Stricter check
+			throw new IllegalArgumentException("Invalid serialized tuple recording: " + serialized);
+		}
+		String elementsPart = serializedContents(serialized);
+		return new TupleRecording(deserializeParts(elementsPart));
 	}
 
 	private static List<Recording> deserializeParts(String partsString) {
@@ -126,6 +137,10 @@ class Serialization {
 
 	static String serialize(ListRecording recording) {
 		return LIST + "[%s]".formatted(listOfElements(recording.elements()));
+	}
+
+	static String serialize(TupleRecording recording) {
+		return TUPLE + "[%s]".formatted(listOfElements(recording.elements()));
 	}
 
 	private static String listOfElements(List<Recording> elements) {

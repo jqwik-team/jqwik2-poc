@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.stream.*;
 
 public sealed interface Recording extends Comparable<Recording>
-	permits AtomRecording, ListRecording, TreeRecording {
+		permits AtomRecording, ListRecording, TreeRecording, TupleRecording {
 
 	Recording EMPTY = atom();
 
@@ -33,10 +33,18 @@ public sealed interface Recording extends Comparable<Recording>
 	}
 
 	static ListRecording list(Recording... elements) {
-		return new ListRecording(Arrays.asList(elements));
+		return list(Arrays.asList(elements));
 	}
 
 	static ListRecording list(List<Recording> elements) {
 		return new ListRecording(elements);
+	}
+
+	static TupleRecording tuple(Recording... elements) {
+		return tuple(Arrays.asList(elements));
+	}
+
+	static TupleRecording tuple(List<Recording> elements) {
+		return new TupleRecording(elements);
 	}
 }

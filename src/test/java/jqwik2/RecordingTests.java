@@ -45,10 +45,21 @@ class RecordingTests {
 		}
 
 		@Example
+		void tuples() {
+			TupleRecording tuple = tuple(atom(1), atom(2, 3));
+			String serialized = tuple.serialize();
+			assertThat(serialized).isEqualTo("t[a[1]:a[2:3]]");
+			assertThat(Recording.deserialize(serialized)).isEqualTo(tuple);
+
+			assertSerializeDeserialize(tuple(atom(1, 2, 3, 4)));
+			assertSerializeDeserialize(tuple());
+		}
+
+		@Example
 		void trees() {
 			TreeRecording tree = tree(atom(1), atom(2, 3));
 			String serialized = tree.serialize();
-			assertThat(serialized).isEqualTo("t[a[1]:a[2:3]]");
+			assertThat(serialized).isEqualTo("r[a[1]:a[2:3]]");
 			assertThat(Recording.deserialize(serialized)).isEqualTo(tree);
 
 			assertSerializeDeserialize(tree(atom(1, 2, 3, 4), list(atom(1), atom(2, 3))));
@@ -110,6 +121,24 @@ class RecordingTests {
 		).isEqualTo(0);
 
 		assertThat(
+			tuple(atom(0), atom(2))
+		).isLessThan(
+			tuple(atom(1), atom(1))
+		);
+
+		assertThat(
+			tuple(atom(0), atom(2))
+		).isLessThan(
+			tuple(atom(2), atom(0))
+		);
+
+		assertThat(
+			tuple(atom(1), atom(2))
+		).isLessThan(
+			tuple(atom(0), atom(0), atom(0))
+		);
+
+		assertThat(
 			tree(atom(0), atom(2))
 		).isLessThan(
 			tree(atom(1), atom(1))
@@ -169,6 +198,13 @@ class RecordingTests {
 		).isTrue();
 		assertThat(
 			list(atom(0)).isomorphicTo(list(atom(0, 0)))
+		).isFalse();
+
+		assertThat(
+			tuple(atom(1, 0), atom(1, 0)).isomorphicTo(tuple(atom(1, 1), atom(1, 1)))
+		).isTrue();
+		assertThat(
+			tuple(atom(1, 0), atom(1, 0)).isomorphicTo(tuple(atom(1, 1), list()))
 		).isFalse();
 
 		assertThat(
