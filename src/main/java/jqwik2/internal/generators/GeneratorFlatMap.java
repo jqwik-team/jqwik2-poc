@@ -21,10 +21,10 @@ public class GeneratorFlatMap<T, R> implements Generator<R> {
 
 	@Override
 	public R generate(GenSource source) {
-		var tree = source.tree();
-		var valueToMap = generator.generate(tree.head());
+		var tuple = source.tuple(2);
+		var valueToMap = generator.generate(tuple.get(0));
 		Generator<R> rGenerator = cache.computeIfAbsent(valueToMap, mapper::apply);
-		return rGenerator.generate(tree.child());
+		return rGenerator.generate(tuple.get(1));
 	}
 
 	@Override
@@ -36,7 +36,7 @@ public class GeneratorFlatMap<T, R> implements Generator<R> {
 			optional.ifPresent(headValue -> {
 				Generator<R> childGenerator = mapper.apply(headValue);
 				childGenerator.edgeCases().forEach(childRecording -> {
-					recordings.add(tree(
+					recordings.add(tuple(
 						headRecording,
 						childRecording
 					));

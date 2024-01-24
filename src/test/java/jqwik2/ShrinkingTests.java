@@ -72,10 +72,10 @@ public class ShrinkingTests {
 			atom(50, 0),
 			atom(5, 1)
 		);
-		TreeRecording treeRecording = tree(
+		TupleRecording tupleRecording = tuple(
 			atom(3), listRecording
 		);
-		GenSource source = RecordedSource.of(treeRecording);
+		GenSource source = RecordedSource.of(tupleRecording);
 
 		Shrinkable<List<Integer>> shrinkable = new ShrinkableGenerator<>(listOfInts).generate(source);
 
@@ -127,10 +127,10 @@ public class ShrinkingTests {
 			atom(50, 0),
 			atom(5, 1)
 		);
-		TreeRecording treeRecording = tree(
+		TupleRecording tupleRecording = tuple(
 			atom(3), listRecording
 		);
-		GenSource source = RecordedSource.of(treeRecording);
+		GenSource source = RecordedSource.of(tupleRecording);
 
 		SampleGenerator sampleGenerator = SampleGenerator.from(listOfInts);
 		Sample sample = sampleGenerator.generate(List.of(source)).orElseThrow();

@@ -245,9 +245,9 @@ class GeneratorTests {
 
 			// List.of(3, 3)
 			GenSource source = RecordedSource.of(
-				tree(
+				tuple(
 					atom(2),
-					tree(atom(0), list(atom(3), atom(3)))
+					tuple(atom(0), list(atom(3), atom(3)))
 				)
 			);
 
@@ -566,7 +566,7 @@ class GeneratorTests {
 			IntegerGenerator ints = new IntegerGenerator(0, 100);
 			Generator<List<Integer>> listOfInts = ints.list(0, 5);
 
-			Recording recording = tree(
+			Recording recording = tuple(
 				atom(3), list(atom(10))
 			);
 

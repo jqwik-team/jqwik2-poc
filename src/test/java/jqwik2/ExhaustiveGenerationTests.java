@@ -349,14 +349,14 @@ class ExhaustiveGenerationTests {
 		}
 
 		private void assertTree(ExhaustiveFlatMap exhaustiveTree, int... expected) {
-			GenSource.Tree tree = exhaustiveTree.current();
-			int head = tree.head().atom().choose(Integer.MAX_VALUE);
+			GenSource.Tuple tuple = exhaustiveTree.current();
+			int head = tuple.get(0).atom().choose(Integer.MAX_VALUE);
 
 			assertThat(head)
 				.describedAs("Expected %d as head", expected[0])
 				.isEqualTo(expected[0]);
 
-			GenSource.List list = tree.child().list();
+			GenSource.List list = tuple.get(1).list();
 
 			for (int i = 0; i < head; i++) {
 				var atom = list.nextElement().atom();
@@ -382,7 +382,7 @@ class ExhaustiveGenerationTests {
 	void generalIntegers() {
 		Generator<Integer> ints = new IntegerGenerator(-10, 100);
 
-		ExhaustiveSource exhaustive = ints.exhaustive().get();
+		ExhaustiveSource<?> exhaustive = ints.exhaustive().get();
 		assertThat(exhaustive.maxCount()).isEqualTo(111L);
 
 		List<Integer> allValues = collectAll(exhaustive, ints);

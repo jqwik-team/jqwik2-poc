@@ -18,7 +18,7 @@ public abstract sealed class RecordedSource<T extends Recording> implements GenS
 		return switch (recording) {
 			case ListRecording listRecording -> new RecordedList(listRecording, backUpSource);
 			case TreeRecording treeRecording -> new RecordedTree(treeRecording, backUpSource);
-			case TupleRecording treeRecording -> null;// new RecordedTuple(tupleRecording, backUpSource);
+			case TupleRecording tupleRecording -> new RecordedTuple(tupleRecording, backUpSource);
 			case AtomRecording atomRecording -> new RecordedAtom(atomRecording, backUpSource);
 			case null -> throw new IllegalArgumentException("Recording must not be null");
 		};
@@ -77,6 +77,31 @@ public abstract sealed class RecordedSource<T extends Recording> implements GenS
 				return backUpSource.list().nextElement();
 			}
 			throw new CannotGenerateException("No more elements");
+		}
+
+	}
+
+	private static final class RecordedTuple extends RecordedSource<TupleRecording> implements GenSource.Tuple {
+
+		private final java.util.List<Recording> elements;
+
+		private RecordedTuple(TupleRecording recording, GenSource backUpSource) {
+			super(recording, backUpSource);
+			this.elements = recording.elements();
+		}
+
+		@Override
+		public Tuple tuple(int size) {
+			if (size != elements.size()) {
+				throw new CannotGenerateException("Tuple size does not match");
+			}
+			return this;
+		}
+
+		@Override
+		public GenSource get(int index) {
+			Recording elementRecording = elements.get(index);
+			return RecordedSource.of(elementRecording, backUpSource);
 		}
 
 	}

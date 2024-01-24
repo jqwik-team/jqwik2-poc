@@ -22,11 +22,11 @@ abstract class AbstractCollectionGenerator<T, C> implements Generator<C> {
 	}
 
 	Collection<T> generateCollection(GenSource source) {
-		GenSource.Tree listSource = source.tree();
-		int size = chooseSize(listSource.head());
+		GenSource.Tuple listSource = source.tuple(2);
+		int size = chooseSize(listSource.get(0));
 
 		List<T> elements = new ArrayList<>(size);
-		GenSource.List elementsSource = listSource.child().list();
+		GenSource.List elementsSource = listSource.get(1).list();
 		for (int i = 0; i < size; i++) {
 			GenSource elementSource = elementsSource.nextElement();
 			while (true) {
@@ -58,11 +58,11 @@ abstract class AbstractCollectionGenerator<T, C> implements Generator<C> {
 	private Collection<Recording> edgeCaseRecordings() {
 		Set<Recording> recordings = new LinkedHashSet<>();
 		if (minSize == 0) {
-			recordings.add(tree(atom(0), Recording.list()));
+			recordings.add(tuple(atom(0), Recording.list()));
 		}
 		if (minSize <= 1 && maxSize >= 1) {
 			elementGenerator.edgeCases().forEach(elementEdgeCase -> {
-				recordings.add(tree(atom(1), Recording.list(elementEdgeCase)));
+				recordings.add(tuple(atom(1), Recording.list(elementEdgeCase)));
 			});
 		}
 		return recordings;

@@ -90,11 +90,11 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 		if (from.isEmpty()) {
 			return Optional.empty();
 		}
-		ExhaustiveFlatMap exhaustiveTree = new ExhaustiveFlatMap(from.get(), mappingFunction);
-		if (exhaustiveTree.maxCount() == Exhaustive.INFINITE) {
+		ExhaustiveFlatMap exhaustiveFlatMap = new ExhaustiveFlatMap(from.get(), mappingFunction);
+		if (exhaustiveFlatMap.maxCount() == Exhaustive.INFINITE) {
 			return Optional.empty();
 		}
-		return Optional.of(exhaustiveTree);
+		return Optional.of(exhaustiveFlatMap);
 	}
 
 	Recording recording();
