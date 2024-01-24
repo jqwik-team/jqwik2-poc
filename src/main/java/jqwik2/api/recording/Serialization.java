@@ -8,7 +8,6 @@ class Serialization {
 	public static final char ATOM = 'a';
 	public static final char LIST = 'l';
 	public static final char TUPLE = 't';
-	public static final char TREE = 'r';
 
 	public static final char START_CONTENT = '[';
 	public static final char END_CONTENT = ']';
@@ -28,26 +27,11 @@ class Serialization {
 				return deserializeAtom(serialized);
 			case LIST:
 				return deserializeList(serialized);
-			case TREE:
-				return deserializeTree(serialized);
 			case TUPLE:
 				return deserializeTuple(serialized);
 			default:
 				throw new IllegalArgumentException("Unknown recording type: " + choice);
 		}
-	}
-
-	private static Recording deserializeTree(String serialized) {
-		if (serialized.length() < 10) { //TODO: Stricter check
-			throw new IllegalArgumentException("Invalid serialized tree recording: " + serialized);
-		}
-		String elementsPart = serializedContents(serialized);
-		var parts = deserializeParts(elementsPart);
-
-		if (parts.size() != 2) {
-			throw new IllegalArgumentException("Invalid serialized tree recording: " + serialized);
-		}
-		return new TreeRecording(parts.getFirst(), parts.getLast());
 	}
 
 	private static Recording deserializeList(String serialized) {
@@ -147,9 +131,5 @@ class Serialization {
 		return elements.stream()
 					   .map(Recording::serialize)
 					   .collect(Collectors.joining(":"));
-	}
-
-	static String serialize(TreeRecording recording) {
-		return TREE + "[%s:%s]".formatted(recording.head().serialize(), recording.child().serialize());
 	}
 }

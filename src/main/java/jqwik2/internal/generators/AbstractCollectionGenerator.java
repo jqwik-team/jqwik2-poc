@@ -68,12 +68,4 @@ abstract class AbstractCollectionGenerator<T, C> implements Generator<C> {
 		return recordings;
 	}
 
-	// @Override
-	// public Optional<? extends ExhaustiveSource<?>> exhaustive() {
-	// 	return ExhaustiveSource.tree(
-	// 		ExhaustiveSource.atom(maxSize - minSize),
-	// 		head -> ExhaustiveSource.list(chooseSize(head), elementGenerator.exhaustive())
-	// 	);
-	// }
-
 }

@@ -309,47 +309,47 @@ class ExhaustiveGenerationTests {
 		}
 
 		@Example
-		void exhaustiveTree() {
-			ExhaustiveFlatMap tree = (ExhaustiveFlatMap) ExhaustiveSource.flatMap(
+		void exhaustiveFlatMap() {
+			ExhaustiveFlatMap exhaustiveFlatMap = (ExhaustiveFlatMap) ExhaustiveSource.flatMap(
 				ExhaustiveSource.atom(2),
 				head -> list(head.atom().choose(3), atom(2))
 			).get();
 
-			assertThat(tree.maxCount()).isEqualTo(13L);
-			assertTree(tree, 0);
+			assertThat(exhaustiveFlatMap.maxCount()).isEqualTo(13L);
+			assertFlatMap(exhaustiveFlatMap, 0);
 
-			assertThat(tree.advance()).isTrue();
-			assertTree(tree, 1, 0);
-			assertThat(tree.advance()).isTrue();
-			assertTree(tree, 1, 1);
-			assertThat(tree.advance()).isTrue();
-			assertTree(tree, 1, 2);
+			assertThat(exhaustiveFlatMap.advance()).isTrue();
+			assertFlatMap(exhaustiveFlatMap, 1, 0);
+			assertThat(exhaustiveFlatMap.advance()).isTrue();
+			assertFlatMap(exhaustiveFlatMap, 1, 1);
+			assertThat(exhaustiveFlatMap.advance()).isTrue();
+			assertFlatMap(exhaustiveFlatMap, 1, 2);
 
-			assertThat(tree.advance()).isTrue();
-			assertTree(tree, 2, 0, 0);
-			tree.advance();
-			assertTree(tree, 2, 0, 1);
-			tree.advance();
-			assertTree(tree, 2, 0, 2);
+			assertThat(exhaustiveFlatMap.advance()).isTrue();
+			assertFlatMap(exhaustiveFlatMap, 2, 0, 0);
+			exhaustiveFlatMap.advance();
+			assertFlatMap(exhaustiveFlatMap, 2, 0, 1);
+			exhaustiveFlatMap.advance();
+			assertFlatMap(exhaustiveFlatMap, 2, 0, 2);
 
-			tree.advance();
-			assertTree(tree, 2, 1, 0);
-			tree.advance();
-			assertTree(tree, 2, 1, 1);
-			tree.advance();
-			assertTree(tree, 2, 1, 2);
+			exhaustiveFlatMap.advance();
+			assertFlatMap(exhaustiveFlatMap, 2, 1, 0);
+			exhaustiveFlatMap.advance();
+			assertFlatMap(exhaustiveFlatMap, 2, 1, 1);
+			exhaustiveFlatMap.advance();
+			assertFlatMap(exhaustiveFlatMap, 2, 1, 2);
 
-			tree.advance();
-			assertTree(tree, 2, 2, 0);
-			tree.advance();
-			assertTree(tree, 2, 2, 1);
-			assertThat(tree.advance()).isTrue();
-			assertTree(tree, 2, 2, 2);
-			assertThat(tree.advance()).isFalse();
+			exhaustiveFlatMap.advance();
+			assertFlatMap(exhaustiveFlatMap, 2, 2, 0);
+			exhaustiveFlatMap.advance();
+			assertFlatMap(exhaustiveFlatMap, 2, 2, 1);
+			assertThat(exhaustiveFlatMap.advance()).isTrue();
+			assertFlatMap(exhaustiveFlatMap, 2, 2, 2);
+			assertThat(exhaustiveFlatMap.advance()).isFalse();
 		}
 
-		private void assertTree(ExhaustiveFlatMap exhaustiveTree, int... expected) {
-			GenSource.Tuple tuple = exhaustiveTree.current();
+		private void assertFlatMap(ExhaustiveFlatMap exhaustiveFlatMap, int... expected) {
+			GenSource.Tuple tuple = exhaustiveFlatMap.current();
 			int head = tuple.get(0).atom().choose(Integer.MAX_VALUE);
 
 			assertThat(head)

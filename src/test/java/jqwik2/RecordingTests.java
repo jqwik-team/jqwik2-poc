@@ -56,21 +56,11 @@ class RecordingTests {
 		}
 
 		@Example
-		void trees() {
-			TreeRecording tree = tree(atom(1), atom(2, 3));
-			String serialized = tree.serialize();
-			assertThat(serialized).isEqualTo("r[a[1]:a[2:3]]");
-			assertThat(Recording.deserialize(serialized)).isEqualTo(tree);
-
-			assertSerializeDeserialize(tree(atom(1, 2, 3, 4), list(atom(1), atom(2, 3))));
-		}
-
-		@Example
 		void nestedRecording() {
-			TreeRecording nested = tree(atom(1, 2, 3), list(
+			TupleRecording nested = tuple(atom(1, 2, 3), list(
 				atom(99),
-				tree(atom(1, 2, 3), list(atom(1), atom(2, 3))),
-				list(atom(11), tree(atom(12), atom(13)))
+				tuple(atom(1, 2, 3), list(atom(1), atom(2, 3))),
+				list(atom(11), tuple(atom(12), atom(13)))
 			));
 
 			assertSerializeDeserialize(nested);
@@ -110,14 +100,14 @@ class RecordingTests {
 			atom(0, 1).compareTo(list(atom(0)))
 		).isEqualTo(0);
 		assertThat(
-			atom(0, 1).compareTo(tree(atom(0), atom(0)))
+			atom(0, 1).compareTo(tuple(atom(0), atom(0)))
 		).isEqualTo(0);
 
 
 		assertThat(list(atom(1, 0))).isLessThan(list(atom(1, 1)));
 		assertThat(list(atom(1))).isLessThan(list(atom(0), atom(0)));
 		assertThat(
-			list(atom(0)).compareTo(tree(atom(0), atom(0)))
+			list(atom(0)).compareTo(tuple(atom(0), atom(0)))
 		).isEqualTo(0);
 
 		assertThat(
@@ -137,24 +127,6 @@ class RecordingTests {
 		).isLessThan(
 			tuple(atom(0), atom(0), atom(0))
 		);
-
-		assertThat(
-			tree(atom(0), atom(2))
-		).isLessThan(
-			tree(atom(1), atom(1))
-		);
-
-		assertThat(
-			tree(atom(0), list(atom(2)))
-		).isLessThan(
-			tree(atom(1), atom(1))
-		);
-
-		assertThat(
-			tree(atom(0), list(atom(2))).compareTo(
-				tree(atom(0), atom(1))
-			)
-		).isEqualTo(0);
 	}
 
 	@Example
@@ -174,8 +146,8 @@ class RecordingTests {
 		assertThat(list(atom(1, 0))).isEqualTo(list(atom(1, 0)));
 		assertThat(list(atom(1, 1))).isNotEqualTo(list(atom(1, 0)));
 
-		assertThat(tree(atom(1, 0), atom(1, 0))).isEqualTo(tree(atom(1, 0), atom(1, 0)));
-		assertThat(tree(atom(1, 1), atom(1, 0))).isNotEqualTo(tree(atom(1, 0), atom(1, 0)));
+		assertThat(tuple(atom(1, 0), atom(1, 0))).isEqualTo(tuple(atom(1, 0), atom(1, 0)));
+		assertThat(tuple(atom(1, 1), atom(1, 0))).isNotEqualTo(tuple(atom(1, 0), atom(1, 0)));
 	}
 
 	@Example
@@ -205,13 +177,6 @@ class RecordingTests {
 		).isTrue();
 		assertThat(
 			tuple(atom(1, 0), atom(1, 0)).isomorphicTo(tuple(atom(1, 1), list()))
-		).isFalse();
-
-		assertThat(
-			tree(atom(1, 0), atom(1, 0)).isomorphicTo(tree(atom(1, 1), atom(1, 1)))
-		).isTrue();
-		assertThat(
-			tree(atom(1, 0), atom(1, 0)).isomorphicTo(tree(atom(1, 1), list()))
 		).isFalse();
 	}
 

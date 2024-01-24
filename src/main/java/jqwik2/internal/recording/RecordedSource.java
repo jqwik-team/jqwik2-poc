@@ -17,7 +17,6 @@ public abstract sealed class RecordedSource<T extends Recording> implements GenS
 	public static GenSource of(Recording recording, GenSource backUpSource) {
 		return switch (recording) {
 			case ListRecording listRecording -> new RecordedList(listRecording, backUpSource);
-			case TreeRecording treeRecording -> new RecordedTree(treeRecording, backUpSource);
 			case TupleRecording tupleRecording -> new RecordedTuple(tupleRecording, backUpSource);
 			case AtomRecording atomRecording -> new RecordedAtom(atomRecording, backUpSource);
 			case null -> throw new IllegalArgumentException("Recording must not be null");
@@ -42,11 +41,6 @@ public abstract sealed class RecordedSource<T extends Recording> implements GenS
 	@Override
 	public List list() {
 		throw new CannotGenerateException("Source is not a list");
-	}
-
-	@Override
-	public Tree tree() {
-		throw new CannotGenerateException("Source is not a tree");
 	}
 
 	@Override
@@ -106,30 +100,7 @@ public abstract sealed class RecordedSource<T extends Recording> implements GenS
 
 	}
 
-	private static final class RecordedTree extends RecordedSource<TreeRecording> implements GenSource.Tree {
-
-		private RecordedTree(TreeRecording recording, GenSource backUpSource) {
-			super(recording, backUpSource);
-		}
-
-		@Override
-		public Tree tree() {
-			return this;
-		}
-
-		@Override
-		public GenSource head() {
-			return RecordedSource.of(recording.head(), backUpSource);
-		}
-
-		@Override
-		public GenSource child() {
-			return RecordedSource.of(recording.child(), backUpSource);
-		}
-
-	}
-
-	private static final class RecordedAtom extends RecordedSource<AtomRecording> implements GenSource.Atom {
+		private static final class RecordedAtom extends RecordedSource<AtomRecording> implements GenSource.Atom {
 		private final Iterator<Integer> iterator;
 
 		private RecordedAtom(AtomRecording recording, GenSource backUpSource) {

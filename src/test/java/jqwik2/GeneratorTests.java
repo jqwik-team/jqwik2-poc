@@ -554,7 +554,7 @@ class GeneratorTests {
 			ListGenerator<Integer> listOfInts = new ListGenerator<>(ints, 0, 5);
 
 			assertThatThrownBy(() -> {
-				GenSource recorded = RecordedSource.of(tree(
+				GenSource recorded = RecordedSource.of(tuple(
 					atom(3), list(atom(10))
 				));
 				listOfInts.generate(recorded);

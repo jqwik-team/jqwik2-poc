@@ -49,12 +49,6 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 		return (Tuple) concreteRecorder;
 	}
 
-	@Override
-	public Tree tree() {
-		concreteRecorder = new TreeRecorder(source.tree());
-		return (Tree) concreteRecorder;
-	}
-
 	static class AtomRecorder extends AbstractRecorder<Atom> implements Atom {
 
 		private final java.util.List<Integer> seeds = new ArrayList<>(5);
@@ -156,42 +150,6 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 
 	}
 
-	static class TreeRecorder extends AbstractRecorder<Tree> implements Tree {
-
-		private AbstractRecorder<?> head;
-		private AbstractRecorder<?> child;
-
-		TreeRecorder(Tree source) {
-			super(source);
-		}
-
-		@Override
-		public Tree tree() {
-			return this;
-		}
-
-		@Override
-		Recording recording() {
-			if (head == null || child == null) {
-				throw new IllegalStateException("Recording has not been finished");
-			}
-			return Recording.tree(head.recording(), child.recording());
-		}
-
-		@Override
-		public GenSource head() {
-			head = new GenRecorder(source.head());
-			return head;
-		}
-
-		@Override
-		public GenSource child() {
-			child = new GenRecorder(source.child());
-			return child;
-		}
-
-	}
-
 }
 
 abstract class AbstractRecorder<T extends GenSource> implements GenSource {
@@ -216,11 +174,6 @@ abstract class AbstractRecorder<T extends GenSource> implements GenSource {
 
 	@Override
 	public Tuple tuple(int size) {
-		throw new UnsupportedOperationException("Should never be called");
-	}
-
-	@Override
-	public Tree tree() {
 		throw new UnsupportedOperationException("Should never be called");
 	}
 
