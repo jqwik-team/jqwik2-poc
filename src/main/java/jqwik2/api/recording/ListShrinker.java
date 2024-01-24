@@ -6,11 +6,11 @@ import java.util.stream.*;
 class ListShrinker {
 	private final List<Recording> elements;
 
-	ListShrinker(ListRecording treeRecording) {
-		this.elements = treeRecording.elements();
+	ListShrinker(ListRecording listRecording) {
+		this.elements = listRecording.elements();
 	}
 
-	// TODO: Shrink two elements together
+	// TODO: Shrink two or more elements together
 	// TODO: Shrink by removing elements from the head
 	// TODO: Shrink list of lists by moving element of inner list to next list element
 	Stream<ListRecording> shrink() {
