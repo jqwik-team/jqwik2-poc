@@ -6,7 +6,7 @@
 - Allow JqwikDefaults to be changed programmatically
 
 - Additional generators and arbitraries
-    - String
+    - String (based on unicode code points)
     - Empty / Null Generator
     - Values.of(...)
     - Values.oneOf(...)
