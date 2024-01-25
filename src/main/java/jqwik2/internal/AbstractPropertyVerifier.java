@@ -10,7 +10,7 @@ import org.opentest4j.*;
 class AbstractPropertyVerifier {
 
 	@FunctionalInterface
-	interface ThrowingTryable {
+	protected interface ThrowingTryable {
 		boolean apply(List<Object> args) throws Throwable;
 	}
 
@@ -19,28 +19,22 @@ class AbstractPropertyVerifier {
 	private final BiConsumer<PropertyRunResult, Throwable> onFailed;
 	private final Consumer<Optional<Throwable>> onAborted;
 	private final List<Generator.DecoratorFunction> decorators;
+	private final List<Arbitrary<?>> arbitraries;
 
 	protected AbstractPropertyVerifier(
 		Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig,
 		Runnable onSuccessful,
 		BiConsumer<PropertyRunResult, Throwable> onFailed,
 		Consumer<Optional<Throwable>> onAborted,
-		List<Generator.DecoratorFunction> decorators
+		List<Generator.DecoratorFunction> decorators,
+		List<Arbitrary<?>> arbitraries
 	) {
 		this.supplyConfig = supplyConfig;
 		this.onSuccessful = onSuccessful;
 		this.onFailed = onFailed;
 		this.onAborted = onAborted;
 		this.decorators = decorators;
-	}
-
-	protected List<Generator<?>> generators(Arbitrary<?>... arbitraries) {
-		List<Generator<?>> generators = new ArrayList<>();
-		for (Arbitrary<?> a : arbitraries) {
-			Generator<?> generator = decorate(a.generator());
-			generators.add(generator);
-		}
-		return generators;
+		this.arbitraries = arbitraries;
 	}
 
 	private Generator<?> decorate(Generator<?> generator) {
@@ -51,7 +45,7 @@ class AbstractPropertyVerifier {
 		return toDecorate;
 	}
 
-	protected Tryable safeTryable(ThrowingTryable unsafeTryable) {
+	private Tryable safeTryable(ThrowingTryable unsafeTryable) {
 		return Tryable.from(args -> {
 			try {
 				return unsafeTryable.apply(args);
@@ -62,7 +56,7 @@ class AbstractPropertyVerifier {
 		});
 	}
 
-	protected PropertyRunResult run(List<Generator<?>> generators, Tryable tryable) {
+	private PropertyRunResult run(List<Generator<?>> generators, Tryable tryable) {
 		var propertyCase = new PropertyCase(generators, tryable);
 		var result = propertyCase.run(supplyConfig.apply(generators));
 		executeResultCallbacks(result);
@@ -98,4 +92,16 @@ class AbstractPropertyVerifier {
 		);
 	}
 
+	private List<Generator<?>> generators() {
+		List<Generator<?>> generators = new ArrayList<>();
+		arbitraries.forEach(a -> generators.add(decorate(a.generator())));
+		return generators;
+	}
+
+	protected PropertyRunResult run(ThrowingTryable unsafeTryable) {
+		return run(
+			generators(),
+			safeTryable(unsafeTryable)
+		);
+	}
 }

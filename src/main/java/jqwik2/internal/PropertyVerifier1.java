@@ -7,8 +7,6 @@ import jqwik2.api.*;
 
 public class PropertyVerifier1<T1> extends AbstractPropertyVerifier implements JqwikProperty.Verifier1<T1> {
 
-	protected final Arbitrary<T1> arbitrary1;
-
 	public PropertyVerifier1(
 		Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig,
 		Runnable onSuccessful,
@@ -17,20 +15,16 @@ public class PropertyVerifier1<T1> extends AbstractPropertyVerifier implements J
 		List<Generator.DecoratorFunction> decorators,
 		Arbitrary<T1> arbitrary
 	) {
-		super(supplyConfig, onSuccessful, onFailed, onAborted, decorators);
-		this.arbitrary1 = arbitrary;
+		super(supplyConfig, onSuccessful, onFailed, onAborted, decorators, List.of(arbitrary));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public PropertyRunResult check(JqwikProperty.C1<T1> checker) {
-		return run(
-			generators(arbitrary1),
-			safeTryable(args -> {
-				T1 v1 = (T1) args.get(0);
-				return checker.check(v1);
-			})
-		);
+		return run(args -> {
+			T1 v1 = (T1) args.get(0);
+			return checker.check(v1);
+		});
 	}
 
 	@Override
