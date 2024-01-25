@@ -34,7 +34,7 @@ public abstract sealed class RecordedSource<T extends Recording> implements GenS
 	}
 
 	@Override
-	public Tuple tuple(int size) {
+	public Tuple tuple() {
 		throw new CannotGenerateException("Source is not a tuple");
 	}
 
@@ -78,26 +78,29 @@ public abstract sealed class RecordedSource<T extends Recording> implements GenS
 	private static final class RecordedTuple extends RecordedSource<TupleRecording> implements GenSource.Tuple {
 
 		private final java.util.List<Recording> elements;
+		private final Iterator<Recording> values;
 
 		private RecordedTuple(TupleRecording recording, GenSource backUpSource) {
 			super(recording, backUpSource);
 			this.elements = recording.elements();
+			this.values = elements.iterator();
 		}
 
 		@Override
-		public Tuple tuple(int size) {
-			if (size != elements.size()) {
-				throw new CannotGenerateException("Tuple size does not match");
-			}
+		public Tuple tuple() {
 			return this;
 		}
 
 		@Override
-		public GenSource get(int index) {
-			Recording elementRecording = elements.get(index);
-			return RecordedSource.of(elementRecording, backUpSource);
+		public GenSource nextValue() {
+			if (values.hasNext()) {
+				return RecordedSource.of(values.next(), backUpSource);
+			}
+			if (backUpSource != null) {
+				return backUpSource.list().nextElement();
+			}
+			throw new CannotGenerateException("No more values");
 		}
-
 	}
 
 		private static final class RecordedAtom extends RecordedSource<AtomRecording> implements GenSource.Atom {

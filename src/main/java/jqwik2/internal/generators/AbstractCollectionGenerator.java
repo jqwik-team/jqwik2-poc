@@ -22,11 +22,11 @@ abstract class AbstractCollectionGenerator<T, C> implements Generator<C> {
 	}
 
 	Collection<T> generateCollection(GenSource source) {
-		GenSource.Tuple listSource = source.tuple(2);
-		int size = chooseSize(listSource.get(0));
+		GenSource.Tuple listSource = source.tuple();
+		int size = chooseSize(listSource.nextValue());
 
 		List<T> elements = new ArrayList<>(size);
-		GenSource.List elementsSource = listSource.get(1).list();
+		GenSource.List elementsSource = listSource.nextValue().list();
 		for (int i = 0; i < size; i++) {
 			GenSource elementSource = elementsSource.nextElement();
 			while (true) {

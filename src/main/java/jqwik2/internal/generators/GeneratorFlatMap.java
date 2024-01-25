@@ -21,10 +21,10 @@ public class GeneratorFlatMap<T, R> implements Generator<R> {
 
 	@Override
 	public R generate(GenSource source) {
-		var tuple = source.tuple(2);
-		var valueToMap = generator.generate(tuple.get(0));
+		var tuple = source.tuple();
+		var valueToMap = generator.generate(tuple.nextValue());
 		Generator<R> rGenerator = cache.computeIfAbsent(valueToMap, mapper::apply);
-		return rGenerator.generate(tuple.get(1));
+		return rGenerator.generate(tuple.nextValue());
 	}
 
 	@Override

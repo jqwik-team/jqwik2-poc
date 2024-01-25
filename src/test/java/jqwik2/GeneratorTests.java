@@ -499,11 +499,11 @@ class GeneratorTests {
 			RandomGenSource source = new RandomGenSource("42");
 			GenRecorder recorder = new GenRecorder(source);
 
-			GenSource.Tuple tuple = recorder.tuple(3);
-			tuple.get(0).atom().choose(5);
-			tuple.get(1).atom().choose(5);
+			GenSource.Tuple tuple = recorder.tuple();
+			tuple.nextValue().atom().choose(5);
+			tuple.nextValue().atom().choose(5);
 
-			GenSource.List list = tuple.get(2).list();
+			GenSource.List list = tuple.nextValue().list();
 			list.nextElement().atom().choose(10);
 			list.nextElement().atom().choose(10);
 			list.nextElement().atom().choose(10);

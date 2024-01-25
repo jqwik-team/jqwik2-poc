@@ -44,8 +44,8 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 	}
 
 	@Override
-	public Tuple tuple(int size) {
-		concreteRecorder = new TupleRecorder(source.tuple(size), size);
+	public Tuple tuple() {
+		concreteRecorder = new TupleRecorder(source.tuple());
 		return (Tuple) concreteRecorder;
 	}
 
@@ -114,40 +114,33 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 
 	static class TupleRecorder extends AbstractRecorder<Tuple> implements Tuple {
 
-		private final java.util.List<AbstractRecorder<?>> elements = new ArrayList<>();
+		private final java.util.List<AbstractRecorder<?>> values = new ArrayList<>();
 
-		TupleRecorder(Tuple source, int size) {
+		TupleRecorder(Tuple source) {
 			super(source);
-			for (int i = 0; i < size; i++) {
-				AbstractRecorder<?> next = new GenRecorder(source.get(i));
-				elements.add(next);
-			}
 		}
 
 		@Override
-		public Tuple tuple(int size) {
-			if (size != elements.size()) {
-				throw new CannotGenerateException("Tuple size does not match");
-			}
+		public Tuple tuple() {
 			return this;
 		}
 
 		@Override
 		Recording recording() {
-			java.util.List<Recording> elementRecordings = elements.stream()
-																  .map(AbstractRecorder::recording)
-																  .collect(Collectors.toList());
+			java.util.List<Recording> elementRecordings = new ArrayList<>();
+			for (AbstractRecorder<?> value : values) {
+				Recording recording = value.recording();
+				elementRecordings.add(recording);
+			}
 			return Recording.tuple(elementRecordings);
 		}
 
 		@Override
-		public GenSource get(int index) {
-			if (index < 0 || index >= elements.size()) {
-				throw new CannotGenerateException("Tuple index out of bounds");
-			}
-			return elements.get(index);
+		public GenSource nextValue() {
+			AbstractRecorder<?> next = new GenRecorder(source.nextValue());
+			values.add(next);
+			return next;
 		}
-
 	}
 
 }
@@ -173,7 +166,7 @@ abstract class AbstractRecorder<T extends GenSource> implements GenSource {
 	}
 
 	@Override
-	public Tuple tuple(int size) {
+	public Tuple tuple() {
 		throw new UnsupportedOperationException("Should never be called");
 	}
 

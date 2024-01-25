@@ -350,13 +350,13 @@ class ExhaustiveGenerationTests {
 
 		private void assertFlatMap(ExhaustiveFlatMap exhaustiveFlatMap, int... expected) {
 			GenSource.Tuple tuple = exhaustiveFlatMap.current();
-			int head = tuple.get(0).atom().choose(Integer.MAX_VALUE);
+			int head = tuple.nextValue().atom().choose(Integer.MAX_VALUE);
 
 			assertThat(head)
 				.describedAs("Expected %d as head", expected[0])
 				.isEqualTo(expected[0]);
 
-			GenSource.List list = tuple.get(1).list();
+			GenSource.List list = tuple.nextValue().list();
 
 			for (int i = 0; i < head; i++) {
 				var atom = list.nextElement().atom();

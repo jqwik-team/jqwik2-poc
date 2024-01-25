@@ -49,7 +49,7 @@ public final class RandomGenSource implements IterableSampleSource, GenSource, G
 	}
 
 	@Override
-	public Tuple tuple(int size) {
+	public Tuple tuple() {
 		return trySwitchTo(Tuple.class);
 	}
 
@@ -74,7 +74,7 @@ public final class RandomGenSource implements IterableSampleSource, GenSource, G
 	}
 
 	@Override
-	public GenSource get(int index) {
+	public GenSource nextValue() {
 		return new RandomGenSource(random.split());
 	}
 
