@@ -67,7 +67,7 @@ class GeneratorTests {
 	class Filtering {
 		@Example
 		void mapIntsToStrings() {
-			Generator<Integer> divisibleBy3 = new IntegerGenerator(-100, 100).filter(i -> i % 3 == 0);
+			Generator<Integer> divisibleBy3 = BaseGenerators.integers(-100, 100).filter(i -> i % 3 == 0);
 
 			RandomGenSource source = new RandomGenSource("42");
 
@@ -80,7 +80,7 @@ class GeneratorTests {
 
 		@Example
 		void filteredEdgeCases() {
-			Generator<Integer> evenNumbers = new IntegerGenerator(-10, 100).filter(i -> i % 2 == 0);
+			Generator<Integer> evenNumbers = BaseGenerators.integers(-10, 100).filter(i -> i % 2 == 0);
 
 			var values = EdgeCasesTests.collectAllEdgeCases(evenNumbers);
 			assertThat(values).containsExactlyInAnyOrder(-10, 0, 100);
@@ -88,7 +88,7 @@ class GeneratorTests {
 
 		@Example
 		void filteredExhaustiveGeneration() {
-			Generator<Integer> evenNumbers = new IntegerGenerator(-10, 100).filter(i -> i % 2 == 0);
+			Generator<Integer> evenNumbers = BaseGenerators.integers(-10, 100).filter(i -> i % 2 == 0);
 			ExhaustiveSource<?> exhaustive = evenNumbers.exhaustive().get();
 			assertThat(exhaustive.maxCount()).isEqualTo(111L);
 
@@ -99,7 +99,7 @@ class GeneratorTests {
 
 		@Example
 		void filteredShrinking() {
-			IntegerGenerator ints = new IntegerGenerator(-1000, 1000);
+			Generator<Integer> ints = BaseGenerators.integers(-1000, 1000);
 			Generator<Integer> evenInts = ints.filter(i -> i % 2 == 0);
 
 			GenSource source = RecordedSource.of(atom(996, 1)); // -996
@@ -120,7 +120,7 @@ class GeneratorTests {
 
 		@Example
 		void mapIntsToStrings() {
-			Generator<String> numberStrings = new IntegerGenerator(-10, 100).map(Object::toString);
+			Generator<String> numberStrings = BaseGenerators.integers(-10, 100).map(Object::toString);
 
 			RandomGenSource source = new RandomGenSource("42");
 
@@ -132,7 +132,7 @@ class GeneratorTests {
 
 		@Example
 		void mappedEdgeCases() {
-			Generator<String> numberStrings = new IntegerGenerator(-10, 100).map(Object::toString);
+			Generator<String> numberStrings = BaseGenerators.integers(-10, 100).map(Object::toString);
 
 			var values = EdgeCasesTests.collectAllEdgeCases(numberStrings);
 			assertThat(values).containsExactlyInAnyOrder(
@@ -146,7 +146,7 @@ class GeneratorTests {
 
 		@Example
 		void mappedExhaustiveGeneration() {
-			Generator<String> numberStrings = new IntegerGenerator(-10, 100).map(Object::toString);
+			Generator<String> numberStrings = BaseGenerators.integers(-10, 100).map(Object::toString);
 
 			var exhaustive = numberStrings.exhaustive();
 			assertThat(exhaustive).isPresent();
@@ -172,8 +172,8 @@ class GeneratorTests {
 
 		@Example
 		void flatMapIntsToListOfInts() {
-			Generator<List<Integer>> listOfInts = new IntegerGenerator(5, 10).flatMap(
-				size -> new IntegerGenerator(-10, 10).list(size, size)
+			Generator<List<Integer>> listOfInts = BaseGenerators.integers(5, 10).flatMap(
+				size -> BaseGenerators.integers(-10, 10).list(size, size)
 			);
 
 			RandomGenSource source = new RandomGenSource("42");
@@ -190,8 +190,8 @@ class GeneratorTests {
 
 		@Example
 		void flatMappedEdgeCases() {
-			Generator<List<Integer>> listOfInts = new IntegerGenerator(0, 1).flatMap(
-				size -> new IntegerGenerator(0, 10).list(size, size)
+			Generator<List<Integer>> listOfInts = BaseGenerators.integers(0, 1).flatMap(
+				size -> BaseGenerators.integers(0, 10).list(size, size)
 			);
 
 			var values = EdgeCasesTests.collectAllEdgeCases(listOfInts);
@@ -204,8 +204,8 @@ class GeneratorTests {
 
 		@Example
 		void flatMappedExhaustiveGeneration() {
-			Generator<List<Integer>> listOfInts = new IntegerGenerator(0, 2).flatMap(
-				size -> new IntegerGenerator(0, 3).list(size, size)
+			Generator<List<Integer>> listOfInts = BaseGenerators.integers(0, 2).flatMap(
+				size -> BaseGenerators.integers(0, 3).list(size, size)
 			);
 
 			var exhaustive = listOfInts.exhaustive();
@@ -242,8 +242,8 @@ class GeneratorTests {
 
 		@Example
 		void flatMapShrinking() {
-			Generator<List<Integer>> listOfInts = new IntegerGenerator(0, 2).flatMap(
-				size -> new IntegerGenerator(0, 3).list(size, size)
+			Generator<List<Integer>> listOfInts = BaseGenerators.integers(0, 2).flatMap(
+				size -> BaseGenerators.integers(0, 3).list(size, size)
 			);
 
 			// List.of(3, 3)
@@ -323,7 +323,7 @@ class GeneratorTests {
 
 		@Example
 		void smallInts() {
-			Generator<Integer> minus10to100 = new IntegerGenerator(-10, 100);
+			Generator<Integer> minus10to100 = BaseGenerators.integers(-10, 100);
 			RandomGenSource source = new RandomGenSource("42");
 
 			for (int i = 0; i < 10; i++) {
@@ -335,7 +335,7 @@ class GeneratorTests {
 
 		@Example
 		void positiveInts() {
-			Generator<Integer> gen5to10 = new IntegerGenerator(5, 10);
+			Generator<Integer> gen5to10 = BaseGenerators.integers(5, 10);
 			RandomGenSource source = new RandomGenSource("42");
 
 			for (int i = 0; i < 10; i++) {
@@ -347,7 +347,7 @@ class GeneratorTests {
 
 		@Example
 		void negativeInts() {
-			Generator<Integer> minus20to0 = new IntegerGenerator(-20, 0);
+			Generator<Integer> minus20to0 = BaseGenerators.integers(-20, 0);
 			RandomGenSource source = new RandomGenSource("42");
 
 			for (int i = 0; i < 20; i++) {
@@ -390,7 +390,7 @@ class GeneratorTests {
 
 		@Example
 		void listOfInts() {
-			Generator<List<Integer>> listOfInts = new IntegerGenerator(-10, 100).list(0, 5);
+			Generator<List<Integer>> listOfInts = BaseGenerators.integers(-10, 100).list(0, 5);
 
 			RandomGenSource source = new RandomGenSource("42");
 
@@ -403,7 +403,7 @@ class GeneratorTests {
 
 		@Example
 		void listOfCertainSize() {
-			Generator<List<Integer>> listOfInts = new IntegerGenerator(-10, 100).list(1, 2);
+			Generator<List<Integer>> listOfInts = BaseGenerators.integers(-10, 100).list(1, 2);
 
 			RandomGenSource source = new RandomGenSource("42");
 
@@ -416,7 +416,7 @@ class GeneratorTests {
 
 		@Example
 		void listOfIntsWithEdgeCases() {
-			Generator<List<Integer>> listOfInts = new IntegerGenerator(-100, 100).list(0, 5);
+			Generator<List<Integer>> listOfInts = BaseGenerators.integers(-100, 100).list(0, 5);
 			Generator<List<Integer>> listWithEdgeCases = WithEdgeCasesDecorator.decorate(listOfInts, 0.5, 10);
 
 			RandomGenSource source = new RandomGenSource("42");
@@ -434,7 +434,7 @@ class GeneratorTests {
 
 		@Example
 		void setsOfInts() {
-			Generator<Set<Integer>> setOfInts = new IntegerGenerator(-10, 100).set(0, 5);
+			Generator<Set<Integer>> setOfInts = BaseGenerators.integers(-10, 100).set(0, 5);
 
 			RandomGenSource source = new RandomGenSource("42");
 
@@ -447,7 +447,7 @@ class GeneratorTests {
 
 		@Example
 		void setOfFixedSize() {
-			Generator<Set<Integer>> setOfInts = new IntegerGenerator(0, 15).set(10, 10);
+			Generator<Set<Integer>> setOfInts = BaseGenerators.integers(0, 15).set(10, 10);
 
 			RandomGenSource source = new RandomGenSource("42");
 
@@ -460,7 +460,7 @@ class GeneratorTests {
 
 		@Example
 		void setEdgeCases() {
-			Generator<Set<Integer>> setOfInts = new IntegerGenerator(0, 15).set(0, 10);
+			Generator<Set<Integer>> setOfInts = BaseGenerators.integers(0, 15).set(0, 10);
 			Set<Set<Integer>> edgeCases = EdgeCasesTests.collectAllEdgeCases(setOfInts);
 			assertThat(edgeCases).containsExactlyInAnyOrder(
 				Set.of(),
@@ -471,7 +471,7 @@ class GeneratorTests {
 
 		@Example
 		void setExhaustiveGeneration() {
-			Generator<Set<Integer>> setOfInts = new IntegerGenerator(0, 3).set(0, 2);
+			Generator<Set<Integer>> setOfInts = BaseGenerators.integers(0, 3).set(0, 2);
 
 			Optional<? extends ExhaustiveSource<?>> exhaustive = setOfInts.exhaustive();
 			assertThat(exhaustive).isPresent();
@@ -500,7 +500,7 @@ class GeneratorTests {
 
 		@Example
 		void smallInts() {
-			Generator<Integer> generator = new IntegerGenerator(-100, 100);
+			Generator<Integer> generator = BaseGenerators.integers(-100, 100);
 			RandomGenSource source = new RandomGenSource("42");
 
 			for (int i = 0; i < 10; i++) {
@@ -516,7 +516,7 @@ class GeneratorTests {
 
 		@Example
 		void positiveInts() {
-			Generator<Integer> generator = new IntegerGenerator(5, 10);
+			Generator<Integer> generator = BaseGenerators.integers(5, 10);
 			RandomGenSource source = new RandomGenSource("42");
 
 			for (int i = 0; i < 10; i++) {
@@ -532,7 +532,7 @@ class GeneratorTests {
 
 		@Example
 		void listOfInts() {
-			IntegerGenerator ints = new IntegerGenerator(-10, 100);
+			Generator<Integer> ints = BaseGenerators.integers(-10, 100);
 			Generator<List<Integer>> generator = ints.list(0, 5);
 
 			RandomGenSource source = new RandomGenSource("42");
@@ -579,7 +579,7 @@ class GeneratorTests {
 
 		@Example
 		void valid() {
-			IntegerGenerator ints = new IntegerGenerator(-10, 100);
+			Generator<Integer> ints = BaseGenerators.integers(-10, 100);
 
 			GenSource source = RecordedSource.of(atom(10, 0));
 			Integer value = ints.generate(source);
@@ -588,7 +588,7 @@ class GeneratorTests {
 
 		@Example
 		void invalidRecording() {
-			IntegerGenerator ints = new IntegerGenerator(-10, 100);
+			Generator<Integer> ints = BaseGenerators.integers(-10, 100);
 
 			assertThatThrownBy(() -> {
 				GenSource recorded = RecordedSource.of(atom(100, 1));
@@ -604,7 +604,7 @@ class GeneratorTests {
 
 		@Example
 		void exhaustedRecording() {
-			IntegerGenerator ints = new IntegerGenerator(0, 100);
+			Generator<Integer> ints = BaseGenerators.integers(0, 100);
 			ListGenerator<Integer> listOfInts = new ListGenerator<>(ints, 0, 5);
 
 			assertThatThrownBy(() -> {
@@ -617,7 +617,7 @@ class GeneratorTests {
 
 		@Example
 		void exhaustedRecordingWithBackUp() {
-			IntegerGenerator ints = new IntegerGenerator(0, 100);
+			Generator<Integer> ints = BaseGenerators.integers(0, 100);
 			Generator<List<Integer>> listOfInts = ints.list(0, 5);
 
 			Recording recording = tuple(
