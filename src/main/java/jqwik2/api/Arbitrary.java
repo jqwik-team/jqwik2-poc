@@ -14,6 +14,10 @@ public interface Arbitrary<T> {
 		return generator().generate(new RandomGenSource(RandomChoice.create()));
 	}
 
+	default T sample(String seed) {
+		return generator().generate(new RandomGenSource(RandomChoice.create(seed)));
+	}
+
 	default ListArbitrary<T> list() {
 		return new DefaultListArbitrary<>(this);
 	}

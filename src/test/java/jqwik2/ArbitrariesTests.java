@@ -2,8 +2,10 @@ package jqwik2;
 
 import java.util.*;
 
-import jqwik2.api.*;
 import jqwik2.api.Arbitrary;
+import jqwik2.api.*;
+import jqwik2.api.arbitraries.Combinators;
+import jqwik2.api.arbitraries.Combinators.*;
 import jqwik2.api.arbitraries.*;
 
 import net.jqwik.api.*;
@@ -86,6 +88,28 @@ class ArbitrariesTests {
 			// System.out.println(genSource);
 		}
 		assertThat(count).isEqualTo(20);
+	}
+
+	@Group
+	class Combine {
+
+		@Example
+		void simpleCombinations() {
+			Arbitrary<Integer> ints = Numbers.integers().between(1, 1000);
+			Arbitrary<String> strings = Numbers.integers().between(1, 100).map(Object::toString);
+
+			Arbitrary<Integer> combined = Combinators.combine(sampler -> {
+				int anInt = sampler.draw(ints);
+				String aString = sampler.draw(strings);
+				return anInt + aString.length();
+			});
+
+			for (int i = 0; i < 10; i++) {
+				int sample = combined.sample(i + "");
+				System.out.println(sample);
+				assertThat(sample).isBetween(2, 1003);
+			}
+		}
 	}
 
 }

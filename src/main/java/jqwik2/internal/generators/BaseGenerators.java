@@ -3,6 +3,7 @@ package jqwik2.internal.generators;
 import java.util.function.*;
 
 import jqwik2.api.*;
+import jqwik2.api.arbitraries.*;
 
 public class BaseGenerators {
 
@@ -24,5 +25,9 @@ public class BaseGenerators {
 
 	public static <T> Generator<T> create(Supplier<T> supplier) {
 		return new CreateGenerator<>(supplier);
+	}
+
+	public static <T> Generator<T> combine(Function<Combinators.Sampler, T> combinator) {
+		return new CombineGenerator<>(combinator);
 	}
 }
