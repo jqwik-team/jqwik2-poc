@@ -11,6 +11,7 @@ import jqwik2.api.recording.*;
 import jqwik2.internal.*;
 import jqwik2.internal.generators.*;
 import jqwik2.internal.recording.*;
+import jqwik2.internal.shrinking.*;
 
 import net.jqwik.api.*;
 
@@ -282,13 +283,32 @@ class GeneratorTests {
 			});
 
 			RandomGenSource source = new RandomGenSource("42");
+			GenRecorder recorder = new GenRecorder(source);
 			for (int i = 0; i < 20; i++) {
-				GenRecorder recorder = new GenRecorder(source);
 				Integer value = combined.generate(recorder);
 				assertThat(value).isBetween(2, 1003);
 
 				GenSource recorded = RecordedSource.of(recorder.recording());
 				assertThat(combined.generate(recorded)).isEqualTo(value);
+			}
+		}
+
+		@Example
+		void embedded() {
+			Arbitrary<Integer> ints = Numbers.integers().between(1, 1000);
+			Generator<Integer> combined = BaseGenerators.combine(sampler -> {
+				int anInt = sampler.draw(ints);
+				return anInt + 1;
+			});
+			var lists = combined.list(1, 3);
+
+			RandomGenSource source = new RandomGenSource("42");
+			GenRecorder recorder = new GenRecorder(source);
+			for (int i = 0; i < 20; i++) {
+				List<Integer> value = lists.generate(recorder);
+
+				GenSource recorded = RecordedSource.of(recorder.recording());
+				assertThat(lists.generate(recorded)).isEqualTo(value);
 			}
 		}
 
@@ -315,6 +335,62 @@ class GeneratorTests {
 				values.add(value);
 			}
 			assertThat(values).contains(-20, -2, 0, 2, 2000);
+		}
+
+		@Example
+		void withFlatMapping() {
+			var sizes = Numbers.integers().between(5, 10);
+			Generator<List<Integer>> listOfInts = BaseGenerators.combine(sampler -> {
+				int size = sampler.draw(sizes);
+				return sampler.draw(Numbers.integers().between(-10, 10).list().ofSize(size));
+			});
+
+			RandomGenSource source = new RandomGenSource("42");
+			GenRecorder recorder = new GenRecorder(source);
+			for (int i = 0; i < 20; i++) {
+				List<Integer> value = listOfInts.generate(recorder);
+				// System.out.println("value=" + value);
+				assertThat(value).hasSizeBetween(5, 10);
+
+				GenSource recorded = RecordedSource.of(recorder.recording());
+				// System.out.println("recorded=" + recorder.recording());
+				assertThat(listOfInts.generate(recorded)).isEqualTo(value);
+			}
+
+		}
+
+		@Example
+		void shrinking() {
+			var sizes = Numbers.integers().between(5, 10);
+			Generator<List<Integer>> listOfInts = BaseGenerators.combine(sampler -> {
+				int size = sampler.draw(sizes);
+				return sampler.draw(Numbers.integers().between(-10, 10).list().ofSize(size));
+			});
+
+			// [0, 0, 0, -2, 0, 0, -6, 0, 0]
+			Recording recording = deserialize("t[a[4]:t[a[0]:l[a[0:2]:a[0:2]:a[0:1]:a[2:3]:a[0:0]:a[0:3]:a[6:1]:a[0:1]:a[0:3]]]]");
+			GenSource source = RecordedSource.of(recording);
+
+			Shrinkable<Object> shrinkable = new ShrinkableGenerator<>(listOfInts).generate(source).asGeneric();
+			FalsifiedSample falsifiedSample = new FalsifiedSample(new Sample(List.of(shrinkable)), null);
+
+			Tryable tryable = Tryable.from(args -> {
+				List<Integer> list = (List<Integer>) args.getFirst();
+				return list.stream().mapToInt(i -> i).sum() == 0;
+			});
+			Shrinker shrinker = new Shrinker(falsifiedSample, tryable);
+
+			FalsifiedSample best = falsifiedSample;
+			while(true) {
+				Optional<FalsifiedSample> next = shrinker.next();
+				if (next.isEmpty()) {
+					break;
+				}
+				assertThat(next.get()).isLessThan(best);
+				best = next.get();
+			}
+
+			assertThat(best.sample().values().getFirst()).isEqualTo(List.of(0, 0, 0, 0, 1));
 		}
 	}
 
