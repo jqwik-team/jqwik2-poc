@@ -69,6 +69,9 @@ public class WithEdgeCasesDecorator<T> extends Generator.Decorator<T> {
 		if (edgeCasesCache == null) {
 			edgeCasesCache = createEdgeCaseRecordings();
 		}
+		if (edgeCasesCache.isEmpty()) {
+			return randomSource;
+		}
 		Recording recording = randomSource.chooseOne(edgeCasesCache);
 		return RecordedSource.of(recording);
 	}

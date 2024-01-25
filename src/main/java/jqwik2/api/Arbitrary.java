@@ -1,6 +1,7 @@
 package jqwik2.api;
 
 import java.util.function.*;
+import java.util.stream.*;
 
 import jqwik2.api.arbitraries.*;
 import jqwik2.internal.*;
@@ -11,11 +12,21 @@ public interface Arbitrary<T> {
 	Generator<T> generator();
 
 	default T sample() {
-		return generator().generate(new RandomGenSource(RandomChoice.create()));
+		return sample(false);
 	}
 
-	default T sample(String seed) {
-		return generator().generate(new RandomGenSource(RandomChoice.create(seed)));
+	default T sample(boolean withEdgeCases) {
+		return samples(withEdgeCases).findFirst().orElseThrow();
+	}
+
+	default Stream<T> samples(boolean withEdgeCases) {
+		var generator = generator();
+		if (withEdgeCases) {
+			generator = WithEdgeCasesDecorator.decorate(generator, 0.05, 100);
+		}
+		var g = generator;
+		var source = new RandomGenSource(RandomChoice.create());
+		return Stream.iterate(g.generate(source), t -> g.generate(source));
 	}
 
 	default ListArbitrary<T> list() {

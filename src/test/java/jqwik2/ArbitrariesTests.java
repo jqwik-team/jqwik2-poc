@@ -5,7 +5,6 @@ import java.util.*;
 import jqwik2.api.Arbitrary;
 import jqwik2.api.*;
 import jqwik2.api.arbitraries.Combinators;
-import jqwik2.api.arbitraries.Combinators.*;
 import jqwik2.api.arbitraries.*;
 
 import net.jqwik.api.*;
@@ -104,11 +103,23 @@ class ArbitrariesTests {
 				return anInt + aString.length();
 			});
 
-			for (int i = 0; i < 10; i++) {
-				int sample = combined.sample(i + "");
-				System.out.println(sample);
+			combined.samples(true).limit(10).forEach(sample -> {
+				// System.out.println(sample);
 				assertThat(sample).isBetween(2, 1003);
-			}
+			});
+		}
+
+		@Example
+		void simpleCombinationsWithEdgeCases() {
+			Arbitrary<Integer> ints = Numbers.integers().between(-10, 1000);
+
+			Arbitrary<Integer> combined = Combinators.combine(sampler -> {
+				int anInt = sampler.draw(ints);
+				return 2 * anInt;
+			});
+
+			List<Integer> values = combined.samples(true).limit(1000).toList();
+			assertThat(values).contains(-20, -2, 0, 2, 2000);
 		}
 	}
 
