@@ -19,6 +19,7 @@ public class GenericPropertyVerifier<T1, T2>
 	private final Arbitrary<T1> arbitrary1;
 	private final Arbitrary<T2> arbitrary2;
 
+	// TODO: Make this an abstract superclass with subclasses for number of arguments
 	public GenericPropertyVerifier(
 		Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig,
 		Runnable onSuccessful,

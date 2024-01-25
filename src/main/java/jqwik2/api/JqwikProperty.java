@@ -64,6 +64,7 @@ public class JqwikProperty {
 
 	private List<Generator.DecoratorFunction> decorators() {
 		return switch (strategy.edgeCases()) {
+			// TODO: Calculate edge cases probability and maxEdgeCases from maxTries
 			case MIXIN -> List.of(WithEdgeCasesDecorator.function(0.05, 100));
 			case OFF -> List.of();
 			case null, default -> throw new IllegalArgumentException("Unsupported edge cases mode: " + strategy.edgeCases());
