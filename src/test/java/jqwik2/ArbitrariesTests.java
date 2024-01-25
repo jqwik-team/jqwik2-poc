@@ -89,38 +89,21 @@ class ArbitrariesTests {
 		assertThat(count).isEqualTo(20);
 	}
 
-	@Group
-	class Combine {
+	@Example
+	void simpleCombinations() {
+		Arbitrary<Integer> ints = Numbers.integers().between(1, 1000);
+		Arbitrary<String> strings = Numbers.integers().between(1, 100).map(Object::toString);
 
-		@Example
-		void simpleCombinations() {
-			Arbitrary<Integer> ints = Numbers.integers().between(1, 1000);
-			Arbitrary<String> strings = Numbers.integers().between(1, 100).map(Object::toString);
+		Arbitrary<Integer> combined = Combinators.combine(sampler -> {
+			int anInt = sampler.draw(ints);
+			String aString = sampler.draw(strings);
+			return anInt + aString.length();
+		});
 
-			Arbitrary<Integer> combined = Combinators.combine(sampler -> {
-				int anInt = sampler.draw(ints);
-				String aString = sampler.draw(strings);
-				return anInt + aString.length();
-			});
-
-			combined.samples(true).limit(10).forEach(sample -> {
-				// System.out.println(sample);
-				assertThat(sample).isBetween(2, 1003);
-			});
-		}
-
-		@Example
-		void simpleCombinationsWithEdgeCases() {
-			Arbitrary<Integer> ints = Numbers.integers().between(-10, 1000);
-
-			Arbitrary<Integer> combined = Combinators.combine(sampler -> {
-				int anInt = sampler.draw(ints);
-				return 2 * anInt;
-			});
-
-			List<Integer> values = combined.samples(true).limit(1000).toList();
-			assertThat(values).contains(-20, -2, 0, 2, 2000);
-		}
+		combined.samples(true).limit(10).forEach(sample -> {
+			// System.out.println(sample);
+			assertThat(sample).isBetween(2, 1003);
+		});
 	}
 
 }

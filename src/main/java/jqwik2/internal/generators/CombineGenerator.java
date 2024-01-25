@@ -10,6 +10,7 @@ class CombineGenerator<T> implements Generator<T> {
 
 	private final Function<Combinators.Sampler, T> combinator;
 	private final List<DecoratorFunction> decorators;
+	private SamplerSupplier samplerSupplier;
 
 	public CombineGenerator(Function<Combinators.Sampler, T> combinator) {
 		this(combinator, List.of());
@@ -29,8 +30,9 @@ class CombineGenerator<T> implements Generator<T> {
 
 	@Override
 	public T generate(GenSource source) {
-		// TODO: Cache sampler
-		Combinators.Sampler sampler = new SourceBasedSampler(source, decorators);
-		return combinator.apply(sampler);
+		if (samplerSupplier == null) {
+			samplerSupplier = new SamplerSupplier(decorators);
+		}
+		return combinator.apply(samplerSupplier.get(source.tuple()));
 	}
 }
