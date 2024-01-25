@@ -35,4 +35,22 @@ public class DefaultSetArbitrary<T> implements SetArbitrary<T> {
 	public SetArbitrary<T> ofMaxSize(int newMaxSize) {
 		return new DefaultSetArbitrary<>(elementArbitrary, minSize, newMaxSize);
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		DefaultSetArbitrary<?> that = (DefaultSetArbitrary<?>) o;
+
+		if (minSize != that.minSize) return false;
+		if (maxSize != that.maxSize) return false;
+		return elementArbitrary.equals(that.elementArbitrary);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(elementArbitrary, minSize, maxSize);
+	}
+
 }

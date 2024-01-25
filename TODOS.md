@@ -7,7 +7,6 @@
 - Allow JqwikDefaults to be changed programmatically
 
 - Additional generators and arbitraries
-    - Combine with "drawing" from arbitraries 
     - Values.of(...)
     - Values.frequency(...)
     - String (based on unicode code points)
@@ -49,4 +48,4 @@
 - Target-based generation and shrinking (
   see http://proper.softlab.ntua.gr/Publications.html)
 
-- Give generators equality to allow caching (Is that still necessary?)
+- Give all / most arbitraries equality to allow caching for flatMap() and combine()

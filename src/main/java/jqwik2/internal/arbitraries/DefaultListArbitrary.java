@@ -35,4 +35,21 @@ public class DefaultListArbitrary<T> implements ListArbitrary<T> {
 	public ListArbitrary<T> ofMaxSize(int newMaxSize) {
 		return new DefaultListArbitrary<>(elementArbitrary, minSize, newMaxSize);
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		DefaultListArbitrary<?> that = (DefaultListArbitrary<?>) o;
+
+		if (minSize != that.minSize) return false;
+		if (maxSize != that.maxSize) return false;
+		return elementArbitrary.equals(that.elementArbitrary);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(elementArbitrary, minSize, maxSize);
+	}
 }
