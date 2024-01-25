@@ -1,15 +1,19 @@
 - JqwikProperty
     - Report all falsified samples, checks, tries, effective seed
     - AfterFailureMode.SAMPLES_THEN_REPLAY
-    - AfterFailureMode.ANALYZE: Find as many failing samples as possible and analyze their commonalities
+    - AfterFailureMode.ANALYZE: Find as many failing samples as possible and
+      analyze their commonalities
 
 - Allow JqwikDefaults to be changed programmatically
 
 - Additional generators and arbitraries
-    - String (based on unicode code points)
-    - Empty / Null Generator
+    - Combine with "drawing" from arbitraries 
     - Values.of(...)
+    - Values.frequency(...)
+    - String (based on unicode code points)
     - Values.oneOf(...)
+    - Values.frequencyOf(...)
+    - Empty / Null Arbitrary -> When used in combinations, nothing is generated
 
 - Add descriptions to generators
     - Can target type of map / flatMap be inferred for description?
@@ -39,9 +43,10 @@
     - Show shrinking progress on console
     - Reduce list by improved binary
       search: https://notebook.drmaciver.com/posts/2019-04-30-13:03.html
-  
+
 - Jupiter Extension
 
-- Target-based generation and shrinking (see http://proper.softlab.ntua.gr/Publications.html)
+- Target-based generation and shrinking (
+  see http://proper.softlab.ntua.gr/Publications.html)
 
 - Give generators equality to allow caching (Is that still necessary?)
