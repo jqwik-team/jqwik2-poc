@@ -55,8 +55,8 @@ public class JqwikProperty {
 		return strategy;
 	}
 
-	public <T1> PropertyVerifier1<T1> forAll(Arbitrary<T1> arbitrary) {
-		return new GenericPropertyVerifier<>(
+	public <T1> Verifier1<T1> forAll(Arbitrary<T1> arbitrary) {
+		return new PropertyVerifier1<>(
 			this::buildConfiguration, this::onSuccessful, this::onFailed, this::onAborted,
 			decorators(), arbitrary
 		);
@@ -71,11 +71,11 @@ public class JqwikProperty {
 		};
 	}
 
-	public <T1, T2> PropertyVerifier2<T1, T2> forAll(
+	public <T1, T2> Verifier2<T1, T2> forAll(
 		Arbitrary<T1> arbitrary1,
 		Arbitrary<T2> arbitrary2
 	) {
-		return new GenericPropertyVerifier<>(
+		return new PropertyVerifier2<>(
 			this::buildConfiguration, this::onSuccessful, this::onFailed, this::onAborted,
 			decorators(), arbitrary1, arbitrary2
 		);
@@ -217,16 +217,16 @@ public class JqwikProperty {
 		database.saveFailure(id, result.effectiveSeed().orElse(null), sampleRecordings);
 	}
 
-	public interface PropertyVerifier1<T1> {
+	public interface Verifier1<T1> {
 		PropertyRunResult check(C1<T1> checker);
 
-		PropertyRunResult verify(V1<T1> checker);
+		PropertyRunResult verify(V1<T1> verifier);
 	}
 
-	public interface PropertyVerifier2<T1, T2> {
+	public interface Verifier2<T1, T2> {
 		PropertyRunResult check(C2<T1, T2> checker);
 
-		PropertyRunResult verify(V2<T1, T2> checker);
+		PropertyRunResult verify(V2<T1, T2> verifier);
 	}
 
 	public interface C1<T1> {
