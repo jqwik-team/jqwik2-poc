@@ -106,4 +106,13 @@ class ArbitrariesTests {
 		});
 	}
 
+	@Example
+	void chooseValue() {
+		Arbitrary<String> choices = Values.of("a", "b", "c");
+		choices.samples(false).limit(10).forEach(sample -> {
+			// System.out.println(sample);
+			assertThat(sample).isIn("a", "b", "c");
+		});
+	}
+
 }
