@@ -10,7 +10,7 @@ import jqwik2.internal.*;
 class ChooseGenerator<T> implements Generator<T> {
 	private final List<T> values;
 
-	ChooseGenerator(Collection<T> values) {
+	ChooseGenerator(Collection<? extends T> values) {
 		this.values = new ArrayList<>(values);
 	}
 

@@ -5,6 +5,7 @@ import java.util.function.*;
 
 import jqwik2.api.*;
 import jqwik2.api.arbitraries.*;
+import jqwik2.internal.*;
 
 public class BaseGenerators {
 
@@ -28,8 +29,12 @@ public class BaseGenerators {
 		return new CreateGenerator<>(supplier);
 	}
 
-	public static <T> Generator<T> choose(Collection<T> values) {
+	public static <T> Generator<T> choose(Collection<? extends T> values) {
 		return new ChooseGenerator<>(values);
+	}
+
+	public static <T> Generator<T> frequency(Collection<Pair<Integer, ? extends T>> frequencies) {
+		return new FrequencyGenerator<>(frequencies);
 	}
 
 	public static <T> Generator<T> combine(Function<Combinators.Sampler, T> combinator) {

@@ -87,6 +87,37 @@ class GeneratorTests {
 		assertThat(values).containsExactly("a", "b", "c");
 	}
 
+	@Example
+	void chooseWithFrequencyGenerator() {
+		Generator<String> choices = BaseGenerators.frequency(List.of(
+			new Pair<>(1, "a"),
+			new Pair<>(5, "b"),
+			new Pair<>(10, "c")
+		));
+
+		GenSource source = new RandomGenSource("42");
+
+		Map<String, Integer> counts = new HashMap<>();
+		for (int i = 0; i < 50; i++) {
+			String value = choices.generate(source);
+			assertThat(value).isIn("a", "b", "c");
+			counts.compute(value, (k, v) -> v == null ? 1 : v + 1);
+		}
+
+		assertThat(counts.get("a")).isLessThan(counts.get("b"));
+		assertThat(counts.get("b")).isLessThan(counts.get("c"));
+
+		var edgeCases = EdgeCasesTests.collectAllEdgeCases(choices);
+		assertThat(edgeCases).containsExactlyInAnyOrder("a", "c");
+
+		var exhaustiveSource = choices.exhaustive();
+		assertThat(exhaustiveSource).isPresent();
+		assertThat(exhaustiveSource.get().maxCount()).isEqualTo(3);
+
+		var values = ExhaustiveGenerationTests.collectAll(exhaustiveSource.get(), choices);
+		assertThat(values).containsExactly("a", "b", "c");
+	}
+
 	@Group
 	class Filtering {
 		@Example

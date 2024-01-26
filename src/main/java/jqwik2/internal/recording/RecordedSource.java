@@ -103,7 +103,7 @@ public abstract sealed class RecordedSource<T extends Recording> implements GenS
 		}
 	}
 
-		private static final class RecordedAtom extends RecordedSource<AtomRecording> implements GenSource.Atom {
+	private static final class RecordedAtom extends RecordedSource<AtomRecording> implements GenSource.Atom {
 		private final Iterator<Integer> iterator;
 
 		private RecordedAtom(AtomRecording recording, GenSource backUpSource) {
@@ -132,7 +132,12 @@ public abstract sealed class RecordedSource<T extends Recording> implements GenS
 		}
 
 		@Override
-		public int choose(int maxExcluded, RandomChoice.Distribution distribution) {
+		public int choose(int maxExcluded, RandomChoice.Distribution ignore) {
+			return choose(maxExcluded);
+		}
+
+		@Override
+		public int choose(int maxExcluded, java.util.List<Integer> ignore) {
 			return choose(maxExcluded);
 		}
 	}

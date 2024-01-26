@@ -1,5 +1,7 @@
 package jqwik2.api;
 
+import java.util.*;
+
 public interface GenSource {
 
 	@SuppressWarnings("unchecked")
@@ -31,6 +33,15 @@ public interface GenSource {
 		 * @return a choice between 0 and maxExcluded - 1
 		 */
 		int choose(int maxExcluded, RandomChoice.Distribution distribution);
+
+		/**
+		 * Choose a value between 0 and maxExcluded - 1.
+		 *
+		 * @param maxExcluded A value between 0 and Integer.MAX_VALUE
+		 * @param weights The list of weights for each possible value, i.e. size must be equal to maxExcluded
+		 * @return a choice between 0 and maxExcluded - 1
+		 */
+		int choose(int maxExcluded, java.util.List<Integer> weights);
 	}
 
 	interface List extends GenSource {
@@ -57,26 +68,18 @@ public interface GenSource {
 			return this;
 		}
 
-		/**
-		 * Choose a value between 0 and maxExcluded - 1.
-		 *
-		 * @param maxExcluded A value between 0 and Integer.MAX_VALUE
-		 * @return a choice between 0 and maxExcluded - 1
-		 */
 		@Override
 		public int choose(int maxExcluded) {
 			return 0;
 		}
 
-		/**
-		 * Choose a value between 0 and maxExcluded - 1.
-		 *
-		 * @param maxExcluded  A value between 0 and Integer.MAX_VALUE
-		 * @param distribution The random distribution to use
-		 * @return a choice between 0 and maxExcluded - 1
-		 */
 		@Override
 		public int choose(int maxExcluded, RandomChoice.Distribution distribution) {
+			return 0;
+		}
+
+		@Override
+		public int choose(int maxExcluded, java.util.List<Integer> weights) {
 			return 0;
 		}
 
