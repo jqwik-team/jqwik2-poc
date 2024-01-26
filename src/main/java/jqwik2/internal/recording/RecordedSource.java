@@ -135,10 +135,5 @@ public abstract sealed class RecordedSource<T extends Recording> implements GenS
 		public int choose(int maxExcluded, RandomChoice.Distribution ignore) {
 			return choose(maxExcluded);
 		}
-
-		@Override
-		public int choose(int maxExcluded, java.util.List<Integer> ignore) {
-			return choose(maxExcluded);
-		}
 	}
 }

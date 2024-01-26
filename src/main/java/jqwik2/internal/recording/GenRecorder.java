@@ -80,13 +80,6 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 			seeds.add(choice);
 			return choice;
 		}
-
-		@Override
-		public int choose(int maxExcluded, java.util.List<Integer> weights) {
-			int choice = source.choose(maxExcluded, weights);
-			seeds.add(choice);
-			return choice;
-		}
 	}
 
 	static class ListRecorder extends AbstractRecorder<List> implements List {

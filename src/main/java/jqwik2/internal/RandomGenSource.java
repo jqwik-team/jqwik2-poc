@@ -39,36 +39,6 @@ public final class RandomGenSource implements IterableSampleSource, GenSource, G
 	}
 
 	@Override
-	public int choose(int maxExcluded, java.util.List<Integer> weights) {
-		if (weights.size() != maxExcluded) {
-			var message = "There must be as many weights as possible choices (%d) but there are %d"
-							  .formatted(maxExcluded, weights.size());
-			throw new IllegalArgumentException(message);
-		}
-		var ranges = calculateRanges(weights);
-		int maxRange = ranges.getLast() + 1;
-		int range = random.nextInt(maxRange);
-		for (int i = 0; i < ranges.size(); i++) {
-			if (range <= ranges.get(i)) {
-				return i;
-			}
-		}
-		// Should never happen
-		return 0;
-	}
-
-	private java.util.List<Integer> calculateRanges(java.util.List<Integer> weights) {
-		int upper = 0;
-		java.util.List<Integer> ranges = new ArrayList<>();
-		for (int weight : weights) {
-			upper += weight;
-			ranges.add(upper);
-		}
-		return ranges;
-	}
-
-
-	@Override
 	public Atom atom() {
 		return trySwitchTo(Atom.class);
 	}
