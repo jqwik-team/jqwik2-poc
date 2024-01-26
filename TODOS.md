@@ -45,5 +45,3 @@
 
 - Target-based generation and shrinking (
   see http://proper.softlab.ntua.gr/Publications.html)
-
-- Give all / most arbitraries equality to allow caching for flatMap() and combine()

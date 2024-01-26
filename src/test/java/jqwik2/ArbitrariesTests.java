@@ -1,6 +1,7 @@
 package jqwik2;
 
 import java.util.*;
+import java.util.function.*;
 
 import jqwik2.api.Arbitrary;
 import jqwik2.api.*;
@@ -25,11 +26,14 @@ class ArbitrariesTests {
 	}
 
 	@Example
-	void constants() {
+	void just() {
 		Arbitrary<Integer> c42 = Values.just(42);
 		Arbitrary<String> cHallo = Values.just("hallo");
 		assertThat(c42.sample()).isEqualTo(42);
 		assertThat(cHallo.sample()).isEqualTo("hallo");
+
+		assertThat(c42).isEqualTo(Values.just(42));
+		assertThat(c42).isNotEqualTo(Values.just(41));
 	}
 
 	@Example
@@ -95,16 +99,20 @@ class ArbitrariesTests {
 		Arbitrary<Integer> ints = Numbers.integers().between(1, 1000);
 		Arbitrary<String> strings = Numbers.integers().between(1, 100).map(Object::toString);
 
-		Arbitrary<Integer> combined = Combinators.combine(sampler -> {
+		Function<Combinators.Sampler, Integer> combinator = sampler -> {
 			int anInt = sampler.draw(ints);
 			String aString = sampler.draw(strings);
 			return anInt + aString.length();
-		});
+		};
+		Arbitrary<Integer> combined = Combinators.combine(combinator);
 
 		combined.samples(true).limit(10).forEach(sample -> {
 			// System.out.println(sample);
 			assertThat(sample).isBetween(2, 1003);
 		});
+
+		assertThat(combined).isEqualTo(Combinators.combine(combinator));
+		assertThat(combined).isNotEqualTo(Combinators.combine(sampler -> 42));
 	}
 
 	@Example
@@ -114,6 +122,10 @@ class ArbitrariesTests {
 			// System.out.println(sample);
 			assertThat(sample).isIn("a", "b", "c");
 		});
+
+		assertThat(choices).isEqualTo(Values.of("a", "b", "c"));
+		assertThat(choices).isNotEqualTo(Values.of("a", "b", null));
+
 	}
 
 	@Example
@@ -127,6 +139,13 @@ class ArbitrariesTests {
 			// System.out.println(sample);
 			assertThat(sample).isIn("a", "b", "c");
 		});
+
+		assertThat(choices).isEqualTo(Values.frequency(
+			new Pair<>(1, "a"),
+			new Pair<>(5, "b"),
+			new Pair<>(10, "c")
+		));
+		assertThat(choices).isNotEqualTo(Values.of("a", "b", "c"));
 	}
 
 }
