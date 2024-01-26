@@ -22,16 +22,16 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 		return range(value, value);
 	}
 
-	static Optional<ExhaustiveSource<?>> atom(int... maxChoices) {
-		ExhaustiveAtom exhaustiveAtom = new ExhaustiveAtom(maxChoices);
+	static Optional<ExhaustiveSource<?>> atom(int... maxChoicesIncluded) {
+		ExhaustiveAtom exhaustiveAtom = new ExhaustiveAtom(maxChoicesIncluded);
 		if (exhaustiveAtom.maxCount() == Exhaustive.INFINITE) {
 			return Optional.empty();
 		}
 		return Optional.of(exhaustiveAtom);
 	}
 
-	static Optional<ExhaustiveSource<?>> atom(ExhaustiveChoice.Range... ranges) {
-		ExhaustiveAtom exhaustiveAtom = new ExhaustiveAtom(ranges);
+	static Optional<ExhaustiveSource<?>> atom(ExhaustiveChoice.Range... includedRanges) {
+		ExhaustiveAtom exhaustiveAtom = new ExhaustiveAtom(includedRanges);
 		if (exhaustiveAtom.maxCount() == Exhaustive.INFINITE) {
 			return Optional.empty();
 		}

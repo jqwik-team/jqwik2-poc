@@ -10,16 +10,16 @@ public class ExhaustiveAtom extends AbstractExhaustiveSource<GenSource.Atom> {
 	private final ExhaustiveChoice.Range[] ranges;
 	private final List<ExhaustiveChoice> choices = new java.util.ArrayList<>();
 
-	public ExhaustiveAtom(int... maxChoices) {
-		this(toRanges(maxChoices));
+	public ExhaustiveAtom(int... maxChoicesIncluded) {
+		this(toRanges(maxChoicesIncluded));
 	}
 
 	private static ExhaustiveChoice.Range[] toRanges(int[] maxChoices) {
-		return Arrays.stream(maxChoices).mapToObj((int min) -> new ExhaustiveChoice.Range(0, min)).toArray(ExhaustiveChoice.Range[]::new);
+		return Arrays.stream(maxChoices).mapToObj((int max) -> new ExhaustiveChoice.Range(0, max)).toArray(ExhaustiveChoice.Range[]::new);
 	}
 
-	public ExhaustiveAtom(ExhaustiveChoice.Range... ranges) {
-		this.ranges = ranges;
+	public ExhaustiveAtom(ExhaustiveChoice.Range... includedRanges) {
+		this.ranges = includedRanges;
 		generateChoices();
 	}
 

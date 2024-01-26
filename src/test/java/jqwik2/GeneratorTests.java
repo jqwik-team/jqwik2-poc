@@ -64,6 +64,29 @@ class GeneratorTests {
 		assertThat(values).containsExactly(List.of("a"));
 	}
 
+
+	@Example
+	void chooseValueGenerator() {
+		Generator<String> choices = BaseGenerators.choose(List.of("a", "b", "c"));
+
+		GenSource source = new RandomGenSource("42");
+
+		for (int i = 0; i < 10; i++) {
+			String value = choices.generate(source);
+			assertThat(value).isIn("a", "b", "c");
+		}
+
+		var edgeCases = EdgeCasesTests.collectAllEdgeCases(choices);
+		assertThat(edgeCases).containsExactlyInAnyOrder("a", "c");
+
+		var exhaustiveSource = choices.exhaustive();
+		assertThat(exhaustiveSource).isPresent();
+		assertThat(exhaustiveSource.get().maxCount()).isEqualTo(3);
+
+		var values = ExhaustiveGenerationTests.collectAll(exhaustiveSource.get(), choices);
+		assertThat(values).containsExactly("a", "b", "c");
+	}
+
 	@Group
 	class Filtering {
 		@Example
