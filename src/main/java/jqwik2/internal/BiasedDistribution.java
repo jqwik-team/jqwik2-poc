@@ -1,4 +1,4 @@
-package jqwik2;
+package jqwik2.internal;
 
 import jqwik2.api.*;
 

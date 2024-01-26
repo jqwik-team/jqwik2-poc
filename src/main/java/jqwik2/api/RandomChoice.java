@@ -3,7 +3,6 @@ package jqwik2.api;
 import java.util.*;
 import java.util.random.*;
 
-import jqwik2.*;
 import jqwik2.internal.*;
 
 /**
