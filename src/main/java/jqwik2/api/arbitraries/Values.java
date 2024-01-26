@@ -3,6 +3,7 @@ package jqwik2.api.arbitraries;
 import java.util.*;
 
 import jqwik2.api.*;
+import jqwik2.internal.*;
 import jqwik2.internal.generators.*;
 
 public class Values {
@@ -13,8 +14,14 @@ public class Values {
 		return () -> BaseGenerators.just(value);
 	}
 
+	@SafeVarargs
 	public static <T> Arbitrary<T> of(T... values) {
 		return () -> BaseGenerators.choose(Arrays.asList(values));
+	}
+
+	@SafeVarargs
+	public static <T> Arbitrary<T> frequency(Pair<Integer, ? extends T>... frequencies) {
+		return () -> BaseGenerators.frequency(Arrays.asList(frequencies));
 	}
 
 }

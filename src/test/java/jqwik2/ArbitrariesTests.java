@@ -6,6 +6,7 @@ import jqwik2.api.Arbitrary;
 import jqwik2.api.*;
 import jqwik2.api.arbitraries.Combinators;
 import jqwik2.api.arbitraries.*;
+import jqwik2.internal.*;
 
 import net.jqwik.api.*;
 
@@ -109,6 +110,19 @@ class ArbitrariesTests {
 	@Example
 	void chooseValue() {
 		Arbitrary<String> choices = Values.of("a", "b", "c");
+		choices.samples(false).limit(10).forEach(sample -> {
+			// System.out.println(sample);
+			assertThat(sample).isIn("a", "b", "c");
+		});
+	}
+
+	@Example
+	void chooseValueWithFrequencies() {
+		Arbitrary<String> choices = Values.frequency(
+			new Pair<>(1, "a"),
+			new Pair<>(5, "b"),
+			new Pair<>(10, "c")
+		);
 		choices.samples(false).limit(10).forEach(sample -> {
 			// System.out.println(sample);
 			assertThat(sample).isIn("a", "b", "c");

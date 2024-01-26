@@ -7,7 +7,6 @@
 - Allow JqwikDefaults to be changed programmatically
 
 - Additional generators and arbitraries
-    - Values.frequency(...)
     - String (based on unicode code points)
     - Values.oneOf(...)
     - Values.frequencyOf(...)
