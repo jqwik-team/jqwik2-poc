@@ -7,6 +7,7 @@ import jqwik2.api.arbitraries.*;
 import jqwik2.api.stateful.*;
 import jqwik2.internal.*;
 import jqwik2.internal.recording.*;
+import org.assertj.core.api.*;
 
 import net.jqwik.api.*;
 import net.jqwik.api.statistics.*;
@@ -314,7 +315,11 @@ class StatefulTests {
 	@Group
 	@PropertyDefaults(tries = 100)
 	class Shrinking {
-		// TODO
+
+		@Example
+		void failing() {
+			Assertions.fail("Not tested yet");
+		}
 	}
 
 }
