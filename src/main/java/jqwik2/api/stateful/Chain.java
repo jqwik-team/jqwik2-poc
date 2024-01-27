@@ -69,4 +69,11 @@ public interface Chain<T> extends Iterator<T> {
 	 * @return a number &gt;= 1
 	 */
 	int maxTransformations();
+
+	/**
+	 * The current value of the chain. Is empty before the first transformation.
+	 *
+	 * @return an optional value of type T
+	 */
+	Optional<T> current();
 }

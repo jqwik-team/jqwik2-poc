@@ -18,7 +18,7 @@ class ChainInstance<S> implements Chain<S> {
 	private final GenSource.List source;
 	private final List<Transformer<S>> transformers = new ArrayList<>();
 
-	private S current;
+	private S current = null;
 	private boolean initialSupplied = false;
 	private Transformer<S> nextTransformer = null;
 
@@ -48,6 +48,14 @@ class ChainInstance<S> implements Chain<S> {
 	@Override
 	public int maxTransformations() {
 		return maxTransformations;
+	}
+
+	@Override
+	public Optional<S> current() {
+		if (!initialSupplied) {
+			return Optional.empty();
+		}
+		return Optional.ofNullable(current);
 	}
 
 	private boolean isInfinite() {
