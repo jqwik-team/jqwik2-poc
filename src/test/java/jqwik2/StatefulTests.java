@@ -215,6 +215,34 @@ class StatefulTests {
 		assertThat(chain.transformations()).hasSize(13);
 	}
 
+	@Property(tries = 10)
+	void noopTransformersAreIgnored(@ForAll long seed) {
+		Transformation<Integer> addOne =
+			ignore -> just(1).map(toAdd -> i -> i + toAdd);
+
+		Transformation<Integer> justNoop = ignore -> just(Transformer.noop());
+		Transformation<Integer> noopOrNoop = ignore -> of(Transformer.noop(), Transformer.noop());
+
+		ChainArbitrary<Integer> chains =
+			Chain.startWith(() -> 0)
+				 .withTransformation(addOne)
+				 .withTransformation(justNoop)
+				 .withTransformation(noopOrNoop)
+				 .withMaxTransformations(13);
+
+
+		Chain<Integer> chain = chains.generator().generate(new RandomGenSource(Long.toString(seed)));
+
+		int last = chain.next();
+		while (chain.hasNext()) {
+			int next = chain.next();
+			assertThat(last + 1).isEqualTo(next);
+			last = next;
+		}
+		assertThat(chain.transformations()).hasSize(13);
+	}
+
+
 	private <T> List<T> collectAllValues(Chain<T> chain) {
 		List<T> values = new ArrayList<>();
 		while (chain.hasNext()) {
