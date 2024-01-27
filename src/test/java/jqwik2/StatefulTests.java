@@ -84,8 +84,7 @@ class StatefulTests {
 
 	@Property(tries = 10)
 	void chainWithSingleTransformation(@ForAll long seed) {
-		Transformation<Integer> growBelow100OtherwiseShrink = intSupplier -> {
-			int last = intSupplier.get();
+		Transformation<Integer> growBelow100OtherwiseShrink = last -> {
 			if (last < 100) {
 				return Numbers.integers().between(0, 10).map(i -> t -> t + i);
 			} else {
@@ -118,8 +117,7 @@ class StatefulTests {
 
 	@Property(tries = 10)
 	void chainWithSeveralTransformations(@ForAll long seed) {
-		Transformation<Integer> growBelow50otherwiseShrink = intSupplier -> {
-			int last = intSupplier.get();
+		Transformation<Integer> growBelow50otherwiseShrink = last -> {
 			if (last < 50) {
 				return Numbers.integers().between(10, 50)
 							  .map(i -> Transformer.transform("+i=" + i, t -> t + i));
@@ -129,8 +127,7 @@ class StatefulTests {
 			}
 		};
 
-		Transformation<Integer> resetToValueBetween0andLastAbsolute = supplier -> {
-			int last = supplier.get();
+		Transformation<Integer> resetToValueBetween0andLastAbsolute = last -> {
 			return Numbers.integers().between(0, Math.abs(last))
 						  .map(value -> Transformer.transform("=" + value, ignore -> value));
 		};

@@ -133,7 +133,7 @@ class ChainInstance<S> implements Chain<S> {
 			if (hasPrecondition && !precondition.test(current)) {
 				continue;
 			}
-			return transformation.apply(() -> current);
+			return transformation.apply(current);
 		}
 		return failWithTooManyAttempts(attemptsCounter);
 	}

@@ -17,8 +17,7 @@ import jqwik2.api.Arbitrary;
  * @see Transformer
  */
 @FunctionalInterface
-// TODO: Could a transformation take T instead of Supplier<T>?
-public interface Transformation<T> extends Function<Supplier<T>, Arbitrary<Transformer<T>>> {
+public interface Transformation<T> extends Function<T, Arbitrary<Transformer<T>>> {
 
 	Predicate<?> NO_PRECONDITION = ignore -> false;
 
@@ -30,14 +29,14 @@ public interface Transformation<T> extends Function<Supplier<T>, Arbitrary<Trans
 		}
 
 		public Transformation<T> provide(Arbitrary<Transformer<T>> arbitrary) {
-			return new Transformation<T>() {
+			return new Transformation<>() {
 				@Override
 				public Predicate<T> precondition() {
 					return precondition;
 				}
 
 				@Override
-				public Arbitrary<Transformer<T>> apply(Supplier<T> ignore) {
+				public Arbitrary<Transformer<T>> apply(T ignore) {
 					return arbitrary;
 				}
 			};
@@ -51,8 +50,8 @@ public interface Transformation<T> extends Function<Supplier<T>, Arbitrary<Trans
 				}
 
 				@Override
-				public Arbitrary<Transformer<T>> apply(Supplier<T> supplier) {
-					return arbitraryCreator.apply(supplier.get());
+				public Arbitrary<Transformer<T>> apply(T state) {
+					return arbitraryCreator.apply(state);
 				}
 			};
 		}
@@ -62,7 +61,7 @@ public interface Transformation<T> extends Function<Supplier<T>, Arbitrary<Trans
 	 * Create a TransformerProvider with a precondition
 	 */
 	static <T> Builder<T> when(Predicate<T> precondition) {
-		return new Builder<T>(precondition);
+		return new Builder<>(precondition);
 	}
 
 	/**
