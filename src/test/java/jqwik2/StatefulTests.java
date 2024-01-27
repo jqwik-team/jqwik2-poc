@@ -13,7 +13,6 @@ import static org.assertj.core.api.Assertions.*;
 class StatefulTests {
 
 	@Example
-	@Disabled("Not yet implemented")
 	void deterministicChain() {
 
 		Arbitrary<Chain<Integer>> chains =

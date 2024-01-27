@@ -3,6 +3,8 @@ package jqwik2.api.stateful;
 import java.util.*;
 import java.util.function.*;
 
+import jqwik2.internal.stateful.*;
+
 /**
  * A chain represents a series of states of type {@code T} in which the previous state
  * is somehow transformed into the next state. {@linkplain Transformer Transformers} are
@@ -31,7 +33,7 @@ public interface Chain<T> extends Iterable<T> {
 	 * @return new arbitrary instance
 	 */
 	static <T> ChainArbitrary<T> startWith(Supplier<? extends T> initialSupplier) {
-		return null;
+		return new DefaultChainArbitrary<>(initialSupplier);
 	}
 
 	/**
