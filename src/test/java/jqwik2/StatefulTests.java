@@ -314,4 +314,10 @@ class StatefulTests {
 		return values;
 	}
 
+	@Group
+	@PropertyDefaults(tries = 100)
+	class Shrinking {
+		// TODO
+	}
+
 }
