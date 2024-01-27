@@ -12,13 +12,12 @@ import jqwik2.internal.*;
 class ChainInstance<S> implements Chain<S> {
 	public static final int MAX_TRANSFORMER_TRIES = 1000;
 
-	private final Supplier<? extends S> initialSupplier;
 	private final int maxTransformations;
 	private final Generator<Transformation<S>> transformationGenerator;
 	private final GenSource.List source;
 	private final List<Transformer<S>> transformers = new ArrayList<>();
 
-	private S current = null;
+	private S current;
 	private boolean initialSupplied = false;
 	private Transformer<S> nextTransformer = null;
 
@@ -28,11 +27,10 @@ class ChainInstance<S> implements Chain<S> {
 		Generator<Transformation<S>> transformationGenerator,
 		GenSource.List source
 	) {
-		this.initialSupplier = initialSupplier;
+		this.current = initialSupplier.get();
 		this.maxTransformations = maxTransformations;
 		this.transformationGenerator = transformationGenerator;
 		this.source = source;
-		this.current = initialSupplier.get();
 	}
 
 	@Override
@@ -67,19 +65,16 @@ class ChainInstance<S> implements Chain<S> {
 		if (!initialSupplied) {
 			return true;
 		}
-		// TODO: Is this necessary?
-		synchronized (ChainInstance.this) {
-			if (isInfinite()) {
+		if (isInfinite()) {
+			nextTransformer = nextTransformer();
+			return !nextTransformer.isEndOfChain();
+		} else {
+			if (transformers.size() < maxTransformations) {
 				nextTransformer = nextTransformer();
 				return !nextTransformer.isEndOfChain();
 			} else {
-				if (transformers.size() < maxTransformations) {
-					nextTransformer = nextTransformer();
-					return !nextTransformer.isEndOfChain();
-				} else {
-					nextTransformer = null;
-					return false;
-				}
+				nextTransformer = null;
+				return false;
 			}
 		}
 	}
@@ -90,15 +85,12 @@ class ChainInstance<S> implements Chain<S> {
 			initialSupplied = true;
 			return current;
 		}
-		// TODO: Is this necessary?
-		synchronized (ChainInstance.this) {
-			if (nextTransformer == null) {
-				throw new NoSuchElementException();
-			}
-			Transformer<S> transformer = nextTransformer;
-			current = transformState(transformer, current);
-			return current;
+		if (nextTransformer == null) {
+			throw new NoSuchElementException();
 		}
+		Transformer<S> transformer = nextTransformer;
+		current = transformState(transformer, current);
+		return current;
 	}
 
 	private Transformer<S> nextTransformer() {
@@ -125,12 +117,11 @@ class ChainInstance<S> implements Chain<S> {
 	private Arbitrary<Transformer<S>> nextTransformerArbitrary(AtomicInteger attemptsCounter, GenSource chooseArbitrarySource) {
 
 		while (attemptsCounter.getAndIncrement() < MAX_TRANSFORMER_TRIES) {
-			Transformation<S> transformation = transformationGenerator.generate(chooseArbitrarySource);
+			// This is important to not record failing precondition attempts (I think)
+			GenSource.Atom selectTransformationSource = chooseArbitrarySource.atom();
+			Transformation<S> transformation = transformationGenerator.generate(selectTransformationSource);
 
-			Predicate<S> precondition = transformation.precondition();
-			// TODO: Is this optimization necessary?
-			boolean hasPrecondition = precondition != Transformation.NO_PRECONDITION;
-			if (hasPrecondition && !precondition.test(current)) {
+			if (!transformation.precondition().test(current)) {
 				continue;
 			}
 			return transformation.apply(current);

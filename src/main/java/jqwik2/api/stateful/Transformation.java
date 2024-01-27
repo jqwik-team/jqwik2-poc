@@ -19,7 +19,7 @@ import jqwik2.api.Arbitrary;
 @FunctionalInterface
 public interface Transformation<T> extends Function<T, Arbitrary<Transformer<T>>> {
 
-	Predicate<?> NO_PRECONDITION = ignore -> false;
+	Predicate<?> NO_PRECONDITION = ignore -> true;
 
 	class Builder<T> {
 		final private Predicate<T> precondition;
