@@ -45,6 +45,20 @@ class StatefulTests {
 		chain.transformers().forEach(t -> assertThat(t).isSameAs(transformer));
 	}
 
+	@Example
+	void chainWithZeroMaxTransformations() {
+		Arbitrary<Chain<Integer>> chains =
+			Chain.startWith(() -> 0)
+				 .withTransformation(ignore -> just(Transformer.transform("+1", i -> i + 1)))
+				 .withMaxTransformations(0);
+
+		Chain<Integer> chain = chains.sample();
+
+		assertThat(collectAllValues(chain)).containsExactly(0);
+		assertThat(chain.transformations()).isEmpty();
+	}
+
+
 	private <T> List<T> collectAllValues(Chain<T> chain) {
 		List<T> values = new ArrayList<>();
 		while (chain.hasNext()) {
