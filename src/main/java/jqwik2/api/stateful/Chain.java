@@ -23,7 +23,7 @@ import jqwik2.internal.stateful.*;
  *
  * @param <T> The type of state to be transformed in a chain
  */
-public interface Chain<T> extends Iterable<T> {
+public interface Chain<T> extends Iterator<T> {
 
 	/**
 	 * Create arbitrary for {@linkplain Chain chains} with a certain initial state.
@@ -37,26 +37,7 @@ public interface Chain<T> extends Iterable<T> {
 	}
 
 	/**
-	 * The {@linkplain Iterator} will iterate through elements representing states in order,
-	 * i.e. their number is one higher than the number of transformations applied to the initial state.
-	 *
-	 * <p>
-	 *     Mind that the next state element can depend on both the previous state and (pseudo-)randomness.
-	 *     Several iterators must always produce the same "chain" of states.
-	 *     Each iterator will start with a new instance of the initial state.
-	 * </p>
-	 *
-	 * @return an iterator through all states
-	 */
-	Iterator<T> start();
-
-	@Override
-	default Iterator<T> iterator() {
-		return start();
-	}
-
-	/**
-	 * Return list of all applied transformations as far as iterators have been used.
+	 * Return list of all applied transformations as far as they have been iterated.
 	 *
 	 * <p>
 	 *     For a chain that has not been iterated through this list is empty.

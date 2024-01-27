@@ -13,6 +13,11 @@ class ChainInstance<S> implements Chain<S> {
 	private final GenSource.List source;
 	private final List<Transformer<S>> transformations = new ArrayList<>();
 
+	private S current;
+	private boolean initialSupplied = false;
+	private int steps = 0;
+	private Transformer<S> nextTransformer = null;
+
 	ChainInstance(
 		Supplier<? extends S> initialSupplier,
 		int maxTransformations,
@@ -23,11 +28,7 @@ class ChainInstance<S> implements Chain<S> {
 		this.maxTransformations = maxTransformations;
 		this.transformationGenerator = transformationGenerator;
 		this.source = source;
-	}
-
-	@Override
-	public Iterator<S> start() {
-		return new ChainIterator(initialSupplier.get());
+		this.current = initialSupplier.get();
 	}
 
 	@Override
@@ -49,60 +50,48 @@ class ChainInstance<S> implements Chain<S> {
 		return maxTransformations < 0;
 	}
 
-	private class ChainIterator implements Iterator<S> {
-		private S current;
-		private boolean initialSupplied = false;
-		private int steps = 0;
-		private Transformer<S> nextTransformer = null;
-
-
-		public ChainIterator(S initial) {
-			this.current = initial;
+	@Override
+	public boolean hasNext() {
+		if (!initialSupplied) {
+			return true;
 		}
-
-		@Override
-		public boolean hasNext() {
-			if (!initialSupplied) {
-				return true;
-			}
-			synchronized (ChainInstance.this) {
-				if (isInfinite()) {
+		synchronized (ChainInstance.this) {
+			if (isInfinite()) {
+				nextTransformer = nextTransformer();
+				return !nextTransformer.isEndOfChain();
+			} else {
+				if (steps < maxTransformations) {
 					nextTransformer = nextTransformer();
 					return !nextTransformer.isEndOfChain();
 				} else {
-					if (steps < maxTransformations) {
-						nextTransformer = nextTransformer();
-						return !nextTransformer.isEndOfChain();
-					} else {
-						nextTransformer = null;
-						return false;
-					}
+					nextTransformer = null;
+					return false;
 				}
 			}
 		}
+	}
 
-		@Override
-		public S next() {
-			if (!initialSupplied) {
-				initialSupplied = true;
-				return current;
+	@Override
+	public S next() {
+		if (!initialSupplied) {
+			initialSupplied = true;
+			return current;
+		}
+		synchronized (ChainInstance.this) {
+			if (nextTransformer == null) {
+				throw new NoSuchElementException();
 			}
-			synchronized (ChainInstance.this) {
-				if (nextTransformer == null) {
-					throw new NoSuchElementException();
-				}
-				Transformer<S> transformer = nextTransformer;
-				current = transformState(transformer, current);
-				return current;
-			}
+			Transformer<S> transformer = nextTransformer;
+			current = transformState(transformer, current);
+			return current;
 		}
+	}
 
-		private Transformer<S> nextTransformer() {
-			return null;
-		}
+	private Transformer<S> nextTransformer() {
+		return null;
+	}
 
-		private S transformState(Transformer<S> transformer, S current) {
-			return null;
-		}
+	private S transformState(Transformer<S> transformer, S current) {
+		return null;
 	}
 }

@@ -30,8 +30,8 @@ class StatefulTests {
 
 	private <T> List<T> collectAllValues(Chain<T> chain) {
 		List<T> values = new ArrayList<>();
-		for (T i : chain) {
-			values.add(i);
+		while (chain.hasNext()) {
+			values.add(chain.next());
 		}
 		return values;
 	}
