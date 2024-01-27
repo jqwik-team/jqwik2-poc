@@ -33,7 +33,7 @@ public class BaseGenerators {
 		return new ChooseGenerator<>(values);
 	}
 
-	public static <T> Generator<T> frequency(Collection<Pair<Integer, ? extends T>> frequencies) {
+	public static <T> Generator<T> frequency(Collection<Pair<Integer, T>> frequencies) {
 		return new FrequencyGenerator<>(frequencies);
 	}
 

@@ -13,7 +13,7 @@ public class FrequencyGenerator<T> implements Generator<T> {
 	private final List<T> values;
 	private final RandomChoice.Distribution distribution;
 
-	public FrequencyGenerator(Collection<Pair<Integer, ? extends T>> frequencies) {
+	public FrequencyGenerator(Collection<Pair<Integer, T>> frequencies) {
 		this.values = values(frequencies);
 		this.frequencies = frequencies.stream()
 									  .filter(p -> p.first() > 0)
@@ -22,7 +22,7 @@ public class FrequencyGenerator<T> implements Generator<T> {
 		this.distribution = frequencyDistribution();
 	}
 
-	private List<T> values(Collection<Pair<Integer, ? extends T>> frequencies) {
+	private List<T> values(Collection<Pair<Integer, T>> frequencies) {
 		return frequencies.stream()
 						  .filter(p -> p.first() > 0)
 						  .map(Pair::second)

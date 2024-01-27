@@ -32,10 +32,11 @@ public class Values {
 
 	@SafeVarargs
 	public static <T> Arbitrary<T> frequency(Pair<Integer, ? extends T>... frequencies) {
-		return new CacheableArbitrary<>((Object[]) frequencies) {
+		List<Pair<Integer, T>> frequencyList = Arrays.stream(frequencies).map(p -> new Pair<>(p.first(), (T) p.second())).toList();
+		return new CacheableArbitrary<>(frequencyList) {
 			@Override
 			public Generator<T> generator() {
-				return BaseGenerators.frequency(Arrays.asList(frequencies));
+				return BaseGenerators.frequency(frequencyList);
 			}
 		};
 	}
