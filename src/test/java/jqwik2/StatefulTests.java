@@ -242,6 +242,23 @@ class StatefulTests {
 		assertThat(chain.transformations()).hasSize(13);
 	}
 
+	@Example
+	void stopGenerationIfNoTransformerApplies() {
+		Arbitrary<Chain<Integer>> chains =
+			Chain.startWith(() -> 1)
+				 .withTransformation(
+					 Transformation.<Integer>when(ignore -> false)
+								   .provide((Arbitrary<Transformer<Integer>>) null) // never gets here
+				 )
+				 .withTransformation(ignore -> just(Transformer.noop())) // noop() is ignored
+				 .withMaxTransformations(50);
+
+		Chain<Integer> chain = chains.sample();
+
+		assertThatThrownBy(() -> {
+			chain.forEachRemaining(ignore -> {});
+		}).isInstanceOf(CannotGenerateException.class);
+	}
 
 	private <T> List<T> collectAllValues(Chain<T> chain) {
 		List<T> values = new ArrayList<>();
