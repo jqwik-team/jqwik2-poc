@@ -45,9 +45,16 @@ class ChainInstance<S> implements Chain<S> {
 		return maxTransformations;
 	}
 
+	private boolean isInfinite() {
+		return maxTransformations < 0;
+	}
+
 	private class ChainIterator implements Iterator<S> {
 		private S current;
 		private boolean initialSupplied = false;
+		private int steps = 0;
+		private Transformer<S> nextTransformer = null;
+
 
 		public ChainIterator(S initial) {
 			this.current = initial;
@@ -58,7 +65,20 @@ class ChainInstance<S> implements Chain<S> {
 			if (!initialSupplied) {
 				return true;
 			}
-			return false;
+			synchronized (ChainInstance.this) {
+				if (isInfinite()) {
+					nextTransformer = nextTransformer();
+					return !nextTransformer.isEndOfChain();
+				} else {
+					if (steps < maxTransformations) {
+						nextTransformer = nextTransformer();
+						return !nextTransformer.isEndOfChain();
+					} else {
+						nextTransformer = null;
+						return false;
+					}
+				}
+			}
 		}
 
 		@Override
@@ -67,7 +87,22 @@ class ChainInstance<S> implements Chain<S> {
 				initialSupplied = true;
 				return current;
 			}
-			throw new NoSuchElementException();
+			synchronized (ChainInstance.this) {
+				if (nextTransformer == null) {
+					throw new NoSuchElementException();
+				}
+				Transformer<S> transformer = nextTransformer;
+				current = transformState(transformer, current);
+				return current;
+			}
+		}
+
+		private Transformer<S> nextTransformer() {
+			return null;
+		}
+
+		private S transformState(Transformer<S> transformer, S current) {
+			return null;
 		}
 	}
 }
