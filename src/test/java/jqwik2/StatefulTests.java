@@ -6,6 +6,7 @@ import jqwik2.api.Arbitrary;
 import jqwik2.api.arbitraries.*;
 import jqwik2.api.stateful.*;
 import jqwik2.internal.*;
+import jqwik2.internal.recording.*;
 
 import net.jqwik.api.*;
 import net.jqwik.api.statistics.*;
@@ -230,7 +231,6 @@ class StatefulTests {
 				 .withTransformation(noopOrNoop)
 				 .withMaxTransformations(13);
 
-
 		Chain<Integer> chain = chains.generator().generate(new RandomGenSource(Long.toString(seed)));
 
 		int last = chain.next();
@@ -267,6 +267,43 @@ class StatefulTests {
 		assertThatThrownBy(() -> {
 			chains.generator().generate(new RandomGenSource("42"));
 		}).isInstanceOf(CannotGenerateException.class);
+	}
+
+	@Example
+	void chainCanBeRegenerated() {
+
+		Transformation<List<Integer>> addRandomIntToList =
+			ignore -> Numbers.integers().between(0, 10)
+							 .map(i -> l -> {
+								 l.add(i);
+								 return l;
+							 });
+
+		Transformation<List<Integer>> removeFirstElement =
+			Transformation.<List<Integer>>when(last -> !last.isEmpty())
+						  .provide(just(l -> {
+							  l.removeFirst();
+							  return l;
+						  }));
+
+		ChainArbitrary<List<Integer>> chains =
+			Chain.startWith(() -> (List<Integer>) new ArrayList<Integer>())
+				 .withTransformation(addRandomIntToList)
+				 .withTransformation(removeFirstElement)
+				 .withMaxTransformations(13);
+
+		GenRecorder recorder = new GenRecorder(new RandomGenSource("43"));
+
+		Chain<List<Integer>> chain = chains.generator().generate(recorder);
+		chain.forEachRemaining(ignore -> {});
+		List<Integer> result1 = chain.current().get();
+		System.out.println(recorder.recording());
+
+		chain = chains.generator().generate(RecordedSource.of(recorder.recording()));
+		chain.forEachRemaining(ignore -> {});
+		List<Integer> result2 = chain.current().get();
+
+		assertThat(result1).isEqualTo(result2);
 	}
 
 	private <T> List<T> collectAllValues(Chain<T> chain) {
