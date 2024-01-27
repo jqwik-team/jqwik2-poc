@@ -37,7 +37,7 @@ class ChainInstance<S> implements Chain<S> {
 
 	@Override
 	public List<String> transformations() {
-		return transformers.stream().map(transformer -> transformer.transformation()).collect(Collectors.toList());
+		return transformers.stream().map(Transformer::transformation).collect(Collectors.toList());
 	}
 
 	@Override

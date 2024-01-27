@@ -25,7 +25,7 @@ class ChainGenerator<S> implements Generator<Chain<S>> {
 
 	@Override
 	public Chain<S> generate(GenSource source) {
-		return new ChainInstance(initialSupplier, maxTransformations, transformationGenerator, source.list());
+		return new ChainInstance<>(initialSupplier, maxTransformations, transformationGenerator, source.list());
 	}
 
 }

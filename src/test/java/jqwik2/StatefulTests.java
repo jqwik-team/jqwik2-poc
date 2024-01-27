@@ -260,6 +260,15 @@ class StatefulTests {
 		}).isInstanceOf(CannotGenerateException.class);
 	}
 
+	@Example
+	void failToCreateGeneratorIfNoTransformersAreProvided() {
+		Arbitrary<Chain<Integer>> chains = Chain.startWith(() -> 1).withMaxTransformations(50);
+
+		assertThatThrownBy(() -> {
+			chains.generator().generate(new RandomGenSource("42"));
+		}).isInstanceOf(CannotGenerateException.class);
+	}
+
 	private <T> List<T> collectAllValues(Chain<T> chain) {
 		List<T> values = new ArrayList<>();
 		while (chain.hasNext()) {

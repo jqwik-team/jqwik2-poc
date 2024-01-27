@@ -32,6 +32,9 @@ public class DefaultChainArbitrary<T> implements ChainArbitrary<T> {
 		final int effectiveMaxTransformations =
 			this.maxTransformations != Integer.MIN_VALUE ? this.maxTransformations : (int) Math.max(Math.round(Math.sqrt(JqwikDefaults.defaultMaxTries())), 10);
 
+		if (weightedTransformations.isEmpty()) {
+			throw new CannotGenerateException("No transformations defined for chain");
+		}
 		return new ChainGenerator<>(initialSupplier, weightedTransformations, effectiveMaxTransformations);
 	}
 
