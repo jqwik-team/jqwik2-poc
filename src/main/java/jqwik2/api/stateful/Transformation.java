@@ -17,6 +17,7 @@ import jqwik2.api.Arbitrary;
  * @see Transformer
  */
 @FunctionalInterface
+// TODO: Could a transformation take T instead of Supplier<T>?
 public interface Transformation<T> extends Function<Supplier<T>, Arbitrary<Transformer<T>>> {
 
 	Predicate<?> NO_PRECONDITION = ignore -> false;

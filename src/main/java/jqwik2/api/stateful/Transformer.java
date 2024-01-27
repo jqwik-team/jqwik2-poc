@@ -21,7 +21,7 @@ public interface Transformer<T> extends Function<T, T> {
 	/**
 	 * The singleton object used for all calls to {@linkplain #endOfChain()}.
 	 */
-	Transformer<?> END_OF_CHAIN = new Transformer<Object>() {
+	Transformer<?> END_OF_CHAIN = new Transformer<>() {
 		@Override
 		public Object apply(Object t) {
 			return t;
@@ -110,7 +110,7 @@ public interface Transformer<T> extends Function<T, T> {
 	 * @return a new instance of a transformer
 	 */
 	static <S> Transformer<S> transform(String description, Function<S, S> transform) {
-		return new Transformer<S>() {
+		return new Transformer<>() {
 			@Override
 			public S apply(S s) {
 				return transform.apply(s);
