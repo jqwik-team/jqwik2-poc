@@ -3,7 +3,9 @@ package jqwik2;
 import java.util.*;
 
 import jqwik2.api.Arbitrary;
+import jqwik2.api.arbitraries.*;
 import jqwik2.api.stateful.*;
+import jqwik2.internal.*;
 
 import net.jqwik.api.*;
 
@@ -76,6 +78,40 @@ class StatefulTests {
 
 		assertThat(lastValue).isEqualTo(999);
 		assertThat(chain.current()).hasValue(999);
+	}
+
+	@Property(tries = 10)
+	void chainWithSingleTransformation(@ForAll long seed) {
+		Transformation<Integer> growBelow100OtherwiseShrink = intSupplier -> {
+			int last = intSupplier.get();
+			if (last < 100) {
+				return Numbers.integers().between(0, 10).map(i -> t -> t + i);
+			} else {
+				return Numbers.integers().between(1, 10).map(i -> t -> t - i);
+			}
+		};
+		Arbitrary<Chain<Integer>> chains =
+			Chain.startWith(() -> 1)
+				 .withTransformation(growBelow100OtherwiseShrink)
+				 .withMaxTransformations(50);
+
+		Chain<Integer> chain = chains.generator().generate(new RandomGenSource(Long.toString(seed)));
+
+		assertThat(chain.maxTransformations()).isEqualTo(50);
+		assertThat(chain.transformations()).hasSize(0);
+
+		int last = 1;
+		while (chain.hasNext()) {
+			int next = chain.next();
+			if (last < 100) {
+				assertThat(next).isGreaterThanOrEqualTo(last);
+			} else {
+				assertThat(next).isLessThan(last);
+			}
+			last = next;
+		}
+
+		assertThat(chain.transformations()).hasSize(50);
 	}
 
 	private <T> List<T> collectAllValues(Chain<T> chain) {
