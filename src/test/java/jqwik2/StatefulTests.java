@@ -114,6 +114,45 @@ class StatefulTests {
 		assertThat(chain.transformations()).hasSize(50);
 	}
 
+	@Property(tries = 10)
+	void chainWithSeveralTransformations(@ForAll long seed) {
+		Transformation<Integer> growBelow50otherwiseShrink = intSupplier -> {
+			int last = intSupplier.get();
+			if (last < 50) {
+				return Numbers.integers().between(10, 50)
+							  .map(i -> Transformer.transform("+i=" + i, t -> t + i));
+			} else {
+				return Numbers.integers().between(2, 9)
+							  .map(i -> Transformer.transform("-i=" + i, t -> t - i));
+			}
+		};
+
+		Transformation<Integer> resetToValueBetween0andLastAbsolute = supplier -> {
+			int last = supplier.get();
+			return Numbers.integers().between(0, Math.abs(last))
+						  .map(value -> Transformer.transform("=" + value, ignore -> value));
+		};
+
+		Arbitrary<Chain<Integer>> chains =
+			Chain.startWith(() -> 1)
+				 .withTransformation(ignore -> just(Transformer.transform("-1", i -> i - 1)))
+				 .withTransformation(growBelow50otherwiseShrink)
+				 .withTransformation(resetToValueBetween0andLastAbsolute)
+				 .withMaxTransformations(50);
+
+		Chain<Integer> chain = chains.generator().generate(new RandomGenSource(Long.toString(seed)));
+
+		assertThat(chain.maxTransformations()).isEqualTo(50);
+		assertThat(chain.transformations()).hasSize(0);
+
+		chain.forEachRemaining(ignore -> {});
+
+		// System.out.println(chain.transformations());
+		// System.out.println(chain.current());
+
+		assertThat(chain.transformations()).hasSize(50);
+	}
+
 	private <T> List<T> collectAllValues(Chain<T> chain) {
 		List<T> values = new ArrayList<>();
 		while (chain.hasNext()) {
