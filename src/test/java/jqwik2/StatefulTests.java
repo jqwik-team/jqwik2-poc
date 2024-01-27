@@ -8,6 +8,7 @@ import jqwik2.api.stateful.*;
 import jqwik2.internal.*;
 
 import net.jqwik.api.*;
+import net.jqwik.api.statistics.*;
 
 import static jqwik2.api.arbitraries.Values.*;
 import static org.assertj.core.api.Assertions.*;
@@ -151,6 +152,32 @@ class StatefulTests {
 		// System.out.println(chain.current());
 
 		assertThat(chain.transformations()).hasSize(50);
+	}
+
+	@Property(tries = 500)
+	@StatisticsReport(onFailureOnly = true)
+	void useFrequenciesToChooseTransformers(@ForAll long seed) {
+
+		Transformation<Integer> just1 = ignore -> just(t -> 1);
+		Transformation<Integer> just2 = ignore -> just(t -> 2);
+
+		Arbitrary<Chain<Integer>> chains =
+			Chain.startWith(() -> 0)
+				 .withTransformation(1, just1)
+				 .withTransformation(4, just2)
+				 .withMaxTransformations(10);
+
+		Chain<Integer> chain = chains.generator().generate(new RandomGenSource(Long.toString(seed)));
+
+		while (chain.hasNext()) {
+			Statistics.collect(chain.next());
+		}
+
+		Statistics.coverage(checker -> {
+			checker.check(0).percentage(p -> p >= 9 && p <= 10); // Always 1 of 11
+			checker.check(1).percentage(p -> p > 0 && p < 35);
+			checker.check(2).percentage(p -> p > 55);
+		});
 	}
 
 	private <T> List<T> collectAllValues(Chain<T> chain) {
