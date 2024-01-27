@@ -180,6 +180,41 @@ class StatefulTests {
 		});
 	}
 
+	@Property(tries = 10)
+	void transformationPreconditionsAreRespected(@ForAll long seed) {
+		Transformation<List<Integer>> addRandomIntToList =
+			ignore -> Numbers.integers().between(0, 10)
+							 .map(i -> l -> {
+								 l.add(i);
+								 return l;
+							 });
+
+		Transformation<List<Integer>> removeFirstElement =
+			Transformation.<List<Integer>>when(last -> !last.isEmpty())
+						  .provide(just(l -> {
+							  l.remove(0);
+							  return l;
+						  }));
+
+		ChainArbitrary<List<Integer>> chains =
+			Chain.startWith(() -> (List<Integer>) new ArrayList<Integer>())
+				 .withTransformation(addRandomIntToList)
+				 .withTransformation(removeFirstElement)
+				 .withMaxTransformations(13);
+
+		Chain<List<Integer>> chain = chains.generator().generate(new RandomGenSource(Long.toString(seed)));
+		chain.next(); // Ignore initial state
+
+		List<Integer> last = new ArrayList<>();
+		while (chain.hasNext()) {
+			int lastSize = last.size();
+			List<Integer> next = chain.next();
+			assertThat(lastSize).isNotEqualTo(next.size());
+			last = next;
+		}
+		assertThat(chain.transformations()).hasSize(13);
+	}
+
 	private <T> List<T> collectAllValues(Chain<T> chain) {
 		List<T> values = new ArrayList<>();
 		while (chain.hasNext()) {
