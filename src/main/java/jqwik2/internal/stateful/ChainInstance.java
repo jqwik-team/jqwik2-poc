@@ -8,6 +8,7 @@ import java.util.stream.*;
 import jqwik2.api.*;
 import jqwik2.api.stateful.*;
 import jqwik2.internal.*;
+import org.opentest4j.*;
 
 class ChainInstance<S> implements Chain<S> {
 	public static final int MAX_TRANSFORMER_TRIES = 1000;
@@ -98,9 +99,13 @@ class ChainInstance<S> implements Chain<S> {
 		GenSource nextTransformerSource;
 		try {
 			nextTransformerSource = source.nextElement();
-		} catch (CannotGenerateException e) {
+		} catch (CannotGenerateException cge) {
 			if (isInfinite()) {
 				return Transformer.endOfChain();
+			}
+			if (transformers.isEmpty()) {
+				// Chains without transformations are not allowed
+				throw new TestAbortedException();
 			}
 			this.maxTransformations = transformers.size();
 			return null;

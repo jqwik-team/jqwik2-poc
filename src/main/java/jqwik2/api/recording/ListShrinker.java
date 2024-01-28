@@ -3,6 +3,8 @@ package jqwik2.api.recording;
 import java.util.*;
 import java.util.stream.*;
 
+import jqwik2.internal.*;
+
 class ListShrinker {
 	private final List<Recording> elements;
 
@@ -11,15 +13,15 @@ class ListShrinker {
 	}
 
 	// TODO: Shrink two or more elements together
-	// TODO: Shrink by removing elements from the head
 	// TODO: Shrink list of lists by moving element of inner list to next list element
 	Stream<ListRecording> shrink() {
 		if (elements.isEmpty()) {
 			return Stream.empty();
 		}
-		return Stream.concat(
+		return StreamConcatenation.concat(
 			shrinkIndividually(),
-			reorder()
+			reorder(),
+			discardElements()
 		).map(ListRecording::new);
 	}
 
@@ -53,4 +55,17 @@ class ListShrinker {
 		Collections.sort(reorderedChildren);
 		return reorderedChildren;
 	}
+
+	private Stream<List<Recording>> discardElements() {
+		return IntStream.range(0, elements.size())
+						.boxed()
+						.flatMap(this::discardElement);
+	}
+
+	private Stream<? extends List<Recording>> discardElement(int index) {
+		List<Recording> shrunkChildren = new ArrayList<>(elements);
+		shrunkChildren.remove(index);
+		return Stream.of(shrunkChildren);
+	}
+
 }

@@ -15,6 +15,8 @@ public final class GeneratedShrinkable<T> implements Shrinkable<T> {
 	public GeneratedShrinkable(T value, Generator<T> generator, GenRecorder recorder) {
 		this.value = value;
 		this.generator = generator;
+		// Store recorder instead of recording since some (stateful) properties
+		// change the recording while running
 		this.recorder = recorder;
 	}
 
