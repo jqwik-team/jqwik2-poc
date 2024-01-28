@@ -341,10 +341,8 @@ class StatefulTests {
 			System.out.println(falsifiedChain.transformations().size());
 			System.out.println(falsifiedChain.current());
 
-			// TODO: falsifiedChain has already been evaluated to the end
-			//       Introduce chain.replay() ?
-			// assertThat(falsifiedChain.transformations()).hasSize(falsifiedChain.maxTransformations());
-			// assertThat(collectAllValues(falsifiedChain)).containsExactly(0);
+			assertThat(falsifiedChain.transformations()).hasSize(falsifiedChain.maxTransformations());
+			assertThat(collectAllValues(falsifiedChain)).containsExactly(0);
 		}
 	}
 

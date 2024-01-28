@@ -12,12 +12,12 @@ import jqwik2.internal.*;
 class ChainInstance<S> implements Chain<S> {
 	public static final int MAX_TRANSFORMER_TRIES = 1000;
 
-	private final int maxTransformations;
 	private final Generator<Transformation<S>> transformationGenerator;
 	private final GenSource.List source;
 	private final List<Transformer<S>> transformers = new ArrayList<>();
 
 	private S current;
+	private int maxTransformations;
 	private boolean initialSupplied = false;
 	private Transformer<S> nextTransformer = null;
 
@@ -95,7 +95,17 @@ class ChainInstance<S> implements Chain<S> {
 
 	private Transformer<S> nextTransformer() {
 		AtomicInteger attemptsCounter = new AtomicInteger(0);
-		GenSource transformerSource = source.nextElement().tuple();
+		GenSource nextTransformerSource;
+		try {
+			nextTransformerSource = source.nextElement();
+		} catch (CannotGenerateException e) {
+			if (isInfinite()) {
+				return Transformer.endOfChain();
+			}
+			this.maxTransformations = transformers.size();
+			return null;
+		}
+		GenSource transformerSource = nextTransformerSource.tuple();
 		GenSource chooseArbitrarySource = transformerSource.tuple().nextValue();
 		GenSource chooseTransformerSource = transformerSource.tuple().nextValue();
 
