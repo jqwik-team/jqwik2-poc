@@ -295,7 +295,7 @@ class StatefulTests {
 		Chain<List<Integer>> chain = chains.generator().generate(recorder);
 		chain.forEachRemaining(ignore -> {});
 		List<Integer> result1 = chain.current().get();
-		System.out.println(recorder.recording());
+		// System.out.println(recorder.recording());
 
 		chain = chains.generator().generate(RecordedSource.of(recorder.recording()));
 		chain.forEachRemaining(ignore -> {});
@@ -348,8 +348,7 @@ class StatefulTests {
 	@PropertyDefaults(tries = 10)
 	class Shrinking {
 
-		//@Property
-		@Example
+		@Property
 		void shrinkChainWithoutStateAccessToEnd(@ForAll long seed) {
 			Arbitrary<Chain<Integer>> chains =
 				Chain.startWith(() -> 0)
