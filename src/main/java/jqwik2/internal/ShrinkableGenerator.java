@@ -13,6 +13,6 @@ public class ShrinkableGenerator<T> {
 	public Shrinkable<T> generate(GenSource source) {
 		GenRecorder recorder = new GenRecorder(source);
 		T value = generator.generate(recorder);
-		return new GeneratedShrinkable<>(value, generator, recorder.recording());
+		return new GeneratedShrinkable<>(value, generator, recorder);
 	}
 }

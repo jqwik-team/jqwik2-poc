@@ -23,8 +23,8 @@ class SampleGenerationTests {
 		GenRecorder recorder2 = new GenRecorder(new RandomGenSource("42"));
 
 		List<Shrinkable<Object>> shrinkables = List.of(
-			new GeneratedShrinkable<>(ints.generate(recorder1), ints, recorder1.recording()).asGeneric(),
-			new GeneratedShrinkable<>(lists.generate(recorder2), lists, recorder2.recording()).asGeneric()
+			new GeneratedShrinkable<>(ints.generate(recorder1), ints, recorder1).asGeneric(),
+			new GeneratedShrinkable<>(lists.generate(recorder2), lists, recorder2).asGeneric()
 		);
 
 		Sample sample = new Sample(shrinkables);

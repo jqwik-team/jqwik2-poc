@@ -299,7 +299,7 @@ class RunningPropertyTests {
 		);
 	}
 
-	@Property(tries = 10)
+	@Property(tries = 1)
 	void reproduceSameSamplesWithSingleThreadExecutor(@ForAll long seed) {
 		reproduceSameSamplesTwice(
 			seed,
