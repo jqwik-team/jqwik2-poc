@@ -3,15 +3,15 @@ package jqwik2;
 import java.util.*;
 
 import jqwik2.api.Arbitrary;
-import jqwik2.api.arbitraries.*;
+import jqwik2.api.*;
 import jqwik2.api.stateful.*;
 import jqwik2.internal.*;
 import jqwik2.internal.recording.*;
-import org.assertj.core.api.*;
 
 import net.jqwik.api.*;
 import net.jqwik.api.statistics.*;
 
+import static jqwik2.api.arbitraries.Numbers.*;
 import static jqwik2.api.arbitraries.Values.*;
 import static org.assertj.core.api.Assertions.*;
 
@@ -87,9 +87,9 @@ class StatefulTests {
 	void chainWithSingleTransformation(@ForAll long seed) {
 		Transformation<Integer> growBelow100OtherwiseShrink = last -> {
 			if (last < 100) {
-				return Numbers.integers().between(0, 10).map(i -> t -> t + i);
+				return integers().between(0, 10).map(i -> t -> t + i);
 			} else {
-				return Numbers.integers().between(1, 10).map(i -> t -> t - i);
+				return integers().between(1, 10).map(i -> t -> t - i);
 			}
 		};
 		Arbitrary<Chain<Integer>> chains =
@@ -120,17 +120,17 @@ class StatefulTests {
 	void chainWithSeveralTransformations(@ForAll long seed) {
 		Transformation<Integer> growBelow50otherwiseShrink = last -> {
 			if (last < 50) {
-				return Numbers.integers().between(10, 50)
-							  .map(i -> Transformer.transform("+i=" + i, t -> t + i));
+				return integers().between(10, 50)
+								 .map(i -> Transformer.transform("+i=" + i, t -> t + i));
 			} else {
-				return Numbers.integers().between(2, 9)
-							  .map(i -> Transformer.transform("-i=" + i, t -> t - i));
+				return integers().between(2, 9)
+								 .map(i -> Transformer.transform("-i=" + i, t -> t - i));
 			}
 		};
 
 		Transformation<Integer> resetToValueBetween0andLastAbsolute = last -> {
-			return Numbers.integers().between(0, Math.abs(last))
-						  .map(value -> Transformer.transform("=" + value, ignore -> value));
+			return integers().between(0, Math.abs(last))
+							 .map(value -> Transformer.transform("=" + value, ignore -> value));
 		};
 
 		Arbitrary<Chain<Integer>> chains =
@@ -182,11 +182,11 @@ class StatefulTests {
 	@Property(tries = 10)
 	void transformationPreconditionsAreRespected(@ForAll long seed) {
 		Transformation<List<Integer>> addRandomIntToList =
-			ignore -> Numbers.integers().between(0, 10)
-							 .map(i -> l -> {
-								 l.add(i);
-								 return l;
-							 });
+			ignore -> integers().between(0, 10)
+								.map(i -> l -> {
+									l.add(i);
+									return l;
+								});
 
 		Transformation<List<Integer>> removeFirstElement =
 			Transformation.<List<Integer>>when(last -> !last.isEmpty())
@@ -271,11 +271,11 @@ class StatefulTests {
 	void chainCanBeRegenerated() {
 
 		Transformation<List<Integer>> addRandomIntToList =
-			ignore -> Numbers.integers().between(0, 10)
-							 .map(i -> l -> {
-								 l.add(i);
-								 return l;
-							 });
+			ignore -> integers().between(0, 10)
+								.map(i -> l -> {
+									l.add(i);
+									return l;
+								});
 
 		Transformation<List<Integer>> removeFirstElement =
 			Transformation.<List<Integer>>when(last -> !last.isEmpty())
@@ -313,12 +313,38 @@ class StatefulTests {
 	}
 
 	@Group
-	@PropertyDefaults(tries = 100)
+	@PropertyDefaults(tries = 10)
 	class Shrinking {
 
+		//@Property
 		@Example
-		void failing() {
-			Assertions.fail("Not tested yet");
+		void shrinkChainWithoutStateAccessToEnd(@ForAll long seed) {
+			Arbitrary<Chain<Integer>> chains =
+				Chain.startWith(() -> 0)
+					 .withTransformation(ignore -> integers().between(0, 10).map(i -> t -> t + i))
+					 .withMaxTransformations(5);
+
+			Tryable falsifier = Tryable.from(params -> {
+				Chain<Integer> chain = (Chain<Integer>) params.getFirst();
+				chain.forEachRemaining(ignore -> {});
+				return false;
+			});
+
+			PropertyCase propertyCase = new PropertyCase(List.of(chains.generator()), falsifier);
+
+			PropertyRunConfiguration configuration = PropertyRunConfiguration.randomized(Long.toString(seed), 100);
+			PropertyRunResult result = propertyCase.run(configuration);
+			assertThat(result.isFailed()).isTrue();
+
+			FalsifiedSample smallestFalsifiedSample = result.falsifiedSamples().first();
+			Chain<Integer> falsifiedChain = (Chain<Integer>) smallestFalsifiedSample.values().getFirst();
+			System.out.println(falsifiedChain.transformations().size());
+			System.out.println(falsifiedChain.current());
+
+			// TODO: falsifiedChain has already been evaluated to the end
+			//       Introduce chain.replay() ?
+			// assertThat(falsifiedChain.transformations()).hasSize(falsifiedChain.maxTransformations());
+			// assertThat(collectAllValues(falsifiedChain)).containsExactly(0);
 		}
 	}
 
