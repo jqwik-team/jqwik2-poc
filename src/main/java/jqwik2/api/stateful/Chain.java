@@ -76,4 +76,11 @@ public interface Chain<T> extends Iterator<T> {
 	 * @return an optional value of type T
 	 */
 	Optional<T> current();
+
+	/**
+	 * Replay the chain from the beginning up to the current state.
+	 *
+	 * @return an iterator over the chain
+	 */
+	Iterator<T> replay();
 }

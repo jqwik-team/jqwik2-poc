@@ -16,6 +16,7 @@ class ChainInstance<S> implements Chain<S> {
 	private final Generator<Transformation<S>> transformationGenerator;
 	private final GenSource.List source;
 	private final List<Transformer<S>> transformers = new ArrayList<>();
+	private final Supplier<? extends S> initialSupplier;
 
 	private S current;
 	private int maxTransformations;
@@ -28,6 +29,7 @@ class ChainInstance<S> implements Chain<S> {
 		Generator<Transformation<S>> transformationGenerator,
 		GenSource.List source
 	) {
+		this.initialSupplier = initialSupplier;
 		this.current = initialSupplier.get();
 		this.maxTransformations = maxTransformations;
 		this.transformationGenerator = transformationGenerator;
@@ -94,6 +96,7 @@ class ChainInstance<S> implements Chain<S> {
 		return current;
 	}
 
+	@SuppressWarnings("OverlyLongMethod")
 	private Transformer<S> nextTransformer() {
 		AtomicInteger attemptsCounter = new AtomicInteger(0);
 		GenSource nextTransformerSource;
@@ -151,5 +154,51 @@ class ChainInstance<S> implements Chain<S> {
 
 	private S transformState(Transformer<S> transformer, S current) {
 		return transformer.apply(current);
+	}
+
+	@Override
+	public Iterator<S> replay() {
+		return new ReplayIterator();
+	}
+
+	private class ReplayIterator implements Iterator<S> {
+		private final List<Transformer<S>> toReplay;
+		private boolean initialSupplied = false;
+		private S current;
+		private int step = 0;
+
+		private ReplayIterator() {
+			toReplay = new ArrayList<>(transformers);
+			current = initialSupplier.get();
+		}
+
+		@Override
+		public boolean hasNext() {
+			if (!initialSupplied) {
+				return true;
+			}
+			if (step < toReplay.size()) {
+				return !toReplay.get(step).isEndOfChain();
+			}
+			return false;
+		}
+
+		@Override
+		public S next() {
+			if (!initialSupplied) {
+				initialSupplied = true;
+				return current;
+			}
+			if (step >= toReplay.size()) {
+				throw new NoSuchElementException();
+			}
+			var nextTransformer = toReplay.get(step);
+			if (nextTransformer.isEndOfChain()) {
+				throw new NoSuchElementException();
+			}
+			current = nextTransformer.apply(current);
+			step++;
+			return current;
+		}
 	}
 }

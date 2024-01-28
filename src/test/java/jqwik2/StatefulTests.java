@@ -304,7 +304,7 @@ class StatefulTests {
 		assertThat(result1).isEqualTo(result2);
 	}
 
-	private <T> List<T> collectAllValues(Chain<T> chain) {
+	private <T> List<T> collectAllValues(Iterator<T> chain) {
 		List<T> values = new ArrayList<>();
 		while (chain.hasNext()) {
 			values.add(chain.next());
@@ -330,6 +330,20 @@ class StatefulTests {
 				return false;
 			});
 
+			Chain<Integer> shrunkChain = failAndShrink(seed, chains, falsifier);
+
+			// System.out.println(shrunkChain.transformations().size());
+			// System.out.println(shrunkChain.current());
+
+			assertThat(shrunkChain.transformations()).hasSize(shrunkChain.maxTransformations());
+			assertThat(shrunkChain.transformations()).hasSize(1);
+			assertThat(shrunkChain.current()).hasValue(0);
+
+			assertThat(collectAllValues(shrunkChain.replay()))
+				.containsExactly(0, 0);
+		}
+
+		private static Chain<Integer> failAndShrink(long seed, Arbitrary<Chain<Integer>> chains, Tryable falsifier) {
 			PropertyCase propertyCase = new PropertyCase(List.of(chains.generator()), falsifier);
 
 			PropertyRunConfiguration configuration = PropertyRunConfiguration.randomized(Long.toString(seed), 100);
@@ -337,17 +351,7 @@ class StatefulTests {
 			assertThat(result.isFailed()).isTrue();
 
 			FalsifiedSample smallestFalsifiedSample = result.falsifiedSamples().first();
-			Chain<Integer> falsifiedChain = (Chain<Integer>) smallestFalsifiedSample.values().getFirst();
-
-			// System.out.println(falsifiedChain.transformations().size());
-			// System.out.println(falsifiedChain.current());
-
-			assertThat(falsifiedChain.transformations()).hasSize(falsifiedChain.maxTransformations());
-			assertThat(falsifiedChain.transformations()).hasSize(1);
-			assertThat(falsifiedChain.current()).hasValue(0);
-
-			// TODO: Introduce a way to replay a chain in order to check if all inbetween values are correct
-			assertThat(collectAllValues(falsifiedChain)).containsExactly(0);
+			return (Chain<Integer>) smallestFalsifiedSample.values().getFirst();
 		}
 	}
 
