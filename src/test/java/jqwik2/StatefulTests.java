@@ -358,7 +358,7 @@ class StatefulTests {
 			Tryable falsifier = Tryable.from(params -> {
 				Chain<Integer> chain = (Chain<Integer>) params.getFirst();
 				chain.forEachRemaining(ignore -> {});
-				return false;
+				return chain.current().get() == 0;
 			});
 
 			Chain<Integer> shrunkChain = failAndShrink(seed, chains, falsifier);
@@ -374,6 +374,30 @@ class StatefulTests {
 				.containsExactly(0, 0);
 		}
 
+		@Property
+		void shrinkChainWithStateAccessToEnd(@ForAll long seed) {
+			Arbitrary<Chain<Integer>> chains =
+				Chain.startWith(() -> 0)
+					 .withTransformation(
+						 previous -> {
+							 int min = Math.min(previous, 10);
+							 return integers().between(min, 10).map(i -> Transformer.transform("+" + i, t -> t + i));
+						 }
+					 ).withMaxTransformations(5);
+
+			Tryable falsifier = Tryable.from(params -> {
+				Chain<Integer> chain = (Chain<Integer>) params.getFirst();
+				chain.forEachRemaining(value -> {
+					assertThat(value).isLessThan(10);
+				});
+			});
+
+			Chain<Integer> shrunkChain = failAndShrink(seed, chains, falsifier);
+			assertThat(shrunkChain.transformations()).hasSize(shrunkChain.maxTransformations());
+			assertThat(collectAllValues(shrunkChain.replay())).containsExactly(0, 10);
+		}
+
+
 		private static Chain<Integer> failAndShrink(long seed, Arbitrary<Chain<Integer>> chains, Tryable falsifier) {
 			PropertyCase propertyCase = new PropertyCase(List.of(chains.generator()), falsifier);
 
@@ -382,6 +406,7 @@ class StatefulTests {
 			assertThat(result.isFailed()).isTrue();
 
 			FalsifiedSample smallestFalsifiedSample = result.falsifiedSamples().first();
+			// FalsifiedSample smallestFalsifiedSample = result.falsifiedSamples().last();
 			return (Chain<Integer>) smallestFalsifiedSample.values().getFirst();
 		}
 	}
