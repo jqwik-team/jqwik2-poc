@@ -304,6 +304,38 @@ class StatefulTests {
 		assertThat(result1).isEqualTo(result2);
 	}
 
+	@Example
+	void chainCanBeReplayed() {
+
+		Transformation<List<Integer>> addRandomIntToList =
+			ignore -> integers().between(0, 10)
+								.map(i -> l -> {
+									l.add(i);
+									return l;
+								});
+
+		Transformation<List<Integer>> removeFirstElement =
+			Transformation.<List<Integer>>when(last -> !last.isEmpty())
+						  .provide(just(l -> {
+							  l.removeFirst();
+							  return l;
+						  }));
+
+		ChainArbitrary<List<Integer>> chains =
+			Chain.startWith(() -> (List<Integer>) new ArrayList<Integer>())
+				 .withTransformation(addRandomIntToList)
+				 .withTransformation(removeFirstElement)
+				 .withMaxTransformations(13);
+
+		RandomGenSource source = new RandomGenSource("43");
+
+		Chain<List<Integer>> chain = chains.generator().generate(source);
+		List<List<Integer>> originalValues = collectAllValues(chain);
+		List<List<Integer>> replayedValues = collectAllValues(chain.replay());
+
+		assertThat(originalValues).isEqualTo(replayedValues);
+	}
+
 	private <T> List<T> collectAllValues(Iterator<T> chain) {
 		List<T> values = new ArrayList<>();
 		while (chain.hasNext()) {
