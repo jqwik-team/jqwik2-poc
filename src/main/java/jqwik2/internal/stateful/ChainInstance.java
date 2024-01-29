@@ -107,11 +107,10 @@ class ChainInstance<S> implements Chain<S> {
 				return Transformer.endOfChain();
 			}
 			if (transformers.isEmpty()) {
-				// Chains without transformations are not allowed
+				// Finite chains without transformations are not allowed
 				throw new TestAbortedException();
 			}
-			this.maxTransformations = transformers.size();
-			return null;
+			return Transformer.endOfChain();
 		}
 		GenSource transformerSource = nextTransformerSource.tuple();
 		GenSource chooseArbitrarySource = transformerSource.tuple().nextValue();

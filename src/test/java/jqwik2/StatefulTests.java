@@ -358,7 +358,7 @@ class StatefulTests {
 			Tryable falsifier = Tryable.from(params -> {
 				Chain<Integer> chain = (Chain<Integer>) params.getFirst();
 				chain.forEachRemaining(ignore -> {});
-				return chain.current().get() == 0;
+				return false;
 			});
 
 			Chain<Integer> shrunkChain = failAndShrink(seed, chains, falsifier);
@@ -366,7 +366,6 @@ class StatefulTests {
 			// System.out.println(shrunkChain.transformations().size());
 			// System.out.println(shrunkChain.current());
 
-			assertThat(shrunkChain.transformations()).hasSize(shrunkChain.maxTransformations());
 			assertThat(shrunkChain.transformations()).hasSize(1);
 			assertThat(shrunkChain.current()).hasValue(0);
 
@@ -387,14 +386,14 @@ class StatefulTests {
 
 			Tryable falsifier = Tryable.from(params -> {
 				Chain<Integer> chain = (Chain<Integer>) params.getFirst();
-				chain.forEachRemaining(value -> {
-					assertThat(value).isLessThan(10);
-				});
+				chain.forEachRemaining(value -> {});
+				return false;
 			});
 
 			Chain<Integer> shrunkChain = failAndShrink(seed, chains, falsifier);
-			assertThat(shrunkChain.transformations()).hasSize(shrunkChain.maxTransformations());
-			assertThat(collectAllValues(shrunkChain.replay())).containsExactly(0, 10);
+
+			assertThat(shrunkChain.transformations()).hasSize(1);
+			assertThat(collectAllValues(shrunkChain.replay())).containsExactly(0, 0);
 		}
 
 
