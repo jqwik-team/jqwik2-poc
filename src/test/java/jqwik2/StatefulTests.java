@@ -520,10 +520,31 @@ class StatefulTests {
 			});
 
 			Chain<Integer> shrunkChain = failAndShrink(seed, chains, falsifier);
+			// System.out.println(shrunkChain);
 			// System.out.println(shrunkChain.transformations());
 
 			assertThat(shrunkChain.transformations()).hasSize(4);
 			assertThat(collectAllValues(shrunkChain.replay())).containsExactly(1, 1, 1, 1, 1);
+		}
+
+		@Property(tries = 1)
+		void preconditionedEndOfChainCanBeShrunkAwayInFiniteChain(@ForAll long seed) {
+			Arbitrary<Chain<Integer>> chains =
+				Chain.startWith(() -> 0)
+					 .withTransformation(Transformation.<Integer>when(i -> i >= 5).provide(just(Transformer.endOfChain())))
+					 .withTransformation(ignore -> just(Transformer.transform("+1", i -> i + 1)))
+					 .withMaxTransformations(100);
+
+			Tryable falsifier = Tryable.from(params -> {
+				Chain<Integer> chain = (Chain<Integer>) params.getFirst();
+				return collectAllValues(chain).size() < 6;
+			});
+
+			Chain<Integer> shrunkChain = failAndShrink(seed, chains, falsifier);
+
+			assertThat(shrunkChain.transformations()).hasSize(5);
+			assertThat(shrunkChain.transformations()).doesNotContain(Transformer.END_OF_CHAIN.transformation());
+			assertThat(collectAllValues(shrunkChain.replay())).containsExactly(0, 1, 2, 3, 4, 5);
 		}
 
 		private static Chain<Integer> failAndShrink(long seed, Arbitrary<Chain<Integer>> chains, Tryable falsifier) {

@@ -39,6 +39,9 @@ public interface Tryable extends Function<List<Object>, TryExecutionResult> {
 				return new TryExecutionResult(TryExecutionResult.Status.FALSIFIED, ae);
 			} catch (TestAbortedException tae) {
 				return new TryExecutionResult(TryExecutionResult.Status.INVALID, tae);
+			} catch (CannotGenerateException cge) {
+				// This can happen during shrinking in chain-based, stateful properties
+				return new TryExecutionResult(TryExecutionResult.Status.INVALID, cge);
 			} catch (Throwable t) {
 				ExceptionSupport.rethrowIfBlacklisted(t);
 				return new TryExecutionResult(TryExecutionResult.Status.FALSIFIED, t);
