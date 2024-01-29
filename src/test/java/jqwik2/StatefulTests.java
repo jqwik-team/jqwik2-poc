@@ -396,6 +396,33 @@ class StatefulTests {
 			assertThat(collectAllValues(shrunkChain.replay())).containsExactly(0, 0);
 		}
 
+		@Property
+		void removeTransformersThatDontChangeStateDuringShrinking(@ForAll long seed) {
+			Transformer<Integer> addOne = Transformer.transform("addOne", t1 -> t1 + 1);
+			Transformer<Integer> doNothing = Transformer.transform("doNothing", t -> t);
+
+			Arbitrary<Chain<Integer>> chains =
+				Chain.startWith(() -> 1)
+					 .withTransformation(ignore -> just(addOne))
+					 .withTransformation(ignore -> just(doNothing))
+					 .withMaxTransformations(20); // Size must be large enough to have at least a single addOne transformer
+
+			Tryable falsifier = Tryable.from(params -> {
+				Chain<Integer> chain = (Chain<Integer>) params.getFirst();
+				int last = 1;
+				while (chain.hasNext()) {
+					last = chain.next();
+				}
+				return last <= 1;
+			});
+
+			Chain<Integer> shrunkChain = failAndShrink(seed, chains, falsifier);
+			// System.out.println(shrunkChain);
+
+			assertThat(shrunkChain.transformations()).hasSize(1);
+			assertThat(collectAllValues(shrunkChain.replay())).containsExactly(1, 2);
+		}
+
 
 		private static Chain<Integer> failAndShrink(long seed, Arbitrary<Chain<Integer>> chains, Tryable falsifier) {
 			PropertyCase propertyCase = new PropertyCase(List.of(chains.generator()), falsifier);
