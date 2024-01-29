@@ -448,6 +448,38 @@ class StatefulTests {
 			);
 		}
 
+		@Property
+		void shrinkChainWithStateAccess(@ForAll long seed) {
+			Arbitrary<Chain<Integer>> chains =
+				Chain.startWith(() -> 1)
+					 .withTransformation(
+						 previous -> {
+							 int max = Math.max(previous, 2);
+							 return integers().between(0, max)
+											  .map(i -> Transformer.transform("+" + i, t -> t + i));
+						 }
+					 ).withMaxTransformations(10);
+
+			Tryable falsifier = Tryable.from(params -> {
+				Chain<Integer> chain = (Chain<Integer>) params.getFirst();
+				int count = 0;
+				int sum = 0;
+				while (chain.hasNext()) {
+					sum += chain.next();
+					count++;
+					if (count >= 5 && sum >= 5) {
+						return false;
+					}
+				}
+				return true;
+			});
+
+			Chain<Integer> shrunkChain = failAndShrink(seed, chains, falsifier);
+			// System.out.println(shrunkChain.transformations());
+
+			assertThat(shrunkChain.transformations()).hasSize(4);
+			assertThat(collectAllValues(shrunkChain.replay())).containsExactly(1, 1, 1, 1, 1);
+		}
 
 		private static Chain<Integer> failAndShrink(long seed, Arbitrary<Chain<Integer>> chains, Tryable falsifier) {
 			PropertyCase propertyCase = new PropertyCase(List.of(chains.generator()), falsifier);
