@@ -605,6 +605,46 @@ class StatefulTests {
 			assertThat(collectAllValues(shrunkChain.replay())).containsExactly(0, 1, 2, 3, 4, 5);
 		}
 
+		@Property
+		void shrinkChainWithMixedAccess(@ForAll long seed) {
+			Arbitrary<Chain<Integer>> chains =
+				Chain.startWith(() -> 0)
+					 .withTransformation(
+						 last -> {
+							 int current = Math.abs(last);
+							 if (current > 100) {
+								 return just(Transformer.transform("half", t -> t / 2));
+							 } else {
+								 return integers().between(current, current * 2).map(i -> Transformer.transform("add-" + i, t -> t + i));
+							 }
+						 })
+					 .withTransformation(ignore -> just(Transformer.transform("minus-1", t -> t - 1)))
+					 .withMaxTransformations(10);
+
+			Tryable falsifier = Tryable.from(params -> {
+				Chain<Integer> chain = (Chain<Integer>) params.getFirst();
+				while (chain.hasNext()) {
+					if (chain.next() > 20) {
+						return false;
+					}
+				}
+				return true;
+			});
+
+			Chain<Integer> shrunkChain = failAndShrink(seed, chains, falsifier);
+			// System.out.println(shrunkChain);
+			// System.out.println(shrunkChain.transformations());
+			assertThat(shrunkChain.transformations()).hasSizeBetween(6, 7);
+
+			List<Integer> series = collectAllValues(shrunkChain.replay());
+			// System.out.println(series);
+			assertThat(series.get(series.size() - 1))
+				.describedAs("Last element of %s", series)
+				.isBetween(21, 32); // It's either 21 or the double of the but-last value
+			assertThat(series.get(series.size() - 2))
+				.describedAs("But-last element of %s", series)
+				.isLessThanOrEqualTo(20);
+		}
 
 		private static Chain<Integer> failAndShrink(long seed, Arbitrary<Chain<Integer>> chains, Tryable falsifier) {
 			PropertyCase propertyCase = new PropertyCase(List.of(chains.generator()), falsifier);
