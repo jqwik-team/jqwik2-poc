@@ -160,6 +160,14 @@ class ChainInstance<S> implements Chain<S> {
 		return new ReplayIterator();
 	}
 
+	@Override
+	public String toString() {
+		String finite = isInfinite() ? "infinite" : "finite";
+		String status = !initialSupplied ? "not started" : hasNext() ? "in progress" : "finished";
+		return "ChainInstance[%s, %s]{maxTransformations=%d, #transformations=%d, current=%s}"
+				   .formatted(finite, status, maxTransformations, transformers.size(), current().map(Objects::toString).orElse("<not initialized>"));
+	}
+
 	private class ReplayIterator implements Iterator<S> {
 		private final List<Transformer<S>> toReplay;
 		private boolean initialSupplied = false;
