@@ -20,6 +20,8 @@
     - Fail if ratio checks/tries is too low
 
 - Stateful generators
+  - ActionChain?
+  - Model-based testing?
 
 - Statistics
     - Collect and report statistics
