@@ -397,7 +397,7 @@ class StatefulTests {
 		}
 
 		@Property
-		void removeTransformersThatDontChangeStateDuringShrinking(@ForAll long seed) {
+		void shrinkAwayTransformersThatDontChangeState(@ForAll long seed) {
 			Transformer<Integer> addOne = Transformer.transform("addOne", t1 -> t1 + 1);
 			Transformer<Integer> doNothing = Transformer.transform("doNothing", t -> t);
 
