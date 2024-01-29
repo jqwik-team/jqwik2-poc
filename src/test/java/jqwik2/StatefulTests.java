@@ -4,6 +4,7 @@ import java.util.*;
 
 import jqwik2.api.Arbitrary;
 import jqwik2.api.*;
+import jqwik2.api.arbitraries.*;
 import jqwik2.api.stateful.*;
 import jqwik2.internal.*;
 import jqwik2.internal.recording.*;
@@ -646,7 +647,40 @@ class StatefulTests {
 				.isLessThanOrEqualTo(20);
 		}
 
-		private static Chain<Integer> failAndShrink(long seed, Arbitrary<Chain<Integer>> chains, Tryable falsifier) {
+		@Property
+		void shrinkPairsOfIterations(@ForAll long seed) {
+			ChainArbitrary<List<Integer>> chains =
+				Chain.startWith(() -> (List<Integer>) new ArrayList<Integer>())
+					 .withTransformation(ignore -> integers().map(i -> Transformer.mutate("add " + i, l -> l.add(i))))
+					 .withTransformation(
+						 Transformation.<List<Integer>>when(list -> !list.isEmpty())
+									   .provide(
+										   list -> Values.of(list)
+														 .map(i -> Transformer.mutate("duplicate " + i, l -> l.add(i)))
+									   ))
+					 .withMaxTransformations(20);
+
+			Tryable falsifier = Tryable.from(params -> {
+				Chain<List<Integer>> chain = (Chain<List<Integer>>) params.getFirst();
+				while (chain.hasNext()) {
+					// Fail on duplicates
+					var list = chain.next();
+					if (new LinkedHashSet<>(list).size() < list.size()) {
+						return false;
+					}
+				}
+				return true;
+			});
+
+			Chain<List<Integer>> shrunkChain = failAndShrink(seed, chains, falsifier);
+
+			assertThat(shrunkChain.transformations()).isIn(
+				List.of("add 0", "add 0"),
+				List.of("add 0", "duplicate 0")
+			);
+		}
+
+		private static <T> Chain<T> failAndShrink(long seed, Arbitrary<Chain<T>> chains, Tryable falsifier) {
 			PropertyCase propertyCase = new PropertyCase(List.of(chains.generator()), falsifier);
 
 			PropertyRunConfiguration configuration = PropertyRunConfiguration.randomized(Long.toString(seed), 100);
@@ -655,7 +689,7 @@ class StatefulTests {
 
 			FalsifiedSample smallestFalsifiedSample = result.falsifiedSamples().first();
 			// FalsifiedSample smallestFalsifiedSample = result.falsifiedSamples().last();
-			return (Chain<Integer>) smallestFalsifiedSample.values().getFirst();
+			return (Chain<T>) smallestFalsifiedSample.values().getFirst();
 		}
 	}
 
