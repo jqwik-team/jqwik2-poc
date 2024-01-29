@@ -68,16 +68,20 @@ class ChainInstance<S> implements Chain<S> {
 		if (!initialSupplied) {
 			return true;
 		}
-		if (isInfinite()) {
-			nextTransformer = nextTransformer();
-			return !nextTransformer.isEndOfChain();
-		} else {
-			if (transformers.size() < maxTransformations) {
+		ensureNextTransformerIsSet();
+		return !nextTransformer.isEndOfChain();
+	}
+
+	private void ensureNextTransformerIsSet() {
+		if (nextTransformer == null) {
+			if (isInfinite()) {
 				nextTransformer = nextTransformer();
-				return !nextTransformer.isEndOfChain();
 			} else {
-				nextTransformer = null;
-				return false;
+				if (transformers.size() < maxTransformations) {
+					nextTransformer = nextTransformer();
+				} else {
+					nextTransformer = Transformer.endOfChain();
+				}
 			}
 		}
 	}
@@ -88,12 +92,13 @@ class ChainInstance<S> implements Chain<S> {
 			initialSupplied = true;
 			return current;
 		}
-		if (nextTransformer == null) {
+		ensureNextTransformerIsSet();
+		if (nextTransformer.isEndOfChain()) {
 			throw new NoSuchElementException();
 		}
-		Transformer<S> transformer = nextTransformer;
-		transformers.add(transformer);
-		current = transformState(transformer, current);
+		transformers.add(nextTransformer);
+		current = transformState(nextTransformer, current);
+		nextTransformer = null;
 		return current;
 	}
 
@@ -165,7 +170,8 @@ class ChainInstance<S> implements Chain<S> {
 		String finite = isInfinite() ? "infinite" : "finite";
 		String status = !initialSupplied ? "not started" : hasNext() ? "in progress" : "finished";
 		return "ChainInstance[%s, %s]{maxTransformations=%d, #transformations=%d, current=%s}"
-				   .formatted(finite, status, maxTransformations, transformers.size(), current().map(Objects::toString).orElse("<not initialized>"));
+				   .formatted(finite, status, maxTransformations, transformers.size(), current().map(Objects::toString)
+																								.orElse("<not initialized>"));
 	}
 
 	private class ReplayIterator implements Iterator<S> {

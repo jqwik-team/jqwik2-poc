@@ -41,6 +41,41 @@ class StatefulTests {
 	}
 
 	@Example
+	void iterationShouldWorkWithoutHasNextQuery() {
+
+		Arbitrary<Chain<Integer>> chains =
+			Chain.startWith(() -> 0)
+				 .withTransformation(ignore -> just(Transformer.transform("+1", i -> i + 1)))
+				 .withMaxTransformations(10);
+
+		Chain<Integer> chain = chains.sample();
+
+		assertThat(chain.current()).isEmpty();
+
+		List<Integer> values = new ArrayList<>();
+		while (true) {
+			try {
+				values.add(chain.next());
+			} catch (NoSuchElementException ignore) {
+				break;
+			}
+		}
+		assertThat(values).containsExactly(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+
+		// Replay should also work without hasNext() query
+		List<Integer> replayed = new ArrayList<>();
+		Iterator<Integer> replay = chain.replay();
+		while (true) {
+			try {
+				replayed.add(replay.next());
+			} catch (NoSuchElementException ignore) {
+				break;
+			}
+		}
+		assertThat(replayed).isEqualTo(values);
+	}
+
+	@Example
 	void transformersAreCorrectlyReported() {
 		Transformer<Integer> transformer = i -> i + 1;
 		Arbitrary<Chain<Integer>> chains =
@@ -428,7 +463,6 @@ class StatefulTests {
 			});
 
 			Chain<Integer> shrunkChain = failAndShrink(seed, chains, falsifier);
-			// System.out.println(shrunkChain);
 
 			assertThat(shrunkChain.transformations()).hasSize(1);
 			assertThat(collectAllValues(shrunkChain.replay())).containsExactly(1, 2);
