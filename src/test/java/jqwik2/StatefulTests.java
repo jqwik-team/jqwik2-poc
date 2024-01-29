@@ -423,6 +423,31 @@ class StatefulTests {
 			assertThat(collectAllValues(shrunkChain.replay())).containsExactly(1, 2);
 		}
 
+		@Property
+		void fullyShrinkTransformersWithoutStateAccess(@ForAll long seed) {
+			Arbitrary<Chain<Integer>> chains =
+				Chain.startWith(() -> 0)
+					 .withTransformation(ignore -> integers().between(1, 5).map(i -> Transformer.transform("add" + i, t -> t + i)))
+					 .withMaxTransformations(10);
+
+			Tryable falsifier = Tryable.from(params -> {
+				Chain<Integer> chain = (Chain<Integer>) params.getFirst();
+				int last = 1;
+				while (chain.hasNext()) {
+					last = chain.next();
+				}
+				return last < 3;
+			});
+
+			Chain<Integer> shrunkChain = failAndShrink(seed, chains, falsifier);
+
+			// There are currently 2 possible "smallest" chains being shrunk to
+			assertThat(collectAllValues(shrunkChain.replay())).isIn(
+				Arrays.asList(0, 3),
+				Arrays.asList(0, 1, 2, 3)
+			);
+		}
+
 
 		private static Chain<Integer> failAndShrink(long seed, Arbitrary<Chain<Integer>> chains, Tryable falsifier) {
 			PropertyCase propertyCase = new PropertyCase(List.of(chains.generator()), falsifier);
