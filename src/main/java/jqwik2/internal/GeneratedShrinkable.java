@@ -63,17 +63,17 @@ public final class GeneratedShrinkable<T> implements Shrinkable<T> {
 
 	@Override
 	public boolean equals(Object obj) {
+		// value can change during shrinking is therefore not part of equality contract
 		if (obj == this) return true;
 		if (obj == null || obj.getClass() != this.getClass()) return false;
 		var that = (GeneratedShrinkable<?>) obj;
-		return Objects.equals(this.value, that.value) &&
-				   Objects.equals(this.generator, that.generator) &&
+		return Objects.equals(this.generator, that.generator) &&
 				   Objects.equals(this.recording(), that.recording());
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(value, generator, recording());
+		return Objects.hash(generator, recording());
 	}
 
 }
