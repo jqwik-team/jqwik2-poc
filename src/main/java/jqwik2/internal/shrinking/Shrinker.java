@@ -41,7 +41,7 @@ public class Shrinker {
 								  invalidSamples.add(pair.first());
 							  }
 						  })
-						  .filter(pair -> pair.second().status() == TryExecutionResult.Status.FALSIFIED)
+						  .filter(pair -> isFalsified(pair.second()))
 						  .findAny();
 
 			if (shrinkingResult.isPresent()) {
@@ -66,18 +66,24 @@ public class Shrinker {
 		}
 	}
 
-	private boolean isInvalid(TryExecutionResult result) {
-		return result.status() == TryExecutionResult.Status.INVALID ||
-				   isIncompatibleError(result.throwable());
+	private boolean isFalsified(TryExecutionResult tryExecutionResult) {
+		return tryExecutionResult.status() == TryExecutionResult.Status.FALSIFIED
+				   && isCompatibleError(tryExecutionResult.throwable());
 	}
 
-	private boolean isIncompatibleError(Throwable throwable) {
+	private boolean isInvalid(TryExecutionResult result) {
+		return result.status() == TryExecutionResult.Status.INVALID ||
+				   !isCompatibleError(result.throwable());
+	}
+
+	private boolean isCompatibleError(Throwable throwable) {
 		if (throwable == null) {
-			return originalThrowable != null;
+			return originalThrowable == null;
 		}
 		if (originalThrowable == null) {
-			return true;
+			return false;
 		}
-		return throwable.getClass() != originalThrowable.getClass();
+		// TODO: Check if stack traces point to same place. Is that worth it?
+		return throwable.getClass().equals(originalThrowable.getClass());
 	}
 }
