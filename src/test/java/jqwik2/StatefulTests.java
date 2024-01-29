@@ -29,7 +29,12 @@ class StatefulTests {
 
 		assertThat(chain.current()).isEmpty();
 
-		assertThat(collectAllValues(chain)).containsExactly(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+		List<Integer> values = new ArrayList<>();
+		while (chain.hasNext()) {
+			chain.hasNext(); // is idempotent
+			values.add(chain.next());
+		}
+		assertThat(values).containsExactly(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
 		assertThat(chain.transformations()).containsExactly(
 			"+1", "+1", "+1", "+1", "+1", "+1", "+1", "+1", "+1", "+1"
 		);
@@ -331,7 +336,13 @@ class StatefulTests {
 
 		Chain<List<Integer>> chain = chains.generator().generate(source);
 		List<List<Integer>> originalValues = collectAllValues(chain);
-		List<List<Integer>> replayedValues = collectAllValues(chain.replay());
+		Iterator<List<Integer>> chain1 = chain.replay();
+		List<List<Integer>> values = new ArrayList<>();
+		while (chain1.hasNext()) {
+			chain1.hasNext(); // is idempotent
+			values.add(chain1.next());
+		}
+		List<List<Integer>> replayedValues = values;
 
 		assertThat(originalValues).isEqualTo(replayedValues);
 	}

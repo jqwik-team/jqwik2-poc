@@ -92,6 +92,7 @@ class ChainInstance<S> implements Chain<S> {
 			throw new NoSuchElementException();
 		}
 		Transformer<S> transformer = nextTransformer;
+		transformers.add(transformer);
 		current = transformState(transformer, current);
 		return current;
 	}
@@ -124,7 +125,6 @@ class ChainInstance<S> implements Chain<S> {
 			if (next == Transformer.noop()) {
 				continue;
 			}
-			transformers.add(next);
 			return next;
 		}
 
