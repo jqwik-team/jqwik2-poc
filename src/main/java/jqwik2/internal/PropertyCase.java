@@ -113,8 +113,13 @@ public class PropertyCase {
 
 		var runner = new ConcurrentRunner(executorServiceSupplier.get(), maxDuration);
 
+		final Iterator<SampleSource> genSources = iterableGenSource.iterator();
+		BiConsumer<TryExecutionResult, Sample> guide =
+			(genSources instanceof GuidedGeneration)
+				? ((GuidedGeneration) genSources)::guide
+				: (result, sample) -> {};
+
 		var taskIterator = new Iterator<ConcurrentRunner.Task>() {
-			private final Iterator<SampleSource> genSources = iterableGenSource.iterator();
 			private int count = 0;
 
 			@Override
@@ -128,7 +133,8 @@ public class PropertyCase {
 				count++;
 				return shutdown -> executeTry(
 					sampleGenerator, trySource, countTries, countChecks,
-					shutdown, onFalsified, onSatisfied, iterableGenSource.lock()
+					shutdown, iterableGenSource.stopWhenFalsified(),
+					guide, onFalsified, onSatisfied, iterableGenSource.lock()
 				);
 			}
 		};
@@ -147,9 +153,8 @@ public class PropertyCase {
 		SampleSource multiSource,
 		AtomicInteger countTries,
 		AtomicInteger countChecks,
-		ConcurrentRunner.Shutdown shutdown,
-		Consumer<FalsifiedSample> onFalsified,
-		Consumer<Sample> onSatisfied,
+		ConcurrentRunner.Shutdown shutdown, boolean stopWhenFalsified,
+		BiConsumer<TryExecutionResult, Sample> guide, Consumer<FalsifiedSample> onFalsified, Consumer<Sample> onSatisfied,
 		Lock generationLock
 	) {
 		Optional<Sample> optionalSample;
@@ -162,13 +167,16 @@ public class PropertyCase {
 		optionalSample.ifPresent(sample -> {
 			countTries.incrementAndGet();
 			TryExecutionResult tryResult = tryable.apply(sample);
+			guide.accept(tryResult, sample);
 			if (tryResult.status() != TryExecutionResult.Status.INVALID) {
 				countChecks.incrementAndGet();
 			}
 			if (tryResult.status() == TryExecutionResult.Status.FALSIFIED) {
 				FalsifiedSample originalSample = new FalsifiedSample(sample, tryResult.throwable());
 				onFalsified.accept(originalSample);
-				shutdown.shutdown();
+				if (stopWhenFalsified) {
+					shutdown.shutdown();
+				}
 			}
 			if (tryResult.status() == TryExecutionResult.Status.SATISFIED) {
 				onSatisfied.accept(sample);

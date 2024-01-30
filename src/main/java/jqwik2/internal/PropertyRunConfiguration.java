@@ -49,12 +49,28 @@ public interface PropertyRunConfiguration {
 		Duration maxRuntime,
 		Supplier<ExecutorService> supplyExecutorService
 	) {
-		return new Configuration(
+		return new RunConfigurationRecord(
 			seed, maxTries,
 			shrinkingEnabled,
 			maxRuntime,
 			supplyExecutorService,
 			() -> randomSource(seed)
+		);
+	}
+
+	static PropertyRunConfiguration guided(
+		Supplier<GuidedGeneration> guidanceSupplier,
+		int maxTries, boolean shrinkingEnabled,
+		Duration maxRuntime,
+		Supplier<ExecutorService> supplyExecutorService
+	) {
+		return new RunConfigurationRecord(
+			null,
+			maxTries,
+			shrinkingEnabled,
+			maxRuntime,
+			supplyExecutorService,
+			() -> new GuidedGenerationSource(guidanceSupplier)
 		);
 	}
 
@@ -75,7 +91,7 @@ public interface PropertyRunConfiguration {
 										var message = "Exhaustive generation is not possible for given generators";
 										return new IllegalArgumentException(message);
 									});
-		return new Configuration(
+		return new RunConfigurationRecord(
 			null, maxTries,
 			false,
 			maxRuntime,
@@ -94,7 +110,7 @@ public interface PropertyRunConfiguration {
 		if (exhaustive.isEmpty() || exhaustive.get().maxCount() > maxTries) {
 			return randomized(seed, maxTries, shrinkingEnabled, maxRuntime, supplyExecutorService);
 		}
-		return new Configuration(
+		return new RunConfigurationRecord(
 			null, maxTries,
 			false,
 			maxRuntime,
@@ -110,7 +126,7 @@ public interface PropertyRunConfiguration {
 		Supplier<ExecutorService> defaultExecutorServiceSupplier
 	) {
 		IterableSampleSource sampleSource = new RecordedSamplesSource(samples);
-		return new Configuration(
+		return new RunConfigurationRecord(
 			null, samples.size(),
 			shrinkingEnabled,
 			maxRuntime,
@@ -122,20 +138,3 @@ public interface PropertyRunConfiguration {
 
 }
 
-record Configuration(
-	String seed, int maxTries,
-	boolean shrinkingEnabled,
-	Duration maxRuntime,
-	Supplier<ExecutorService> supplyExecutorService,
-	Supplier<IterableSampleSource> supplySource
-) implements PropertyRunConfiguration {
-	@Override
-	public Optional<String> effectiveSeed() {
-		return Optional.ofNullable(seed);
-	}
-
-	@Override
-	public IterableSampleSource source() {
-		return supplySource.get();
-	}
-}
