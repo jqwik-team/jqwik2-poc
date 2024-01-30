@@ -395,7 +395,7 @@ class StatefulTests {
 	@Group
 	@PropertyDefaults(tries = 10)
 	class Shrinking {
-
+		// Todo: There's a lot of redundancy in the following tests. Try to find the crucial shrinking cases.
 		@Property
 		void shrinkChainWithoutStateAccessToEnd(@ForAll long seed) {
 			Arbitrary<Chain<Integer>> chains =
@@ -678,6 +678,45 @@ class StatefulTests {
 				List.of("add 0", "add 0"),
 				List.of("add 0", "duplicate 0")
 			);
+		}
+
+		@Property
+		void shrinkAwayPartsThatDontChangeState(@ForAll long seed) {
+			ChainArbitrary<String> chains =
+				Chain.startWith(() -> "")
+					 .withTransformation(ignore -> Numbers.integers().between('A', 'Z').map(Character::toString)
+														  .map(a -> Transformer.transform("append " + a, s -> s + a)))
+					 .withTransformation(ignore -> just(Transformer.transform("nothing", s -> s)))
+					 .withTransformation(ignore -> just(Transformer.noop()))
+					 .withTransformation(Transformation.<String>when(string -> !string.isEmpty())
+													   .provide(
+														   value -> Values.of(value.toCharArray())
+																		  .map(c -> Transformer.transform("duplicate " + c, s -> s + c))
+													   ))
+					 .withMaxTransformations(20);
+
+			Tryable falsifier = Tryable.from(params -> {
+				Chain<String> chain = (Chain<String>) params.getFirst();
+				while (chain.hasNext()) {
+					// Fail on duplicate chars
+					String value = chain.next();
+					long uniqueChars = value.chars().boxed().distinct().count();
+					if (uniqueChars < value.length()) {
+						return false;
+					}
+				}
+				return true;
+			});
+
+			Chain<String> shrunkChain = failAndShrink(seed, chains, falsifier);
+			assertThat(shrunkChain.transformations()).hasSize(2);
+
+			// Full is not stable enough (about 1 of 5 fails):
+			// Todo: Implement pairwise shrinking of list elements
+			// assertThat(shrunkChain.transformations()).isIn(
+			// 	Arrays.asList("append A", "append A"),
+			// 	Arrays.asList("append A", "duplicate A")
+			// );
 		}
 
 		private static <T> Chain<T> failAndShrink(long seed, Arbitrary<Chain<T>> chains, Tryable falsifier) {
