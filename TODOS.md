@@ -1,4 +1,5 @@
 - JqwikProperty
+    - tries = 0 && maxDuration = 0 -> run forever (until interrupted, falsified or genSource exhausted)
     - Report all falsified samples, checks, tries, effective seed
     - AfterFailureMode.SAMPLES_THEN_REPLAY
     - AfterFailureMode.ANALYZE: Find as many failing samples as possible and
@@ -26,7 +27,10 @@
 - Statistics
     - Collect and report statistics
     - Generate until a statistical measurement is supposed to be stable.
-      See   https://www.youtube.com/watch?v=NcJOiQlzlXQ&list=PLvL2NEhYV4ZvCRCVlXTfB6-d09K3r0Sxa
+      - See   https://www.youtube.com/watch?v=NcJOiQlzlXQ&list=PLvL2NEhYV4ZvCRCVlXTfB6-d09K3r0Sxa
+      - See https://projecteuclid.org/journals/annals-of-mathematical-statistics/volume-16/issue-2/Sequential-Tests-of-Statistical-Hypotheses/10.1214/aoms/1177731118.full
+      - https://en.wikipedia.org/wiki/Sequential_probability_ratio_test
+      - Python implementation: https://github.com/Testispuncher/Sequential-Probability-Ratio-Test
 
 - Shrinking (https://www.drmaciver.com/2019/01/notes-on-test-case-reduction/)
     - Compare shrinkables due to full length if different recording types are
