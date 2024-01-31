@@ -125,7 +125,7 @@ class ConcurrentRunnerTests {
 	void shutdownOnTimeoutEvenIfTasksAreStillBeingAdded(@ForAll("services") Pair<String, Supplier<ExecutorService>> pair) {
 		ExecutorService service = pair.second().get();
 
-		ConcurrentRunner runner = new ConcurrentRunner(service, Duration.ofSeconds(1));
+		ConcurrentRunner runner = new ConcurrentRunner(service, Duration.ofMillis(500));
 
 		AtomicInteger createdTasks = new AtomicInteger();
 		AtomicInteger runTasks = new AtomicInteger();
@@ -133,7 +133,7 @@ class ConcurrentRunnerTests {
 			@Override
 			public boolean hasNext() {
 				try {
-					Thread.sleep(100);
+					Thread.sleep(50);
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
 				}

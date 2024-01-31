@@ -119,35 +119,14 @@ public class PropertyCase {
 				? ((GuidedGeneration) genSources)::guide
 				: (result, sample) -> {};
 
-		var taskIterator = new Iterator<ConcurrentRunner.Task>() {
-			private int count = 0;
-			private volatile boolean stopped = false;
-
-			@Override
-			public boolean hasNext() {
-				if (stopped) {
-					return false;
-				}
-				return genSources.hasNext() && count < maxTries;
-			}
-
-			@Override
-			public ConcurrentRunner.Task next() {
-				SampleSource trySource = genSources.next();
-				count++;
-				return shutdown -> {
-					ConcurrentRunner.Shutdown shutdownAndStop = () -> {
-						shutdown.shutdown();
-						stopped = true;
-					};
-					executeTry(
-						sampleGenerator, trySource, countTries, countChecks,
-						shutdownAndStop, iterableGenSource.stopWhenFalsified(),
-						guide, onFalsified, onSatisfied, iterableGenSource.lock()
-					);
-				};
-			}
-		};
+		var taskIterator = new ConcurrentTaskIterator(
+			genSources, maxTries,
+			(trySource, shutdown) -> executeTry(
+				sampleGenerator, trySource, countTries, countChecks,
+				shutdown, iterableGenSource.stopWhenFalsified(),
+				guide, onFalsified, onSatisfied, iterableGenSource.lock()
+			)
+		);
 
 		try {
 			runner.run(taskIterator);
@@ -177,7 +156,12 @@ public class PropertyCase {
 		optionalSample.ifPresent(sample -> {
 			countTries.incrementAndGet();
 			TryExecutionResult tryResult = tryable.apply(sample);
-			guide.accept(tryResult, sample);
+			try {
+				generationLock.lock();
+				guide.accept(tryResult, sample);
+			} finally {
+				generationLock.unlock();
+			}
 			if (tryResult.status() != TryExecutionResult.Status.INVALID) {
 				countChecks.incrementAndGet();
 			}
@@ -206,6 +190,47 @@ public class PropertyCase {
 		// new FullShrinker(originalSample, tryable).shrinkToEnd(
 		// 	falsifiedSamples::add
 		// );
+	}
+
+	private static class ConcurrentTaskIterator implements Iterator<ConcurrentRunner.Task> {
+		private final Iterator<SampleSource> genSources;
+		private final int maxTries;
+		private final BiConsumer<SampleSource, ConcurrentRunner.Shutdown> task;
+
+		private int count = 0;
+		private volatile boolean stopped = false;
+
+		private ConcurrentTaskIterator(
+			Iterator<SampleSource> genSources,
+			int maxTries,
+			BiConsumer<SampleSource, ConcurrentRunner.Shutdown> task
+		) {
+			this.genSources = genSources;
+			this.maxTries = maxTries;
+			this.task = task;
+		}
+
+		@Override
+		public boolean hasNext() {
+			if (stopped) {
+				return false;
+			}
+			return genSources.hasNext() && count < maxTries;
+		}
+
+		@Override
+		public ConcurrentRunner.Task next() {
+			SampleSource trySource = genSources.next();
+			count++;
+			return shutdown -> {
+				ConcurrentRunner.Shutdown shutdownAndStop = () -> {
+					shutdown.shutdown();
+					stopped = true;
+				};
+				task.accept(trySource, shutdownAndStop);
+			};
+		}
+
 	}
 
 }
