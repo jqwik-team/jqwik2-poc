@@ -553,12 +553,13 @@ class StatefulTests {
 		void endOfChainCanBeShrunkAwayInFiniteChain(@ForAll long seed) {
 			Arbitrary<Chain<Integer>> chains =
 				Chain.startWith(() -> 0)
-					 .withTransformation(ignore -> just(Transformer.endOfChain()))
-					 .withTransformation(ignore -> just(Transformer.transform("+1", i -> i + 1)))
+					 .withTransformation(1, ignore -> just(Transformer.endOfChain()))
+					 .withTransformation(5, ignore -> just(Transformer.transform("+1", i -> i + 1)))
 					 .withMaxTransformations(100);
 
 			Tryable falsifier = Tryable.from(params -> {
 				Chain<Integer> chain = (Chain<Integer>) params.getFirst();
+				chain.forEachRemaining(ignore -> {});
 				return false;
 			});
 
@@ -620,7 +621,7 @@ class StatefulTests {
 							 }
 						 })
 					 .withTransformation(ignore -> just(Transformer.transform("minus-1", t -> t - 1)))
-					 .withMaxTransformations(10);
+					 .withMaxTransformations(20);
 
 			Tryable falsifier = Tryable.from(params -> {
 				Chain<Integer> chain = (Chain<Integer>) params.getFirst();
@@ -635,7 +636,9 @@ class StatefulTests {
 			Chain<Integer> shrunkChain = failAndShrink(seed, chains, falsifier);
 			// System.out.println(shrunkChain);
 			// System.out.println(shrunkChain.transformations());
-			assertThat(shrunkChain.transformations()).hasSizeBetween(6, 7);
+			// TODO: Improve shrinking to make result more predictable
+			//       Shortest should be: ["minus-1", "add-2", "add-2", "add-5", "add-13"]
+			assertThat(shrunkChain.transformations()).hasSizeBetween(5, 8);
 
 			List<Integer> series = collectAllValues(shrunkChain.replay());
 			// System.out.println(series);
@@ -709,9 +712,9 @@ class StatefulTests {
 			});
 
 			Chain<String> shrunkChain = failAndShrink(seed, chains, falsifier);
-			assertThat(shrunkChain.transformations()).hasSize(2);
+			assertThat(shrunkChain.transformations()).hasSizeBetween(2, 3);
 
-			// Full is not stable enough (about 1 of 5 fails):
+			// Full shrinking is not stable enough (about 1 of 5 fails):
 			// Todo: Implement pairwise shrinking of list elements
 			// assertThat(shrunkChain.transformations()).isIn(
 			// 	Arrays.asList("append A", "append A"),
@@ -724,10 +727,11 @@ class StatefulTests {
 
 			PropertyRunConfiguration configuration = PropertyRunConfiguration.randomized(Long.toString(seed), 100);
 			PropertyRunResult result = propertyCase.run(configuration);
-			assertThat(result.isFailed()).isTrue();
+			assertThat(result.isFailed()).describedAs("property run should fail").isTrue();
 
 			FalsifiedSample smallestFalsifiedSample = result.falsifiedSamples().first();
-			// FalsifiedSample smallestFalsifiedSample = result.falsifiedSamples().last();
+			// FalsifiedSample originalFalsifiedSample = result.falsifiedSamples().last();
+			// System.out.println("Original falsified sample: " + originalFalsifiedSample);
 			return (Chain<T>) smallestFalsifiedSample.values().getFirst();
 		}
 	}

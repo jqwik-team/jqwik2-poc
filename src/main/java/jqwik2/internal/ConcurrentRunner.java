@@ -9,10 +9,12 @@ import jqwik2.api.support.*;
 
 public class ConcurrentRunner {
 
+	@FunctionalInterface
 	public interface Task {
 		void run(Shutdown shutdown) throws Throwable;
 	}
 
+	@FunctionalInterface
 	public interface Shutdown {
 		void shutdown();
 	}
