@@ -121,9 +121,13 @@ public class PropertyCase {
 
 		var taskIterator = new Iterator<ConcurrentRunner.Task>() {
 			private int count = 0;
+			private volatile boolean stopped = false;
 
 			@Override
 			public boolean hasNext() {
+				if (stopped) {
+					return false;
+				}
 				return genSources.hasNext() && count < maxTries;
 			}
 
@@ -131,11 +135,17 @@ public class PropertyCase {
 			public ConcurrentRunner.Task next() {
 				SampleSource trySource = genSources.next();
 				count++;
-				return shutdown -> executeTry(
-					sampleGenerator, trySource, countTries, countChecks,
-					shutdown, iterableGenSource.stopWhenFalsified(),
-					guide, onFalsified, onSatisfied, iterableGenSource.lock()
-				);
+				return shutdown -> {
+					ConcurrentRunner.Shutdown shutdownAndStop = () -> {
+						shutdown.shutdown();
+						stopped = true;
+					};
+					executeTry(
+						sampleGenerator, trySource, countTries, countChecks,
+						shutdownAndStop, iterableGenSource.stopWhenFalsified(),
+						guide, onFalsified, onSatisfied, iterableGenSource.lock()
+					);
+				};
 			}
 		};
 
