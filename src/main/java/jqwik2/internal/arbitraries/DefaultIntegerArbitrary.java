@@ -22,11 +22,17 @@ public class DefaultIntegerArbitrary implements IntegerArbitrary {
 
 	@Override
 	public IntegerArbitrary between(int min, int max) {
+		if (min > max) {
+			throw new IllegalArgumentException("min must be <= max");
+		}
 		return new DefaultIntegerArbitrary(min, max);
 	}
 
 	@Override
 	public Generator<Integer> generator() {
+		if (Math.abs(max - min) <= 100) {
+			return BaseGenerators.integers(min, max);
+		}
 		return BaseGenerators.integers(min, max, RandomChoice.Distribution.biased(5));
 	}
 
