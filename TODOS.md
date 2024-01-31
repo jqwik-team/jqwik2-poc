@@ -5,6 +5,10 @@
     - AfterFailureMode.ANALYZE: Find as many failing samples as possible and
       analyze their commonalities
 
+- Target-based generation and shrinking
+    - see http://proper.softlab.ntua.gr/Publications.html
+    - simulated annealing: https://www.baeldung.com/java-simulated-annealing-for-traveling-salesman
+
 - Allow JqwikDefaults to be changed programmatically
 
 - Additional generators and arbitraries
@@ -48,6 +52,3 @@
       search: https://notebook.drmaciver.com/posts/2019-04-30-13:03.html
 
 - Jupiter Extension
-
-- Target-based generation and shrinking (
-  see http://proper.softlab.ntua.gr/Publications.html)
