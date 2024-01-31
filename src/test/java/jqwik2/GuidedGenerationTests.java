@@ -16,8 +16,8 @@ import static org.assertj.core.api.Assertions.*;
 
 class GuidedGenerationTests {
 
-	@Example
-	void runGuidedProperty() {
+	@Property(tries = 10)
+	void runSequentialGuidance(@ForAll long seed) {
 		List<Generator<?>> generators = List.of(
 			new IntegerGenerator(0, 100)
 		);
@@ -29,67 +29,42 @@ class GuidedGenerationTests {
 
 		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
-		AtomicInteger count = new AtomicInteger(0);
+		AtomicInteger countNextSourceCalls = new AtomicInteger(0);
 
-		// TODO: Convert that into a proper thread safe, synchronized GuidedGeneration
-		//       Thereby find out why the same values are generated so often
-		GuidedGeneration guidance = new GuidedGeneration() {
-			private volatile Sample lastSample = null;
-			private volatile boolean started = false;
-			private final Iterator<SampleSource> iterator = new RandomGenSource("42").iterator();
-			private final CountDownLatch latch = new CountDownLatch(1);
+		GuidedGeneration generateUntil91isGenerated = new SequentialGuidedGeneration() {
+			private final Iterator<SampleSource> iterator = new RandomGenSource(Long.toString(seed)).iterator();
 
 			@Override
-			public synchronized boolean hasNext() {
-				if (!started) {
-					return true;
-				}
-				// try {
-				// 	Thread.sleep(500);
-				// } catch (InterruptedException e) {
-				// 	throw new RuntimeException(e);
-				// }
-				try {
-					if (!latch.await(5, TimeUnit.SECONDS)) {
-						return false;
-					}
-					int last = (int) lastSample.values().getFirst();
-					// System.out.println("last = " + last);
-					return last != 91;
-				} catch (InterruptedException ignore) {
-					return false;
-				}
-			}
-
-			@Override
-			public synchronized SampleSource next() {
-				count.incrementAndGet();
-				if (!started) {
-					started = true;
-					return iterator.next();
-				}
+			protected SampleSource initialSource() {
 				return iterator.next();
 			}
 
 			@Override
-			public void guide(TryExecutionResult result, Sample sample) {
-				lastSample = sample;
-				latch.countDown();
+			protected SampleSource nextSource() {
+				countNextSourceCalls.incrementAndGet();
+				return iterator.next();
+			}
+
+			@Override
+			protected boolean handleResult(TryExecutionResult result, Sample sample) {
+				int lastInt = (int) sample.values().getFirst();
+				// System.out.println("last = " + last);
+				return lastInt != 91;
 			}
 		};
 
 		PropertyRunResult result = propertyCase.run(
 			guided(
-				() -> guidance,
+				() -> generateUntil91isGenerated,
 				1000,
 				false,
-				Duration.ofSeconds(10),
+				Duration.ofSeconds(5),
 				Executors::newSingleThreadExecutor
 			)
 		);
 
-		// System.out.println("count = " + count);
-		// System.out.println("result.countTries() = " + result.countTries());
+		System.out.println("countNextSourceCalls = " + countNextSourceCalls.get());
+		System.out.println("result.countTries()  = " + result.countTries());
 
 		assertThat(result.status()).isEqualTo(PropertyRunResult.Status.FAILED);
 		FalsifiedSample smallest = result.falsifiedSamples().getFirst();
