@@ -33,8 +33,14 @@ public class ConcurrentRunner {
 		List<Future<?>> submittedTasks = Collections.synchronizedList(new ArrayList<>());
 		Timer timer = new Timer();
 		try (executorService) {
+			AtomicBoolean timeoutOccurred = new AtomicBoolean(false);
+			scheduleTimeoutTask(timer, executorService, submittedTasks, timeoutOccurred);
+
 			Shutdown shutdown = executorService::shutdownNow;
 			while (taskIterator.hasNext()) {
+				if (timeoutOccurred.get()) {
+					break;
+				}
 				Task task = taskIterator.next();
 				try {
 					Runnable runnable = () -> {
@@ -51,9 +57,6 @@ public class ConcurrentRunner {
 				}
 			}
 
-			AtomicBoolean timeoutOccurred = new AtomicBoolean(false);
-			scheduleAdditionTimeoutTask(timer, submittedTasks, timeoutOccurred);
-
 			waitForFinishOrFail(executorService);
 
 			if (!uncaughtErrors.isEmpty()) {
@@ -63,8 +66,6 @@ public class ConcurrentRunner {
 			if (timeoutOccurred.get()) {
 				throw new TimeoutException("Concurrent run timed out after " + timeout);
 			}
-		} catch (TimeoutException timeoutException) {
-			throw timeoutException;
 		} catch (Throwable throwable) {
 			ExceptionSupport.throwAsUnchecked(throwable);
 		} finally {
@@ -72,15 +73,15 @@ public class ConcurrentRunner {
 		}
 	}
 
-	private void scheduleAdditionTimeoutTask(Timer timer, List<Future<?>> submittedTasks, AtomicBoolean timeoutOccurred) {
-		// Timeout is already handled by waitForFinishOrFail(), but this can speed up task cancellation,
-		// especially with Executors.newVirtualThreadPerTaskExecutor().
-		// This is a performance optimization only. Remove if it causes problems.
+	private void scheduleTimeoutTask(Timer timer, ExecutorService executorService, List<Future<?>> submittedTasks, AtomicBoolean timeoutOccurred) {
+		// Timeout is also handled by waitForFinishOrFail(), but that won't work during task creation
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				submittedTasks.forEach(future -> future.cancel(true));
 				timeoutOccurred.set(true);
+				executorService.shutdownNow();
+				// This is an optimization to speed up shutdown with virtual threads:
+				submittedTasks.forEach(future -> future.cancel(true));
 			}
 		}, timeout.toMillis());
 	}

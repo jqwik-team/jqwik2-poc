@@ -13,6 +13,7 @@ import net.jqwik.api.*;
 
 import static org.assertj.core.api.Assertions.*;
 
+@PropertyDefaults(tries = 10)
 class ConcurrentRunnerTests {
 
 	public static final String NEW_VIRTUAL_THREAD_PER_TASK_EXECUTOR = "newVirtualThreadPerTaskExecutor";
@@ -119,6 +120,53 @@ class ConcurrentRunnerTests {
 		assertThat(countAll.get()).isLessThanOrEqualTo(100);
 		assertThat(countShutdowns.get()).isGreaterThanOrEqualTo(1);
 	}
+
+	@Property
+	void shutdownOnTimeoutEvenIfTasksAreStillBeingAdded(@ForAll("services") Pair<String, Supplier<ExecutorService>> pair) {
+		ExecutorService service = pair.second().get();
+
+		ConcurrentRunner runner = new ConcurrentRunner(service, Duration.ofSeconds(1));
+
+		AtomicInteger createdTasks = new AtomicInteger();
+		AtomicInteger runTasks = new AtomicInteger();
+		var taskIterator = new Iterator<ConcurrentRunner.Task>() {
+			@Override
+			public boolean hasNext() {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					throw new RuntimeException(e);
+				}
+				if (createdTasks.getAndIncrement() < 50) {
+					return true;
+				}
+				return false;
+			}
+
+			@Override
+			public ConcurrentRunner.Task next() {
+				return shutdown -> {
+					runTasks.incrementAndGet();
+				};
+			}
+		};
+
+		try {
+			runner.run(taskIterator);
+			fail("Expected TimeoutException");
+		} catch (TimeoutException timeoutException) {
+			// System.out.println("Timeout occurred: " + timeoutException.getMessage());
+		}
+
+		// System.out.println("service: " + pair.first());
+		// System.out.println("created tasks: " + createdTasks.get());
+		// System.out.println("run tasks    : " + runTasks.get());
+
+		// Approximately 10 tasks should be run before the timeout
+		assertThat(runTasks.get()).isGreaterThan(5);
+		assertThat(runTasks.get()).isLessThan(20);
+	}
+
 
 	private static void sleep(int millis) {
 		try {
