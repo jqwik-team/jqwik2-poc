@@ -14,7 +14,7 @@ public class BaseGenerators {
 	private BaseGenerators() {}
 
 	public static Generator<Integer> integers(int min, int max) {
-		return integers(min, max, RandomChoice.Distribution.biased(5));
+		return integers(min, max, RandomChoice.Distribution.UNIFORM);
 	}
 
 	public static Generator<Integer> integers(int min, int max, RandomChoice.Distribution distribution) {
