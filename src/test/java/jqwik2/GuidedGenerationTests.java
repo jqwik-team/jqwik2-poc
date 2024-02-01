@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.*;
 import jqwik2.api.*;
 import jqwik2.internal.*;
 import jqwik2.internal.generators.*;
+import org.opentest4j.*;
 
 import net.jqwik.api.*;
 
@@ -18,9 +19,7 @@ class GuidedGenerationTests {
 
 	@Property(tries = 10)
 	void succeedingSequentialGuidance(@ForAll long seed) {
-		List<Generator<?>> generators = List.of(
-			new IntegerGenerator(0, 100)
-		);
+		List<Generator<?>> generators = List.of(BaseGenerators.integers(0, 100));
 		AtomicInteger count = new AtomicInteger(0);
 		Tryable tryable = Tryable.from(args -> {
 			count.incrementAndGet();
@@ -66,9 +65,7 @@ class GuidedGenerationTests {
 
 	@Property(tries = 10)
 	void failingSequentialGuidance(@ForAll long seed) {
-		List<Generator<?>> generators = List.of(
-			new IntegerGenerator(0, 100)
-		);
+		List<Generator<?>> generators = List.of(BaseGenerators.integers(0, 100));
 		Tryable tryable = Tryable.from(args -> {
 			int anInt = (int) args.get(0);
 			// System.out.println("anInt = " + anInt);
@@ -117,7 +114,58 @@ class GuidedGenerationTests {
 		assertThat(result.status()).isEqualTo(PropertyRunResult.Status.FAILED);
 		FalsifiedSample smallest = result.falsifiedSamples().getFirst();
 		assertThat(smallest.values()).isEqualTo(List.of(91));
+	}
 
+	@Property(tries = 10)
+	void overrideRunResultInGuidedGeneration(@ForAll long seed) {
+		List<Generator<?>> generators = List.of(BaseGenerators.integers(0, 100));
+		Tryable tryable = Tryable.from(args -> {
+			// System.out.println("args = " + args);
+		});
+
+		PropertyCase propertyCase = new PropertyCase(generators, tryable);
+
+		GuidedGeneration generate42Values = new SequentialGuidedGeneration() {
+			volatile int count = 0;
+			private final Iterator<SampleSource> iterator = new RandomGenSource(Long.toString(seed)).iterator();
+
+			@Override
+			protected SampleSource initialSource() {
+				return iterator.next();
+			}
+
+			@Override
+			protected SampleSource nextSource() {
+				return iterator.next();
+			}
+
+			@Override
+			protected boolean handleResult(TryExecutionResult result, Sample sample) {
+				count++;
+				return count < 42;
+			}
+
+			@Override
+			public PropertyRunResult overridePropertyResult(PropertyRunResult originalResult) {
+				AssertionFailedError assertionError = new AssertionFailedError("Override");
+				return originalResult.withStatus(PropertyRunResult.Status.FAILED)
+									 .withFailureReason(assertionError);
+			}
+		};
+
+		PropertyRunResult result = propertyCase.run(
+			guided(
+				() -> generate42Values,
+				1000,
+				false,
+				Duration.ofSeconds(5),
+				Executors::newSingleThreadExecutor
+			)
+		);
+
+		assertThat(result.countTries()).isEqualTo(42);
+		assertThat(result.status()).isEqualTo(PropertyRunResult.Status.FAILED);
+		assertThat(result.failureReason()).isPresent().get().isInstanceOf(AssertionFailedError.class);
 	}
 
 }

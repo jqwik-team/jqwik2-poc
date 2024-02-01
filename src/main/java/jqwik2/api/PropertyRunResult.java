@@ -57,5 +57,19 @@ public record PropertyRunResult(
 		}
 		return falsifiedSamples.first().thrown();
 	}
+
+	public PropertyRunResult withStatus(Status changedStatus) {
+		return new PropertyRunResult(
+			changedStatus, countTries, countChecks, effectiveSeed,
+			falsifiedSamples, failureReason, abortionReason, timedOut
+		);
+	}
+
+	public PropertyRunResult withFailureReason(Throwable changedFailureReason) {
+		return new PropertyRunResult(
+			status, countTries, countChecks, effectiveSeed,
+			falsifiedSamples, Optional.ofNullable(changedFailureReason), abortionReason, timedOut
+		);
+	}
 }
 

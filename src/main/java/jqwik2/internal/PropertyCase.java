@@ -57,49 +57,105 @@ public class PropertyCase {
 		AtomicInteger countChecks = new AtomicInteger(0);
 
 		try {
-			Pair<SortedSet<FalsifiedSample>, Boolean> falsifiedAndTimedOut = runAndCollectFalsifiedSamples(
+			Triple<SortedSet<FalsifiedSample>, Boolean, Optional<GuidedGeneration>> collectedRunResults = runAndCollectFalsifiedSamples(
 				iterableGenSource, maxTries, sampleGenerator,
 				countTries, countChecks,
 				maxDuration, executorServiceSupplier
 			);
 
-			SortedSet<FalsifiedSample> falsifiedSamples = falsifiedAndTimedOut.first();
-			boolean timedOut = falsifiedAndTimedOut.second();
+			SortedSet<FalsifiedSample> falsifiedSamples = collectedRunResults.first();
+			boolean timedOut = collectedRunResults.second();
+			Optional<GuidedGeneration> guidedGeneration = collectedRunResults.third();
 
-			if (falsifiedSamples.isEmpty()) {
-				if (timedOut && countChecks.get() < 1) {
-					String timedOutMessage = "Timeout after " + maxDuration + " without any check being executed.";
-					Exception abortionReason = new TimeoutException(timedOutMessage);
-					return new PropertyRunResult(
-						ABORTED, countTries.get(), countChecks.get(), effectiveSeed,
-						new TreeSet<>(), Optional.empty(), Optional.of(abortionReason),
-						timedOut
-					);
-				}
-				return new PropertyRunResult(SUCCESSFUL, countTries.get(), countChecks.get(), effectiveSeed, timedOut);
+			PropertyRunResult runResult = createRunResult(
+				countChecks, countTries, effectiveSeed, maxDuration,
+				falsifiedSamples, shrinkingEnabled, timedOut
+			);
+
+			return guidedGeneration
+					   .map(generation -> generation.overridePropertyResult(runResult))
+					   .orElse(runResult);
+
+		} catch (Throwable t) {
+			ExceptionSupport.rethrowIfBlacklisted(t);
+			return abortion(effectiveSeed, t, countTries, countChecks);
+		}
+	}
+
+	private PropertyRunResult createRunResult(
+		AtomicInteger countChecks, AtomicInteger countTries, Optional<String> effectiveSeed,
+		Duration maxDuration, SortedSet<FalsifiedSample> falsifiedSamples, boolean shrinkingEnabled,
+		boolean timedOut
+	) {
+		if (falsifiedSamples.isEmpty()) {
+			if (hasTimedOutWithoutCheck(timedOut, countChecks)) {
+				return timeOutAbortion(effectiveSeed, maxDuration, countTries, countChecks);
 			}
-
+			return success(effectiveSeed, countTries, countChecks, timedOut);
+		} else {
 			FalsifiedSample originalSample = falsifiedSamples.first();
 			if (shrinkingEnabled) {
 				shrink(originalSample, falsifiedSamples);
 			}
-
-			return new PropertyRunResult(
-				FAILED, countTries.get(), countChecks.get(), effectiveSeed,
-				falsifiedSamples, Optional.empty(), Optional.empty(), timedOut
-			);
-
-		} catch (Throwable t) {
-			ExceptionSupport.rethrowIfBlacklisted(t);
-			return new PropertyRunResult(
-				ABORTED, countTries.get(), countChecks.get(), effectiveSeed,
-				new TreeSet<>(), Optional.empty(), Optional.of(t),
-				false
-			);
+			return failure(effectiveSeed, countTries, countChecks, falsifiedSamples, timedOut);
 		}
 	}
 
-	private Pair<SortedSet<FalsifiedSample>, Boolean> runAndCollectFalsifiedSamples(
+	private static PropertyRunResult abortion(
+		Optional<String> effectiveSeed,
+		Throwable t,
+		AtomicInteger countTries,
+		AtomicInteger countChecks
+	) {
+		return new PropertyRunResult(
+			ABORTED, countTries.get(), countChecks.get(), effectiveSeed,
+			new TreeSet<>(), Optional.empty(), Optional.of(t),
+			false
+		);
+	}
+
+	private static PropertyRunResult failure(
+		Optional<String> effectiveSeed,
+		AtomicInteger countTries,
+		AtomicInteger countChecks,
+		SortedSet<FalsifiedSample> falsifiedSamples,
+		boolean timedOut
+	) {
+		return new PropertyRunResult(
+			FAILED, countTries.get(), countChecks.get(), effectiveSeed,
+			falsifiedSamples, Optional.empty(), Optional.empty(), timedOut
+		);
+	}
+
+	private static PropertyRunResult success(
+		Optional<String> effectiveSeed,
+		AtomicInteger countTries,
+		AtomicInteger countChecks,
+		boolean timedOut
+	) {
+		return new PropertyRunResult(SUCCESSFUL, countTries.get(), countChecks.get(), effectiveSeed, timedOut);
+	}
+
+	private static PropertyRunResult timeOutAbortion(
+		Optional<String> effectiveSeed,
+		Duration maxDuration,
+		AtomicInteger countTries,
+		AtomicInteger countChecks
+	) {
+		String timedOutMessage = "Timeout after " + maxDuration + " without any check being executed.";
+		Exception abortionReason = new TimeoutException(timedOutMessage);
+		return new PropertyRunResult(
+			ABORTED, countTries.get(), countChecks.get(), effectiveSeed,
+			new TreeSet<>(), Optional.empty(), Optional.of(abortionReason),
+			true
+		);
+	}
+
+	private static boolean hasTimedOutWithoutCheck(boolean timedOut, AtomicInteger countChecks) {
+		return timedOut && countChecks.get() < 1;
+	}
+
+	private Triple<SortedSet<FalsifiedSample>, Boolean, Optional<GuidedGeneration>> runAndCollectFalsifiedSamples(
 		IterableSampleSource iterableGenSource,
 		int maxTries,
 		SampleGenerator sampleGenerator,
@@ -128,11 +184,16 @@ public class PropertyCase {
 			)
 		);
 
+		Optional<GuidedGeneration> optionalGuidedGeneration =
+			(genSources instanceof GuidedGeneration)
+				? Optional.of((GuidedGeneration) genSources)
+				: Optional.empty();
+
 		try {
 			runner.run(taskIterator);
-			return new Pair<>(falsifiedSamples, false);
+			return new Triple<>(falsifiedSamples, false, optionalGuidedGeneration);
 		} catch (TimeoutException timeoutException) {
-			return new Pair<>(falsifiedSamples, true);
+			return new Triple<>(falsifiedSamples, true, optionalGuidedGeneration);
 		}
 
 	}
