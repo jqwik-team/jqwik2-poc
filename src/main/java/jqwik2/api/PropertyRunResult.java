@@ -6,12 +6,13 @@ public record PropertyRunResult(
 	Status status, int countTries, int countChecks,
 	Optional<String> effectiveSeed,
 	SortedSet<FalsifiedSample> falsifiedSamples,
+	Optional<Throwable> failureReason, // Can be overridden e.g. by guided generation
 	Optional<Throwable> abortionReason,
 	boolean timedOut
 ) {
 
 	public PropertyRunResult(Status status, int countTries, int countChecks, Optional<String> effectiveSeed, boolean timedOut) {
-		this(status, countTries, countChecks, effectiveSeed, new TreeSet<>(), Optional.empty(), timedOut);
+		this(status, countTries, countChecks, effectiveSeed, new TreeSet<>(), Optional.empty(), Optional.empty(), timedOut);
 	}
 
 	public enum Status {
@@ -42,6 +43,19 @@ public record PropertyRunResult(
 
 	public boolean isAborted() {
 		return status == Status.ABORTED;
+	}
+
+	public Optional<Throwable> failureReason() {
+		if (!isFailed()) {
+			return Optional.empty();
+		}
+		if (failureReason.isPresent()) {
+			return failureReason;
+		}
+		if (falsifiedSamples.isEmpty()) {
+			return Optional.empty();
+		}
+		return falsifiedSamples.first().thrown();
 	}
 }
 

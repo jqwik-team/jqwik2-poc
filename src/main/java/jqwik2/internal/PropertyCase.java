@@ -72,7 +72,7 @@ public class PropertyCase {
 					Exception abortionReason = new TimeoutException(timedOutMessage);
 					return new PropertyRunResult(
 						ABORTED, countTries.get(), countChecks.get(), effectiveSeed,
-						new TreeSet<>(), Optional.of(abortionReason),
+						new TreeSet<>(), Optional.empty(), Optional.of(abortionReason),
 						timedOut
 					);
 				}
@@ -86,14 +86,14 @@ public class PropertyCase {
 
 			return new PropertyRunResult(
 				FAILED, countTries.get(), countChecks.get(), effectiveSeed,
-				falsifiedSamples, Optional.empty(), timedOut
+				falsifiedSamples, Optional.empty(), Optional.empty(), timedOut
 			);
 
 		} catch (Throwable t) {
 			ExceptionSupport.rethrowIfBlacklisted(t);
 			return new PropertyRunResult(
 				ABORTED, countTries.get(), countChecks.get(), effectiveSeed,
-				new TreeSet<>(), Optional.of(t),
+				new TreeSet<>(), Optional.empty(), Optional.of(t),
 				false
 			);
 		}

@@ -63,8 +63,8 @@ class GuidedGenerationTests {
 			)
 		);
 
-		System.out.println("countNextSourceCalls = " + countNextSourceCalls.get());
-		System.out.println("result.countTries()  = " + result.countTries());
+		// System.out.println("countNextSourceCalls = " + countNextSourceCalls.get());
+		// System.out.println("result.countTries()  = " + result.countTries());
 
 		assertThat(result.status()).isEqualTo(PropertyRunResult.Status.FAILED);
 		FalsifiedSample smallest = result.falsifiedSamples().getFirst();
