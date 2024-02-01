@@ -17,7 +17,55 @@ import static org.assertj.core.api.Assertions.*;
 class GuidedGenerationTests {
 
 	@Property(tries = 10)
-	void runSequentialGuidance(@ForAll long seed) {
+	void succeedingSequentialGuidance(@ForAll long seed) {
+		List<Generator<?>> generators = List.of(
+			new IntegerGenerator(0, 100)
+		);
+		AtomicInteger count = new AtomicInteger(0);
+		Tryable tryable = Tryable.from(args -> {
+			count.incrementAndGet();
+			// System.out.println("args = " + args);
+		});
+
+		PropertyCase propertyCase = new PropertyCase(generators, tryable);
+
+		GuidedGeneration generate42Values = new SequentialGuidedGeneration() {
+			volatile int count = 0;
+			private final Iterator<SampleSource> iterator = new RandomGenSource(Long.toString(seed)).iterator();
+
+			@Override
+			protected SampleSource initialSource() {
+				return iterator.next();
+			}
+
+			@Override
+			protected SampleSource nextSource() {
+				return iterator.next();
+			}
+
+			@Override
+			protected boolean handleResult(TryExecutionResult result, Sample sample) {
+				count++;
+				return count < 42;
+			}
+		};
+
+		PropertyRunResult result = propertyCase.run(
+			guided(
+				() -> generate42Values,
+				1000,
+				false,
+				Duration.ofSeconds(5),
+				Executors::newSingleThreadExecutor
+			)
+		);
+
+		assertThat(result.status()).isEqualTo(PropertyRunResult.Status.SUCCESSFUL);
+		assertThat(count.get()).isEqualTo(42);
+	}
+
+	@Property(tries = 10)
+	void failingSequentialGuidance(@ForAll long seed) {
 		List<Generator<?>> generators = List.of(
 			new IntegerGenerator(0, 100)
 		);
