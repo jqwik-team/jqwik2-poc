@@ -81,7 +81,7 @@ class RunningPropertyTests {
 	}
 
 	@Example
-	void failProperty() {
+	void failPropertyWithNoReason() {
 		List<Generator<?>> generators = List.of(
 			new IntegerGenerator(0, 100)
 		);
@@ -100,10 +100,31 @@ class RunningPropertyTests {
 		assertThat(result.countTries()).isEqualTo(1);
 		assertThat(result.countChecks()).isEqualTo(1);
 		assertThat(result.falsifiedSamples()).hasSizeGreaterThanOrEqualTo(1);
+		assertThat(result.failureReason()).isEmpty();
 		FalsifiedSample smallest = result.falsifiedSamples().getFirst();
-		assertThat(smallest.values())
-			.isEqualTo(List.of(lastArg[0]));
+		assertThat(smallest.values()).isEqualTo(List.of(lastArg[0]));
 		assertThat(smallest.thrown()).isEmpty();
+	}
+
+	@Property(tries = 5)
+	void failPropertyWithReason(@ForAll long seed) {
+		List<Generator<?>> generators = List.of(BaseGenerators.integers(0, 100));
+		var assertionError = new AssertionError("I failed!");
+		Tryable tryable = Tryable.from((Consumer<List<Object>>) args -> {
+			throw assertionError;
+		});
+
+		PropertyCase propertyCase = new PropertyCase(generators, tryable);
+
+		PropertyRunResult result = propertyCase.run(
+			randomized(Long.toString(seed), 10, true)
+		);
+		assertThat(result.status()).isEqualTo(Status.FAILED);
+		assertThat(result.falsifiedSamples()).hasSizeGreaterThanOrEqualTo(1);
+		assertThat(result.failureReason()).isPresent().hasValue(assertionError);
+
+		FalsifiedSample smallest = result.falsifiedSamples().getFirst();
+		assertThat(smallest.thrown()).isPresent().hasValue(assertionError);
 	}
 
 	@Example
