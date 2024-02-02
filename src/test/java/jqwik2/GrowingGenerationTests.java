@@ -97,4 +97,48 @@ class GrowingGenerationTests {
 		assertThat(counter.get()).isEqualTo(34);
 	}
 
+	@Example
+	void flatMappedValues() {
+		SampleGenerator sampleGenerator = SampleGenerator.from(
+			BaseGenerators.integers(0, 3).flatMap(i -> BaseGenerators.integers(0, i).map(j -> List.of(i, j)))
+		);
+
+		Set<List<Object>> values = new HashSet<>();
+		for (SampleSource sampleSource : new IterableGrowingSource()) {
+			sampleGenerator.generate(sampleSource).ifPresent(sample -> {
+				values.add(sample.values());
+				//System.out.println(sample);
+			});
+		}
+		assertThat(values).containsExactlyInAnyOrder(
+			List.of(List.of(0, 0)),
+			List.of(List.of(1, 0)),
+			List.of(List.of(1, 1)),
+			List.of(List.of(2, 0)),
+			List.of(List.of(2, 1)),
+			List.of(List.of(2, 2)),
+			List.of(List.of(3, 0)),
+			List.of(List.of(3, 1)),
+			List.of(List.of(3, 2)),
+			List.of(List.of(3, 3))
+		);
+	}
+
+	@Example
+	@Disabled
+	void listOfIntegers() {
+		SampleGenerator sampleGenerator = SampleGenerator.from(
+			BaseGenerators.integers(0, 5).list(0, 2)
+		);
+
+		AtomicInteger counter = new AtomicInteger(0);
+		for (SampleSource sampleSource : new IterableGrowingSource()) {
+			sampleGenerator.generate(sampleSource).ifPresent(sample -> {
+				counter.incrementAndGet();
+				System.out.println(sample);
+			});
+		}
+		assertThat(counter.get()).isEqualTo(43);
+	}
+
 }

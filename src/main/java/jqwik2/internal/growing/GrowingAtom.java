@@ -5,7 +5,7 @@ import java.util.*;
 import jqwik2.api.*;
 import jqwik2.internal.*;
 
-class GrowingAtom implements GrowingSource, GenSource.Atom {
+class GrowingAtom extends AbstractGrowingSource implements GenSource.Atom {
 	private final java.util.List<Pair<Integer, Integer>> choices = new ArrayList<>();
 	private int currentChoiceIndex = 0;
 
@@ -49,9 +49,7 @@ class GrowingAtom implements GrowingSource, GenSource.Atom {
 		if (choices.size() < currentChoiceIndex + 1) {
 			choices.add(new Pair<>(maxExcluded, 0));
 		}
-		var currentChoice = choices.get(currentChoiceIndex++).second();
-		// System.out.printf("choose(%d)=%d%n", maxExcluded, currentChoice);
-		return currentChoice;
+		return choices.get(currentChoiceIndex++).second();
 	}
 
 	@Override
@@ -62,15 +60,5 @@ class GrowingAtom implements GrowingSource, GenSource.Atom {
 	@Override
 	public Atom atom() {
 		return this;
-	}
-
-	@Override
-	public List list() {
-		throw new CannotGenerateException("Cannot generate list from atom");
-	}
-
-	@Override
-	public Tuple tuple() {
-		throw new CannotGenerateException("Cannot generate tuple from atom");
 	}
 }

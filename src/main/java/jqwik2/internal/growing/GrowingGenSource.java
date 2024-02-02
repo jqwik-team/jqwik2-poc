@@ -10,6 +10,11 @@ class GrowingGenSource extends AbstractGrowingSource {
 	}
 
 	@Override
+	public Tuple tuple() {
+		return currentSource.get(Tuple.class, GrowingTuple::new);
+	}
+
+	@Override
 	public boolean advance() {
 		return currentSource.advance();
 	}
