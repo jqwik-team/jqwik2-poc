@@ -59,10 +59,42 @@ class GrowingGenerationTests {
 		for (SampleSource sampleSource : new IterableGrowingSource()) {
 			sampleGenerator.generate(sampleSource).ifPresent(sample -> {
 				counter.incrementAndGet();
-				System.out.println(sample);
+				// System.out.println(sample);
 			});
 		}
 		assertThat(counter.get()).isEqualTo(60);
+	}
+
+	@Example
+	void mappedValues() {
+		SampleGenerator sampleGenerator = SampleGenerator.from(
+			BaseGenerators.integers(0, 10).map(i -> Integer.toString(i))
+		);
+
+		AtomicInteger counter = new AtomicInteger(0);
+		for (SampleSource sampleSource : new IterableGrowingSource()) {
+			sampleGenerator.generate(sampleSource).ifPresent(sample -> {
+				counter.incrementAndGet();
+				// System.out.println(sample);
+			});
+		}
+		assertThat(counter.get()).isEqualTo(11);
+	}
+
+	@Example
+	void filteredValues() {
+		SampleGenerator sampleGenerator = SampleGenerator.from(
+			BaseGenerators.integers(0, 100).filter(i -> i % 3 == 0)
+		);
+
+		AtomicInteger counter = new AtomicInteger(0);
+		for (SampleSource sampleSource : new IterableGrowingSource()) {
+			sampleGenerator.generate(sampleSource).ifPresent(sample -> {
+				counter.incrementAndGet();
+				// System.out.println(sample);
+			});
+		}
+		assertThat(counter.get()).isEqualTo(34);
 	}
 
 }
