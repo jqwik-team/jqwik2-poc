@@ -1,7 +1,6 @@
-- GrowingGenerationSource
-
 - JqwikProperty
     - tries = 0 && maxDuration = 0 -> run forever (until interrupted, falsified or genSource exhausted)
+    - Allow suppression of duplicate samples
     - Report all falsified samples, checks, tries, effective seed
     - AfterFailureMode.SAMPLES_THEN_REPLAY
     - AfterFailureMode.ANALYZE: Find as many failing samples as possible and
