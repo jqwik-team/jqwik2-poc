@@ -10,6 +10,8 @@ import static jqwik2.api.ExhaustiveSource.*;
 
 public class IntegerGenerationSupport {
 
+	private static final RandomChoice.Distribution ONLY_0_OR_1 = (random, maxExcluded) -> random.nextInt(2);
+
 	private final GenSource source;
 	private final RandomChoice.Distribution distribution;
 
@@ -83,22 +85,38 @@ public class IntegerGenerationSupport {
 								  ? Integer.MAX_VALUE
 								  : Math.max(Math.abs(min), Math.abs(max)) + 1;
 			int valueUnsigned = chooseUnsignedValue(intSource, maxUnsigned);
-			int signOrMaxMin = intSource.choose(4);
+			int signOrMaxMin = chooseSignOrMaxMin(intSource);
+			if (signOrMaxMin == 1 && valueUnsigned == 0) {
+				// Optimization to generate 0 less often
+				continue;
+			}
 			if (signOrMaxMin == 2) {
 				// MAX_VALUE is generated for the case (max, 2),
-				if (max == Integer.MAX_VALUE && valueUnsigned == maxUnsigned - 1)
+				if (max == Integer.MAX_VALUE && valueUnsigned == maxUnsigned - 1) {
 					return Integer.MAX_VALUE;
+				} else {
+					continue;
+				}
 			}
 			if (signOrMaxMin == 3) {
 				// MIN_VALUE is generated for the case (min, 3),
-				if (min == Integer.MIN_VALUE && valueUnsigned == maxUnsigned - 1)
+				if (min == Integer.MIN_VALUE && valueUnsigned == maxUnsigned - 1) {
 					return Integer.MIN_VALUE;
+				} else {
+					continue;
+				}
 			}
-			int valueWithSign = (signOrMaxMin % 2) == 0 ? valueUnsigned : -valueUnsigned;
+			int valueWithSign = signOrMaxMin == 0 ? valueUnsigned : -valueUnsigned;
 			if (valueWithSign >= min && valueWithSign <= max) {
 				return valueWithSign;
 			}
 		}
+	}
+
+	private static int chooseSignOrMaxMin(GenSource.Atom intSource) {
+		// 0: positive, 1: negative, 2: max, 3: min
+		// The random choice is only between 0 and 1. 3 or 4 are there for the edge cases
+		return intSource.choose(4, ONLY_0_OR_1);
 	}
 
 	private int chooseUnsignedValue(GenSource.Atom intSource, int maxUnsigned) {

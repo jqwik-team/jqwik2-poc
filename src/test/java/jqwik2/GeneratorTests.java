@@ -420,8 +420,8 @@ class GeneratorTests {
 				return sampler.draw(Numbers.integers().between(-10, 10).list().ofSize(size));
 			});
 
-			// [0, 0, 0, -2, 0, 0, -6, 0, 0]
-			Recording recording = deserialize("t[a[4]:t[a[0]:l[a[0:2]:a[0:2]:a[0:1]:a[2:3]:a[0:0]:a[0:3]:a[6:1]:a[0:1]:a[0:3]]]]");
+			// [0, 0, -10, -2, 0, 8, -6, 0, 5]
+			Recording recording = deserialize("t[a[4]:t[a[0]:l[a[0:0]:a[0:0]:a[10:1]:a[2:1]:a[0:0]:a[8:0]:a[6:1]:a[0:0]:a[5:0]]]]");
 			GenSource source = RecordedSource.of(recording);
 
 			Shrinkable<Object> shrinkable = new ShrinkableGenerator<>(listOfInts).generate(source).asGeneric();

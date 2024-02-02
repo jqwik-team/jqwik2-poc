@@ -3,13 +3,12 @@ package jqwik2;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 
-import jqwik2.api.*;
 import jqwik2.api.Arbitrary;
+import jqwik2.api.*;
 import jqwik2.api.arbitraries.*;
 import jqwik2.internal.*;
 import jqwik2.internal.generators.*;
 import jqwik2.internal.growing.*;
-import jqwik2.internal.recording.*;
 
 import net.jqwik.api.*;
 
@@ -153,7 +152,7 @@ class GrowingGenerationTests {
 		for (SampleSource sampleSource : new IterableGrowingSource()) {
 			sampleGenerator.generate(sampleSource).ifPresent(sample -> {
 				counter.incrementAndGet();
-				System.out.println(sample);
+				// System.out.println(sample);
 			});
 		}
 		assertThat(counter.get()).isEqualTo(37);
@@ -187,7 +186,7 @@ class GrowingGenerationTests {
 		var sizes = Numbers.integers().between(1, 3);
 		Generator<List<Integer>> combined = BaseGenerators.combine(sampler -> {
 			int size = sampler.draw(sizes);
-			return sampler.draw(Numbers.integers().between(1, 3).list().ofSize(size));
+			return sampler.draw(Numbers.integers().between(-1, 1).list().ofSize(size));
 		});
 
 		SampleGenerator sampleGenerator = SampleGenerator.from(combined);
@@ -201,6 +200,5 @@ class GrowingGenerationTests {
 		}
 		assertThat(counter.get()).isEqualTo(39);
 	}
-
 
 }
