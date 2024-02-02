@@ -24,7 +24,7 @@ class GrowingGenerationTests {
 		for (SampleSource sampleSource : new IterableGrowingSource()) {
 			sampleGenerator.generate(sampleSource).ifPresent(sample -> {
 				counter.incrementAndGet();
-				// System.out.println(sample);
+				System.out.println(sample);
 			});
 		}
 		assertThat(counter.get()).isEqualTo(101);
