@@ -15,6 +15,11 @@ class GrowingGenSource extends AbstractGrowingSource {
 	}
 
 	@Override
+	public List list() {
+		return currentSource.get(List.class, GrowingList::new);
+	}
+
+	@Override
 	public boolean advance() {
 		return currentSource.advance();
 	}

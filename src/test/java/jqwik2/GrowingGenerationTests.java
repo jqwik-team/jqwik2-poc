@@ -125,7 +125,6 @@ class GrowingGenerationTests {
 	}
 
 	@Example
-	@Disabled
 	void listOfIntegers() {
 		SampleGenerator sampleGenerator = SampleGenerator.from(
 			BaseGenerators.integers(0, 5).list(0, 2)
@@ -135,7 +134,7 @@ class GrowingGenerationTests {
 		for (SampleSource sampleSource : new IterableGrowingSource()) {
 			sampleGenerator.generate(sampleSource).ifPresent(sample -> {
 				counter.incrementAndGet();
-				System.out.println(sample);
+				// System.out.println(sample);
 			});
 		}
 		assertThat(counter.get()).isEqualTo(43);
