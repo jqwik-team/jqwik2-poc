@@ -6,7 +6,6 @@ import jqwik2.api.Arbitrary;
 import jqwik2.api.Shrinkable;
 import jqwik2.api.*;
 import jqwik2.api.arbitraries.*;
-import jqwik2.api.arbitraries.Combinators;
 import jqwik2.api.recording.*;
 import jqwik2.internal.*;
 import jqwik2.internal.generators.*;
@@ -16,6 +15,7 @@ import jqwik2.internal.shrinking.*;
 import net.jqwik.api.*;
 
 import static jqwik2.api.recording.Recording.list;
+import static jqwik2.api.recording.Recording.tuple;
 import static jqwik2.api.recording.Recording.*;
 import static org.assertj.core.api.Assertions.*;
 
@@ -63,7 +63,6 @@ class GeneratorTests {
 		var values = ExhaustiveGenerationTests.collectAll(exhaustiveSource.get(), createA);
 		assertThat(values).containsExactly(List.of("a"));
 	}
-
 
 	@Example
 	void chooseValueGenerator() {
@@ -435,7 +434,7 @@ class GeneratorTests {
 			Shrinker shrinker = new Shrinker(falsifiedSample, tryable);
 
 			FalsifiedSample best = falsifiedSample;
-			while(true) {
+			while (true) {
 				Optional<FalsifiedSample> next = shrinker.next();
 				if (next.isEmpty()) {
 					break;

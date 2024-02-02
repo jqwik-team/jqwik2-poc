@@ -4,9 +4,12 @@ import java.util.*;
 import java.util.concurrent.atomic.*;
 
 import jqwik2.api.*;
+import jqwik2.api.Arbitrary;
+import jqwik2.api.arbitraries.*;
 import jqwik2.internal.*;
 import jqwik2.internal.generators.*;
 import jqwik2.internal.growing.*;
+import jqwik2.internal.recording.*;
 
 import net.jqwik.api.*;
 
@@ -155,5 +158,49 @@ class GrowingGenerationTests {
 		}
 		assertThat(counter.get()).isEqualTo(37);
 	}
+
+	@Example
+	void simpleCombinations() {
+		Arbitrary<Integer> ints = Numbers.integers().between(1, 5);
+		Arbitrary<Integer> tens = Numbers.integers().between(1, 5).map(i -> i * 10);
+
+		Generator<Integer> combined = BaseGenerators.combine(sampler -> {
+			int anInt = sampler.draw(ints);
+			int aTen = sampler.draw(tens);
+			return anInt + aTen;
+		});
+
+		SampleGenerator sampleGenerator = SampleGenerator.from(combined);
+
+		AtomicInteger counter = new AtomicInteger(0);
+		for (SampleSource sampleSource : new IterableGrowingSource()) {
+			sampleGenerator.generate(sampleSource).ifPresent(sample -> {
+				counter.incrementAndGet();
+				// System.out.println(sample);
+			});
+		}
+		assertThat(counter.get()).isEqualTo(25);
+	}
+
+	@Example
+	void combinationWithFlatMapping() {
+		var sizes = Numbers.integers().between(1, 3);
+		Generator<List<Integer>> combined = BaseGenerators.combine(sampler -> {
+			int size = sampler.draw(sizes);
+			return sampler.draw(Numbers.integers().between(1, 3).list().ofSize(size));
+		});
+
+		SampleGenerator sampleGenerator = SampleGenerator.from(combined);
+
+		AtomicInteger counter = new AtomicInteger(0);
+		for (SampleSource sampleSource : new IterableGrowingSource()) {
+			sampleGenerator.generate(sampleSource).ifPresent(sample -> {
+				counter.incrementAndGet();
+				// System.out.println(sample);
+			});
+		}
+		assertThat(counter.get()).isEqualTo(39);
+	}
+
 
 }
