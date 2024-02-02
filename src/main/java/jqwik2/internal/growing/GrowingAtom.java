@@ -9,8 +9,8 @@ class GrowingAtom implements GrowingSource, GenSource.Atom {
 	private final java.util.List<Pair<Integer, Integer>> choices = new ArrayList<>();
 	private int currentChoiceIndex = 0;
 
+	@Override
 	public boolean advance() {
-		this.currentChoiceIndex = 0;
 		for (int index = choices.size() - 1; index >= 0; index--) {
 			var choice = choices.get(index);
 			if (choiceNotExhausted(choice)) {
@@ -35,6 +35,16 @@ class GrowingAtom implements GrowingSource, GenSource.Atom {
 	}
 
 	@Override
+	public void reset() {
+		choices.clear();
+	}
+
+	@Override
+	public void next() {
+		currentChoiceIndex = 0;
+	}
+
+	@Override
 	public int choose(int maxExcluded) {
 		if (choices.size() < currentChoiceIndex + 1) {
 			choices.add(new Pair<>(maxExcluded, 0));
@@ -47,11 +57,6 @@ class GrowingAtom implements GrowingSource, GenSource.Atom {
 	@Override
 	public int choose(int maxExcluded, RandomChoice.Distribution distribution) {
 		return choose(maxExcluded);
-	}
-
-	public void reset() {
-		currentChoiceIndex = 0;
-		choices.clear();
 	}
 
 	@Override

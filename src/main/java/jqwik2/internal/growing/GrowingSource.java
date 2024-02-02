@@ -5,4 +5,5 @@ import jqwik2.api.*;
 public interface GrowingSource {
 	boolean advance();
 	void reset();
+	void next();
 }

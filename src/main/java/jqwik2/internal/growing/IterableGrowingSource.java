@@ -13,19 +13,15 @@ public class IterableGrowingSource implements IterableSampleSource {
 	private static class GrowingGenSourceIterator implements Iterator<SampleSource> {
 
 		private final GrowingSampleSource source = new GrowingSampleSource();
-
 		private boolean hasAdvanceBeenInvoked = false;
-
-		public GrowingGenSourceIterator() {
-		}
 
 		@Override
 		public boolean hasNext() {
 			if (!hasAdvanceBeenInvoked) {
 				return true;
 			}
-			boolean advanced = source.advance();
-			if (!advanced) {
+			boolean hasNext = source.next();
+			if (!hasNext) {
 				return false;
 			}
 			hasAdvanceBeenInvoked = false;

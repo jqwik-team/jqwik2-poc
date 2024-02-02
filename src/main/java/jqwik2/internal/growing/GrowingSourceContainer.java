@@ -7,7 +7,7 @@ import jqwik2.internal.*;
 
 class GrowingSourceContainer implements GrowingSource {
 
-	private GrowingSource currentSource;
+	private GrowingSource source;
 	private boolean resourceRequested = false;
 
 	@SuppressWarnings("unchecked")
@@ -15,30 +15,38 @@ class GrowingSourceContainer implements GrowingSource {
 		if (resourceRequested) {
 			throw new CannotGenerateException("Already requested a resource");
 		}
-		if (currentSource == null) {
-			currentSource = genSourceSupplier.get();
-		} else if (!genSourceType.isInstance(currentSource)) {
+		if (source == null) {
+			source = genSourceSupplier.get();
+		} else if (!genSourceType.isInstance(source)) {
 			throw new CannotGenerateException("Source is not an atom");
 		}
 		resourceRequested = true;
-		return (T) currentSource;
+		return (T) source;
+	}
+
+	@Override
+	public void next() {
+		resourceRequested = false;
+		if (source == null) {
+			return;
+		}
+		source.next();
 	}
 
 	@Override
 	public boolean advance() {
-		resourceRequested = false;
-		if (currentSource == null) {
+		if (source == null) {
 			return false;
 		}
-		return currentSource.advance();
+		return source.advance();
 	}
 
 	@Override
 	public void reset() {
-		resourceRequested = false;
-		if (currentSource == null) {
+		if (source == null) {
 			return;
 		}
-		currentSource.reset();
+		source.reset();
 	}
+
 }

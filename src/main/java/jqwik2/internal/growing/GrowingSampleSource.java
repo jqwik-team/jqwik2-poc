@@ -4,7 +4,7 @@ import java.util.*;
 
 import jqwik2.api.*;
 
-public class GrowingSampleSource implements SampleSource {
+class GrowingSampleSource implements SampleSource {
 	private final List<GrowingGenSource> sources = new ArrayList<>();
 
 	@Override
@@ -15,15 +15,21 @@ public class GrowingSampleSource implements SampleSource {
 		return sources.stream().map(s -> (GenSource) s).toList();
 	}
 
-	boolean advance() {
-		for (int i = sources.size() - 1; i >= 0; i--) {
+	boolean next() {
+		sources.forEach(GrowingGenSource::next);
+		int i = sources.size() - 1;
+		while (i >= 0) {
 			var source = sources.get(i);
 			if (source.advance()) {
+				resetSourcesAfter(i);
 				return true;
-			} else {
-				source.reset();
 			}
+			i--;
 		}
 		return false;
+	}
+
+	private void resetSourcesAfter(int resourceIndex) {
+		sources.subList(resourceIndex + 1, sources.size()).forEach(GrowingGenSource::reset);
 	}
 }

@@ -9,12 +9,19 @@ class GrowingGenSource extends AbstractGrowingSource {
 		return currentSource.get(Atom.class, GrowingAtom::new);
 	}
 
+	@Override
 	public boolean advance() {
 		return currentSource.advance();
 	}
 
+	@Override
 	public void reset() {
 		currentSource.reset();
+	}
+
+	@Override
+	public void next() {
+		currentSource.next();
 	}
 
 }

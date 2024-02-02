@@ -24,7 +24,7 @@ class GrowingGenerationTests {
 		for (SampleSource sampleSource : new IterableGrowingSource()) {
 			sampleGenerator.generate(sampleSource).ifPresent(sample -> {
 				counter.incrementAndGet();
-				System.out.println(sample);
+				// System.out.println(sample);
 			});
 		}
 		assertThat(counter.get()).isEqualTo(101);
@@ -45,6 +45,24 @@ class GrowingGenerationTests {
 			});
 		}
 		assertThat(values).hasSize(16);
+	}
+
+	@Example
+	void sampleWithThreeParameters() {
+		SampleGenerator sampleGenerator = SampleGenerator.from(
+			BaseGenerators.integers(0, 2),
+			BaseGenerators.integers(0, 3),
+			BaseGenerators.integers(0, 4)
+		);
+
+		AtomicInteger counter = new AtomicInteger(0);
+		for (SampleSource sampleSource : new IterableGrowingSource()) {
+			sampleGenerator.generate(sampleSource).ifPresent(sample -> {
+				counter.incrementAndGet();
+				System.out.println(sample);
+			});
+		}
+		assertThat(counter.get()).isEqualTo(60);
 	}
 
 }
