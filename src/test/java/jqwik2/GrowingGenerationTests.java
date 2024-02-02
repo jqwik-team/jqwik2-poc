@@ -140,4 +140,20 @@ class GrowingGenerationTests {
 		assertThat(counter.get()).isEqualTo(43);
 	}
 
+	@Example
+	void setOfIntegers() {
+		SampleGenerator sampleGenerator = SampleGenerator.from(
+			BaseGenerators.integers(0, 5).set(0, 2)
+		);
+
+		AtomicInteger counter = new AtomicInteger(0);
+		for (SampleSource sampleSource : new IterableGrowingSource()) {
+			sampleGenerator.generate(sampleSource).ifPresent(sample -> {
+				counter.incrementAndGet();
+				System.out.println(sample);
+			});
+		}
+		assertThat(counter.get()).isEqualTo(37);
+	}
+
 }
