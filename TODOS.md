@@ -1,3 +1,5 @@
+- GrowingGenerationSource
+
 - JqwikProperty
     - tries = 0 && maxDuration = 0 -> run forever (until interrupted, falsified or genSource exhausted)
     - Report all falsified samples, checks, tries, effective seed
