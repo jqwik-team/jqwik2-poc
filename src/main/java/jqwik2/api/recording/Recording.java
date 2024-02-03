@@ -40,6 +40,12 @@ public sealed interface Recording extends Comparable<Recording>
 		return tuple(Arrays.asList(elements));
 	}
 
+	static TupleRecording tuple(int... atoms) {
+		List<Recording> atomRecordings = Arrays.stream(atoms).boxed()
+											   .map(i -> (Recording) Recording.atom(i)).toList();
+		return tuple(atomRecordings);
+	}
+
 	static TupleRecording tuple(List<Recording> elements) {
 		return new TupleRecording(elements);
 	}

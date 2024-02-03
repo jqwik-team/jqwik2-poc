@@ -50,7 +50,7 @@ public class ShrinkingTests {
 		IntegerGenerator ints = new IntegerGenerator(-10, 100);
 
 		// -10
-		GenSource source = RecordedSource.of(atom(10, 1));
+		GenSource source = RecordedSource.of(Recording.tuple(10, 1));
 
 		Shrinkable<Integer> shrinkable = new ShrinkableGenerator<>(ints).generate(source);
 
@@ -68,9 +68,9 @@ public class ShrinkingTests {
 
 		// [-10, 50, -5]
 		ListRecording listRecording = list(
-			atom(10, 1),
-			atom(50, 0),
-			atom(5, 1)
+			Recording.tuple(10, 1),
+			Recording.tuple(50, 0),
+			Recording.tuple(5, 1)
 		);
 		TupleRecording tupleRecording = tuple(
 			atom(3), listRecording
@@ -92,7 +92,7 @@ public class ShrinkingTests {
 		IntegerGenerator ints = new IntegerGenerator(-100000, 100000);
 
 		// 9999
-		GenSource source = RecordedSource.of(atom(9999, 0));
+		GenSource source = RecordedSource.of(Recording.tuple(9999, 0));
 
 		SampleGenerator sampleGenerator = SampleGenerator.from(ints);
 		Sample sample = sampleGenerator.generate(List.of(source)).orElseThrow();
@@ -123,9 +123,9 @@ public class ShrinkingTests {
 
 		// [-10, 50, -5]
 		ListRecording listRecording = list(
-			atom(10, 1),
-			atom(50, 0),
-			atom(5, 1)
+			Recording.tuple(10, 1),
+			Recording.tuple(50, 0),
+			Recording.tuple(5, 1)
 		);
 		TupleRecording tupleRecording = tuple(
 			atom(3), listRecording
@@ -161,7 +161,7 @@ public class ShrinkingTests {
 		IntegerGenerator gen1 = new IntegerGenerator(-100000, 100000);
 		IntegerGenerator gen2 = new IntegerGenerator(0, 100);
 
-		GenSource source1 = RecordedSource.of(atom(9999, 1)); // -9999
+		GenSource source1 = RecordedSource.of(Recording.tuple(9999, 1)); // -9999
 		GenSource source2 = RecordedSource.of(atom(50)); // 50
 
 		SampleGenerator sampleGenerator = SampleGenerator.from(gen1, gen2);
@@ -192,7 +192,7 @@ public class ShrinkingTests {
 		IntegerGenerator ints = new IntegerGenerator(-100000, 100000);
 
 		// 9999
-		GenSource source = RecordedSource.of(atom(9999, 0));
+		GenSource source = RecordedSource.of(Recording.tuple(9999, 0));
 
 		SampleGenerator sampleGenerator = SampleGenerator.from(ints);
 		Sample sample = sampleGenerator.generate(List.of(source)).orElseThrow();

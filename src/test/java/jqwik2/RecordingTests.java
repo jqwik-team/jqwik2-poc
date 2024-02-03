@@ -52,7 +52,7 @@ class RecordingTests {
 			assertThat(Recording.deserialize(serialized)).isEqualTo(tuple);
 
 			assertSerializeDeserialize(tuple(atom(1, 2, 3, 4)));
-			assertSerializeDeserialize(tuple());
+			assertSerializeDeserialize(tuple(new Recording[0]));
 		}
 
 		@Example
