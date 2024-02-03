@@ -1,75 +1,58 @@
 package jqwik2.internal.exhaustive;
 
-import java.util.*;
-
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
 
 public class ExhaustiveAtom extends AbstractExhaustiveSource<GenSource.Atom> {
 
-	private final ExhaustiveChoice.Range[] ranges;
-	private final List<ExhaustiveChoice> choices = new java.util.ArrayList<>();
+	private final ExhaustiveChoice.Range range;
+	private ExhaustiveChoice choice;
 
-	public ExhaustiveAtom(int... maxChoicesIncluded) {
-		this(toRanges(maxChoicesIncluded));
+	public ExhaustiveAtom(int maxChoiceIncluded) {
+		this(toRange(maxChoiceIncluded));
 	}
 
-	private static ExhaustiveChoice.Range[] toRanges(int[] maxChoices) {
-		return Arrays.stream(maxChoices).mapToObj((int max) -> new ExhaustiveChoice.Range(0, max)).toArray(ExhaustiveChoice.Range[]::new);
+	private static ExhaustiveChoice.Range toRange(int maxChoice) {
+		return new ExhaustiveChoice.Range(0, maxChoice);
 	}
 
-	public ExhaustiveAtom(ExhaustiveChoice.Range... includedRanges) {
-		this.ranges = includedRanges;
-		generateChoices();
-	}
-
-	private void generateChoices() {
-		ExhaustiveChoice last = null;
-		for (ExhaustiveChoice.Range range : ranges) {
-			ExhaustiveChoice choice = new ExhaustiveChoice(range);
-			choices.add(choice);
-			if (last != null) {
-				last.chain(choice);
-			}
-			last = choice;
-		}
+	public ExhaustiveAtom(ExhaustiveChoice.Range includedRange) {
+		this.range = includedRange;
+		this.choice = new ExhaustiveChoice(range);
 	}
 
 	@Override
 	public long maxCount() {
-		if (choices.isEmpty()) {
-			return 0;
-		}
-		return choices.getFirst().maxCount();
+		return choice.maxCount();
 	}
 
 	@Override
 	protected boolean tryAdvance() {
-		return choices.getLast().advanceThisOrUp();
+		return choice.advanceThisOrUp();
 	}
 
 	@Override
 	public void reset() {
-		choices.forEach(ExhaustiveChoice::reset);
+		choice.reset();
 	}
 
 	@Override
 	public ExhaustiveAtom clone() {
-		return new ExhaustiveAtom(ranges);
+		return new ExhaustiveAtom(range);
 	}
 
 	@Override
 	public void setSucc(Exhaustive<?> exhaustive) {
-		choices.getLast().setSucc(exhaustive);
+		choice.setSucc(exhaustive);
 		super.setSucc(exhaustive);
 	}
 
 	public Recording recording() {
-		return Recording.atom(choices.getFirst().fix());
+		return Recording.atom(choice.fix());
 	}
 
 	@Override
 	public String toString() {
-		return "ExhaustiveAtom{ranges=%s, recording=%s}".formatted(Arrays.toString(ranges), recording());
+		return "ExhaustiveAtom{range=%s, recording=%s}".formatted(range, recording());
 	}
 }
