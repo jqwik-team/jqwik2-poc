@@ -263,7 +263,7 @@ class JqwikPropertyTests {
 
 		// Add sample with too many parts, which should be ignored
 		sampleRecordings.add(new SampleRecording(
-			atom(42, 1),
+			Recording.tuple(42, 1),
 			atom(0)
 		));
 

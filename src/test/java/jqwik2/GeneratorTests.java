@@ -736,7 +736,7 @@ class GeneratorTests {
 			Generator<Integer> ints = BaseGenerators.integers(-10, 100);
 
 			assertThatThrownBy(() -> {
-				GenSource recorded = RecordedSource.of(atom(100, 1));
+				GenSource recorded = RecordedSource.of(Recording.tuple(100, 1));
 				ints.generate(recorded);
 			}).isInstanceOf(CannotGenerateException.class);
 

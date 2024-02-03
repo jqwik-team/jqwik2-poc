@@ -6,7 +6,7 @@ import java.util.stream.*;
 public sealed interface Recording extends Comparable<Recording>
 		permits AtomRecording, ListRecording, TupleRecording {
 
-	Recording EMPTY = atom();
+	Recording EMPTY = tuple(List.of());
 
 	static Recording deserialize(String serialized) {
 		return Serialization.deserialize(serialized);
@@ -24,8 +24,8 @@ public sealed interface Recording extends Comparable<Recording>
 		return new AtomRecording(List.copyOf(choices));
 	}
 
-	static AtomRecording atom(Integer... choices) {
-		return atom(Arrays.asList(choices));
+	static AtomRecording atom(int choice) {
+		return atom(List.of(choice));
 	}
 
 	static ListRecording list(Recording... elements) {

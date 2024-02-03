@@ -132,7 +132,7 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 
 		@Override
 		public Recording recording() {
-			return Recording.atom();
+			return Recording.EMPTY;
 		}
 
 		@Override

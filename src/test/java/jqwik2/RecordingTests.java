@@ -7,6 +7,7 @@ import jqwik2.api.recording.*;
 import net.jqwik.api.*;
 
 import static jqwik2.api.recording.Recording.list;
+import static jqwik2.api.recording.Recording.tuple;
 import static jqwik2.api.recording.Recording.*;
 import static org.assertj.core.api.Assertions.*;
 
@@ -18,48 +19,48 @@ class RecordingTests {
 		@Example
 		void empty() {
 			String serialized = EMPTY.serialize();
-			assertThat(serialized).isEqualTo("a[]");
+			assertThat(serialized).isEqualTo("t[]");
 			assertThat(Recording.deserialize(serialized))
 				.isEqualTo(EMPTY);
 		}
 
 		@Example
 		void atoms() {
-			AtomRecording atom = atom(1, 2, 3);
+			AtomRecording atom = atom(1);
 			String serialized = atom.serialize();
-			assertThat(serialized).isEqualTo("a[1:2:3]");
+			assertThat(serialized).isEqualTo("a[1]");
 			assertThat(Recording.deserialize(serialized)).isEqualTo(atom);
 
-			assertSerializeDeserialize(atom(1, 2));
+			assertSerializeDeserialize(atom(2));
 		}
 
 		@Example
 		void lists() {
-			ListRecording list = list(atom(1), atom(2, 3));
+			ListRecording list = list(atom(1), atom(2));
 			String serialized = list.serialize();
-			assertThat(serialized).isEqualTo("l[a[1]:a[2:3]]");
+			assertThat(serialized).isEqualTo("l[a[1]:a[2]]");
 			assertThat(Recording.deserialize(serialized)).isEqualTo(list);
 
-			assertSerializeDeserialize(list(atom(1, 2, 3, 4)));
+			assertSerializeDeserialize(list(atom(123)));
 			assertSerializeDeserialize(list());
 		}
 
 		@Example
 		void tuples() {
-			TupleRecording tuple = tuple(atom(1), atom(2, 3));
+			TupleRecording tuple = tuple(1, 2);
 			String serialized = tuple.serialize();
-			assertThat(serialized).isEqualTo("t[a[1]:a[2:3]]");
+			assertThat(serialized).isEqualTo("t[a[1]:a[2]]");
 			assertThat(Recording.deserialize(serialized)).isEqualTo(tuple);
 
-			assertSerializeDeserialize(tuple(atom(1, 2, 3, 4)));
+			assertSerializeDeserialize(tuple(atom(14)));
 			assertSerializeDeserialize(tuple(new Recording[0]));
 		}
 
 		@Example
 		void nestedRecording() {
-			TupleRecording nested = tuple(atom(1, 2, 3), list(
+			TupleRecording nested = tuple(atom(13), list(
 				atom(99),
-				tuple(atom(1, 2, 3), list(atom(1), atom(2, 3))),
+				tuple(atom(3), list(atom(1), atom(2))),
 				list(atom(11), tuple(atom(12), atom(13)))
 			));
 
@@ -90,21 +91,15 @@ class RecordingTests {
 	void compareRecording() {
 		assertThat(atom(2)).isGreaterThan(atom(1));
 
-		assertThat(atom(1, 0)).isLessThan(atom(1, 1));
-		assertThat(atom(1)).isLessThan(atom(1, 1));
-		assertThat(atom(0, 1)).isLessThan(atom(1, 1));
 		assertThat(
-			atom(0, 1).compareTo(atom(0, 1))
+			atom(0).compareTo(list(atom(0)))
 		).isEqualTo(0);
 		assertThat(
-			atom(0, 1).compareTo(list(atom(0)))
-		).isEqualTo(0);
-		assertThat(
-			atom(0, 1).compareTo(tuple(atom(0), atom(0)))
+			atom(0).compareTo(tuple(atom(0), atom(0)))
 		).isEqualTo(0);
 
 
-		assertThat(list(atom(1, 0))).isLessThan(list(atom(1, 1)));
+		assertThat(list(atom(0))).isLessThan(list(atom(1)));
 		assertThat(list(atom(1))).isLessThan(list(atom(0), atom(0)));
 		assertThat(
 			list(atom(0)).compareTo(tuple(atom(0), atom(0)))
@@ -140,28 +135,22 @@ class RecordingTests {
 
 	@Example
 	void equality() {
-		assertThat(atom(1, 0)).isEqualTo(atom(1, 0));
-		assertThat(atom(1, 1)).isNotEqualTo(atom(1, 0));
+		assertThat(atom(1)).isEqualTo(atom(1));
+		assertThat(atom(1)).isNotEqualTo(atom(2));
 
-		assertThat(list(atom(1, 0))).isEqualTo(list(atom(1, 0)));
-		assertThat(list(atom(1, 1))).isNotEqualTo(list(atom(1, 0)));
+		assertThat(list(atom(1))).isEqualTo(list(atom(1)));
+		assertThat(list(atom(1))).isNotEqualTo(list(atom(0)));
 
-		assertThat(tuple(atom(1, 0), atom(1, 0))).isEqualTo(tuple(atom(1, 0), atom(1, 0)));
-		assertThat(tuple(atom(1, 1), atom(1, 0))).isNotEqualTo(tuple(atom(1, 0), atom(1, 0)));
+		assertThat(tuple(atom(1), atom(2))).isEqualTo(tuple(atom(1), atom(2)));
+		assertThat(tuple(atom(1), atom(1))).isNotEqualTo(tuple(atom(1), atom(2)));
 	}
 
 	@Example
 	void isomorphism() {
 		assertThat(
-			atom(1, 0).isomorphicTo(atom(1, 1))
+			atom(1).isomorphicTo(atom(0))
 		).isTrue();
-		assertThat(
-			atom(1, 0).isomorphicTo(atom(1))
-		).isFalse();
 
-		assertThat(
-			list().isomorphicTo(list(atom(0, 1), atom(0, 1)))
-		).isTrue();
 		assertThat(
 			list(atom(1)).isomorphicTo(list(atom(0)))
 		).isTrue();
@@ -169,27 +158,27 @@ class RecordingTests {
 			list(atom(1)).isomorphicTo(list(atom(1), atom(1)))
 		).isTrue();
 		assertThat(
-			list(atom(0)).isomorphicTo(list(atom(0, 0)))
+			list(atom(0)).isomorphicTo(list(tuple(0)))
 		).isFalse();
 
 		assertThat(
-			tuple(atom(1, 0), atom(1, 0)).isomorphicTo(tuple(atom(1, 1), atom(1, 1)))
+			tuple(atom(0), atom(1)).isomorphicTo(tuple(atom(1), atom(2)))
 		).isTrue();
 		assertThat(
-			tuple(atom(1, 0), atom(1, 0)).isomorphicTo(tuple(atom(1, 1), list()))
+			tuple(atom(1), atom(1)).isomorphicTo(tuple(atom(1), list()))
 		).isFalse();
 	}
 
 	@Example
 	void isomorphismSampleRecording() {
 		assertThat(
-			new SampleRecording(atom(1, 0))
-				.isomorphicTo(new SampleRecording(atom(1, 1)))
+			new SampleRecording(atom(1))
+				.isomorphicTo(new SampleRecording(atom(0)))
 		).isTrue();
 
 		assertThat(
-			new SampleRecording(atom(1))
-				.isomorphicTo(new SampleRecording(atom(1, 1)))
+			new SampleRecording(tuple(1))
+				.isomorphicTo(new SampleRecording(tuple(1, 1)))
 		).isFalse();
 
 		assertThat(
