@@ -64,7 +64,7 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 
 		@Override
 		Recording recording() {
-			return new AtomRecording(seeds);
+			return new AtomRecording(seeds.getFirst());
 		}
 
 		@Override

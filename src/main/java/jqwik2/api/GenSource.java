@@ -1,7 +1,5 @@
 package jqwik2.api;
 
-import java.util.*;
-
 public interface GenSource {
 
 	@SuppressWarnings("unchecked")
@@ -28,7 +26,7 @@ public interface GenSource {
 		/**
 		 * Choose a value between 0 and maxExcluded - 1.
 		 *
-		 * @param maxExcluded A value between 0 and Integer.MAX_VALUE
+		 * @param maxExcluded  A value between 0 and Integer.MAX_VALUE
 		 * @param distribution The random distribution to use
 		 * @return a choice between 0 and maxExcluded - 1
 		 */

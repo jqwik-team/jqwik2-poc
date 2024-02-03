@@ -108,7 +108,7 @@ public abstract sealed class RecordedSource<T extends Recording> implements GenS
 
 		private RecordedAtom(AtomRecording recording, GenSource backUpSource) {
 			super(recording, backUpSource);
-			this.iterator = recording.choices().iterator();
+			this.iterator = Collections.singletonList(recording.choice()).iterator();
 		}
 
 		@Override

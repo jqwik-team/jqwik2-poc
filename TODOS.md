@@ -1,3 +1,11 @@
+- From Atom to Choice:
+    - StatefulTests
+    - AtomShrinker
+    - AtomRecorder
+    - RecordedAtom
+    - Atom serialization / deserialization (a[value] -> value)
+    - Rename Atom -> Choice
+  
 - JqwikProperty
     - tries = 0 && maxDuration = 0 -> run forever (until interrupted, falsified or genSource exhausted)
     - Allow suppression of duplicate samples

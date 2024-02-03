@@ -8,7 +8,7 @@ class AtomShrinker {
 	private final List<Integer> seeds;
 
 	AtomShrinker(AtomRecording recording) {
-		this.seeds = recording.choices();
+		this.seeds = List.of(recording.choice());
 	}
 
 	// TODO: Shrink in fibonacci steps from both ends
@@ -19,7 +19,7 @@ class AtomShrinker {
 			for (Integer integer : shrinkValue(current)) {
 				List<Integer> shrunk = new ArrayList<>(seeds);
 				shrunk.set(i, integer);
-				candidates.add(new AtomRecording(shrunk));
+				candidates.add(new AtomRecording(shrunk.getFirst()));
 			}
 		}
 		return candidates.stream();

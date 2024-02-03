@@ -97,7 +97,7 @@ class Serialization {
 									  .map(Integer::parseInt)
 									  .toList();
 		if (choices.isEmpty()) return Recording.EMPTY;
-		return new AtomRecording(choices);
+		return new AtomRecording(choices.getFirst());
 	}
 
 	private static String serializedContents(String serialized) {
@@ -109,7 +109,7 @@ class Serialization {
 	}
 
 	static String serialize(AtomRecording recording) {
-		var listOfChoices = listOfChoices(recording.choices());
+		var listOfChoices = listOfChoices(List.of(recording.choice()));
 		return ATOM + "[%s]".formatted(listOfChoices);
 	}
 

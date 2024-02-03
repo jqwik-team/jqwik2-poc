@@ -3,11 +3,11 @@ package jqwik2.api.recording;
 import java.util.*;
 import java.util.stream.*;
 
-public record AtomRecording(List<Integer> choices) implements Recording {
+public record AtomRecording(int choice) implements Recording {
 
 	public AtomRecording {
-		if (choices.stream().anyMatch(c -> c < 0)) {
-			throw new IllegalArgumentException("Atom choices must be >= 0");
+		if (choice < 0) {
+			throw new IllegalArgumentException("A choice must be >= 0");
 		}
 	}
 
@@ -27,21 +27,15 @@ public record AtomRecording(List<Integer> choices) implements Recording {
 	@Override
 	public boolean isomorphicTo(Recording other) {
 		if (other instanceof AtomRecording atom) {
-			return choices.size() == atom.choices.size();
+			return true;
 		}
 		return false;
 	}
 
 	private int compareAtoms(AtomRecording left, AtomRecording right) {
-		int sizeComparison = Integer.compare(left.choices().size(), right.choices().size());
+		int sizeComparison = Integer.compare(left.choice, right.choice);
 		if (sizeComparison != 0) {
 			return sizeComparison;
-		}
-		for (int i = 0; i < left.choices().size(); i++) {
-			int seedComparison = Integer.compare(left.choices().get(i), right.choices().get(i));
-			if (seedComparison != 0) {
-				return seedComparison;
-			}
 		}
 		return 0;
 	}
