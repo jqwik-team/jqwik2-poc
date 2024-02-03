@@ -156,7 +156,7 @@ class GeneratorTests {
 			Generator<Integer> ints = BaseGenerators.integers(-1000, 1000);
 			Generator<Integer> evenInts = ints.filter(i -> i % 2 == 0);
 
-			GenSource source = RecordedSource.of(tuple(atom(996), atom(1))); // -996
+			GenSource source = RecordedSource.of(tuple(996, 1)); // -996
 
 			Shrinkable<Integer> shrinkable = new ShrinkableGenerator<>(evenInts).generate(source);
 
@@ -726,7 +726,7 @@ class GeneratorTests {
 		void valid() {
 			Generator<Integer> ints = BaseGenerators.integers(-10, 100);
 
-			GenSource source = RecordedSource.of(tuple(atom(10), atom(0)));
+			GenSource source = RecordedSource.of(tuple(10, 0));
 			Integer value = ints.generate(source);
 			assertThat(value).isEqualTo(10);
 		}

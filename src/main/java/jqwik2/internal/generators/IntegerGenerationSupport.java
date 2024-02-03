@@ -7,7 +7,6 @@ import jqwik2.api.recording.*;
 import jqwik2.api.support.*;
 
 import static jqwik2.api.ExhaustiveSource.*;
-import static jqwik2.api.recording.Recording.atom;
 
 public class IntegerGenerationSupport {
 
@@ -131,18 +130,18 @@ public class IntegerGenerationSupport {
 
 	private static Set<Recording> fullRangeIntEdgeCases(int min, int max) {
 		Set<Recording> recordings = new LinkedHashSet<>();
-		recordings.add(Recording.tuple(atom(Math.abs(max)), atom(0)));
-		recordings.add(Recording.tuple(atom(0), atom(0)));
-		recordings.add(Recording.tuple(atom(1), atom(1)));
-		recordings.add(Recording.tuple(atom(1), atom(0)));
+		recordings.add(Recording.tuple(Math.abs(max), 0));
+		recordings.add(Recording.tuple(0, 0));
+		recordings.add(Recording.tuple(1, 1));
+		recordings.add(Recording.tuple(1, 0));
 
 		if (min == Integer.MIN_VALUE) {
-			recordings.add(Recording.tuple(atom(Integer.MAX_VALUE - 1), atom(2)));
+			recordings.add(Recording.tuple(Integer.MAX_VALUE - 1, 2));
 		}
 		if (max == Integer.MAX_VALUE) {
-			recordings.add(Recording.tuple(atom(Integer.MAX_VALUE - 1), atom(3)));
+			recordings.add(Recording.tuple(Integer.MAX_VALUE - 1, 3));
 		} else {
-			recordings.add(Recording.tuple(atom(Math.abs(min)), atom(1)));
+			recordings.add(Recording.tuple(Math.abs(min), 1));
 		}
 		return recordings;
 	}

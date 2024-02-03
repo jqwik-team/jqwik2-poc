@@ -19,20 +19,20 @@ class EdgeCasesTests {
 	void intEdgeCasesCanBeGenerated() {
 		Generator<Integer> allInts = new IntegerGenerator(Integer.MIN_VALUE, Integer.MAX_VALUE);
 
-		GenSource maxValueSource = RecordedSource.of(tuple(atom(Integer.MAX_VALUE - 1), atom(2)));
-		GenSource minValueSource = RecordedSource.of(tuple(atom(Integer.MAX_VALUE - 1), atom(3)));
+		GenSource maxValueSource = RecordedSource.of(Recording.tuple(Integer.MAX_VALUE - 1, 2));
+		GenSource minValueSource = RecordedSource.of(Recording.tuple(Integer.MAX_VALUE - 1, 3));
 
 		assertThat(allInts.generate(maxValueSource)).isEqualTo(Integer.MAX_VALUE);
 		assertThat(allInts.generate(minValueSource)).isEqualTo(Integer.MIN_VALUE);
 
 		IntegerGenerator positiveInts = new IntegerGenerator(0, Integer.MAX_VALUE);
 		// RecordedSource has state and must be recreated for each test
-		maxValueSource = RecordedSource.of(tuple(atom(Integer.MAX_VALUE - 1), atom(2)));
+		maxValueSource = RecordedSource.of(Recording.tuple(Integer.MAX_VALUE - 1, 2));
 		assertThat(positiveInts.generate(maxValueSource)).isEqualTo(Integer.MAX_VALUE);
 
 		IntegerGenerator negativeInts = new IntegerGenerator(Integer.MIN_VALUE, 0);
 		// RecordedSource has state and must be recreated for each test
-		minValueSource = RecordedSource.of(tuple(atom(Integer.MAX_VALUE - 1), atom(3)));
+		minValueSource = RecordedSource.of(Recording.tuple(Integer.MAX_VALUE - 1, 3));
 		assertThat(negativeInts.generate(minValueSource)).isEqualTo(Integer.MIN_VALUE);
 
 		IntegerGenerator smallPositiveInts = new IntegerGenerator(10, Integer.MAX_VALUE);
