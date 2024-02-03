@@ -1,55 +1,49 @@
 package jqwik2.internal.growing;
 
-import java.util.*;
-
 import jqwik2.api.*;
 import jqwik2.internal.*;
 
 class GrowingAtom extends AbstractGrowingSource implements GenSource.Atom {
-	private final java.util.List<Pair<Integer, Integer>> choices = new ArrayList<>();
-	private int currentChoiceIndex = 0;
+	private Pair<Integer, Integer> choice = null;
+	private boolean choiceRequested = false;
 
 	@Override
 	public boolean advance() {
-		for (int index = choices.size() - 1; index >= 0; index--) {
-			var choice = choices.get(index);
-			if (choiceNotExhausted(choice)) {
-				advanceChoice(index, choice);
-				clearChoicesAfter(index);
-				return true;
-			}
+		if (choice != null && choiceNotExhausted()) {
+			advanceChoice();
+			return true;
 		}
 		return false;
 	}
 
-	private void clearChoicesAfter(int index) {
-		choices.subList(index + 1, choices.size()).clear();
+	private void advanceChoice() {
+		choice = new Pair<>(choice.first(), choice.second() + 1);
 	}
 
-	private void advanceChoice(int index, Pair<Integer, Integer> choice) {
-		choices.set(index, new Pair<>(choice.first(), choice.second() + 1));
-	}
-
-	private static boolean choiceNotExhausted(Pair<Integer, Integer> choice) {
+	private boolean choiceNotExhausted() {
 		return choice.second() < choice.first() - 1;
 	}
 
 	@Override
 	public void reset() {
-		choices.clear();
+		choice = null;
 	}
 
 	@Override
 	public void next() {
-		currentChoiceIndex = 0;
+		choiceRequested = false;
 	}
 
 	@Override
 	public int choose(int maxExcluded) {
-		if (choices.size() < currentChoiceIndex + 1) {
-			choices.add(new Pair<>(maxExcluded, 0));
+		if (choiceRequested) {
+			throw new CannotGenerateException("no more choice available");
 		}
-		return choices.get(currentChoiceIndex++).second();
+		if (choice == null) {
+			choice = new Pair<>(maxExcluded, 0);
+		}
+		choiceRequested = true;
+		return choice.second();
 	}
 
 	@Override
