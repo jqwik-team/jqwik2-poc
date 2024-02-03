@@ -7,6 +7,7 @@ import jqwik2.api.recording.*;
 import jqwik2.api.support.*;
 
 import static jqwik2.api.ExhaustiveSource.*;
+import static jqwik2.api.recording.Recording.atom;
 
 public class IntegerGenerationSupport {
 
@@ -56,17 +57,23 @@ public class IntegerGenerationSupport {
 	public static Optional<ExhaustiveSource<?>> exhaustive(int min, int max) {
 		if (isPositiveUnsignedIntRange(min, max)) {
 			int range = max - min;
-			return atom(range);
+			return ExhaustiveSource.atom(range);
 		}
 		if (isNegativeUnsignedIntRange(min, max)) {
 			int range = max - min;
-			return atom(range);
+			return ExhaustiveSource.atom(range);
 		}
 		return or(
-			atom(range(0, max), value(0)),
-			atom(range(1, Math.abs(min)), value(1)
+			ExhaustiveSource.atom(range(0, max), value(0)),
+			ExhaustiveSource.atom(range(1, Math.abs(min)), value(1)
 			)
 		);
+		// return or(
+		// 	ExhaustiveSource.tuple(atom(range(0, max)), atom(value(0))),
+		// 	ExhaustiveSource.tuple(atom(range(1, Math.abs(min)), atom(value(1)))
+		// 	)
+		// );
+
 	}
 
 	private static boolean isNegativeUnsignedIntRange(int min, int max) {
@@ -79,13 +86,13 @@ public class IntegerGenerationSupport {
 
 	private int chooseFullRangedInt(int min, int max) {
 		while (true) {
-			GenSource.Atom intSource = source.atom();
+			GenSource.Tuple intSource = source.tuple();
 			boolean isMinValueOrMaxValueRequested = min == Integer.MIN_VALUE || max == Integer.MAX_VALUE;
 			int maxUnsigned = isMinValueOrMaxValueRequested
 								  ? Integer.MAX_VALUE
 								  : Math.max(Math.abs(min), Math.abs(max)) + 1;
-			int valueUnsigned = chooseUnsignedValue(intSource, maxUnsigned);
-			int signOrMaxMin = chooseSignOrMaxMin(intSource);
+			int valueUnsigned = chooseUnsignedValue(intSource.nextValue().atom(), maxUnsigned);
+			int signOrMaxMin = chooseSignOrMaxMin(intSource.nextValue().atom());
 			if (signOrMaxMin == 1 && valueUnsigned == 0) {
 				// Optimization to generate 0 less often
 				continue;
@@ -131,19 +138,18 @@ public class IntegerGenerationSupport {
 
 	private static Set<Recording> fullRangeIntEdgeCases(int min, int max) {
 		Set<Recording> recordings = new LinkedHashSet<>();
-		recordings.add(Recording.atom(Math.abs(max), 0));
-		recordings.add(Recording.atom(0, 0));
-
-		recordings.add(Recording.atom(1, 1));
-		recordings.add(Recording.atom(1, 0));
+		recordings.add(Recording.tuple(atom(Math.abs(max)), atom(0)));
+		recordings.add(Recording.tuple(atom(0), atom(0)));
+		recordings.add(Recording.tuple(atom(1), atom(1)));
+		recordings.add(Recording.tuple(atom(1), atom(0)));
 
 		if (min == Integer.MIN_VALUE) {
-			recordings.add(Recording.atom(Integer.MAX_VALUE - 1, 2));
+			recordings.add(Recording.tuple(atom(Integer.MAX_VALUE - 1), atom(2)));
 		}
 		if (max == Integer.MAX_VALUE) {
-			recordings.add(Recording.atom(Integer.MAX_VALUE - 1, 3));
+			recordings.add(Recording.tuple(atom(Integer.MAX_VALUE - 1), atom(3)));
 		} else {
-			recordings.add(Recording.atom(Math.abs(min), 1));
+			recordings.add(Recording.tuple(atom(Math.abs(min)), atom(1)));
 		}
 		return recordings;
 	}
