@@ -52,6 +52,20 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 		return Optional.of(exhaustiveOr);
 	}
 
+	@SafeVarargs
+	static Optional<ExhaustiveSource<?>> tuple(Optional<ExhaustiveSource<?>> ... valueSources) {
+		if (Arrays.stream(valueSources).anyMatch(Optional::isEmpty)) {
+			return Optional.empty();
+		}
+		@SuppressWarnings("OptionalGetWithoutIsPresent") // It's checked above
+		List<? extends ExhaustiveSource<?>> values = Arrays.stream(valueSources).map(Optional::get).toList();
+		ExhaustiveTuple exhaustiveList = new ExhaustiveTuple(values);
+		if (exhaustiveList.maxCount() == Exhaustive.INFINITE) {
+			return Optional.empty();
+		}
+		return Optional.of(exhaustiveList);
+	}
+
 	static Optional<ExhaustiveSource<?>> list(int size, Optional<? extends ExhaustiveSource<?>> elementSource) {
 		if (elementSource.isEmpty()) {
 			return Optional.empty();

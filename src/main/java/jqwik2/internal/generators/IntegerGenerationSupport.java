@@ -64,16 +64,9 @@ public class IntegerGenerationSupport {
 			return ExhaustiveSource.atom(range);
 		}
 		return or(
-			ExhaustiveSource.atom(range(0, max), value(0)),
-			ExhaustiveSource.atom(range(1, Math.abs(min)), value(1)
-			)
+			ExhaustiveSource.tuple(ExhaustiveSource.atom(range(0, max)), ExhaustiveSource.atom(value(0))),
+			ExhaustiveSource.tuple(ExhaustiveSource.atom(range(1, Math.abs(min))), ExhaustiveSource.atom(value(1)))
 		);
-		// return or(
-		// 	ExhaustiveSource.tuple(atom(range(0, max)), atom(value(0))),
-		// 	ExhaustiveSource.tuple(atom(range(1, Math.abs(min)), atom(value(1)))
-		// 	)
-		// );
-
 	}
 
 	private static boolean isNegativeUnsignedIntRange(int min, int max) {
