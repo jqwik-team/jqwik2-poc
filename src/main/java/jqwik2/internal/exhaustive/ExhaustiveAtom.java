@@ -5,35 +5,43 @@ import jqwik2.api.recording.*;
 
 public class ExhaustiveAtom extends AbstractExhaustiveSource<GenSource.Atom> {
 
-	private final ExhaustiveChoice.Range range;
-	private ExhaustiveChoice choice;
+	private final Range range;
+	private int currentValue = 0;
 
 	public ExhaustiveAtom(int maxChoiceIncluded) {
 		this(toRange(maxChoiceIncluded));
 	}
 
-	private static ExhaustiveChoice.Range toRange(int maxChoice) {
-		return new ExhaustiveChoice.Range(0, maxChoice);
+	private static Range toRange(int maxChoice) {
+		return new Range(0, maxChoice);
 	}
 
-	public ExhaustiveAtom(ExhaustiveChoice.Range includedRange) {
+	public ExhaustiveAtom(Range includedRange) {
 		this.range = includedRange;
-		this.choice = new ExhaustiveChoice(range);
+		reset();
 	}
 
 	@Override
 	public long maxCount() {
-		return choice.maxCount();
+		int localMaxCount = range.size();
+		if (succ().isPresent()) {
+			return localMaxCount * succ().get().maxCount();
+		}
+		return localMaxCount;
 	}
 
 	@Override
 	protected boolean tryAdvance() {
-		return choice.advanceThisOrUp();
+		if (currentValue >= range.max()) {
+			return false;
+		}
+		currentValue++;
+		return true;
 	}
 
 	@Override
 	public void reset() {
-		choice.reset();
+		currentValue = range.min();
 	}
 
 	@Override
@@ -41,18 +49,24 @@ public class ExhaustiveAtom extends AbstractExhaustiveSource<GenSource.Atom> {
 		return new ExhaustiveAtom(range);
 	}
 
-	@Override
-	public void setSucc(Exhaustive<?> exhaustive) {
-		choice.setSucc(exhaustive);
-		super.setSucc(exhaustive);
-	}
-
 	public Recording recording() {
-		return Recording.atom(choice.fix());
+		return Recording.atom(currentValue);
 	}
 
 	@Override
 	public String toString() {
 		return "ExhaustiveAtom{range=%s, recording=%s}".formatted(range, recording());
 	}
+
+	public record Range(int min, int max) {
+		public int size() {
+			return (max - min) + 1;
+		}
+
+		@Override
+		public String toString() {
+			return "[%d-%d]".formatted(min, max);
+		}
+	}
+
 }

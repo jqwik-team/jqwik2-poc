@@ -14,11 +14,11 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 		return Optional.of(any);
 	}
 
-	static ExhaustiveChoice.Range range(int min, int max) {
-		return new ExhaustiveChoice.Range(min, max);
+	static ExhaustiveAtom.Range range(int min, int max) {
+		return new ExhaustiveAtom.Range(min, max);
 	}
 
-	static ExhaustiveChoice.Range value(int value) {
+	static ExhaustiveAtom.Range value(int value) {
 		return range(value, value);
 	}
 
@@ -30,7 +30,7 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 		return Optional.of(exhaustiveAtom);
 	}
 
-	static Optional<ExhaustiveSource<?>> atom(ExhaustiveChoice.Range includedRange) {
+	static Optional<ExhaustiveSource<?>> atom(ExhaustiveAtom.Range includedRange) {
 		ExhaustiveAtom exhaustiveAtom = new ExhaustiveAtom(includedRange);
 		if (exhaustiveAtom.maxCount() == Exhaustive.INFINITE) {
 			return Optional.empty();

@@ -20,78 +20,6 @@ class ExhaustiveGenerationTests {
 	class ExhaustiveAtoms {
 
 		@Example
-		void choiceWithMax() {
-			ExhaustiveChoice choice = new ExhaustiveChoice(2);
-			assertThat(choice.maxCount()).isEqualTo(3L);
-			assertThat(choice.choose(3)).isEqualTo(0);
-
-			assertThat(choice.advance()).isTrue();
-			assertThat(choice.choose(3)).isEqualTo(1);
-			assertThat(choice.advance()).isTrue();
-			assertThat(choice.choose(3)).isEqualTo(2);
-			assertThat(choice.choose(2)).isEqualTo(0);
-
-			assertThat(choice.advance()).isFalse();
-
-			choice.reset();
-			assertThat(choice.choose(3)).isEqualTo(0);
-		}
-
-		@Example
-		void choiceWithRange() {
-			ExhaustiveChoice choice = new ExhaustiveChoice(2, 5);
-			assertThat(choice.maxCount()).isEqualTo(4L);
-			assertThat(choice.choose(4)).isEqualTo(2);
-
-			assertThat(choice.advance()).isTrue();
-			assertThat(choice.choose(6)).isEqualTo(3);
-			assertThat(choice.advance()).isTrue();
-			assertThat(choice.choose(6)).isEqualTo(4);
-			assertThat(choice.choose(3)).isEqualTo(1);
-			assertThat(choice.advance()).isTrue();
-			assertThat(choice.choose(6)).isEqualTo(5);
-
-			assertThat(choice.advance()).isFalse();
-
-			choice.reset();
-			assertThat(choice.choose(6)).isEqualTo(2);
-		}
-
-		@Example
-		void twoConcatenatedExhaustiveChoices() {
-			ExhaustiveChoice first = new ExhaustiveChoice(2);
-			ExhaustiveChoice second = new ExhaustiveChoice(1);
-
-			first.chain(second);
-			assertThat(first.maxCount()).isEqualTo(6L);
-
-			assertThat(first.choose(3)).isEqualTo(0);
-			assertThat(second.choose(2)).isEqualTo(0);
-
-			assertThat(first.advance()).isTrue();
-			assertThat(first.choose(3)).isEqualTo(0);
-			assertThat(second.choose(2)).isEqualTo(1);
-
-			assertThat(first.advance()).isTrue();
-			assertThat(first.choose(3)).isEqualTo(1);
-			assertThat(second.choose(2)).isEqualTo(0);
-
-			assertThat(first.advance()).isTrue();
-			assertThat(first.choose(3)).isEqualTo(1);
-			assertThat(second.choose(2)).isEqualTo(1);
-
-			assertThat(first.advance()).isTrue();
-			assertThat(first.choose(3)).isEqualTo(2);
-			assertThat(second.choose(2)).isEqualTo(0);
-
-			assertThat(first.advance()).isTrue();
-			assertThat(first.choose(3)).isEqualTo(2);
-			assertThat(second.choose(2)).isEqualTo(1);
-
-			assertThat(first.advance()).isFalse();
-		}
-
-		@Example
 		void exhaustiveAtom() {
 			ExhaustiveAtom atom = (ExhaustiveAtom) ExhaustiveSource.atom(3).get();
 			assertThat(atom.maxCount()).isEqualTo(4L);
@@ -104,6 +32,22 @@ class ExhaustiveGenerationTests {
 			assertAtom(atom, 2);
 			assertThat(atom.advance()).isTrue();
 			assertAtom(atom, 3);
+			assertThat(atom.advance()).isFalse();
+		}
+
+		@Example
+		void exhaustiveAtomWithRange() {
+			ExhaustiveAtom atom = (ExhaustiveAtom) ExhaustiveSource.atom(new ExhaustiveAtom.Range(2, 5)).get();
+			assertThat(atom.maxCount()).isEqualTo(4L);
+
+			assertAtom(atom, 2);
+
+			assertThat(atom.advance()).isTrue();
+			assertAtom(atom, 3);
+			assertThat(atom.advance()).isTrue();
+			assertAtom(atom, 4);
+			assertThat(atom.advance()).isTrue();
+			assertAtom(atom, 5);
 			assertThat(atom.advance()).isFalse();
 		}
 
