@@ -93,44 +93,17 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void exhaustiveAtom() {
-			ExhaustiveAtom atom = (ExhaustiveAtom) ExhaustiveSource.atom(1, 2, 3).get();
-			assertThat(atom.maxCount()).isEqualTo(24L);
+			ExhaustiveAtom atom = (ExhaustiveAtom) ExhaustiveSource.atom(3).get();
+			assertThat(atom.maxCount()).isEqualTo(4L);
 
-			assertAtom(atom, 0, 0, 0);
-
-			assertThat(atom.advance()).isTrue();
-			assertAtom(atom, 0, 0, 1);
-			assertThat(atom.advance()).isTrue();
-			assertAtom(atom, 0, 0, 2);
-			assertThat(atom.advance()).isTrue();
-			assertAtom(atom, 0, 0, 3);
-			assertThat(atom.advance()).isTrue();
-			assertAtom(atom, 0, 1, 0);
-
-			atom.advance();
-			atom.advance();
-			atom.advance();
-			atom.advance();
-			atom.advance();
-			atom.advance();
-			atom.advance();
+			assertAtom(atom, 0);
 
 			assertThat(atom.advance()).isTrue();
-			assertAtom(atom, 1, 0, 0);
-
-			atom.advance();
-			atom.advance();
-			atom.advance();
-			atom.advance();
-			atom.advance();
-			atom.advance();
-			atom.advance();
-			atom.advance();
-			atom.advance();
-			atom.advance();
+			assertAtom(atom, 1);
 			assertThat(atom.advance()).isTrue();
-			assertAtom(atom, 1, 2, 3);
-
+			assertAtom(atom, 2);
+			assertThat(atom.advance()).isTrue();
+			assertAtom(atom, 3);
 			assertThat(atom.advance()).isFalse();
 		}
 
@@ -170,16 +143,16 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void exhaustiveAtomWithRanges() {
-			ExhaustiveAtom atom = (ExhaustiveAtom) ExhaustiveSource.atom(
-				range(2, 3), range(3, 4), value(4)
-			).get();
-			assertThat(atom.maxCount()).isEqualTo(4L);
+			ExhaustiveAtom atom = (ExhaustiveAtom) ExhaustiveSource.atom(range(2, 7)).get();
+			assertThat(atom.maxCount()).isEqualTo(6L);
 
-			assertAtom(atom, 2, 3, 4);
+			assertAtom(atom, 2);
 			atom.advance();
 			atom.advance();
 			assertThat(atom.advance()).isTrue();
-			assertAtom(atom, 3, 4, 4);
+			assertAtom(atom, 5);
+			atom.advance();
+			atom.advance();
 
 			assertThat(atom.advance()).isFalse();
 		}
@@ -188,24 +161,24 @@ class ExhaustiveGenerationTests {
 		void orAtom() {
 
 			ExhaustiveOr atom = (ExhaustiveOr) ExhaustiveSource.or(
-				atom(range(0, 1), value(0)),
-				atom(range(0, 2), value(1)),
-				atom(value(2), value(3))
+				atom(range(0, 1)),
+				atom(range(0, 2)),
+				atom(value(42))
 			).get();
 
 			assertThat(atom.maxCount()).isEqualTo(6L);
-			assertAtom(atom, 0, 0);
+			assertAtom(atom, 0);
 
 			assertThat(atom.advance()).isTrue();
-			assertAtom(atom, 1, 0);
+			assertAtom(atom, 1);
 			assertThat(atom.advance()).isTrue();
-			assertAtom(atom, 0, 1);
+			assertAtom(atom, 0);
 			assertThat(atom.advance()).isTrue();
-			assertAtom(atom, 1, 1);
+			assertAtom(atom, 1);
 			assertThat(atom.advance()).isTrue();
-			assertAtom(atom, 2, 1);
+			assertAtom(atom, 2);
 			assertThat(atom.advance()).isTrue();
-			assertAtom(atom, 2, 3);
+			assertAtom(atom, 42);
 			assertThat(atom.advance()).isFalse();
 		}
 

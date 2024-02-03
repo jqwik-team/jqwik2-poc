@@ -65,7 +65,7 @@ public class ExhaustiveAtom extends AbstractExhaustiveSource<GenSource.Atom> {
 	}
 
 	public Recording recording() {
-		return Recording.atom(choices.stream().map(ExhaustiveChoice::fix).toList());
+		return Recording.atom(choices.getFirst().fix());
 	}
 
 	@Override
