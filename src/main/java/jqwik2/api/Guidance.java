@@ -36,4 +36,7 @@ public interface Guidance {
 	default PropertyRunResult overridePropertyResult(PropertyRunResult originalResult) {
 		return originalResult;
 	}
+
+	default void stop() {
+	}
 }

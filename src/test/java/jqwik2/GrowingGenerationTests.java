@@ -2,8 +2,8 @@ package jqwik2;
 
 import java.time.*;
 import java.util.*;
-import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
+import java.util.function.*;
 
 import jqwik2.api.Arbitrary;
 import jqwik2.api.*;
@@ -26,12 +26,13 @@ class GrowingGenerationTests {
 		);
 
 		AtomicInteger counter = new AtomicInteger(0);
-		for (SampleSource sampleSource : new IterableGrowingSource()) {
-			sampleGenerator.generate(sampleSource).ifPresent(sample -> {
+		forAllGrowingSamples(
+			sampleGenerator,
+			sample -> {
 				counter.incrementAndGet();
 				// System.out.println(sample);
-			});
-		}
+			}
+		);
 		assertThat(counter.get()).isEqualTo(101);
 	}
 
@@ -43,36 +44,37 @@ class GrowingGenerationTests {
 
 		// There'll be duplicate values since different sources can lead to same value
 		Set<List<Object>> values = new HashSet<>();
-		for (SampleSource sampleSource : new IterableGrowingSource()) {
-			sampleGenerator.generate(sampleSource).ifPresent(sample -> {
+		forAllGrowingSamples(
+			sampleGenerator,
+			sample -> {
 				// System.out.println(sample);
 				values.add(sample.values());
-			});
-		}
+			}
+		);
 		assertThat(values).hasSize(16);
 	}
 
 	@Example
-	@Disabled("Currently only generates a single example")
-	void sampleInConcurrentThreads() {
+	void growSamplesInPropertyCase() {
 		List<Generator<?>> generators = List.of(
 			BaseGenerators.integers(Integer.MIN_VALUE, Integer.MAX_VALUE),
 			BaseGenerators.choose(List.of("a", "b", "c"))
 		);
 
 		AtomicInteger counter = new AtomicInteger(0);
-		Tryable tryable = Tryable.from( args -> {
+		Tryable tryable = Tryable.from(args -> {
 			counter.incrementAndGet();
-			System.out.println(args);
-			return counter.get() < 10;
+			// System.out.println(args);
+			return counter.get() < 100;
 		});
 		var propertyCase = new PropertyCase(generators, tryable);
 
 		var result = propertyCase.run(PropertyRunConfiguration.growing(
-			10000, false, Duration.ofMinutes(1), Executors::newCachedThreadPool
+			10000, false, Duration.ofSeconds(10)
 		));
 
 		assertThat(result.status()).isEqualTo(FAILED);
+		assertThat(counter.get()).isEqualTo(100);
 	}
 
 	@Example
@@ -84,12 +86,13 @@ class GrowingGenerationTests {
 		);
 
 		AtomicInteger counter = new AtomicInteger(0);
-		for (SampleSource sampleSource : new IterableGrowingSource()) {
-			sampleGenerator.generate(sampleSource).ifPresent(sample -> {
+		forAllGrowingSamples(
+			sampleGenerator,
+			sample -> {
 				counter.incrementAndGet();
 				// System.out.println(sample);
-			});
-		}
+			}
+		);
 		assertThat(counter.get()).isEqualTo(60);
 	}
 
@@ -100,12 +103,13 @@ class GrowingGenerationTests {
 		);
 
 		AtomicInteger counter = new AtomicInteger(0);
-		for (SampleSource sampleSource : new IterableGrowingSource()) {
-			sampleGenerator.generate(sampleSource).ifPresent(sample -> {
+		forAllGrowingSamples(
+			sampleGenerator,
+			sample -> {
 				counter.incrementAndGet();
 				// System.out.println(sample);
-			});
-		}
+			}
+		);
 		assertThat(counter.get()).isEqualTo(11);
 	}
 
@@ -116,12 +120,13 @@ class GrowingGenerationTests {
 		);
 
 		AtomicInteger counter = new AtomicInteger(0);
-		for (SampleSource sampleSource : new IterableGrowingSource()) {
-			sampleGenerator.generate(sampleSource).ifPresent(sample -> {
+		forAllGrowingSamples(
+			sampleGenerator,
+			sample -> {
 				counter.incrementAndGet();
 				// System.out.println(sample);
-			});
-		}
+			}
+		);
 		assertThat(counter.get()).isEqualTo(34);
 	}
 
@@ -132,12 +137,13 @@ class GrowingGenerationTests {
 		);
 
 		Set<List<Object>> values = new HashSet<>();
-		for (SampleSource sampleSource : new IterableGrowingSource()) {
-			sampleGenerator.generate(sampleSource).ifPresent(sample -> {
+		forAllGrowingSamples(
+			sampleGenerator,
+			sample -> {
 				values.add(sample.values());
-				//System.out.println(sample);
-			});
-		}
+				// System.out.println(sample);
+			}
+		);
 		assertThat(values).containsExactlyInAnyOrder(
 			List.of(List.of(0, 0)),
 			List.of(List.of(1, 0)),
@@ -159,12 +165,13 @@ class GrowingGenerationTests {
 		);
 
 		AtomicInteger counter = new AtomicInteger(0);
-		for (SampleSource sampleSource : new IterableGrowingSource()) {
-			sampleGenerator.generate(sampleSource).ifPresent(sample -> {
+		forAllGrowingSamples(
+			sampleGenerator,
+			sample -> {
 				counter.incrementAndGet();
 				// System.out.println(sample);
-			});
-		}
+			}
+		);
 		assertThat(counter.get()).isEqualTo(43);
 	}
 
@@ -175,12 +182,13 @@ class GrowingGenerationTests {
 		);
 
 		AtomicInteger counter = new AtomicInteger(0);
-		for (SampleSource sampleSource : new IterableGrowingSource()) {
-			sampleGenerator.generate(sampleSource).ifPresent(sample -> {
+		forAllGrowingSamples(
+			sampleGenerator,
+			sample -> {
 				counter.incrementAndGet();
 				// System.out.println(sample);
-			});
-		}
+			}
+		);
 		assertThat(counter.get()).isEqualTo(37);
 	}
 
@@ -198,12 +206,13 @@ class GrowingGenerationTests {
 		SampleGenerator sampleGenerator = SampleGenerator.from(combined);
 
 		AtomicInteger counter = new AtomicInteger(0);
-		for (SampleSource sampleSource : new IterableGrowingSource()) {
-			sampleGenerator.generate(sampleSource).ifPresent(sample -> {
+		forAllGrowingSamples(
+			sampleGenerator,
+			sample -> {
 				counter.incrementAndGet();
 				// System.out.println(sample);
-			});
-		}
+			}
+		);
 		assertThat(counter.get()).isEqualTo(25);
 	}
 
@@ -218,13 +227,29 @@ class GrowingGenerationTests {
 		SampleGenerator sampleGenerator = SampleGenerator.from(combined);
 
 		AtomicInteger counter = new AtomicInteger(0);
-		for (SampleSource sampleSource : new IterableGrowingSource()) {
-			sampleGenerator.generate(sampleSource).ifPresent(sample -> {
+		forAllGrowingSamples(
+			sampleGenerator,
+			sample -> {
 				counter.incrementAndGet();
 				// System.out.println(sample);
-			});
-		}
+			}
+		);
 		assertThat(counter.get()).isEqualTo(39);
+	}
+
+	// IterableGrowingSource cannot be directly iterated since it is a sequential guided source that requires guidance being triggered
+	private static void forAllGrowingSamples(SampleGenerator sampleGenerator, Consumer<Sample> whenGenerated) {
+		GuidedGeneration iterator = (GuidedGeneration) new IterableGrowingSource().iterator();
+		while (iterator.hasNext()) {
+			SampleSource sampleSource = iterator.next();
+			sampleGenerator.generate(sampleSource).ifPresentOrElse(
+				sample -> {
+					whenGenerated.accept(sample);
+					iterator.guide(null, null);
+				},
+				() -> iterator.onEmptyGeneration(sampleSource)
+			);
+		}
 	}
 
 }

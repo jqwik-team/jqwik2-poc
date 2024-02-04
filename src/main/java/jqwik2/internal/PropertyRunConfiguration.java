@@ -76,15 +76,13 @@ public interface PropertyRunConfiguration {
 	}
 
 	static PropertyRunConfiguration growing(
-		int maxTries, boolean shrinkingEnabled,
-		Duration maxRuntime,
-		Supplier<ExecutorService> supplyExecutorService
+		int maxTries, boolean shrinkingEnabled, Duration maxRuntime
 	) {
 		return new RunConfigurationRecord(
 			null, maxTries,
 			shrinkingEnabled,
 			maxRuntime,
-			supplyExecutorService,
+			Executors::newSingleThreadExecutor,
 			IterableGrowingSource::new
 		);
 	}

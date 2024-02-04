@@ -9,6 +9,7 @@ public abstract class SequentialGuidedGeneration implements GuidedGeneration {
 	private volatile boolean started = false;
 	private volatile boolean guidanceArrived = false;
 	private volatile boolean proceedGeneration = true;
+	private volatile boolean stopped = false;
 
 	/**
 	 * Return the initial source for the first sample generation.
@@ -38,7 +39,7 @@ public abstract class SequentialGuidedGeneration implements GuidedGeneration {
 			if (!started) {
 				return true;
 			}
-			while (!guidanceArrived) {
+			while (!guidanceArrived && !stopped) {
 				try {
 					this.wait();
 				} catch (InterruptedException ignore) {
@@ -81,4 +82,11 @@ public abstract class SequentialGuidedGeneration implements GuidedGeneration {
 		}
 	}
 
+	@Override
+	public void stop() {
+		synchronized (this) {
+			stopped = true;
+			this.notifyAll();
+		}
+	}
 }

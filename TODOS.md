@@ -1,8 +1,3 @@
-- Growing Generation Source
-    - Use with PropertyCase.run() -> GrowingGenerationTests.sampleInConcurrentThreads()
-      - IterableSampleSource.iterator(int size) + GrowingSampleSource must return RecordedSource on each iteration
-    - Can the exhaustive sources be replaced by  growing sources?
-  
 - JqwikProperty
     - tries = 0 && maxDuration = 0 -> run forever (until interrupted, falsified or genSource exhausted)
     - Allow suppression of duplicate samples
@@ -11,17 +6,18 @@
     - AfterFailureMode.ANALYZE: Find as many failing samples as possible and
       analyze their commonalities
 
+- Additional generators and arbitraries
+    - Values.oneOf(...)
+    - Recursive generators using lazy evaluation of arbitrary
+    - String (based on unicode code points)
+    - Values.frequencyOf(...)
+        - Empty / Null Arbitrary -> When used in combinations, nothing is generated
+
 - Target-based generation and shrinking
-    - see http://proper.softlab.ntua.gr/Publications.html
-    - simulated annealing: https://www.baeldung.com/java-simulated-annealing-for-traveling-salesman
+      - see http://proper.softlab.ntua.gr/Publications.html
+      - simulated annealing: https://www.baeldung.com/java-simulated-annealing-for-traveling-salesman
 
 - Allow JqwikDefaults to be changed programmatically
-
-- Additional generators and arbitraries
-    - String (based on unicode code points)
-    - Values.oneOf(...)
-    - Values.frequencyOf(...)
-    - Empty / Null Arbitrary -> When used in combinations, nothing is generated
 
 - Add descriptions to generators
     - Can target type of map / flatMap be inferred for description?

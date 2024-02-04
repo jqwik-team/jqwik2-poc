@@ -3,8 +3,9 @@ package jqwik2.internal.growing;
 import java.util.*;
 
 import jqwik2.api.*;
+import jqwik2.internal.*;
 
-class GrowingSampleSource implements SampleSource {
+public class GrowingSampleSource extends SequentialGuidedGeneration implements SampleSource {
 	private final List<GrowingGenSource> sources = new ArrayList<>();
 
 	@Override
@@ -15,7 +16,27 @@ class GrowingSampleSource implements SampleSource {
 		return sources.stream().map(s -> (GenSource) s).toList();
 	}
 
-	boolean next() {
+	@Override
+	protected SampleSource initialSource() {
+		return this;
+	}
+
+	@Override
+	protected SampleSource nextSource() {
+		return this;
+	}
+
+	@Override
+	protected boolean handleResult(TryExecutionResult result, Sample sample) {
+		return grow();
+	}
+
+	@Override
+	protected boolean handleEmptyGeneration(SampleSource failingSource) {
+		return grow();
+	}
+
+	private boolean grow() {
 		sources.forEach(GrowingGenSource::next);
 		int i = sources.size() - 1;
 		while (i >= 0) {
