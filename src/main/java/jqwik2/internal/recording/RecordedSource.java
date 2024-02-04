@@ -104,11 +104,12 @@ public abstract sealed class RecordedSource<T extends Recording> implements GenS
 	}
 
 	private static final class RecordedAtom extends RecordedSource<AtomRecording> implements GenSource.Atom {
-		private final Iterator<Integer> iterator;
+
+		private final Iterator<Integer> noneOrOneChoice;
 
 		private RecordedAtom(AtomRecording recording, GenSource backUpSource) {
 			super(recording, backUpSource);
-			this.iterator = recording.choices().iterator();
+			noneOrOneChoice = recording.optionalChoice().stream().iterator();
 		}
 
 		@Override
@@ -118,11 +119,11 @@ public abstract sealed class RecordedSource<T extends Recording> implements GenS
 
 		@Override
 		public int choose(int maxExcluded) {
-			if (iterator.hasNext()) {
+			if (noneOrOneChoice.hasNext()) {
 				if (maxExcluded == 0) {
 					return 0;
 				}
-				return iterator.next() % maxExcluded;
+				return noneOrOneChoice.next() % maxExcluded;
 			} else {
 				if (backUpSource != null) {
 					return backUpSource.atom().choose(maxExcluded);

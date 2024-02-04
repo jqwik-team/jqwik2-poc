@@ -1,5 +1,4 @@
 - From Atom to Choice:
-    - RecordedAtom
     - Atom serialization / deserialization (a[value] -> value)
     - Rename Atom -> Choice, List -> Sequence, Serialization letters
   
