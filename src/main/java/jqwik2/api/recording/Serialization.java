@@ -95,13 +95,22 @@ class Serialization {
 
 	static Recording deserializeAtom(String serialized) {
 		if (serialized.length() < 3) {
-			throw new IllegalArgumentException("Invalid serialized atom recording: " + serialized);
+			var message = "Invalid serialized atom recording: <%s>".formatted(serialized);
+			throw new IllegalArgumentException(message);
 		}
 		String choicesPart = serializedContents(serialized);
 		List<Integer> choices = Arrays.stream(choicesPart.split(":"))
 									  .filter(s -> !s.isBlank())
 									  .map(Integer::parseInt)
 									  .toList();
+		if (choices.size() > 1) {
+			var message = "An atom cannot have more than one choice value but <%s> has %d".formatted(serialized, choices.size());
+			throw new IllegalArgumentException(message);
+		}
+		if (choices.stream().anyMatch(c -> c < 0)) {
+			var message = "A choice cannot be negative but <%s> is".formatted(serialized);
+			throw new IllegalArgumentException(message);
+		}
 		if (choices.isEmpty()) {
 			return new AtomRecording(Optional.empty());
 		}
@@ -117,8 +126,8 @@ class Serialization {
 	}
 
 	static String serialize(AtomRecording recording) {
-		var listOfChoices = listOfChoices(recording.choices());
-		return ATOM + "[%s]".formatted(listOfChoices);
+		var choiceString = recording.optionalChoice().map(String::valueOf).orElse("");
+		return ATOM + "[%s]".formatted(choiceString);
 	}
 
 	private static String listOfChoices(List<Integer> choices) {

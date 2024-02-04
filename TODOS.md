@@ -1,5 +1,4 @@
 - From Atom to Choice:
-    - Atom serialization / deserialization (a[value] -> value)
     - Rename Atom -> Choice, List -> Sequence, Serialization letters
   
 - JqwikProperty

@@ -60,8 +60,4 @@ public record AtomRecording(Optional<Integer> optionalChoice) implements Recordi
 	public String toString() {
 		return serialize();
 	}
-
-	public List<Integer> choices() {
-		return optionalChoice.map(List::of).orElse(List.of());
-	}
 }
