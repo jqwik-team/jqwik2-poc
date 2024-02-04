@@ -1,5 +1,6 @@
 - Growing Generation Source
     - Use with PropertyCase.run() -> GrowingGenerationTests.sampleInConcurrentThreads()
+      - IterableSampleSource.iterator(int size) + GrowingSampleSource must return RecordedSource on each iteration
     - Can the exhaustive sources be replaced by  growing sources?
   
 - JqwikProperty
