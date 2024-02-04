@@ -1,6 +1,4 @@
 - From Atom to Choice:
-    - StatefulTests
-    - AtomShrinker
     - AtomRecorder
     - RecordedAtom
     - Atom serialization / deserialization (a[value] -> value)

@@ -5,38 +5,31 @@ import java.util.stream.*;
 
 class AtomShrinker {
 
-	private final List<Integer> seeds;
+	private final Optional<Integer> optionalChoice;
 
 	AtomShrinker(AtomRecording recording) {
-		this.seeds = recording.choices();
+		this.optionalChoice = recording.optionalChoice();
+	}
+
+	Stream<AtomRecording> shrink() {
+		return optionalChoice.stream()
+							 .flatMap(this::shrinkChoice)
+							 .map(AtomRecording::new);
 	}
 
 	// TODO: Shrink in fibonacci steps from both ends
-	Stream<AtomRecording> shrink() {
-		Set<AtomRecording> candidates = new LinkedHashSet<>();
-		for (int i = 0; i < seeds.size(); i++) {
-			int current = seeds.get(i);
-			for (Integer integer : shrinkValue(current)) {
-				List<Integer> shrunk = new ArrayList<>(seeds);
-				shrunk.set(i, integer);
-				candidates.add(new AtomRecording(shrunk.getFirst()));
-			}
-		}
-		return candidates.stream();
-	}
-
-	private Set<Integer> shrinkValue(int seedValue) {
-		if (seedValue == 0) {
-			return Set.of();
+	private Stream<Integer> shrinkChoice(int choice) {
+		if (choice == 0) {
+			return Stream.empty();
 		}
 		Set<Integer> shrunkValues = new LinkedHashSet<>();
 		shrunkValues.add(0);
-		if (seedValue > 1) {
+		if (choice > 1) {
 			shrunkValues.add(1);
 		}
-		shrunkValues.add(seedValue - 1);
-		shrunkValues.add(seedValue / 2);
-		return shrunkValues;
+		shrunkValues.add(choice - 1);
+		shrunkValues.add(choice / 2);
+		return shrunkValues.stream();
 	}
 
 }
