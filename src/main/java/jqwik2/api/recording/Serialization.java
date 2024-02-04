@@ -7,7 +7,7 @@ import static jqwik2.api.recording.Recording.*;
 
 class Serialization {
 
-	public static final char CHOICE = 'a';
+	public static final char CHOICE = 'c';
 	public static final char LIST = 'l';
 	public static final char TUPLE = 't';
 

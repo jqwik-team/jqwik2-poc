@@ -27,11 +27,11 @@ class RecordingTests {
 		void choices() {
 			ChoiceRecording choice = choice(1);
 			String serialized = choice.serialize();
-			assertThat(serialized).isEqualTo("a[1]");
+			assertThat(serialized).isEqualTo("c[1]");
 			assertThat(Recording.deserialize(serialized)).isEqualTo(choice);
 
 			serialized = choice().serialize();
-			assertThat(serialized).isEqualTo("a[]");
+			assertThat(serialized).isEqualTo("c[]");
 			assertThat(Recording.deserialize(serialized)).isEqualTo(choice());
 
 			assertSerializeDeserialize(choice(2));
@@ -41,7 +41,7 @@ class RecordingTests {
 		void lists() {
 			ListRecording list = list(choice(1), choice(2));
 			String serialized = list.serialize();
-			assertThat(serialized).isEqualTo("l[a[1]:a[2]]");
+			assertThat(serialized).isEqualTo("l[c[1]:c[2]]");
 			assertThat(Recording.deserialize(serialized)).isEqualTo(list);
 
 			assertSerializeDeserialize(list(choice(123)));
@@ -52,7 +52,7 @@ class RecordingTests {
 		void tuples() {
 			TupleRecording tuple = tuple(1, 2);
 			String serialized = tuple.serialize();
-			assertThat(serialized).isEqualTo("t[a[1]:a[2]]");
+			assertThat(serialized).isEqualTo("t[c[1]:c[2]]");
 			assertThat(Recording.deserialize(serialized)).isEqualTo(tuple);
 
 			assertSerializeDeserialize(tuple(14));
@@ -79,7 +79,7 @@ class RecordingTests {
 			));
 
 			var serialized = sample.serialize();
-			assertThat(serialized).isEqualTo("a[1]:a[2]:a[3]");
+			assertThat(serialized).isEqualTo("c[1]:c[2]:c[3]");
 
 			assertThat(SampleRecording.deserialize(serialized)).isEqualTo(sample);
 		}
