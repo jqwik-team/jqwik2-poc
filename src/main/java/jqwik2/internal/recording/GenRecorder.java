@@ -64,7 +64,9 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 
 		@Override
 		Recording recording() {
-			return new AtomRecording(seeds.getFirst());
+			Optional<Integer> optionalChoice =
+				seeds.isEmpty() ? Optional.empty() : Optional.of(seeds.getFirst());
+			return new AtomRecording(optionalChoice);
 		}
 
 		@Override

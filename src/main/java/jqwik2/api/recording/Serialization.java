@@ -109,7 +109,7 @@ class Serialization {
 	}
 
 	static String serialize(AtomRecording recording) {
-		var listOfChoices = listOfChoices(List.of(recording.choice()));
+		var listOfChoices = listOfChoices(recording.choices());
 		return ATOM + "[%s]".formatted(listOfChoices);
 	}
 

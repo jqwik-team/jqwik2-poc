@@ -3,12 +3,18 @@ package jqwik2.api.recording;
 import java.util.*;
 import java.util.stream.*;
 
-public record AtomRecording(int choice) implements Recording {
+public record AtomRecording(Optional<Integer> optionalChoice) implements Recording {
+
+	public AtomRecording(int choice) {
+		this(Optional.of(choice));
+	}
 
 	public AtomRecording {
-		if (choice < 0) {
-			throw new IllegalArgumentException("A choice must be >= 0");
-		}
+		optionalChoice.ifPresent( choice -> {
+			if (choice < 0) {
+				throw new IllegalArgumentException("A choice must be >= 0");
+			}
+		});
 	}
 
 	@Override
@@ -27,17 +33,22 @@ public record AtomRecording(int choice) implements Recording {
 	@Override
 	public boolean isomorphicTo(Recording other) {
 		if (other instanceof AtomRecording atom) {
-			return true;
+			return this.optionalChoice.isPresent() == atom.optionalChoice.isPresent();
 		}
 		return false;
 	}
 
 	private int compareAtoms(AtomRecording left, AtomRecording right) {
-		int sizeComparison = Integer.compare(left.choice, right.choice);
-		if (sizeComparison != 0) {
-			return sizeComparison;
+		if (left.optionalChoice.isEmpty()) {
+			if (right.optionalChoice.isEmpty()) {
+				return 0;
+			}
+			return 1;
 		}
-		return 0;
+		if (right.optionalChoice.isEmpty()) {
+			return -1;
+		}
+		return Integer.compare(left.optionalChoice.get(), right.optionalChoice.get());
 	}
 
 	@Override
@@ -50,4 +61,7 @@ public record AtomRecording(int choice) implements Recording {
 		return serialize();
 	}
 
+	public List<Integer> choices() {
+		return optionalChoice.map(List::of).orElse(List.of());
+	}
 }
