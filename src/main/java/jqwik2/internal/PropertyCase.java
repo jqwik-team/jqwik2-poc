@@ -57,7 +57,7 @@ public class PropertyCase {
 		AtomicInteger countChecks = new AtomicInteger(0);
 
 		try {
-			Triple<SortedSet<FalsifiedSample>, Boolean, Optional<GuidedGeneration>> collectedRunResults = runAndCollectFalsifiedSamples(
+			Triple<SortedSet<FalsifiedSample>, Boolean, Guidance> collectedRunResults = runAndCollectFalsifiedSamples(
 				iterableGenSource, maxTries, sampleGenerator,
 				countTries, countChecks,
 				maxDuration, executorServiceSupplier
@@ -65,17 +65,14 @@ public class PropertyCase {
 
 			SortedSet<FalsifiedSample> falsifiedSamples = collectedRunResults.first();
 			boolean timedOut = collectedRunResults.second();
-			Optional<GuidedGeneration> guidedGeneration = collectedRunResults.third();
+			Guidance guidance = collectedRunResults.third();
 
 			PropertyRunResult runResult = createRunResult(
 				countChecks, countTries, effectiveSeed, maxDuration,
 				falsifiedSamples, shrinkingEnabled, timedOut
 			);
 
-			return guidedGeneration
-					   .map(generation -> generation.overridePropertyResult(runResult))
-					   .orElse(runResult);
-
+			return guidance.overridePropertyResult(runResult);
 		} catch (Throwable t) {
 			ExceptionSupport.rethrowIfBlacklisted(t);
 			return abortion(effectiveSeed, t, countTries, countChecks);
@@ -155,7 +152,7 @@ public class PropertyCase {
 		return timedOut && countChecks.get() < 1;
 	}
 
-	private Triple<SortedSet<FalsifiedSample>, Boolean, Optional<GuidedGeneration>> runAndCollectFalsifiedSamples(
+	private Triple<SortedSet<FalsifiedSample>, Boolean, Guidance> runAndCollectFalsifiedSamples(
 		IterableSampleSource iterableGenSource,
 		int maxTries,
 		SampleGenerator sampleGenerator,
@@ -170,30 +167,26 @@ public class PropertyCase {
 		var runner = new ConcurrentRunner(executorServiceSupplier.get(), maxDuration);
 
 		final Iterator<SampleSource> genSources = iterableGenSource.iterator();
-		BiConsumer<TryExecutionResult, Sample> guide =
-			(genSources instanceof GuidedGeneration)
-				? ((GuidedGeneration) genSources)::guide
-				: (result, sample) -> {};
+
+		Guidance guidance =
+			(genSources instanceof Guidance g)
+				? g
+				: Guidance.NULL;
 
 		var taskIterator = new ConcurrentTaskIterator(
 			genSources, maxTries,
 			(trySource, shutdown) -> executeTry(
 				sampleGenerator, trySource, countTries, countChecks,
 				shutdown, iterableGenSource.stopWhenFalsified(),
-				guide, onFalsified, onSatisfied, iterableGenSource.lock()
+				guidance, onFalsified, onSatisfied, iterableGenSource.lock()
 			)
 		);
 
-		Optional<GuidedGeneration> optionalGuidedGeneration =
-			(genSources instanceof GuidedGeneration)
-				? Optional.of((GuidedGeneration) genSources)
-				: Optional.empty();
-
 		try {
 			runner.run(taskIterator);
-			return new Triple<>(falsifiedSamples, false, optionalGuidedGeneration);
+			return new Triple<>(falsifiedSamples, false, guidance);
 		} catch (TimeoutException timeoutException) {
-			return new Triple<>(falsifiedSamples, true, optionalGuidedGeneration);
+			return new Triple<>(falsifiedSamples, true, guidance);
 		}
 
 	}
@@ -204,7 +197,7 @@ public class PropertyCase {
 		AtomicInteger countTries,
 		AtomicInteger countChecks,
 		ConcurrentRunner.Shutdown shutdown, boolean stopWhenFalsified,
-		BiConsumer<TryExecutionResult, Sample> guide, Consumer<FalsifiedSample> onFalsified, Consumer<Sample> onSatisfied,
+		Guidance guidance, Consumer<FalsifiedSample> onFalsified, Consumer<Sample> onSatisfied,
 		Lock generationLock
 	) {
 		Optional<Sample> optionalSample;
@@ -214,29 +207,32 @@ public class PropertyCase {
 		} finally {
 			generationLock.unlock();
 		}
-		optionalSample.ifPresent(sample -> {
-			countTries.incrementAndGet();
-			TryExecutionResult tryResult = tryable.apply(sample);
-			try {
-				generationLock.lock();
-				guide.accept(tryResult, sample);
-			} finally {
-				generationLock.unlock();
-			}
-			if (tryResult.status() != TryExecutionResult.Status.INVALID) {
-				countChecks.incrementAndGet();
-			}
-			if (tryResult.status() == TryExecutionResult.Status.FALSIFIED) {
-				FalsifiedSample originalSample = new FalsifiedSample(sample, tryResult.throwable());
-				onFalsified.accept(originalSample);
-				if (stopWhenFalsified) {
-					shutdown.shutdown();
+		optionalSample.ifPresentOrElse(
+			sample -> {
+				countTries.incrementAndGet();
+				TryExecutionResult tryResult = tryable.apply(sample);
+				try {
+					generationLock.lock();
+					guidance.guide(tryResult, sample);
+				} finally {
+					generationLock.unlock();
 				}
-			}
-			if (tryResult.status() == TryExecutionResult.Status.SATISFIED) {
-				onSatisfied.accept(sample);
-			}
-		});
+				if (tryResult.status() != TryExecutionResult.Status.INVALID) {
+					countChecks.incrementAndGet();
+				}
+				if (tryResult.status() == TryExecutionResult.Status.FALSIFIED) {
+					FalsifiedSample originalSample = new FalsifiedSample(sample, tryResult.throwable());
+					onFalsified.accept(originalSample);
+					if (stopWhenFalsified) {
+						shutdown.shutdown();
+					}
+				}
+				if (tryResult.status() == TryExecutionResult.Status.SATISFIED) {
+					onSatisfied.accept(sample);
+				}
+			},
+			() -> guidance.onEmptyGeneration(multiSource)
+		);
 	}
 
 	private static IterableSampleSource randomSource(PropertyRunConfiguration configuration) {

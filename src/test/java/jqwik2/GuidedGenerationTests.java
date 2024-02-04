@@ -47,6 +47,11 @@ class GuidedGenerationTests {
 				count++;
 				return count < 42;
 			}
+
+			@Override
+			protected boolean handleEmptyGeneration(SampleSource failingSource) {
+				throw new IllegalStateException("Should not happen");
+			}
 		};
 
 		PropertyRunResult result = propertyCase.run(
@@ -96,6 +101,17 @@ class GuidedGenerationTests {
 				// System.out.println("last = " + last);
 				return lastInt != 91;
 			}
+
+			/**
+			 * Handle the case that the previous sample generation was empty.
+			 * Return true if the next sample generation should be started.
+			 *
+			 * @param failingSource
+			 */
+			@Override
+			protected boolean handleEmptyGeneration(SampleSource failingSource) {
+				throw new IllegalStateException("Should not happen");
+			}
 		};
 
 		PropertyRunResult result = propertyCase.run(
@@ -143,6 +159,11 @@ class GuidedGenerationTests {
 			protected boolean handleResult(TryExecutionResult result, Sample sample) {
 				count++;
 				return count < 42;
+			}
+
+			@Override
+			protected boolean handleEmptyGeneration(SampleSource failingSource) {
+				throw new IllegalStateException("Should not happen");
 			}
 
 			@Override

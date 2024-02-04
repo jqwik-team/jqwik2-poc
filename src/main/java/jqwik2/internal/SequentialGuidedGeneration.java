@@ -22,6 +22,12 @@ public abstract class SequentialGuidedGeneration implements GuidedGeneration {
 	protected abstract boolean handleResult(TryExecutionResult result, Sample sample);
 
 	/**
+	 * Handle the case that the previous sample generation was empty.
+	 * Return true if the next sample generation should be started.
+	 */
+	protected abstract boolean handleEmptyGeneration(SampleSource failingSource);
+
+	/**
 	 * Provide the source for the next sample generation.
 	 */
 	protected abstract SampleSource nextSource();
@@ -62,6 +68,15 @@ public abstract class SequentialGuidedGeneration implements GuidedGeneration {
 		synchronized (this) {
 			guidanceArrived = true;
 			proceedGeneration = handleResult(result, sample);
+			this.notifyAll();
+		}
+	}
+
+	@Override
+	public void onEmptyGeneration(SampleSource failingSource) {
+		synchronized (this) {
+			guidanceArrived = true;
+			proceedGeneration = handleEmptyGeneration(failingSource);
 			this.notifyAll();
 		}
 	}
