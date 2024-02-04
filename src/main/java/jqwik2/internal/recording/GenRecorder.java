@@ -51,7 +51,7 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 
 	static class AtomRecorder extends AbstractRecorder<Atom> implements Atom {
 
-		private final java.util.List<Integer> seeds = new ArrayList<>(5);
+		private Optional<Integer> optionalChoice = Optional.empty();
 
 		AtomRecorder(Atom source) {
 			super(source);
@@ -64,22 +64,20 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 
 		@Override
 		Recording recording() {
-			Optional<Integer> optionalChoice =
-				seeds.isEmpty() ? Optional.empty() : Optional.of(seeds.getFirst());
 			return new AtomRecording(optionalChoice);
 		}
 
 		@Override
 		public int choose(int maxExcluded) {
 			int choice = source.choose(maxExcluded);
-			seeds.add(choice);
+			optionalChoice = Optional.of(choice);
 			return choice;
 		}
 
 		@Override
 		public int choose(int maxExcluded, RandomChoice.Distribution distribution) {
 			int choice = source.choose(maxExcluded, distribution);
-			seeds.add(choice);
+			optionalChoice = Optional.of(choice);
 			return choice;
 		}
 	}

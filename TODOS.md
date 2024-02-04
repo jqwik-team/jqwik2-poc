@@ -1,8 +1,7 @@
 - From Atom to Choice:
-    - AtomRecorder
     - RecordedAtom
     - Atom serialization / deserialization (a[value] -> value)
-    - Rename Atom -> Choice
+    - Rename Atom -> Choice, List -> Sequence, Serialization letters
   
 - JqwikProperty
     - tries = 0 && maxDuration = 0 -> run forever (until interrupted, falsified or genSource exhausted)
