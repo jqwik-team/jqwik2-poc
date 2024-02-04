@@ -43,10 +43,10 @@ public record AtomRecording(Optional<Integer> optionalChoice) implements Recordi
 			if (right.optionalChoice.isEmpty()) {
 				return 0;
 			}
-			return 1;
+			return -1;
 		}
 		if (right.optionalChoice.isEmpty()) {
-			return -1;
+			return 1;
 		}
 		return Integer.compare(left.optionalChoice.get(), right.optionalChoice.get());
 	}

@@ -96,7 +96,10 @@ class RecordingTests {
 
 	@Example
 	void compareRecording() {
+		assertThat(atom(2)).isEqualByComparingTo(atom(2));
 		assertThat(atom(2)).isGreaterThan(atom(1));
+		assertThat(atom(1)).isGreaterThan(atom());
+		assertThat(atom()).isLessThan(atom(1));
 
 		assertThat(
 			atom(0).compareTo(list(atom(0)))
