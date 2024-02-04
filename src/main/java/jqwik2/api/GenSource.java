@@ -7,13 +7,13 @@ public interface GenSource {
 		return (T) new AnyGenSource();
 	}
 
-	Atom atom();
+	Choice choice();
 
 	List list();
 
 	Tuple tuple();
 
-	interface Atom extends GenSource {
+	interface Choice extends GenSource {
 
 		/**
 		 * Choose a value between 0 and maxExcluded - 1.
@@ -42,9 +42,9 @@ public interface GenSource {
 		GenSource nextValue();
 	}
 
-	class AnyGenSource implements GenSource, GenSource.Atom, GenSource.List, GenSource.Tuple {
+	class AnyGenSource implements GenSource, Choice, GenSource.List, GenSource.Tuple {
 		@Override
-		public Atom atom() {
+		public Choice choice() {
 			return this;
 		}
 

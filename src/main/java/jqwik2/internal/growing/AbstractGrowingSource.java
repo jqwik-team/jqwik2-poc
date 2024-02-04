@@ -1,25 +1,23 @@
 package jqwik2.internal.growing;
 
-import java.util.*;
-
 import jqwik2.api.*;
 import jqwik2.internal.*;
 
 abstract class AbstractGrowingSource implements GrowingSource, GenSource {
 
 	@Override
-	public Atom atom() {
-		throw new CannotGenerateException("This source is not an atom");
+	public Choice choice() {
+		throw new CannotGenerateException("This source is not a choice");
 	}
 
 	@Override
 	public List list() {
-		throw new CannotGenerateException("This source is not an atom");
+		throw new CannotGenerateException("This source is not a list");
 	}
 
 	@Override
 	public Tuple tuple() {
-		throw new CannotGenerateException("This source is not an atom");
+		throw new CannotGenerateException("This source is not a tuple");
 	}
 
 }

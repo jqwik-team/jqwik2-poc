@@ -7,7 +7,7 @@ import static jqwik2.api.recording.Recording.*;
 
 class Serialization {
 
-	public static final char ATOM = 'a';
+	public static final char CHOICE = 'a';
 	public static final char LIST = 'l';
 	public static final char TUPLE = 't';
 
@@ -25,8 +25,8 @@ class Serialization {
 		}
 		char choice = serialized.charAt(0);
 		switch (choice) {
-			case ATOM:
-				return deserializeAtom(serialized);
+			case CHOICE:
+				return deserializeChoice(serialized);
 			case LIST:
 				return deserializeList(serialized);
 			case TUPLE:
@@ -93,9 +93,9 @@ class Serialization {
 		return skip;
 	}
 
-	static Recording deserializeAtom(String serialized) {
+	static Recording deserializeChoice(String serialized) {
 		if (serialized.length() < 3) {
-			var message = "Invalid serialized atom recording: <%s>".formatted(serialized);
+			var message = "Invalid serialized choice recording: <%s>".formatted(serialized);
 			throw new IllegalArgumentException(message);
 		}
 		String choicesPart = serializedContents(serialized);
@@ -104,7 +104,7 @@ class Serialization {
 									  .map(Integer::parseInt)
 									  .toList();
 		if (choices.size() > 1) {
-			var message = "An atom cannot have more than one choice value but <%s> has %d".formatted(serialized, choices.size());
+			var message = "A choice cannot have more than one value but <%s> has %d".formatted(serialized, choices.size());
 			throw new IllegalArgumentException(message);
 		}
 		if (choices.stream().anyMatch(c -> c < 0)) {
@@ -112,9 +112,9 @@ class Serialization {
 			throw new IllegalArgumentException(message);
 		}
 		if (choices.isEmpty()) {
-			return new AtomRecording(Optional.empty());
+			return new ChoiceRecording(Optional.empty());
 		}
-		return new AtomRecording(choices.getFirst());
+		return new ChoiceRecording(choices.getFirst());
 	}
 
 	private static String serializedContents(String serialized) {
@@ -125,15 +125,9 @@ class Serialization {
 		return recording.recordings().stream().map(Recording::serialize).collect(Collectors.joining(":"));
 	}
 
-	static String serialize(AtomRecording recording) {
+	static String serialize(ChoiceRecording recording) {
 		var choiceString = recording.optionalChoice().map(String::valueOf).orElse("");
-		return ATOM + "[%s]".formatted(choiceString);
-	}
-
-	private static String listOfChoices(List<Integer> choices) {
-		return choices.stream()
-					  .map(String::valueOf)
-					  .collect(Collectors.joining(":"));
+		return CHOICE + "[%s]".formatted(choiceString);
 	}
 
 	static String serialize(ListRecording recording) {

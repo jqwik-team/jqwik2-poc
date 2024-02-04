@@ -44,11 +44,11 @@ public class IntegerGenerationSupport {
 	public static Collection<Recording> edgeCases(int min, int max) {
 		if (isPositiveUnsignedIntRange(min, max)) {
 			int range = max - min;
-			return EdgeCasesSupport.forAtom(range);
+			return EdgeCasesSupport.forChoice(range);
 		}
 		if (isNegativeUnsignedIntRange(min, max)) {
 			int range = max - min;
-			return EdgeCasesSupport.forAtom(range);
+			return EdgeCasesSupport.forChoice(range);
 		}
 		return fullRangeIntEdgeCases(min, max);
 	}
@@ -56,15 +56,15 @@ public class IntegerGenerationSupport {
 	public static Optional<ExhaustiveSource<?>> exhaustive(int min, int max) {
 		if (isPositiveUnsignedIntRange(min, max)) {
 			int range = max - min;
-			return ExhaustiveSource.atom(range);
+			return ExhaustiveSource.choice(range);
 		}
 		if (isNegativeUnsignedIntRange(min, max)) {
 			int range = max - min;
-			return ExhaustiveSource.atom(range);
+			return ExhaustiveSource.choice(range);
 		}
 		return or(
-			ExhaustiveSource.tuple(ExhaustiveSource.atom(range(0, max)), ExhaustiveSource.atom(value(0))),
-			ExhaustiveSource.tuple(ExhaustiveSource.atom(range(1, Math.abs(min))), ExhaustiveSource.atom(value(1)))
+			ExhaustiveSource.tuple(ExhaustiveSource.choice(range(0, max)), ExhaustiveSource.choice(value(0))),
+			ExhaustiveSource.tuple(ExhaustiveSource.choice(range(1, Math.abs(min))), ExhaustiveSource.choice(value(1)))
 		);
 	}
 
@@ -83,8 +83,8 @@ public class IntegerGenerationSupport {
 			int maxUnsigned = isMinValueOrMaxValueRequested
 								  ? Integer.MAX_VALUE
 								  : Math.max(Math.abs(min), Math.abs(max)) + 1;
-			int valueUnsigned = chooseUnsignedValue(intSource.nextValue().atom(), maxUnsigned);
-			int signOrMaxMin = chooseSignOrMaxMin(intSource.nextValue().atom());
+			int valueUnsigned = chooseUnsignedValue(intSource.nextValue().choice(), maxUnsigned);
+			int signOrMaxMin = chooseSignOrMaxMin(intSource.nextValue().choice());
 			if (signOrMaxMin == 1 && valueUnsigned == 0) {
 				// Optimization to generate 0 less often
 				continue;
@@ -112,19 +112,19 @@ public class IntegerGenerationSupport {
 		}
 	}
 
-	private static int chooseSignOrMaxMin(GenSource.Atom intSource) {
+	private static int chooseSignOrMaxMin(GenSource.Choice intSource) {
 		// 0: positive, 1: negative, 2: max, 3: min
 		// The random choice is only between 0 and 1. 3 or 4 are there for the edge cases
 		return intSource.choose(4, ONLY_0_OR_1);
 	}
 
-	private int chooseUnsignedValue(GenSource.Atom intSource, int maxUnsigned) {
+	private int chooseUnsignedValue(GenSource.Choice intSource, int maxUnsigned) {
 		return intSource.choose(maxUnsigned, distribution);
 	}
 
 	private int chooseUnsignedInt(int min, int max) {
 		int range = max - min;
-		int delta = chooseUnsignedValue(source.atom(), range + 1);
+		int delta = chooseUnsignedValue(source.choice(), range + 1);
 		return min + delta;
 	}
 

@@ -39,10 +39,10 @@ class FailureDatabaseTests {
 
 	@Example
 	void saveAndLoadFailures() {
-		var sample1 = new SampleRecording(List.of(atom(1), atom(2)));
-		var sample2 = new SampleRecording(List.of(atom(1), atom(3)));
-		var sample3 = new SampleRecording(List.of(atom(1), atom(2), atom(3)));
-		var sample4 = new SampleRecording(List.of(atom(2), atom(1)));
+		var sample1 = new SampleRecording(List.of(choice(1), choice(2)));
+		var sample2 = new SampleRecording(List.of(choice(1), choice(3)));
+		var sample3 = new SampleRecording(List.of(choice(1), choice(2), choice(3)));
+		var sample4 = new SampleRecording(List.of(choice(2), choice(1)));
 
 
 		database.saveFailingSample("id1", sample1);
@@ -58,9 +58,9 @@ class FailureDatabaseTests {
 
 	@Property(tries = 10, shrinking = ShrinkingMode.FULL)
 	void makeSureSampleIdDoesNotCollideWithLongRecordingsAndJustOneChange(@ForAll @Size(min = 1, max = 5000) List<@IntRange(min = 0) Integer> atoms) {
-		List<Recording> longListOfAtoms = atoms.stream().map(choice -> (Recording) atom(choice)).toList();
+		List<Recording> longListOfAtoms = atoms.stream().map(choice -> (Recording) choice(choice)).toList();
 		ArrayList<Recording> longListOfAtoms2 = new ArrayList<>(longListOfAtoms);
-		longListOfAtoms2.set(longListOfAtoms2.size() - 1, atom(99));
+		longListOfAtoms2.set(longListOfAtoms2.size() - 1, choice(99));
 		var sample1 = new SampleRecording(longListOfAtoms);
 		var sample2 = new SampleRecording(longListOfAtoms2);
 
@@ -73,10 +73,10 @@ class FailureDatabaseTests {
 
 	@Example
 	void loadFailuresIgnoresSamplesThatCannotBeDeserialized() throws IOException {
-		var sample1 = new SampleRecording(List.of(atom(1), atom(2)));
-		var sample2 = new SampleRecording(List.of(atom(1), atom(3)));
-		var sample3 = new SampleRecording(List.of(atom(1), atom(2), atom(3)));
-		var sample4 = new SampleRecording(List.of(atom(2), atom(1)));
+		var sample1 = new SampleRecording(List.of(choice(1), choice(2)));
+		var sample2 = new SampleRecording(List.of(choice(1), choice(3)));
+		var sample3 = new SampleRecording(List.of(choice(1), choice(2), choice(3)));
+		var sample4 = new SampleRecording(List.of(choice(2), choice(1)));
 
 
 		database.saveFailingSample("id1", sample1);
@@ -95,9 +95,9 @@ class FailureDatabaseTests {
 
 	@Example
 	void saveAndDeleteFailure() {
-		var sample1 = new SampleRecording(List.of(atom(1), atom(2)));
-		var sample2 = new SampleRecording(List.of(atom(1), atom(3)));
-		var sample4 = new SampleRecording(List.of(atom(2), atom(1)));
+		var sample1 = new SampleRecording(List.of(choice(1), choice(2)));
+		var sample2 = new SampleRecording(List.of(choice(1), choice(3)));
+		var sample4 = new SampleRecording(List.of(choice(2), choice(1)));
 
 		database.saveFailingSample("id1", sample1);
 		database.saveFailingSample("id1", sample2);
@@ -113,8 +113,8 @@ class FailureDatabaseTests {
 
 	@Example
 	void deleteProperty() {
-		var sample1 = new SampleRecording(List.of(atom(1), atom(2)));
-		var sample2 = new SampleRecording(List.of(atom(1), atom(3)));
+		var sample1 = new SampleRecording(List.of(choice(1), choice(2)));
+		var sample2 = new SampleRecording(List.of(choice(1), choice(3)));
 
 		database.saveFailingSample("id1", sample1);
 		database.saveFailingSample("id1", sample2);
@@ -131,8 +131,8 @@ class FailureDatabaseTests {
 
 	@Example
 	void clear() {
-		var sample1 = new SampleRecording(List.of(atom(1), atom(2)));
-		var sample2 = new SampleRecording(List.of(atom(1), atom(3)));
+		var sample1 = new SampleRecording(List.of(choice(1), choice(2)));
+		var sample2 = new SampleRecording(List.of(choice(1), choice(3)));
 
 		database.saveFailingSample("id1", sample1);
 		database.saveFailingSample("id2", sample2);
@@ -155,8 +155,8 @@ class FailureDatabaseTests {
 
 	@Example
 	void saveFailureInOneGo() {
-		var sample1 = new SampleRecording(List.of(atom(1), atom(2)));
-		var sample2 = new SampleRecording(List.of(atom(1), atom(3)));
+		var sample1 = new SampleRecording(List.of(choice(1), choice(2)));
+		var sample2 = new SampleRecording(List.of(choice(1), choice(3)));
 		Set<SampleRecording> failedSamples = Set.of(sample1, sample2);
 		database.saveFailure("id1", "1234567890", failedSamples);
 
@@ -166,10 +166,10 @@ class FailureDatabaseTests {
 
 	@Example
 	void propertyIds() {
-		var sample1 = new SampleRecording(List.of(atom(1), atom(2)));
-		var sample2 = new SampleRecording(List.of(atom(1), atom(3)));
-		var sample3 = new SampleRecording(List.of(atom(1), atom(4)));
-		var sample4 = new SampleRecording(List.of(atom(1), atom(5)));
+		var sample1 = new SampleRecording(List.of(choice(1), choice(2)));
+		var sample2 = new SampleRecording(List.of(choice(1), choice(3)));
+		var sample3 = new SampleRecording(List.of(choice(1), choice(4)));
+		var sample4 = new SampleRecording(List.of(choice(1), choice(5)));
 
 		database.saveFailingSample("id1", sample1);
 		database.saveFailingSample("id2", sample2);
@@ -193,8 +193,8 @@ class FailureDatabaseTests {
 			String seed = seeds.get(next.getAndIncrement());
 
 			database.saveFailure(propertyId, seed, Set.of(
-				new SampleRecording(List.of(atom(1), atom(2))),
-				new SampleRecording(List.of(atom(3), atom(4)))
+				new SampleRecording(List.of(choice(1), choice(2))),
+				new SampleRecording(List.of(choice(3), choice(4)))
 			));
 
 			// Checking the values uses most of the time

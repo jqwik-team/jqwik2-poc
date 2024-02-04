@@ -3,18 +3,18 @@ package jqwik2.api.recording;
 import java.util.*;
 import java.util.stream.*;
 
-class AtomShrinker {
+class ChoiceShrinker {
 
 	private final Optional<Integer> optionalChoice;
 
-	AtomShrinker(AtomRecording recording) {
+	ChoiceShrinker(ChoiceRecording recording) {
 		this.optionalChoice = recording.optionalChoice();
 	}
 
-	Stream<AtomRecording> shrink() {
+	Stream<ChoiceRecording> shrink() {
 		return optionalChoice.stream()
 							 .flatMap(this::shrinkChoice)
-							 .map(AtomRecording::new);
+							 .map(ChoiceRecording::new);
 	}
 
 	// TODO: Shrink in fibonacci steps from both ends

@@ -5,8 +5,8 @@ class GrowingGenSource extends AbstractGrowingSource {
 	private GrowingSourceContainer currentSource = new GrowingSourceContainer();
 
 	@Override
-	public Atom atom() {
-		return currentSource.get(Atom.class, GrowingAtom::new);
+	public Choice choice() {
+		return currentSource.get(Choice.class, GrowingChoice::new);
 	}
 
 	@Override

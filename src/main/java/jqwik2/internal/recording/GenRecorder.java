@@ -6,7 +6,6 @@ import java.util.stream.*;
 
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
-import jqwik2.internal.*;
 
 public class GenRecorder extends AbstractRecorder<GenSource> {
 
@@ -32,9 +31,9 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 	}
 
 	@Override
-	public Atom atom() {
-		concreteRecorder = new AtomRecorder(source.atom());
-		return (Atom) concreteRecorder;
+	public Choice choice() {
+		concreteRecorder = new ChoiceRecorder(source.choice());
+		return (Choice) concreteRecorder;
 	}
 
 	@Override
@@ -49,22 +48,22 @@ public class GenRecorder extends AbstractRecorder<GenSource> {
 		return (Tuple) concreteRecorder;
 	}
 
-	static class AtomRecorder extends AbstractRecorder<Atom> implements Atom {
+	static class ChoiceRecorder extends AbstractRecorder<Choice> implements Choice {
 
 		private Optional<Integer> optionalChoice = Optional.empty();
 
-		AtomRecorder(Atom source) {
+		ChoiceRecorder(Choice source) {
 			super(source);
 		}
 
 		@Override
-		public Atom atom() {
+		public Choice choice() {
 			return this;
 		}
 
 		@Override
 		Recording recording() {
-			return new AtomRecording(optionalChoice);
+			return new ChoiceRecording(optionalChoice);
 		}
 
 		@Override
@@ -156,7 +155,7 @@ abstract class AbstractRecorder<T extends GenSource> implements GenSource {
 	abstract Recording recording();
 
 	@Override
-	public Atom atom() {
+	public Choice choice() {
 		throw new UnsupportedOperationException("Should never be called");
 	}
 

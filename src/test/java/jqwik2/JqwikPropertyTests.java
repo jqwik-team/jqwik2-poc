@@ -259,12 +259,12 @@ class JqwikPropertyTests {
 		}
 
 		// Add non-fitting recording, which should be ignored
-		sampleRecordings.add(new SampleRecording(list(atom(0))));
+		sampleRecordings.add(new SampleRecording(list(choice(0))));
 
 		// Add sample with too many parts, which should be ignored
 		sampleRecordings.add(new SampleRecording(
 			Recording.tuple(42, 1),
-			atom(0)
+			choice(0)
 		));
 
 		PropertyRunStrategy strategy = PropertyRunStrategy.create(

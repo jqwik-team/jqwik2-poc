@@ -1,5 +1,6 @@
 - From Atom to Choice:
-    - Rename Atom -> Choice, List -> Sequence, Serialization letters
+    - List -> Sequence, Serialization letters
+    - Can the exhaustive sources be replaced by  growing sources?
   
 - JqwikProperty
     - tries = 0 && maxDuration = 0 -> run forever (until interrupted, falsified or genSource exhausted)

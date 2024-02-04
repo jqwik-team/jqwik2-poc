@@ -3,13 +3,13 @@ package jqwik2.internal.growing;
 import jqwik2.api.*;
 import jqwik2.internal.*;
 
-class GrowingAtom extends AbstractGrowingSource implements GenSource.Atom {
-	private Pair<Integer, Integer> choice = null;
+class GrowingChoice extends AbstractGrowingSource implements GenSource.Choice {
+	private Pair<Integer, Integer> choiceMaxAndValue = null;
 	private boolean choiceRequested = false;
 
 	@Override
 	public boolean advance() {
-		if (choice != null && choiceNotExhausted()) {
+		if (choiceMaxAndValue != null && choiceNotExhausted()) {
 			advanceChoice();
 			return true;
 		}
@@ -17,16 +17,16 @@ class GrowingAtom extends AbstractGrowingSource implements GenSource.Atom {
 	}
 
 	private void advanceChoice() {
-		choice = new Pair<>(choice.first(), choice.second() + 1);
+		choiceMaxAndValue = new Pair<>(choiceMaxAndValue.first(), choiceMaxAndValue.second() + 1);
 	}
 
 	private boolean choiceNotExhausted() {
-		return choice.second() < choice.first() - 1;
+		return choiceMaxAndValue.second() < choiceMaxAndValue.first() - 1;
 	}
 
 	@Override
 	public void reset() {
-		choice = null;
+		choiceMaxAndValue = null;
 	}
 
 	@Override
@@ -39,11 +39,11 @@ class GrowingAtom extends AbstractGrowingSource implements GenSource.Atom {
 		if (choiceRequested) {
 			throw new CannotGenerateException("no more choice available");
 		}
-		if (choice == null) {
-			choice = new Pair<>(maxExcluded, 0);
+		if (choiceMaxAndValue == null) {
+			choiceMaxAndValue = new Pair<>(maxExcluded, 0);
 		}
 		choiceRequested = true;
-		return choice.second();
+		return choiceMaxAndValue.second();
 	}
 
 	@Override
@@ -52,7 +52,7 @@ class GrowingAtom extends AbstractGrowingSource implements GenSource.Atom {
 	}
 
 	@Override
-	public Atom atom() {
+	public Choice choice() {
 		return this;
 	}
 }

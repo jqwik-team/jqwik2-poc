@@ -18,7 +18,7 @@ class GrowingSourceContainer implements GrowingSource {
 		if (source == null) {
 			source = genSourceSupplier.get();
 		} else if (!genSourceType.isInstance(source)) {
-			throw new CannotGenerateException("Source is not an atom");
+			throw new CannotGenerateException("Source is not a " + genSourceType.getSimpleName());
 		}
 		resourceRequested = true;
 		return (T) source;

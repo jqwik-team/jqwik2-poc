@@ -25,7 +25,7 @@ public class ListGenerator<T> extends AbstractCollectionGenerator<T, List<T>> {
 	@Override
 	public Optional<ExhaustiveSource<?>> exhaustive() {
 		return ExhaustiveSource.flatMap(
-			ExhaustiveSource.atom(maxSize - minSize),
+			ExhaustiveSource.choice(maxSize - minSize),
 			head -> ExhaustiveSource.list(chooseSize(head), elementGenerator.exhaustive())
 		);
 	}

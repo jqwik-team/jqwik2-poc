@@ -10,10 +10,10 @@ public class EdgeCasesSupport {
 		return Collections.singletonList(Recording.EMPTY);
 	}
 
-	public static Set<Recording> forAtom(int maxChoiceIncluded) {
+	public static Set<Recording> forChoice(int maxChoiceIncluded) {
 		return Set.of(
-			Recording.atom(0),
-			Recording.atom(maxChoiceIncluded)
+			Recording.choice(0),
+			Recording.choice(maxChoiceIncluded)
 		);
 	}
 

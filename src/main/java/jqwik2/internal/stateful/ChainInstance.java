@@ -140,7 +140,7 @@ class ChainInstance<S> implements Chain<S> {
 
 		while (attemptsCounter.getAndIncrement() < MAX_TRANSFORMER_TRIES) {
 			// This is important to not record failing precondition attempts (I think)
-			GenSource.Atom selectTransformationSource = chooseArbitrarySource.atom();
+			GenSource.Choice selectTransformationSource = chooseArbitrarySource.choice();
 			Transformation<S> transformation = transformationGenerator.generate(selectTransformationSource);
 
 			if (!transformation.precondition().test(current)) {

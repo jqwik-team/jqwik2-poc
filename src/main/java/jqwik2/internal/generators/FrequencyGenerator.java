@@ -36,7 +36,7 @@ public class FrequencyGenerator<T> implements Generator<T> {
 		if (frequencies.isEmpty()) {
 			throw new CannotGenerateException("No values to choose from");
 		}
-		int index = source.atom().choose(frequencies.size(), distribution);
+		int index = source.choice().choose(frequencies.size(), distribution);
 		return frequencies.get(index).second();
 	}
 
@@ -46,12 +46,12 @@ public class FrequencyGenerator<T> implements Generator<T> {
 
 	@Override
 	public Iterable<Recording> edgeCases() {
-		return EdgeCasesSupport.forAtom(values.size() - 1);
+		return EdgeCasesSupport.forChoice(values.size() - 1);
 	}
 
 	@Override
 	public Optional<ExhaustiveSource<?>> exhaustive() {
-		return ExhaustiveSource.atom(values.size() - 1);
+		return ExhaustiveSource.choice(values.size() - 1);
 	}
 
 	private class FrequencyBasedDistribution implements RandomChoice.Distribution {

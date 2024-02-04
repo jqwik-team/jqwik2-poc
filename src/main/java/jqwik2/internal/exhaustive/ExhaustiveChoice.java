@@ -3,12 +3,12 @@ package jqwik2.internal.exhaustive;
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
 
-public class ExhaustiveAtom extends AbstractExhaustiveSource<GenSource.Atom> {
+public class ExhaustiveChoice extends AbstractExhaustiveSource<GenSource.Choice> {
 
 	private final Range range;
 	private int currentValue = 0;
 
-	public ExhaustiveAtom(int maxChoiceIncluded) {
+	public ExhaustiveChoice(int maxChoiceIncluded) {
 		this(toRange(maxChoiceIncluded));
 	}
 
@@ -16,7 +16,7 @@ public class ExhaustiveAtom extends AbstractExhaustiveSource<GenSource.Atom> {
 		return new Range(0, maxChoice);
 	}
 
-	public ExhaustiveAtom(Range includedRange) {
+	public ExhaustiveChoice(Range includedRange) {
 		this.range = includedRange;
 		reset();
 	}
@@ -45,17 +45,17 @@ public class ExhaustiveAtom extends AbstractExhaustiveSource<GenSource.Atom> {
 	}
 
 	@Override
-	public ExhaustiveAtom clone() {
-		return new ExhaustiveAtom(range);
+	public ExhaustiveChoice clone() {
+		return new ExhaustiveChoice(range);
 	}
 
 	public Recording recording() {
-		return Recording.atom(currentValue);
+		return Recording.choice(currentValue);
 	}
 
 	@Override
 	public String toString() {
-		return "ExhaustiveAtom{range=%s, recording=%s}".formatted(range, recording());
+		return "ExhaustiveChoice{range=%s, recording=%s}".formatted(range, recording());
 	}
 
 	public record Range(int min, int max) {

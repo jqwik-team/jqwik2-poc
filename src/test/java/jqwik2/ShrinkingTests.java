@@ -73,7 +73,7 @@ public class ShrinkingTests {
 			Recording.tuple(5, 1)
 		);
 		TupleRecording tupleRecording = tuple(
-			atom(3), listRecording
+			choice(3), listRecording
 		);
 		GenSource source = RecordedSource.of(tupleRecording);
 
@@ -128,7 +128,7 @@ public class ShrinkingTests {
 			Recording.tuple(5, 1)
 		);
 		TupleRecording tupleRecording = tuple(
-			atom(3), listRecording
+			choice(3), listRecording
 		);
 		GenSource source = RecordedSource.of(tupleRecording);
 
@@ -162,7 +162,7 @@ public class ShrinkingTests {
 		IntegerGenerator gen2 = new IntegerGenerator(0, 100);
 
 		GenSource source1 = RecordedSource.of(Recording.tuple(9999, 1)); // -9999
-		GenSource source2 = RecordedSource.of(atom(50)); // 50
+		GenSource source2 = RecordedSource.of(choice(50)); // 50
 
 		SampleGenerator sampleGenerator = SampleGenerator.from(gen1, gen2);
 		Sample sample = sampleGenerator.generate(List.of(source1, source2)).orElseThrow();

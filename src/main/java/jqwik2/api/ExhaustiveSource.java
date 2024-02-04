@@ -14,28 +14,28 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 		return Optional.of(any);
 	}
 
-	static ExhaustiveAtom.Range range(int min, int max) {
-		return new ExhaustiveAtom.Range(min, max);
+	static ExhaustiveChoice.Range range(int min, int max) {
+		return new ExhaustiveChoice.Range(min, max);
 	}
 
-	static ExhaustiveAtom.Range value(int value) {
+	static ExhaustiveChoice.Range value(int value) {
 		return range(value, value);
 	}
 
-	static Optional<ExhaustiveSource<?>> atom(int maxChoiceIncluded) {
-		ExhaustiveAtom exhaustiveAtom = new ExhaustiveAtom(maxChoiceIncluded);
-		if (exhaustiveAtom.maxCount() == Exhaustive.INFINITE) {
+	static Optional<ExhaustiveSource<?>> choice(int maxChoiceIncluded) {
+		ExhaustiveChoice exhaustiveChoice = new ExhaustiveChoice(maxChoiceIncluded);
+		if (exhaustiveChoice.maxCount() == Exhaustive.INFINITE) {
 			return Optional.empty();
 		}
-		return Optional.of(exhaustiveAtom);
+		return Optional.of(exhaustiveChoice);
 	}
 
-	static Optional<ExhaustiveSource<?>> atom(ExhaustiveAtom.Range includedRange) {
-		ExhaustiveAtom exhaustiveAtom = new ExhaustiveAtom(includedRange);
-		if (exhaustiveAtom.maxCount() == Exhaustive.INFINITE) {
+	static Optional<ExhaustiveSource<?>> choice(ExhaustiveChoice.Range includedRange) {
+		ExhaustiveChoice exhaustiveChoice = new ExhaustiveChoice(includedRange);
+		if (exhaustiveChoice.maxCount() == Exhaustive.INFINITE) {
 			return Optional.empty();
 		}
-		return Optional.of(exhaustiveAtom);
+		return Optional.of(exhaustiveChoice);
 	}
 
 	@SafeVarargs
@@ -44,8 +44,8 @@ public interface ExhaustiveSource<T extends GenSource> extends Exhaustive<Exhaus
 			return Optional.empty();
 		}
 		@SuppressWarnings("OptionalGetWithoutIsPresent") // It's checked above
-		List<? extends ExhaustiveSource<?>> atomList = Arrays.stream(alternatives).map(Optional::get).toList();
-		ExhaustiveOr exhaustiveOr = new ExhaustiveOr(atomList);
+		List<? extends ExhaustiveSource<?>> alternativesList = Arrays.stream(alternatives).map(Optional::get).toList();
+		ExhaustiveOr exhaustiveOr = new ExhaustiveOr(alternativesList);
 		if (exhaustiveOr.maxCount() == Exhaustive.INFINITE) {
 			return Optional.empty();
 		}

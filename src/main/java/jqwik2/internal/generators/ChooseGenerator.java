@@ -19,17 +19,17 @@ class ChooseGenerator<T> implements Generator<T> {
 		if (values.isEmpty()) {
 			throw new CannotGenerateException("No values to choose from");
 		}
-		int index = source.atom().choose(values.size());
+		int index = source.choice().choose(values.size());
 		return values.get(index);
 	}
 
 	@Override
 	public Iterable<Recording> edgeCases() {
-		return EdgeCasesSupport.forAtom(values.size() - 1);
+		return EdgeCasesSupport.forChoice(values.size() - 1);
 	}
 
 	@Override
 	public Optional<ExhaustiveSource<?>> exhaustive() {
-		return ExhaustiveSource.atom(values.size() - 1);
+		return ExhaustiveSource.choice(values.size() - 1);
 	}
 }

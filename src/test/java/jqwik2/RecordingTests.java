@@ -1,12 +1,8 @@
 package jqwik2;
 
 import java.util.*;
-import java.util.function.*;
 
-import jqwik2.api.*;
 import jqwik2.api.recording.*;
-import jqwik2.internal.*;
-import jqwik2.internal.recording.*;
 
 import net.jqwik.api.*;
 
@@ -28,27 +24,27 @@ class RecordingTests {
 		}
 
 		@Example
-		void atoms() {
-			AtomRecording atom = atom(1);
-			String serialized = atom.serialize();
+		void choices() {
+			ChoiceRecording choice = choice(1);
+			String serialized = choice.serialize();
 			assertThat(serialized).isEqualTo("a[1]");
-			assertThat(Recording.deserialize(serialized)).isEqualTo(atom);
+			assertThat(Recording.deserialize(serialized)).isEqualTo(choice);
 
-			serialized = atom().serialize();
+			serialized = choice().serialize();
 			assertThat(serialized).isEqualTo("a[]");
-			assertThat(Recording.deserialize(serialized)).isEqualTo(atom());
+			assertThat(Recording.deserialize(serialized)).isEqualTo(choice());
 
-			assertSerializeDeserialize(atom(2));
+			assertSerializeDeserialize(choice(2));
 		}
 
 		@Example
 		void lists() {
-			ListRecording list = list(atom(1), atom(2));
+			ListRecording list = list(choice(1), choice(2));
 			String serialized = list.serialize();
 			assertThat(serialized).isEqualTo("l[a[1]:a[2]]");
 			assertThat(Recording.deserialize(serialized)).isEqualTo(list);
 
-			assertSerializeDeserialize(list(atom(123)));
+			assertSerializeDeserialize(list(choice(123)));
 			assertSerializeDeserialize(list());
 		}
 
@@ -65,10 +61,10 @@ class RecordingTests {
 
 		@Example
 		void nestedRecording() {
-			TupleRecording nested = tuple(atom(13), list(
-				atom(99),
-				tuple(atom(3), list(atom(1), atom(2))),
-				list(atom(11), tuple(atom(12), atom(13)))
+			TupleRecording nested = tuple(choice(13), list(
+				choice(99),
+				tuple(choice(3), list(choice(1), choice(2))),
+				list(choice(11), tuple(choice(12), choice(13)))
 			));
 
 			assertSerializeDeserialize(nested);
@@ -77,9 +73,9 @@ class RecordingTests {
 		@Example
 		void sampleRecording() {
 			SampleRecording sample = new SampleRecording(List.of(
-				atom(1),
-				atom(2),
-				atom(3)
+				choice(1),
+				choice(2),
+				choice(3)
 			));
 
 			var serialized = sample.serialize();
@@ -96,94 +92,94 @@ class RecordingTests {
 
 	@Example
 	void compareRecording() {
-		assertThat(atom(2)).isEqualByComparingTo(atom(2));
-		assertThat(atom(2)).isGreaterThan(atom(1));
-		assertThat(atom(1)).isGreaterThan(atom());
-		assertThat(atom()).isLessThan(atom(1));
+		assertThat(choice(2)).isEqualByComparingTo(choice(2));
+		assertThat(choice(2)).isGreaterThan(choice(1));
+		assertThat(choice(1)).isGreaterThan(choice());
+		assertThat(choice()).isLessThan(choice(1));
 
 		assertThat(
-			atom(0).compareTo(list(atom(0)))
+			choice(0).compareTo(list(choice(0)))
 		).isEqualTo(0);
 		assertThat(
-			atom(0).compareTo(tuple(atom(0), atom(0)))
+			choice(0).compareTo(tuple(choice(0), choice(0)))
 		).isEqualTo(0);
 
 
-		assertThat(list(atom(0))).isLessThan(list(atom(1)));
-		assertThat(list(atom(1))).isLessThan(list(atom(0), atom(0)));
+		assertThat(list(choice(0))).isLessThan(list(choice(1)));
+		assertThat(list(choice(1))).isLessThan(list(choice(0), choice(0)));
 		assertThat(
-			list(atom(0)).compareTo(tuple(atom(0), atom(0)))
+			list(choice(0)).compareTo(tuple(choice(0), choice(0)))
 		).isEqualTo(0);
 
 		assertThat(
-			tuple(atom(0), atom(2))
+			tuple(choice(0), choice(2))
 		).isLessThan(
-			tuple(atom(1), atom(1))
+			tuple(choice(1), choice(1))
 		);
 
 		assertThat(
-			tuple(atom(0), atom(2))
+			tuple(choice(0), choice(2))
 		).isLessThan(
-			tuple(atom(2), atom(0))
+			tuple(choice(2), choice(0))
 		);
 
 		assertThat(
-			tuple(atom(1), atom(2))
+			tuple(choice(1), choice(2))
 		).isLessThan(
-			tuple(atom(0), atom(0), atom(0))
+			tuple(choice(0), choice(0), choice(0))
 		);
 	}
 
 	@Example
 	void compareSampleRecordings() {
-		SampleRecording sample = new SampleRecording(atom(2));
+		SampleRecording sample = new SampleRecording(choice(2));
 
-		assertThat(sample).isGreaterThan(new SampleRecording(atom(1)));
-		assertThat(sample).isLessThan(new SampleRecording(atom(3)));
-		assertThat(sample.compareTo(new SampleRecording(atom(2)))).isEqualTo(0);
+		assertThat(sample).isGreaterThan(new SampleRecording(choice(1)));
+		assertThat(sample).isLessThan(new SampleRecording(choice(3)));
+		assertThat(sample.compareTo(new SampleRecording(choice(2)))).isEqualTo(0);
 	}
 
 	@Example
 	void equality() {
-		assertThat(atom(1)).isEqualTo(atom(1));
-		assertThat(atom(1)).isNotEqualTo(atom(2));
+		assertThat(choice(1)).isEqualTo(choice(1));
+		assertThat(choice(1)).isNotEqualTo(choice(2));
 
-		assertThat(list(atom(1))).isEqualTo(list(atom(1)));
-		assertThat(list(atom(1))).isNotEqualTo(list(atom(0)));
+		assertThat(list(choice(1))).isEqualTo(list(choice(1)));
+		assertThat(list(choice(1))).isNotEqualTo(list(choice(0)));
 
-		assertThat(tuple(atom(1), atom(2))).isEqualTo(tuple(atom(1), atom(2)));
-		assertThat(tuple(atom(1), atom(1))).isNotEqualTo(tuple(atom(1), atom(2)));
+		assertThat(tuple(choice(1), choice(2))).isEqualTo(tuple(choice(1), choice(2)));
+		assertThat(tuple(choice(1), choice(1))).isNotEqualTo(tuple(choice(1), choice(2)));
 	}
 
 	@Example
 	void isomorphism() {
 		assertThat(
-			atom(1).isomorphicTo(atom(0))
+			choice(1).isomorphicTo(choice(0))
 		).isTrue();
 
 		assertThat(
-			list(atom(1)).isomorphicTo(list(atom(0)))
+			list(choice(1)).isomorphicTo(list(choice(0)))
 		).isTrue();
 		assertThat(
-			list(atom(1)).isomorphicTo(list(atom(1), atom(1)))
+			list(choice(1)).isomorphicTo(list(choice(1), choice(1)))
 		).isTrue();
 		assertThat(
-			list(atom(0)).isomorphicTo(list(tuple(0)))
+			list(choice(0)).isomorphicTo(list(tuple(0)))
 		).isFalse();
 
 		assertThat(
-			tuple(atom(0), atom(1)).isomorphicTo(tuple(atom(1), atom(2)))
+			tuple(choice(0), choice(1)).isomorphicTo(tuple(choice(1), choice(2)))
 		).isTrue();
 		assertThat(
-			tuple(atom(1), atom(1)).isomorphicTo(tuple(atom(1), list()))
+			tuple(choice(1), choice(1)).isomorphicTo(tuple(choice(1), list()))
 		).isFalse();
 	}
 
 	@Example
 	void isomorphismSampleRecording() {
 		assertThat(
-			new SampleRecording(atom(1))
-				.isomorphicTo(new SampleRecording(atom(0)))
+			new SampleRecording(choice(1))
+				.isomorphicTo(new SampleRecording(choice(0)))
 		).isTrue();
 
 		assertThat(
@@ -192,8 +188,8 @@ class RecordingTests {
 		).isFalse();
 
 		assertThat(
-			new SampleRecording(atom(1), atom(2))
-				.isomorphicTo(new SampleRecording(atom(1)))
+			new SampleRecording(choice(1), choice(2))
+				.isomorphicTo(new SampleRecording(choice(1)))
 		).isFalse();
 	}
 }

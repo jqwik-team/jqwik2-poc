@@ -45,7 +45,7 @@ abstract class AbstractCollectionGenerator<T, C> implements Generator<C> {
 	}
 
 	protected int chooseSize(GenSource head) {
-		GenSource.Atom sizeSource = head.atom();
+		GenSource.Choice sizeSource = head.choice();
 		int sizeRange = maxSize - minSize;
 		return sizeSource.choose(sizeRange + 1) + minSize;
 	}
@@ -58,11 +58,11 @@ abstract class AbstractCollectionGenerator<T, C> implements Generator<C> {
 	private Collection<Recording> edgeCaseRecordings() {
 		Set<Recording> recordings = new LinkedHashSet<>();
 		if (minSize == 0) {
-			recordings.add(tuple(atom(0), Recording.list()));
+			recordings.add(tuple(choice(0), Recording.list()));
 		}
 		if (minSize <= 1 && maxSize >= 1) {
 			elementGenerator.edgeCases().forEach(elementEdgeCase -> {
-				recordings.add(tuple(atom(1), Recording.list(elementEdgeCase)));
+				recordings.add(tuple(choice(1), Recording.list(elementEdgeCase)));
 			});
 		}
 		return recordings;

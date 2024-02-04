@@ -4,7 +4,6 @@ import java.util.*;
 
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
-import jqwik2.internal.*;
 import jqwik2.internal.generators.*;
 import jqwik2.internal.recording.*;
 
@@ -37,12 +36,12 @@ class EdgeCasesTests {
 
 		IntegerGenerator smallPositiveInts = new IntegerGenerator(10, Integer.MAX_VALUE);
 		// RecordedSource has state and must be recreated for each test
-		maxValueSource = RecordedSource.of(atom(Integer.MAX_VALUE - 10));
+		maxValueSource = RecordedSource.of(choice(Integer.MAX_VALUE - 10));
 		assertThat(smallPositiveInts.generate(maxValueSource)).isEqualTo(Integer.MAX_VALUE);
 
 		IntegerGenerator smallNegativeInts = new IntegerGenerator(Integer.MIN_VALUE, -10);
 		// RecordedSource has state and must be recreated for each test
-		maxValueSource = RecordedSource.of(atom(Integer.MAX_VALUE - 9));
+		maxValueSource = RecordedSource.of(choice(Integer.MAX_VALUE - 9));
 		assertThat(smallNegativeInts.generate(maxValueSource)).isEqualTo(Integer.MIN_VALUE);
 	}
 

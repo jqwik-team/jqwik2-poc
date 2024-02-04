@@ -3,13 +3,13 @@ package jqwik2.api.recording;
 import java.util.*;
 import java.util.stream.*;
 
-public record AtomRecording(Optional<Integer> optionalChoice) implements Recording {
+public record ChoiceRecording(Optional<Integer> optionalChoice) implements Recording {
 
-	public AtomRecording(int choice) {
+	public ChoiceRecording(int choice) {
 		this(Optional.of(choice));
 	}
 
-	public AtomRecording {
+	public ChoiceRecording {
 		optionalChoice.ifPresent( choice -> {
 			if (choice < 0) {
 				throw new IllegalArgumentException("A choice must be >= 0");
@@ -19,26 +19,26 @@ public record AtomRecording(Optional<Integer> optionalChoice) implements Recordi
 
 	@Override
 	public Stream<? extends Recording> shrink() {
-		return new AtomShrinker(this).shrink();
+		return new ChoiceShrinker(this).shrink();
 	}
 
 	@Override
 	public int compareTo(Recording other) {
-		if (other instanceof AtomRecording otherAtomic) {
-			return compareAtoms(this, otherAtomic);
+		if (other instanceof ChoiceRecording otherChoice) {
+			return compareChoices(this, otherChoice);
 		}
 		return 0;
 	}
 
 	@Override
 	public boolean isomorphicTo(Recording other) {
-		if (other instanceof AtomRecording atom) {
-			return this.optionalChoice.isPresent() == atom.optionalChoice.isPresent();
+		if (other instanceof ChoiceRecording otherChoice) {
+			return this.optionalChoice.isPresent() == otherChoice.optionalChoice.isPresent();
 		}
 		return false;
 	}
 
-	private int compareAtoms(AtomRecording left, AtomRecording right) {
+	private int compareChoices(ChoiceRecording left, ChoiceRecording right) {
 		if (left.optionalChoice.isEmpty()) {
 			if (right.optionalChoice.isEmpty()) {
 				return 0;

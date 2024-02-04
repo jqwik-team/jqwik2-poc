@@ -18,7 +18,7 @@ public abstract sealed class RecordedSource<T extends Recording> implements GenS
 		return switch (recording) {
 			case ListRecording listRecording -> new RecordedList(listRecording, backUpSource);
 			case TupleRecording tupleRecording -> new RecordedTuple(tupleRecording, backUpSource);
-			case AtomRecording atomRecording -> new RecordedAtom(atomRecording, backUpSource);
+			case ChoiceRecording choiceRecording -> new RecordedChoice(choiceRecording, backUpSource);
 			case null -> throw new IllegalArgumentException("Recording must not be null");
 		};
 	}
@@ -29,8 +29,8 @@ public abstract sealed class RecordedSource<T extends Recording> implements GenS
 	}
 
 	@Override
-	public Atom atom() {
-		throw new CannotGenerateException("Source is not an atom");
+	public Choice choice() {
+		throw new CannotGenerateException("Source is not a choice");
 	}
 
 	@Override
@@ -103,17 +103,17 @@ public abstract sealed class RecordedSource<T extends Recording> implements GenS
 		}
 	}
 
-	private static final class RecordedAtom extends RecordedSource<AtomRecording> implements GenSource.Atom {
+	private static final class RecordedChoice extends RecordedSource<ChoiceRecording> implements Choice {
 
 		private final Iterator<Integer> noneOrOneChoice;
 
-		private RecordedAtom(AtomRecording recording, GenSource backUpSource) {
+		private RecordedChoice(ChoiceRecording recording, GenSource backUpSource) {
 			super(recording, backUpSource);
 			noneOrOneChoice = recording.optionalChoice().stream().iterator();
 		}
 
 		@Override
-		public Atom atom() {
+		public Choice choice() {
 			return this;
 		}
 
@@ -126,7 +126,7 @@ public abstract sealed class RecordedSource<T extends Recording> implements GenS
 				return noneOrOneChoice.next() % maxExcluded;
 			} else {
 				if (backUpSource != null) {
-					return backUpSource.atom().choose(maxExcluded);
+					return backUpSource.choice().choose(maxExcluded);
 				}
 				throw new CannotGenerateException("No more choices!");
 			}

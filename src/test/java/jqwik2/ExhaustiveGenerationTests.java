@@ -21,7 +21,7 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void exhaustiveAtom() {
-			ExhaustiveAtom atom = (ExhaustiveAtom) ExhaustiveSource.atom(3).get();
+			ExhaustiveChoice atom = (ExhaustiveChoice) ExhaustiveSource.choice(3).get();
 			assertThat(atom.maxCount()).isEqualTo(4L);
 
 			assertAtom(atom, 0);
@@ -37,7 +37,7 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void exhaustiveAtomWithRange() {
-			ExhaustiveAtom atom = (ExhaustiveAtom) ExhaustiveSource.atom(new ExhaustiveAtom.Range(2, 5)).get();
+			ExhaustiveChoice atom = (ExhaustiveChoice) ExhaustiveSource.choice(new ExhaustiveChoice.Range(2, 5)).get();
 			assertThat(atom.maxCount()).isEqualTo(4L);
 
 			assertAtom(atom, 2);
@@ -53,8 +53,8 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void twoConcatenatedExhaustiveAtoms() {
-			ExhaustiveAtom first = (ExhaustiveAtom) ExhaustiveSource.atom(2).get();
-			ExhaustiveAtom second = (ExhaustiveAtom) ExhaustiveSource.atom(1).get();
+			ExhaustiveChoice first = (ExhaustiveChoice) ExhaustiveSource.choice(2).get();
+			ExhaustiveChoice second = (ExhaustiveChoice) ExhaustiveSource.choice(1).get();
 
 			first.chain(second);
 			assertThat(first.maxCount()).isEqualTo(6L);
@@ -87,7 +87,7 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void exhaustiveAtomWithRanges() {
-			ExhaustiveAtom atom = (ExhaustiveAtom) ExhaustiveSource.atom(range(2, 7)).get();
+			ExhaustiveChoice atom = (ExhaustiveChoice) ExhaustiveSource.choice(range(2, 7)).get();
 			assertThat(atom.maxCount()).isEqualTo(6L);
 
 			assertAtom(atom, 2);
@@ -105,9 +105,9 @@ class ExhaustiveGenerationTests {
 		void orAtom() {
 
 			ExhaustiveOr atom = (ExhaustiveOr) ExhaustiveSource.or(
-				atom(range(0, 1)),
-				atom(range(0, 2)),
-				atom(value(42))
+				choice(range(0, 1)),
+				choice(range(0, 2)),
+				choice(value(42))
 			).get();
 
 			assertThat(atom.maxCount()).isEqualTo(6L);
@@ -160,17 +160,17 @@ class ExhaustiveGenerationTests {
 			});
 		}
 
-		private static void assertAtom(ExhaustiveAtom exhaustiveAtom, int... expected) {
-			GenSource.Atom fixed = exhaustiveAtom.current();
+		private static void assertAtom(ExhaustiveChoice exhaustiveAtom, int... expected) {
+			GenSource.Choice fixed = exhaustiveAtom.current();
 			assertAtom(expected, fixed);
 		}
 
 		private static void assertAtom(ExhaustiveOr exhaustiveAtom, int... expected) {
-			GenSource.Atom fixed = (GenSource.Atom) exhaustiveAtom.current();
+			GenSource.Choice fixed = (GenSource.Choice) exhaustiveAtom.current();
 			assertAtom(expected, fixed);
 		}
 
-		private static void assertAtom(int[] expected, GenSource.Atom fixed) {
+		private static void assertAtom(int[] expected, GenSource.Choice fixed) {
 			for (int i = 0; i < expected.length; i++) {
 				assertThat(fixed.choose(Integer.MAX_VALUE))
 					.describedAs("Expected %d at position %d", expected[i], i)
@@ -184,7 +184,7 @@ class ExhaustiveGenerationTests {
 	class ExhaustiveTrees {
 		@Example
 		void exhaustiveList() {
-			ExhaustiveSource<?> list = ExhaustiveSource.list(2, atom(2)).get();
+			ExhaustiveSource<?> list = ExhaustiveSource.list(2, choice(2)).get();
 			assertThat(list.maxCount()).isEqualTo(9L);
 
 			assertList(list, 0, 0);
@@ -210,7 +210,7 @@ class ExhaustiveGenerationTests {
 
 		@Example
 		void exhaustiveEmptyList() {
-			ExhaustiveSource<?> list = ExhaustiveSource.list(0, atom(2)).get();
+			ExhaustiveSource<?> list = ExhaustiveSource.list(0, choice(2)).get();
 			assertThat(list.maxCount()).isEqualTo(1L);
 			assertThat(list.advance()).isFalse();
 		}
@@ -218,7 +218,7 @@ class ExhaustiveGenerationTests {
 		private void assertList(ExhaustiveSource<?> list, int... expected) {
 			GenSource.List fixedList = (GenSource.List) list.current();
 			for (int i = 0; i < expected.length; i++) {
-				var atom = fixedList.nextElement().atom();
+				var atom = fixedList.nextElement().choice();
 				assertThat(atom.choose(Integer.MAX_VALUE))
 					.describedAs("Expected %d at position %d", expected[i], i)
 					.isEqualTo(expected[i]);
@@ -228,8 +228,8 @@ class ExhaustiveGenerationTests {
 		@Example
 		void exhaustiveFlatMap() {
 			ExhaustiveFlatMap exhaustiveFlatMap = (ExhaustiveFlatMap) ExhaustiveSource.flatMap(
-				ExhaustiveSource.atom(2),
-				head -> list(head.atom().choose(3), atom(2))
+				ExhaustiveSource.choice(2),
+				head -> list(head.choice().choose(3), choice(2))
 			).get();
 
 			assertThat(exhaustiveFlatMap.maxCount()).isEqualTo(13L);
@@ -267,7 +267,7 @@ class ExhaustiveGenerationTests {
 
 		private void assertFlatMap(ExhaustiveFlatMap exhaustiveFlatMap, int... expected) {
 			GenSource.Tuple tuple = exhaustiveFlatMap.current();
-			int head = tuple.nextValue().atom().choose(Integer.MAX_VALUE);
+			int head = tuple.nextValue().choice().choose(Integer.MAX_VALUE);
 
 			assertThat(head)
 				.describedAs("Expected %d as head", expected[0])
@@ -276,7 +276,7 @@ class ExhaustiveGenerationTests {
 			GenSource.List list = tuple.nextValue().list();
 
 			for (int i = 0; i < head; i++) {
-				var atom = list.nextElement().atom();
+				var atom = list.nextElement().choice();
 				assertThat(atom.choose(Integer.MAX_VALUE))
 					.describedAs("Expected %d at position %d", expected[i + 1], i)
 					.isEqualTo(expected[i + 1]);

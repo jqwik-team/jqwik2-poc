@@ -303,8 +303,8 @@ class GeneratorTests {
 			// List.of(3, 3)
 			GenSource source = RecordedSource.of(
 				tuple(
-					atom(2),
-					tuple(atom(0), list(atom(3), atom(3)))
+					choice(2),
+					tuple(choice(0), list(choice(3), choice(3)))
 				)
 			);
 
@@ -699,21 +699,21 @@ class GeneratorTests {
 			GenRecorder recorder = new GenRecorder(source);
 
 			GenSource.Tuple tuple = recorder.tuple();
-			tuple.nextValue().atom().choose(5);
-			tuple.nextValue().atom().choose(5);
+			tuple.nextValue().choice().choose(5);
+			tuple.nextValue().choice().choose(5);
 
 			GenSource.List list = tuple.nextValue().list();
-			list.nextElement().atom().choose(10);
-			list.nextElement().atom().choose(10);
-			list.nextElement().atom().choose(10);
+			list.nextElement().choice().choose(10);
+			list.nextElement().choice().choose(10);
+			list.nextElement().choice().choose(10);
 
 			// System.out.println(recorder.recording());
 
 			assertThat(recorder.recording()).isEqualTo(
 				Recording.tuple(
-					atom(2),
-					atom(1),
-					list(atom(8), atom(8), atom(4))
+					choice(2),
+					choice(1),
+					list(choice(8), choice(8), choice(4))
 				)
 			);
 		}
@@ -741,7 +741,7 @@ class GeneratorTests {
 			}).isInstanceOf(CannotGenerateException.class);
 
 			assertThatThrownBy(() -> {
-				GenSource recorded = RecordedSource.of(atom(100));
+				GenSource recorded = RecordedSource.of(choice(100));
 				ints.generate(recorded);
 			}).isInstanceOf(CannotGenerateException.class);
 
@@ -754,7 +754,7 @@ class GeneratorTests {
 
 			assertThatThrownBy(() -> {
 				GenSource recorded = RecordedSource.of(tuple(
-					atom(3), list(atom(10))
+					choice(3), list(choice(10))
 				));
 				listOfInts.generate(recorded);
 			}).isInstanceOf(CannotGenerateException.class);
@@ -766,7 +766,7 @@ class GeneratorTests {
 			Generator<List<Integer>> listOfInts = ints.list(0, 5);
 
 			Recording recording = tuple(
-				atom(3), list(atom(10))
+				choice(3), list(choice(10))
 			);
 
 			GenSource backUpSource = new RandomGenSource("42");
