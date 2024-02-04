@@ -1,6 +1,8 @@
 package jqwik2;
 
+import java.time.*;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 
 import jqwik2.api.Arbitrary;
@@ -12,6 +14,7 @@ import jqwik2.internal.growing.*;
 
 import net.jqwik.api.*;
 
+import static jqwik2.api.PropertyRunResult.Status.*;
 import static org.assertj.core.api.Assertions.*;
 
 class GrowingGenerationTests {
@@ -47,6 +50,29 @@ class GrowingGenerationTests {
 			});
 		}
 		assertThat(values).hasSize(16);
+	}
+
+	@Example
+	@Disabled("Currently only generates a single example")
+	void sampleInConcurrentThreads() {
+		List<Generator<?>> generators = List.of(
+			BaseGenerators.integers(Integer.MIN_VALUE, Integer.MAX_VALUE),
+			BaseGenerators.choose(List.of("a", "b", "c"))
+		);
+
+		AtomicInteger counter = new AtomicInteger(0);
+		Tryable tryable = Tryable.from( args -> {
+			counter.incrementAndGet();
+			System.out.println(args);
+			return counter.get() < 10;
+		});
+		var propertyCase = new PropertyCase(generators, tryable);
+
+		var result = propertyCase.run(PropertyRunConfiguration.growing(
+			10000, false, Duration.ofMinutes(1), Executors::newCachedThreadPool
+		));
+
+		assertThat(result.status()).isEqualTo(FAILED);
 	}
 
 	@Example

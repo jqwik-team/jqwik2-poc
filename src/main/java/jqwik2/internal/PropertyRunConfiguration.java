@@ -8,6 +8,7 @@ import java.util.function.*;
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
 import jqwik2.internal.exhaustive.*;
+import jqwik2.internal.growing.*;
 
 public interface PropertyRunConfiguration {
 
@@ -73,6 +74,21 @@ public interface PropertyRunConfiguration {
 			() -> new GuidedGenerationSource(guidanceSupplier)
 		);
 	}
+
+	static PropertyRunConfiguration growing(
+		int maxTries, boolean shrinkingEnabled,
+		Duration maxRuntime,
+		Supplier<ExecutorService> supplyExecutorService
+	) {
+		return new RunConfigurationRecord(
+			null, maxTries,
+			shrinkingEnabled,
+			maxRuntime,
+			supplyExecutorService,
+			IterableGrowingSource::new
+		);
+	}
+
 
 	private static IterableSampleSource randomSource(String seed) {
 		return seed == null

@@ -1,5 +1,5 @@
-- From Atom to Choice:
-    - List -> Sequence, Serialization letters
+- Growing Generation Source
+    - Use with PropertyCase.run() -> GrowingGenerationTests.sampleInConcurrentThreads()
     - Can the exhaustive sources be replaced by  growing sources?
   
 - JqwikProperty
