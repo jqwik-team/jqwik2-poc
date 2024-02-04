@@ -24,6 +24,10 @@ public sealed interface Recording extends Comparable<Recording>
 		return new AtomRecording(choice);
 	}
 
+	static AtomRecording atom() {
+		return new AtomRecording(Optional.empty());
+	}
+
 	static ListRecording list(Recording... elements) {
 		return list(Arrays.asList(elements));
 	}

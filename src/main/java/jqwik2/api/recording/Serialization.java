@@ -3,6 +3,8 @@ package jqwik2.api.recording;
 import java.util.*;
 import java.util.stream.*;
 
+import static jqwik2.api.recording.Recording.*;
+
 class Serialization {
 
 	public static final char ATOM = 'a';
@@ -47,7 +49,11 @@ class Serialization {
 			throw new IllegalArgumentException("Invalid serialized tuple recording: " + serialized);
 		}
 		String elementsPart = serializedContents(serialized);
-		return new TupleRecording(deserializeParts(elementsPart));
+		var parts = deserializeParts(elementsPart);
+		if (parts.isEmpty()) {
+			return EMPTY;
+		}
+		return new TupleRecording(parts);
 	}
 
 	private static List<Recording> deserializeParts(String partsString) {
@@ -96,7 +102,9 @@ class Serialization {
 									  .filter(s -> !s.isBlank())
 									  .map(Integer::parseInt)
 									  .toList();
-		if (choices.isEmpty()) return Recording.EMPTY;
+		if (choices.isEmpty()) {
+			return new AtomRecording(Optional.empty());
+		}
 		return new AtomRecording(choices.getFirst());
 	}
 

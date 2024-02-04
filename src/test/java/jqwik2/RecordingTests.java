@@ -1,8 +1,12 @@
 package jqwik2;
 
 import java.util.*;
+import java.util.function.*;
 
+import jqwik2.api.*;
 import jqwik2.api.recording.*;
+import jqwik2.internal.*;
+import jqwik2.internal.recording.*;
 
 import net.jqwik.api.*;
 
@@ -20,8 +24,7 @@ class RecordingTests {
 		void empty() {
 			String serialized = EMPTY.serialize();
 			assertThat(serialized).isEqualTo("t[]");
-			assertThat(Recording.deserialize(serialized))
-				.isEqualTo(EMPTY);
+			assertThat(Recording.deserialize(serialized)).isSameAs(EMPTY);
 		}
 
 		@Example
@@ -30,6 +33,10 @@ class RecordingTests {
 			String serialized = atom.serialize();
 			assertThat(serialized).isEqualTo("a[1]");
 			assertThat(Recording.deserialize(serialized)).isEqualTo(atom);
+
+			serialized = atom().serialize();
+			assertThat(serialized).isEqualTo("a[]");
+			assertThat(Recording.deserialize(serialized)).isEqualTo(atom());
 
 			assertSerializeDeserialize(atom(2));
 		}
