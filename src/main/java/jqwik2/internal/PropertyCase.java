@@ -225,7 +225,12 @@ public class PropertyCase {
 					onFalsified.accept(originalSample);
 					if (stopWhenFalsified) {
 						shutdown.shutdown();
-						guidance.stop();
+						try {
+							generationLock.lock();
+							guidance.stop();
+						} finally {
+							generationLock.unlock();
+						}
 					}
 				}
 				if (tryResult.status() == TryExecutionResult.Status.SATISFIED) {

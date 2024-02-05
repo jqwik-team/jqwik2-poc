@@ -386,4 +386,26 @@ class JqwikPropertyTests {
 		assertThat(checkingResult.countChecks()).isEqualTo(checkingResult.countTries());
 	}
 
+	@Example
+	void failedTryWillStopEndlessRunningProperty() {
+		var checkingProperty = new JqwikProperty()
+								  .withMaxTries(0)
+								  .withMaxRuntime(Duration.ZERO);
+
+		AtomicInteger counter = new AtomicInteger();
+		PropertyRunResult checkingResult = checkingProperty.forAll(Numbers.integers())
+														   .verify(i -> {
+															   // System.out.println(counter.get());
+															   Thread.sleep(5);
+															   counter.incrementAndGet();
+															   assertThat(counter.get()).isLessThan(100);
+														   });
+
+		// TODO: Should take about 0.5 seconds (100 * 5ms) but takes langer.
+		//  Somehow the sleep() makes it slower and slower
+		assertThat(checkingResult.isFailed()).isTrue();
+		assertThat(checkingResult.countTries()).isGreaterThan(1);
+		assertThat(checkingResult.countChecks()).isEqualTo(checkingResult.countTries());
+	}
+
 }
