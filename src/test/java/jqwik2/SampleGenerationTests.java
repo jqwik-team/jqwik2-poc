@@ -52,6 +52,25 @@ class SampleGenerationTests {
 	}
 
 	@Example
+	void sampleGeneratorCanFilterOutDuplicates() {
+		Generator<Integer> ints = new IntegerGenerator(-10, 10);
+		Generator<List<Integer>> lists = new ListGenerator<>(ints, 0, 3);
+
+		List<Sample> allSamples = new ArrayList<>();
+
+		RandomGenSource randomGenSource = new RandomGenSource();
+		SampleGenerator sampleGenerator = SampleGenerator.from(ints, lists);
+		sampleGenerator.filterOutDuplicates();
+		for (int i = 0; i < 1000; i++) {
+			List<GenSource> sources = List.of(randomGenSource.split(), randomGenSource.split());
+			sampleGenerator.generate(sources).ifPresent(allSamples::add);
+		}
+
+		assertThat(allSamples).doesNotHaveDuplicates();
+	}
+
+
+	@Example
 	void useRandomSampleGeneratorWithEdgeCases() {
 		Generator<Integer> ints = new IntegerGenerator(-100, 100);
 		Generator<Integer> withEdgeCases = WithEdgeCasesDecorator.decorate(ints, 0.9, 10);

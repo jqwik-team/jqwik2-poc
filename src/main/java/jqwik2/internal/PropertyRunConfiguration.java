@@ -26,34 +26,39 @@ public interface PropertyRunConfiguration {
 
 	IterableSampleSource source();
 
+	boolean filterOutDuplicateSamples();
+
 	static PropertyRunConfiguration randomized(String seed, int maxTries) {
 		return randomized(
 			seed, maxTries, true,
 			Duration.ofMinutes(10),
+			false,
 			DEFAULT_EXECUTOR_SERVICE_SUPPLIER
 		);
 	}
 
 	static PropertyRunConfiguration randomized(
-		String seed, int maxTries, boolean shrinkingEnabled
+		String seed, int maxTries, boolean shrinkingEnabled, boolean filterOutDuplicateSamples
 	) {
 		return randomized(
 			seed, maxTries,
 			shrinkingEnabled,
 			Duration.ofSeconds(10),
+			filterOutDuplicateSamples,
 			Executors::newSingleThreadExecutor
 		);
 	}
 
 	static PropertyRunConfiguration randomized(
 		String seed, int maxTries, boolean shrinkingEnabled,
-		Duration maxRuntime,
+		Duration maxRuntime, boolean filterOutDuplicateSamples,
 		Supplier<ExecutorService> supplyExecutorService
 	) {
 		return new RunConfigurationRecord(
 			seed, maxTries,
 			shrinkingEnabled,
 			maxRuntime,
+			filterOutDuplicateSamples,
 			supplyExecutorService,
 			() -> randomSource(seed)
 		);
@@ -70,6 +75,7 @@ public interface PropertyRunConfiguration {
 			maxTries,
 			shrinkingEnabled,
 			maxRuntime,
+			false,
 			supplyExecutorService,
 			() -> new GuidedGenerationSource(guidanceSupplier)
 		);
@@ -82,6 +88,7 @@ public interface PropertyRunConfiguration {
 			null, maxTries,
 			shrinkingEnabled,
 			maxRuntime,
+			true,
 			Executors::newSingleThreadExecutor,
 			IterableGrowingSource::new
 		);
@@ -109,6 +116,7 @@ public interface PropertyRunConfiguration {
 			null, maxTries,
 			false,
 			maxRuntime,
+			false,
 			supplyExecutorService,
 			() -> sampleSources
 		);
@@ -116,18 +124,23 @@ public interface PropertyRunConfiguration {
 
 	static PropertyRunConfiguration smart(
 		String seed, int maxTries, Duration maxRuntime,
-		boolean shrinkingEnabled,
+		boolean shrinkingEnabled, boolean filterOutDuplicateSamples,
 		Supplier<ExecutorService> supplyExecutorService,
 		List<Generator<?>> generators
 	) {
 		var exhaustive = IterableExhaustiveSource.from(generators);
 		if (exhaustive.isEmpty() || exhaustive.get().maxCount() > maxTries) {
-			return randomized(seed, maxTries, shrinkingEnabled, maxRuntime, supplyExecutorService);
+			return randomized(
+				seed, maxTries,
+				shrinkingEnabled, maxRuntime, filterOutDuplicateSamples,
+				supplyExecutorService
+			);
 		}
 		return new RunConfigurationRecord(
 			null, maxTries,
 			false,
 			maxRuntime,
+			filterOutDuplicateSamples,
 			supplyExecutorService,
 			exhaustive::get
 		);
@@ -144,6 +157,7 @@ public interface PropertyRunConfiguration {
 			null, samples.size(),
 			shrinkingEnabled,
 			maxRuntime,
+			false,
 			defaultExecutorServiceSupplier,
 			() -> sampleSource
 		);

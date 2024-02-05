@@ -11,6 +11,8 @@ public class SampleGenerator {
 	}
 
 	private final List<Generator<Object>> generators;
+	private final Set<Sample> generatedSamples = new HashSet<>();
+	private boolean filterOutDuplicates = false;
 
 	public SampleGenerator(List<Generator<Object>> generators) {
 		this.generators = generators;
@@ -27,7 +29,14 @@ public class SampleGenerator {
 		} catch (CannotGenerateException cge) {
 			return Optional.empty();
 		}
-		return Optional.of(new Sample(shrinkables));
+		var sample = new Sample(shrinkables);
+		if (filterOutDuplicates) {
+			if (generatedSamples.contains(sample)) {
+				return Optional.empty();
+			}
+			generatedSamples.add(sample);
+		}
+		return Optional.of(sample);
 	}
 
 	private static List<Generator<Object>> toObjectGenerators(List<Generator<?>> generators) {
@@ -44,4 +53,11 @@ public class SampleGenerator {
 		return generate(SampleSource.of(sources));
 	}
 
+	public void filterOutDuplicates(boolean filterOutDuplicates) {
+		this.filterOutDuplicates = filterOutDuplicates;
+	}
+
+	public void filterOutDuplicates() {
+		filterOutDuplicates(true);
+	}
 }

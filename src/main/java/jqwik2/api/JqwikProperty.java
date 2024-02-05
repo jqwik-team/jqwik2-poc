@@ -126,6 +126,7 @@ public class JqwikProperty {
 				strategy.maxTries(),
 				isShrinkingEnabled(),
 				strategy.maxRuntime(),
+				strategy.filterOutDuplicateSamples(),
 				PropertyRunConfiguration.DEFAULT_EXECUTOR_SERVICE_SUPPLIER
 			);
 			case EXHAUSTIVE -> PropertyRunConfiguration.exhaustive(
@@ -139,6 +140,7 @@ public class JqwikProperty {
 				strategy.maxTries(),
 				strategy.maxRuntime(),
 				isShrinkingEnabled(),
+				strategy.filterOutDuplicateSamples(),
 				PropertyRunConfiguration.DEFAULT_EXECUTOR_SERVICE_SUPPLIER,
 				generators
 			);
@@ -178,6 +180,7 @@ public class JqwikProperty {
 		PropertyRunStrategy clonedStrategy = PropertyRunStrategy.create(
 			maxTries,
 			strategy.maxRuntime(),
+			strategy.filterOutDuplicateSamples(),
 			strategy.seedSupplier(),
 			strategy.samples(),
 			strategy.shrinking(),
@@ -192,6 +195,7 @@ public class JqwikProperty {
 		PropertyRunStrategy clonedStrategy = PropertyRunStrategy.create(
 			strategy.maxTries(),
 			maxRuntime,
+			strategy.filterOutDuplicateSamples(),
 			strategy.seedSupplier(),
 			strategy.samples(),
 			strategy.shrinking(),
@@ -206,6 +210,7 @@ public class JqwikProperty {
 		PropertyRunStrategy clonedStrategy = PropertyRunStrategy.create(
 			strategy.maxTries(),
 			strategy.maxRuntime(),
+			strategy.filterOutDuplicateSamples(),
 			strategy.seedSupplier(),
 			strategy.samples(),
 			strategy.shrinking(),
@@ -220,6 +225,7 @@ public class JqwikProperty {
 		PropertyRunStrategy clonedStrategy = PropertyRunStrategy.create(
 			strategy.maxTries(),
 			strategy.maxRuntime(),
+			strategy.filterOutDuplicateSamples(),
 			strategy.seedSupplier(),
 			strategy.samples(),
 			strategy.shrinking(),

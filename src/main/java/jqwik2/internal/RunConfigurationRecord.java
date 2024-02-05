@@ -11,6 +11,7 @@ record RunConfigurationRecord(
 	String seed, int maxTries,
 	boolean shrinkingEnabled,
 	Duration maxRuntime,
+	boolean filterOutDuplicateSamples,
 	Supplier<ExecutorService> supplyExecutorService,
 	Supplier<IterableSampleSource> supplySource
 ) implements PropertyRunConfiguration {

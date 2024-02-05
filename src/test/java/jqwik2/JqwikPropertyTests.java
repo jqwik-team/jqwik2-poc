@@ -174,7 +174,7 @@ class JqwikPropertyTests {
 	@Example
 	void generationMode_EXHAUSTIVE() {
 		PropertyRunStrategy strategy = PropertyRunStrategy.create(
-			100, Duration.ofMinutes(10), null,
+			100, Duration.ofMinutes(10), false, null,
 			List.of(),
 			PropertyRunStrategy.ShrinkingMode.OFF,
 			PropertyRunStrategy.GenerationMode.EXHAUSTIVE,
@@ -200,7 +200,7 @@ class JqwikPropertyTests {
 	@Example
 	void generationMode_SMART() {
 		PropertyRunStrategy strategy = PropertyRunStrategy.create(
-			100, Duration.ofMinutes(10), RandomChoice::generateRandomSeed,
+			100, Duration.ofMinutes(10), true, RandomChoice::generateRandomSeed,
 			List.of(),
 			PropertyRunStrategy.ShrinkingMode.OFF,
 			PropertyRunStrategy.GenerationMode.SMART,
@@ -228,7 +228,7 @@ class JqwikPropertyTests {
 	@Example
 	void edgeCasesMode_MIXIN() {
 		PropertyRunStrategy strategy = PropertyRunStrategy.create(
-			1000, Duration.ofMinutes(10), RandomChoice::generateRandomSeed,
+			1000, Duration.ofMinutes(10), true, RandomChoice::generateRandomSeed,
 			List.of(),
 			PropertyRunStrategy.ShrinkingMode.OFF,
 			PropertyRunStrategy.GenerationMode.SMART,
@@ -269,7 +269,7 @@ class JqwikPropertyTests {
 		));
 
 		PropertyRunStrategy strategy = PropertyRunStrategy.create(
-			1000, Duration.ofMinutes(10), RandomChoice::generateRandomSeed,
+			1000, Duration.ofMinutes(10), true, RandomChoice::generateRandomSeed,
 			sampleRecordings,
 			PropertyRunStrategy.ShrinkingMode.OFF,
 			PropertyRunStrategy.GenerationMode.SAMPLES,

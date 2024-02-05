@@ -1,5 +1,4 @@
 - JqwikProperty
-    - Allow suppression of duplicate samples
     - Report all falsified samples, checks, tries, effective seed
     - AfterFailureMode.SAMPLES_THEN_REPLAY
     - AfterFailureMode.ANALYZE: Find as many failing samples as possible and

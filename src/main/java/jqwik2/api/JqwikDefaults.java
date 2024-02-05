@@ -44,4 +44,8 @@ public class JqwikDefaults {
 	static PropertyRunStrategy.AfterFailureMode defaultAfterFailureMode() {
 		return PropertyRunStrategy.AfterFailureMode.SAMPLES_ONLY;
 	}
+
+	static boolean defaultFilterOutDuplicateSamples() {
+		return true;
+	}
 }

@@ -29,7 +29,7 @@ class RunningPropertyTests {
 		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
-			randomized("42", 10, false)
+			randomized("42", 10, false, false)
 		);
 		assertThat(result.status()).isEqualTo(Status.SUCCESSFUL);
 		assertThat(result.countTries()).isEqualTo(10);
@@ -51,7 +51,7 @@ class RunningPropertyTests {
 		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
-			randomized("42", 10, false)
+			randomized("42", 10, false, false)
 		);
 		assertThat(result.status()).isEqualTo(Status.SUCCESSFUL);
 		assertThat(result.countTries()).isEqualTo(10);
@@ -72,7 +72,7 @@ class RunningPropertyTests {
 		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
-			randomized("42", 10, false)
+			randomized("42", 10, false, false)
 		);
 		assertThat(result.status()).isEqualTo(Status.SUCCESSFUL);
 		assertThat(result.countTries()).isEqualTo(10);
@@ -94,7 +94,7 @@ class RunningPropertyTests {
 		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
-			randomized("42", 10, false)
+			randomized("42", 10, false, false)
 		);
 		assertThat(result.status()).isEqualTo(Status.FAILED);
 		assertThat(result.countTries()).isEqualTo(1);
@@ -117,7 +117,7 @@ class RunningPropertyTests {
 		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
-			randomized(Long.toString(seed), 10, true)
+			randomized(Long.toString(seed), 10, true, false)
 		);
 		assertThat(result.status()).isEqualTo(Status.FAILED);
 		assertThat(result.falsifiedSamples()).hasSizeGreaterThanOrEqualTo(1);
@@ -141,7 +141,7 @@ class RunningPropertyTests {
 		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
-			randomized("42", 10, false)
+			randomized("42", 10, false, false)
 		);
 		assertThat(result.status()).isEqualTo(Status.FAILED);
 		FalsifiedSample smallest = result.falsifiedSamples().getFirst();
@@ -167,7 +167,7 @@ class RunningPropertyTests {
 		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
-			randomized("4242", 100, true)
+			randomized("4242", 100, true, false)
 		);
 		assertThat(result.status()).isEqualTo(Status.FAILED);
 		assertThat(result.countTries()).isEqualTo(3); // depends on seed
@@ -199,7 +199,7 @@ class RunningPropertyTests {
 		PropertyRunResult result = propertyCase.run(
 			randomized(
 				"42", 1000, false,
-				Duration.ofSeconds(10),
+				Duration.ofSeconds(10), false,
 				Executors::newCachedThreadPool
 			)
 		);
@@ -227,7 +227,7 @@ class RunningPropertyTests {
 		PropertyRunResult result = propertyCase.run(
 			randomized(
 				"42", 1000, false,
-				Duration.ofSeconds(1),
+				Duration.ofSeconds(1), false,
 				Executors::newSingleThreadExecutor
 			)
 		);
@@ -254,7 +254,7 @@ class RunningPropertyTests {
 		PropertyRunResult result = propertyCase.run(
 			randomized(
 				"42", 100, false,
-				Duration.ofMillis(500),
+				Duration.ofMillis(500), false,
 				Executors::newSingleThreadExecutor
 			)
 		);
@@ -304,7 +304,7 @@ class RunningPropertyTests {
 		PropertyRunResult result = propertyCase.run(
 			randomized(
 				"42", 10, true,
-				Duration.ofSeconds(10),
+				Duration.ofSeconds(10), false,
 				Executors::newCachedThreadPool
 			)
 		);
@@ -350,7 +350,7 @@ class RunningPropertyTests {
 
 		PropertyRunConfiguration runConfiguration = randomized(
 			Long.toString(seed), 10, false,
-			Duration.ofSeconds(10),
+			Duration.ofSeconds(10), false,
 			serviceSupplier
 		);
 

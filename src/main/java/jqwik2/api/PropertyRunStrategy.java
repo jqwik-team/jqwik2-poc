@@ -11,6 +11,7 @@ public interface PropertyRunStrategy {
 	PropertyRunStrategy DEFAULT = new DefaultStrategy(
 		JqwikDefaults.defaultMaxTries(),
 		JqwikDefaults.defaultMaxDuration(),
+		JqwikDefaults.defaultFilterOutDuplicateSamples(),
 		RandomChoice::generateRandomSeed,
 		List.of(),
 		JqwikDefaults.defaultShrinkingMode(),
@@ -20,12 +21,12 @@ public interface PropertyRunStrategy {
 	);
 
 	static PropertyRunStrategy create(
-		int maxTries, Duration maxRuntime, Supplier<String> seed,
-		List<SampleRecording> samples,
+		int maxTries, Duration maxRuntime, boolean filterOutDuplicateSamples,
+		Supplier<String> seed, List<SampleRecording> samples,
 		ShrinkingMode shrinking, GenerationMode generation, EdgeCasesMode edgeCases, AfterFailureMode afterFailure
 	) {
 		return new DefaultStrategy(
-			maxTries, maxRuntime,
+			maxTries, maxRuntime, filterOutDuplicateSamples,
 			seed, samples,
 			shrinking, generation, edgeCases, afterFailure
 		);
@@ -34,6 +35,8 @@ public interface PropertyRunStrategy {
 	int maxTries();
 
 	Duration maxRuntime();
+
+	boolean filterOutDuplicateSamples();
 
 	Supplier<String> seedSupplier();
 
@@ -68,10 +71,12 @@ public interface PropertyRunStrategy {
 		REPLAY,
 		SAMPLES_ONLY
 	}
+
 }
 
 record DefaultStrategy(
 	int maxTries, Duration maxRuntime,
+	boolean filterOutDuplicateSamples,
 	Supplier<String> seedSupplier,
 	List<SampleRecording> samples,
 	ShrinkingMode shrinking,
