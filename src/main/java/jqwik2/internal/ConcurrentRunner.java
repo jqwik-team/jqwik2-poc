@@ -20,11 +20,11 @@ public class ConcurrentRunner {
 	}
 
 	private final ExecutorService executorService;
-	private final Duration timeout;
+	private final Duration maxRuntime;
 
-	public ConcurrentRunner(ExecutorService executorService, Duration timeout) {
+	public ConcurrentRunner(ExecutorService executorService, Duration maxRuntime) {
 		this.executorService = executorService;
-		this.timeout = timeout;
+		this.maxRuntime = maxRuntime;
 	}
 
 	@SuppressWarnings("OverlyLongMethod")
@@ -64,7 +64,7 @@ public class ConcurrentRunner {
 			}
 
 			if (timeoutOccurred.get()) {
-				throw new TimeoutException("Concurrent run timed out after " + timeout);
+				throw new TimeoutException("Concurrent run timed out after " + maxRuntime);
 			}
 		} catch (Throwable throwable) {
 			ExceptionSupport.throwAsUnchecked(throwable);
@@ -75,6 +75,9 @@ public class ConcurrentRunner {
 
 	private void scheduleTimeoutTask(Timer timer, ExecutorService executorService, List<Future<?>> submittedTasks, AtomicBoolean timeoutOccurred) {
 		// Timeout is also handled by waitForFinishOrFail(), but that won't work during task creation
+		if (maxRuntime.isZero()) {
+			return;
+		}
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
@@ -83,20 +86,22 @@ public class ConcurrentRunner {
 				// This is an optimization to speed up shutdown with virtual threads:
 				submittedTasks.forEach(future -> future.cancel(true));
 			}
-		}, timeout.toMillis());
+		}, maxRuntime.toMillis());
 	}
 
 	private void waitForFinishOrFail(ExecutorService executorService) throws TimeoutException {
 		boolean timeoutOccurred = false;
 		try {
 			executorService.shutdown();
-			timeoutOccurred = !executorService.awaitTermination(timeout.toMillis(), TimeUnit.MILLISECONDS);
+			if (!maxRuntime.isZero()) {
+				timeoutOccurred = !executorService.awaitTermination(maxRuntime.toMillis(), TimeUnit.MILLISECONDS);
+			}
 		} catch (InterruptedException e) {
 			executorService.shutdownNow();
 		}
 		if (timeoutOccurred) {
 			executorService.shutdownNow();
-			String message = "Concurrent run timed out after " + timeout;
+			String message = "Concurrent run timed out after " + maxRuntime;
 			throw new TimeoutException(message);
 		}
 	}

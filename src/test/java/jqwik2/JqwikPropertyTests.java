@@ -2,6 +2,7 @@ package jqwik2;
 
 import java.time.*;
 import java.util.*;
+import java.util.concurrent.atomic.*;
 import java.util.function.*;
 
 import jqwik2.api.Arbitrary;
@@ -348,6 +349,41 @@ class JqwikPropertyTests {
 		});
 		assertThat(replayedResult.countTries()).isEqualTo(2);
 		assertThat(samplesOnlyValues).isEqualTo(falsifiedValues);
+	}
+
+	@Example
+	void propertyWithMaxTriesSetTo0_runsUntilTimeout() {
+		var checkingProperty = new JqwikProperty()
+								  .withMaxTries(0)
+								  .withMaxRuntime(Duration.ofSeconds(1));
+
+		AtomicInteger counter = new AtomicInteger();
+		PropertyRunResult checkingResult = checkingProperty.forAll(Numbers.integers())
+														   .verify(i -> counter.incrementAndGet());
+
+		// Should take about 1 second till maxRuntime is reached
+		assertThat(checkingResult.isSuccessful()).isTrue();
+		assertThat(checkingResult.countTries()).isGreaterThan(1);
+		assertThat(checkingResult.countChecks()).isEqualTo(checkingResult.countTries());
+	}
+
+	@Example
+	void propertyWithMaxDurationSetTo0_runsMaxTriesIsReached() {
+		var checkingProperty = new JqwikProperty()
+								  .withMaxTries(10)
+								  .withMaxRuntime(Duration.ZERO);
+
+		AtomicInteger counter = new AtomicInteger();
+		PropertyRunResult checkingResult = checkingProperty.forAll(Numbers.integers())
+														   .verify(i -> {
+															   Thread.sleep(100);
+															   counter.incrementAndGet();
+														   });
+
+		// Should take about 1 second (10 * 100ms)
+		assertThat(checkingResult.isSuccessful()).isTrue();
+		assertThat(checkingResult.countTries()).isGreaterThan(1);
+		assertThat(checkingResult.countChecks()).isEqualTo(checkingResult.countTries());
 	}
 
 }

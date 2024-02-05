@@ -1,5 +1,6 @@
 package jqwik2.api;
 
+import java.time.*;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
@@ -171,6 +172,34 @@ public class JqwikProperty {
 			return;
 		}
 		onAbortHandlers.add(onAbortHandler);
+	}
+
+	public JqwikProperty withMaxTries(int maxTries) {
+		PropertyRunStrategy clonedStrategy = PropertyRunStrategy.create(
+			maxTries,
+			strategy.maxRuntime(),
+			strategy.seedSupplier(),
+			strategy.samples(),
+			strategy.shrinking(),
+			strategy.generation(),
+			strategy.edgeCases(),
+			strategy.afterFailure()
+		);
+		return new JqwikProperty(id, clonedStrategy, database);
+	}
+
+	public JqwikProperty withMaxRuntime(Duration maxRuntime) {
+		PropertyRunStrategy clonedStrategy = PropertyRunStrategy.create(
+			strategy.maxTries(),
+			maxRuntime,
+			strategy.seedSupplier(),
+			strategy.samples(),
+			strategy.shrinking(),
+			strategy.generation(),
+			strategy.edgeCases(),
+			strategy.afterFailure()
+		);
+		return new JqwikProperty(id, clonedStrategy, database);
 	}
 
 	public JqwikProperty withGeneration(PropertyRunStrategy.GenerationMode generationMode) {

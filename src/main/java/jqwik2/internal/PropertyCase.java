@@ -255,7 +255,7 @@ public class PropertyCase {
 		private final int maxTries;
 		private final BiConsumer<SampleSource, ConcurrentRunner.Shutdown> task;
 
-		private int count = 0;
+		private volatile int count = 0;
 		private volatile boolean stopped = false;
 
 		private ConcurrentTaskIterator(
@@ -273,7 +273,11 @@ public class PropertyCase {
 			if (stopped) {
 				return false;
 			}
-			return genSources.hasNext() && count < maxTries;
+			return genSources.hasNext() && maxTriesNotReached();
+		}
+
+		private boolean maxTriesNotReached() {
+			return maxTries == 0 || count < maxTries;
 		}
 
 		@Override
