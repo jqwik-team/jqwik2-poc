@@ -17,18 +17,21 @@ public interface PropertyRunStrategy {
 		JqwikDefaults.defaultShrinkingMode(),
 		JqwikDefaults.defaultGenerationMode(),
 		JqwikDefaults.defaultEdgeCasesMode(),
-		JqwikDefaults.defaultAfterFailureMode()
+		JqwikDefaults.defaultAfterFailureMode(),
+		JqwikDefaults.defaultConcurrencyMode()
 	);
 
 	static PropertyRunStrategy create(
 		int maxTries, Duration maxRuntime, boolean filterOutDuplicateSamples,
 		Supplier<String> seed, List<SampleRecording> samples,
-		ShrinkingMode shrinking, GenerationMode generation, EdgeCasesMode edgeCases, AfterFailureMode afterFailure
+		ShrinkingMode shrinking, GenerationMode generation,
+		EdgeCasesMode edgeCases, AfterFailureMode afterFailure, ConcurrencyMode concurrency
 	) {
 		return new DefaultStrategy(
 			maxTries, maxRuntime, filterOutDuplicateSamples,
 			seed, samples,
-			shrinking, generation, edgeCases, afterFailure
+			shrinking, generation,
+			edgeCases, afterFailure, concurrency
 		);
 	}
 
@@ -49,6 +52,8 @@ public interface PropertyRunStrategy {
     EdgeCasesMode edgeCases();
 
     AfterFailureMode afterFailure();
+
+	ConcurrencyMode concurrency();
 
 	enum GenerationMode {
 		RANDOMIZED,
@@ -72,6 +77,13 @@ public interface PropertyRunStrategy {
 		SAMPLES_ONLY
 	}
 
+	enum ConcurrencyMode {
+		SINGLE_THREAD,
+		CACHED_THREAD_POOL,
+		FIXED_THREAD_POOL,
+		VIRTUAL_THREADS
+	}
+
 }
 
 record DefaultStrategy(
@@ -82,5 +94,6 @@ record DefaultStrategy(
 	ShrinkingMode shrinking,
 	GenerationMode generation,
 	EdgeCasesMode edgeCases,
-	AfterFailureMode afterFailure
+	AfterFailureMode afterFailure,
+	ConcurrencyMode concurrency
 ) implements PropertyRunStrategy {}

@@ -1,5 +1,5 @@
 - JqwikProperty
-    - Introduce PropertyRunStrategy.concurrency = NONE | VIRTUAL_THREADS | CACHED_THREAD_POOL | FIXED_THREAD_POOL
+    - Introduce Builder for PropertyRunStrategy
     - Report all falsified samples, checks, tries, effective seed
     - AfterFailureMode.SAMPLES_THEN_REPLAY
     - AfterFailureMode.ANALYZE: Find as many failing samples as possible and
@@ -13,8 +13,9 @@
         - Empty / Null Arbitrary -> When used in combinations, nothing is generated
 
 - Target-based generation and shrinking
-      - see http://proper.softlab.ntua.gr/Publications.html
-      - simulated annealing: https://www.baeldung.com/java-simulated-annealing-for-traveling-salesman
+    - Target a statistical classifier, e.g. percentage of generated parameter type > 20%
+    - see http://proper.softlab.ntua.gr/Publications.html
+    - simulated annealing: https://www.baeldung.com/java-simulated-annealing-for-traveling-salesman
 
 - Allow JqwikDefaults to be changed programmatically
 

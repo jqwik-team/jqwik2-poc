@@ -17,6 +17,10 @@ public class JqwikDefaults {
 		return Duration.ofMinutes(10);
 	}
 
+	static boolean defaultFilterOutDuplicateSamples() {
+		return true;
+	}
+
 	public static PropertyRunStrategy.ShrinkingMode defaultShrinkingMode() {
 		return PropertyRunStrategy.ShrinkingMode.FULL;
 	}
@@ -45,7 +49,7 @@ public class JqwikDefaults {
 		return PropertyRunStrategy.AfterFailureMode.SAMPLES_ONLY;
 	}
 
-	static boolean defaultFilterOutDuplicateSamples() {
-		return true;
+	static PropertyRunStrategy.ConcurrencyMode defaultConcurrencyMode() {
+		return PropertyRunStrategy.ConcurrencyMode.SINGLE_THREAD;
 	}
 }

@@ -167,8 +167,7 @@ class ConcurrentRunnerTests {
 		assertThat(runTasks.get()).isLessThan(20);
 	}
 
-
-	private static void sleep(int millis) {
+	public static void sleep(int millis) {
 		try {
 			Thread.sleep(millis);
 		} catch (InterruptedException ignore) {
@@ -177,7 +176,7 @@ class ConcurrentRunnerTests {
 		}
 	}
 
-	private static void sleepInThread(int millis) {
+	public static void sleepInThread(int millis) {
 		long before = System.currentTimeMillis();
 		BigDecimal pow = new BigDecimal(new Random().nextDouble());
 		while (System.currentTimeMillis() - before < millis) {

@@ -2,6 +2,7 @@ package jqwik2.api;
 
 import java.time.*;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
 
@@ -110,10 +111,10 @@ public class JqwikProperty {
 						strategy.maxRuntime(),
 						isShrinkingEnabled(),
 						samples,
-						PropertyRunConfiguration.DEFAULT_EXECUTOR_SERVICE_SUPPLIER
+						serviceSupplier()
 					);
 				}
-				case null, default -> throw new IllegalStateException("Property has failed before: " + id);
+				case null -> throw new IllegalStateException("Property has failed before: " + id);
 			};
 		}
 		return buildDefaultConfiguration(generators, strategy.seedSupplier());
@@ -127,12 +128,12 @@ public class JqwikProperty {
 				isShrinkingEnabled(),
 				strategy.maxRuntime(),
 				strategy.filterOutDuplicateSamples(),
-				PropertyRunConfiguration.DEFAULT_EXECUTOR_SERVICE_SUPPLIER
+				serviceSupplier()
 			);
 			case EXHAUSTIVE -> PropertyRunConfiguration.exhaustive(
 				strategy.maxTries(),
 				strategy.maxRuntime(),
-				PropertyRunConfiguration.DEFAULT_EXECUTOR_SERVICE_SUPPLIER,
+				serviceSupplier(),
 				generators
 			);
 			case SMART -> PropertyRunConfiguration.smart(
@@ -141,16 +142,26 @@ public class JqwikProperty {
 				strategy.maxRuntime(),
 				isShrinkingEnabled(),
 				strategy.filterOutDuplicateSamples(),
-				PropertyRunConfiguration.DEFAULT_EXECUTOR_SERVICE_SUPPLIER,
+				serviceSupplier(),
 				generators
 			);
 			case SAMPLES -> PropertyRunConfiguration.samples(
 				strategy.maxRuntime(),
 				isShrinkingEnabled(),
 				strategy.samples(),
-				PropertyRunConfiguration.DEFAULT_EXECUTOR_SERVICE_SUPPLIER
+				serviceSupplier()
 			);
 			case null -> throw new IllegalArgumentException("Unsupported generation strategy: " + strategy.generation());
+		};
+	}
+
+	private Supplier<ExecutorService> serviceSupplier() {
+		return switch (strategy.concurrency()) {
+			case SINGLE_THREAD -> null;
+			case CACHED_THREAD_POOL -> Executors::newCachedThreadPool;
+			case FIXED_THREAD_POOL -> () -> Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+			case VIRTUAL_THREADS -> Executors::newVirtualThreadPerTaskExecutor;
+			case null -> throw new IllegalArgumentException("Unsupported concurrency mode: " + strategy.concurrency());
 		};
 	}
 
@@ -186,7 +197,8 @@ public class JqwikProperty {
 			strategy.shrinking(),
 			strategy.generation(),
 			strategy.edgeCases(),
-			strategy.afterFailure()
+			strategy.afterFailure(),
+			strategy.concurrency()
 		);
 		return new JqwikProperty(id, clonedStrategy, database);
 	}
@@ -201,7 +213,8 @@ public class JqwikProperty {
 			strategy.shrinking(),
 			strategy.generation(),
 			strategy.edgeCases(),
-			strategy.afterFailure()
+			strategy.afterFailure(),
+			strategy.concurrency()
 		);
 		return new JqwikProperty(id, clonedStrategy, database);
 	}
@@ -216,7 +229,8 @@ public class JqwikProperty {
 			strategy.shrinking(),
 			generationMode,
 			strategy.edgeCases(),
-			strategy.afterFailure()
+			strategy.afterFailure(),
+			strategy.concurrency()
 		);
 		return new JqwikProperty(id, clonedStrategy, database);
 	}
@@ -231,7 +245,24 @@ public class JqwikProperty {
 			strategy.shrinking(),
 			strategy.generation(),
 			strategy.edgeCases(),
-			afterFailureMode
+			afterFailureMode,
+			strategy.concurrency()
+		);
+		return new JqwikProperty(id, clonedStrategy, database);
+	}
+
+	public JqwikProperty withConcurrency(PropertyRunStrategy.ConcurrencyMode concurrencyMode) {
+		PropertyRunStrategy clonedStrategy = PropertyRunStrategy.create(
+			strategy.maxTries(),
+			strategy.maxRuntime(),
+			strategy.filterOutDuplicateSamples(),
+			strategy.seedSupplier(),
+			strategy.samples(),
+			strategy.shrinking(),
+			strategy.generation(),
+			strategy.edgeCases(),
+			strategy.afterFailure(),
+			concurrencyMode
 		);
 		return new JqwikProperty(id, clonedStrategy, database);
 	}
