@@ -1,4 +1,5 @@
 - JqwikProperty
+    - Introduce PropertyRunStrategy.concurrency = NONE | VIRTUAL_THREADS | CACHED_THREAD_POOL | FIXED_THREAD_POOL
     - Report all falsified samples, checks, tries, effective seed
     - AfterFailureMode.SAMPLES_THEN_REPLAY
     - AfterFailureMode.ANALYZE: Find as many failing samples as possible and

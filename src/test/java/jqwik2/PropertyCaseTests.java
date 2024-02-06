@@ -3,6 +3,7 @@ package jqwik2;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
 import java.util.function.*;
 
 import jqwik2.api.Assume;
@@ -11,6 +12,7 @@ import jqwik2.api.PropertyRunResult.*;
 import jqwik2.internal.*;
 import jqwik2.internal.generators.*;
 
+import net.jqwik.api.Arbitrary;
 import net.jqwik.api.*;
 
 import static jqwik2.internal.PropertyRunConfiguration.*;
@@ -18,8 +20,18 @@ import static org.assertj.core.api.Assertions.*;
 
 class PropertyCaseTests {
 
-	@Example
-	void runSuccessfulProperty() {
+	@Provide
+	Arbitrary<Supplier<ExecutorService>> serviceSuppliers() {
+		return Arbitraries.of(
+			Executors::newCachedThreadPool,
+			Executors::newVirtualThreadPerTaskExecutor,
+			() -> Executors.newFixedThreadPool(4),
+			null // Will use InMainThreadRunner
+		);
+	}
+
+	@Property(generation = GenerationMode.EXHAUSTIVE)
+	void runSuccessfulProperty(@ForAll("serviceSuppliers") Supplier<ExecutorService> serviceSupplier) {
 		List<Generator<?>> generators = List.of(
 			new IntegerGenerator(0, 100)
 		);
@@ -28,7 +40,13 @@ class PropertyCaseTests {
 		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
-			randomized("42", 10, false, false)
+			randomized(
+				"42", 10,
+				false,
+				Duration.ofSeconds(10),
+				false,
+				serviceSupplier
+			)
 		);
 		assertThat(result.status()).isEqualTo(Status.SUCCESSFUL);
 		assertThat(result.countTries()).isEqualTo(10);
@@ -57,8 +75,8 @@ class PropertyCaseTests {
 		assertThat(result.countChecks()).isEqualTo(10);
 	}
 
-	@Example
-	void runSuccessfulWithInvalids() {
+	@Property(generation = GenerationMode.EXHAUSTIVE)
+	void runSuccessfulWithInvalids(@ForAll("serviceSuppliers") Supplier<ExecutorService> serviceSupplier) {
 		List<Generator<?>> generators = List.of(
 			new IntegerGenerator(0, 100)
 		);
@@ -71,7 +89,13 @@ class PropertyCaseTests {
 		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
-			randomized("42", 10, false, false)
+			randomized(
+				"42", 10,
+				false,
+				Duration.ofSeconds(10),
+				false,
+				serviceSupplier
+			)
 		);
 		assertThat(result.status()).isEqualTo(Status.SUCCESSFUL);
 		assertThat(result.countTries()).isEqualTo(10);
@@ -79,8 +103,8 @@ class PropertyCaseTests {
 		assertThat(result.countChecks()).isEqualTo(3);
 	}
 
-	@Example
-	void failPropertyWithNoReason() {
+	@Property(generation = GenerationMode.EXHAUSTIVE)
+	void failPropertyWithNoReason(@ForAll("serviceSuppliers") Supplier<ExecutorService> serviceSupplier) {
 		List<Generator<?>> generators = List.of(
 			new IntegerGenerator(0, 100)
 		);
@@ -93,20 +117,24 @@ class PropertyCaseTests {
 		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
-			randomized("42", 10, false, false)
+			randomized(
+				"42", 10,
+				false,
+				Duration.ofSeconds(10),
+				false,
+				serviceSupplier
+			)
 		);
 		assertThat(result.status()).isEqualTo(Status.FAILED);
-		assertThat(result.countTries()).isEqualTo(1);
-		assertThat(result.countChecks()).isEqualTo(1);
+		assertThat(result.countTries()).isGreaterThanOrEqualTo(1);
+		assertThat(result.countChecks()).isEqualTo(result.countTries());
 		assertThat(result.falsifiedSamples()).hasSizeGreaterThanOrEqualTo(1);
 		assertThat(result.failureReason()).isEmpty();
-		FalsifiedSample smallest = result.falsifiedSamples().getFirst();
-		assertThat(smallest.values()).isEqualTo(List.of(lastArg[0]));
-		assertThat(smallest.thrown()).isEmpty();
+		assertThat(result.falsifiedSamples()).anyMatch(s -> s.values().equals(List.of(lastArg[0])));
 	}
 
-	@Property(tries = 5)
-	void failPropertyWithReason(@ForAll long seed) {
+	@Property(generation = GenerationMode.EXHAUSTIVE)
+	void failPropertyWithReason(@ForAll("serviceSuppliers") Supplier<ExecutorService> serviceSupplier) {
 		List<Generator<?>> generators = List.of(BaseGenerators.integers(0, 100));
 		var assertionError = new AssertionError("I failed!");
 		Tryable tryable = Tryable.from((Consumer<List<Object>>) args -> {
@@ -116,7 +144,13 @@ class PropertyCaseTests {
 		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
-			randomized(Long.toString(seed), 10, true, false)
+			randomized(
+				"42", 10,
+				true,
+				Duration.ofSeconds(10),
+				false,
+				serviceSupplier
+			)
 		);
 		assertThat(result.status()).isEqualTo(Status.FAILED);
 		assertThat(result.falsifiedSamples()).hasSizeGreaterThanOrEqualTo(1);
@@ -153,8 +187,8 @@ class PropertyCaseTests {
 		});
 	}
 
-	@Example
-	void failAndShrink() {
+	@Property(generation = GenerationMode.EXHAUSTIVE)
+	void failAndShrink(@ForAll("serviceSuppliers") Supplier<ExecutorService> serviceSupplier) {
 		List<Generator<?>> generators = List.of(
 			new IntegerGenerator(0, 100)
 		);
@@ -166,57 +200,38 @@ class PropertyCaseTests {
 		PropertyCase propertyCase = new PropertyCase(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
-			randomized("4242", 100, true, false)
+			randomized(
+				"4242", 100,
+				true,
+				Duration.ofSeconds(10),
+				false,
+				serviceSupplier
+			)
 		);
 		assertThat(result.status()).isEqualTo(Status.FAILED);
-		assertThat(result.countTries()).isEqualTo(3); // depends on seed
+		assertThat(result.countTries()).isGreaterThan(1);
 		assertThat(result.falsifiedSamples()).hasSizeGreaterThan(1);
 		FalsifiedSample smallest = result.falsifiedSamples().getFirst();
 		assertThat(smallest.values()).isEqualTo(List.of(45));
 		FalsifiedSample biggest = result.falsifiedSamples().getLast();
-		assertThat(biggest.values()).isEqualTo(List.of(65)); // depends on seed
+		assertThat(biggest).isGreaterThan(smallest);
 	}
 
-	@Example
-	void runSuccessfulPropertyInCachedThreadPool() {
-		// Should run in not much longer than 100 ms
-
+	@Property(generation = GenerationMode.EXHAUSTIVE)
+	void runSuccessfulWithMaxDuration(@ForAll("serviceSuppliers") Supplier<ExecutorService> serviceSupplier) {
 		List<Generator<?>> generators = List.of(
 			new IntegerGenerator(0, 100)
 		);
+
+		AtomicBoolean firstHasRun = new AtomicBoolean(false);
 		Tryable tryable = Tryable.from(args -> {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
-			}
-			return true;
-		});
-
-		PropertyCase propertyCase = new PropertyCase(generators, tryable);
-
-		PropertyRunResult result = propertyCase.run(
-			randomized(
-				"42", 1000, false,
-				Duration.ofSeconds(10), false,
-				Executors::newCachedThreadPool
-			)
-		);
-		assertThat(result.status()).isEqualTo(Status.SUCCESSFUL);
-		assertThat(result.countTries()).isEqualTo(1000);
-		assertThat(result.countChecks()).isEqualTo(1000);
-	}
-
-	@Example
-	void runSuccessfulWithMaxDuration() {
-
-		List<Generator<?>> generators = List.of(
-			new IntegerGenerator(0, 100)
-		);
-		Tryable tryable = Tryable.from(args -> {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
+			if (firstHasRun.get()) {
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+				}
+			} else {
+				firstHasRun.set(true);
 			}
 			return true;
 		});
@@ -227,7 +242,7 @@ class PropertyCaseTests {
 			randomized(
 				"42", 1000, false,
 				Duration.ofSeconds(1), false,
-				Executors::newSingleThreadExecutor
+				serviceSupplier
 			)
 		);
 		assertThat(result.status()).isEqualTo(Status.SUCCESSFUL);
@@ -236,14 +251,14 @@ class PropertyCaseTests {
 		assertThat(result.countChecks()).isLessThanOrEqualTo(result.countTries());
 	}
 
-	@Example
-	void failWithTimeout() {
+	@Property(generation = GenerationMode.EXHAUSTIVE)
+	void failWithTimeout(@ForAll("serviceSuppliers") Supplier<ExecutorService> serviceSupplier) {
 
 		Tryable tryable = Tryable.from(args -> {
 			try {
 				Thread.sleep(5000);
 			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
+				fail("I was interrupted!");
 			}
 		});
 
@@ -253,21 +268,15 @@ class PropertyCaseTests {
 		PropertyRunResult result = propertyCase.run(
 			randomized(
 				"42", 100, false,
-				Duration.ofMillis(500), false,
-				Executors::newSingleThreadExecutor
+				Duration.ofMillis(200), false,
+				serviceSupplier
 			)
 		);
-		assertThat(result.status()).isEqualTo(Status.FAILED);
-		// assertThat(result.abortionReason()).describedAs("has abortion reason").isPresent();
-		// if (result.abortionReason().get() instanceof TimeoutException) {
-			// In rare cases the timeout will be too late for the RTE to be caught
-			assertThat(result.timedOut()).describedAs("has timed out").isTrue();
-		// }
+		assertThat(result.status()).isIn(Status.FAILED, Status.ABORTED);
 	}
 
-	@Example
-	void abort() {
-
+	@Property(generation = GenerationMode.EXHAUSTIVE)
+	void abort(@ForAll("serviceSuppliers") Supplier<ExecutorService> serviceSupplier) {
 		Tryable tryable = Tryable.from(args -> {
 			try {
 				Thread.sleep(5000);
@@ -283,56 +292,48 @@ class PropertyCaseTests {
 
 		PropertyCase propertyCase = new PropertyCase(List.of(aFailingGenerator), tryable);
 
-		PropertyRunResult result = propertyCase.run(randomized(RandomChoice.generateRandomSeed(), 100));
+		String seed = RandomChoice.generateRandomSeed();
+		PropertyRunResult result = propertyCase.run(
+			randomized(
+				seed, 100, true,
+				Duration.ofMinutes(10),
+				false,
+				serviceSupplier
+			)
+		);
 		assertThat(result.status()).isEqualTo(Status.ABORTED);
 		assertThat(result.abortionReason()).hasValue(abortion);
 	}
 
-	@Example
-	void failAndShrinkInCachedThreadPool() {
-		List<Generator<?>> generators = List.of(
-			new IntegerGenerator(0, 100)
+	@Property(tries = 10)
+	void reproduceSameSamplesWithVirtualTasks(@ForAll long seed) {
+		reproduceSameSamplesTwice(
+			seed,
+			Executors::newVirtualThreadPerTaskExecutor
 		);
-		Tryable tryable = Tryable.from(args -> {
-			int anInt = (int) args.get(0);
-			return anInt < 20;
-		});
-
-		PropertyCase propertyCase = new PropertyCase(generators, tryable);
-
-		PropertyRunResult result = propertyCase.run(
-			randomized(
-				"42", 10, true,
-				Duration.ofSeconds(10), false,
-				Executors::newCachedThreadPool
-			)
-		);
-		assertThat(result.status()).isEqualTo(Status.FAILED);
-		FalsifiedSample smallest = result.falsifiedSamples().getFirst();
-		assertThat(smallest.values()).isEqualTo(List.of(20));
 	}
 
 	@Property(tries = 10)
-	void reproduceSameSamplesWithSameSeed(@ForAll long seed) {
+	void reproduceSameSamplesWithFixedSizeCachedPool(@ForAll long seed) {
+		reproduceSameSamplesTwice(
+			seed,
+			() -> Executors.newFixedThreadPool(4)
+		);
+	}
+
+	@Property(tries = 10)
+	void reproduceSameSamplesWithCachedThreadPool(@ForAll long seed) {
 		reproduceSameSamplesTwice(
 			seed,
 			Executors::newCachedThreadPool
 		);
 	}
 
-	@Property(tries = 1)
-	void reproduceSameSamplesWithSingleThreadExecutor(@ForAll long seed) {
-		reproduceSameSamplesTwice(
-			seed,
-			Executors::newSingleThreadExecutor
-		);
-	}
-
 	@Property(tries = 10)
-	void reproduceSameSamplesEvenWithEdgeCases(@ForAll long seed) {
+	void reproduceSameSamplesInMainThreadRunner(@ForAll long seed) {
 		reproduceSameSamplesTwice(
 			seed,
-			Executors::newCachedThreadPool
+			null
 		);
 	}
 

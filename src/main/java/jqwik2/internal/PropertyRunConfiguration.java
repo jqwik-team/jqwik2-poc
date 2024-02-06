@@ -12,7 +12,8 @@ import jqwik2.internal.growing.*;
 
 public interface PropertyRunConfiguration {
 
-	Supplier<ExecutorService> DEFAULT_EXECUTOR_SERVICE_SUPPLIER = Executors::newSingleThreadExecutor;
+	// null -> InMainThreadRunner is being used
+	Supplier<ExecutorService> DEFAULT_EXECUTOR_SERVICE_SUPPLIER = null;
 
 	Duration maxRuntime();
 
@@ -20,7 +21,7 @@ public interface PropertyRunConfiguration {
 
 	Optional<String> effectiveSeed();
 
-	Supplier<ExecutorService> supplyExecutorService();
+	Optional<ExecutorService> executorService();
 
 	boolean shrinkingEnabled();
 

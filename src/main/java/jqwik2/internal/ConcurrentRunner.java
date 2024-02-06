@@ -7,17 +7,7 @@ import java.util.concurrent.atomic.*;
 
 import jqwik2.api.support.*;
 
-public class ConcurrentRunner {
-
-	@FunctionalInterface
-	public interface Task {
-		void run(Shutdown shutdown) throws Throwable;
-	}
-
-	@FunctionalInterface
-	public interface Shutdown {
-		void shutdown();
-	}
+public class ConcurrentRunner implements TaskRunner {
 
 	private final ExecutorService executorService;
 	private final Duration maxRuntime;
@@ -27,6 +17,7 @@ public class ConcurrentRunner {
 		this.maxRuntime = maxRuntime;
 	}
 
+	@Override
 	@SuppressWarnings("OverlyLongMethod")
 	public void run(Iterator<ConcurrentRunner.Task> taskIterator) throws TimeoutException {
 		List<Throwable> uncaughtErrors = Collections.synchronizedList(new ArrayList<>());

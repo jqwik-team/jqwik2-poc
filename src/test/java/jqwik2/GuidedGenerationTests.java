@@ -4,21 +4,38 @@ import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
+import java.util.function.*;
 
 import jqwik2.api.*;
 import jqwik2.internal.*;
 import jqwik2.internal.generators.*;
 import org.opentest4j.*;
 
+import net.jqwik.api.Arbitrary;
 import net.jqwik.api.*;
 
 import static jqwik2.internal.PropertyRunConfiguration.*;
 import static org.assertj.core.api.Assertions.*;
 
+import static net.jqwik.api.GenerationMode.*;
+
 class GuidedGenerationTests {
 
+	@Provide
+	Arbitrary<Supplier<ExecutorService>> serviceSuppliers() {
+		return Arbitraries.of(
+			Executors::newCachedThreadPool,
+			Executors::newVirtualThreadPerTaskExecutor,
+			() -> Executors.newFixedThreadPool(4),
+			null // Will use InMainThreadRunner
+		);
+	}
+
 	@Property(tries = 10)
-	void succeedingSequentialGuidance(@ForAll long seed) {
+	void succeedingSequentialGuidance(
+		@ForAll("serviceSuppliers") Supplier<ExecutorService> supplier,
+		@ForAll long seed
+	) {
 		List<Generator<?>> generators = List.of(BaseGenerators.integers(0, 100));
 		AtomicInteger count = new AtomicInteger(0);
 		Tryable tryable = Tryable.from(args -> {
@@ -60,7 +77,7 @@ class GuidedGenerationTests {
 				1000,
 				false,
 				Duration.ofSeconds(5),
-				Executors::newSingleThreadExecutor
+				supplier
 			)
 		);
 
@@ -69,7 +86,10 @@ class GuidedGenerationTests {
 	}
 
 	@Property(tries = 10)
-	void failingSequentialGuidance(@ForAll long seed) {
+	void failingSequentialGuidance(
+		@ForAll("serviceSuppliers") Supplier<ExecutorService> supplier,
+		@ForAll long seed
+	) {
 		List<Generator<?>> generators = List.of(BaseGenerators.integers(0, 100));
 		Tryable tryable = Tryable.from(args -> {
 			int anInt = (int) args.get(0);
@@ -120,7 +140,7 @@ class GuidedGenerationTests {
 				1000,
 				false,
 				Duration.ofSeconds(5),
-				Executors::newSingleThreadExecutor
+				supplier
 			)
 		);
 
@@ -132,8 +152,8 @@ class GuidedGenerationTests {
 		assertThat(smallest.values()).isEqualTo(List.of(91));
 	}
 
-	@Property(tries = 10)
-	void overrideRunResultInGuidedGeneration(@ForAll long seed) {
+	@Property(generation = EXHAUSTIVE)
+	void overrideRunResultInGuidedGeneration(@ForAll("serviceSuppliers") Supplier<ExecutorService> supplier) {
 		List<Generator<?>> generators = List.of(BaseGenerators.integers(0, 100));
 		Tryable tryable = Tryable.from(args -> {
 			// System.out.println("args = " + args);
@@ -143,7 +163,7 @@ class GuidedGenerationTests {
 
 		GuidedGeneration generate42Values = new SequentialGuidedGeneration() {
 			volatile int count = 0;
-			private final Iterator<SampleSource> iterator = new RandomGenSource(Long.toString(seed)).iterator();
+			private final Iterator<SampleSource> iterator = new RandomGenSource().iterator();
 
 			@Override
 			protected SampleSource initialSource() {
@@ -180,7 +200,7 @@ class GuidedGenerationTests {
 				1000,
 				false,
 				Duration.ofSeconds(5),
-				Executors::newSingleThreadExecutor
+				supplier
 			)
 		);
 

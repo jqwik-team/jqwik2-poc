@@ -38,7 +38,7 @@ public class PropertyCase {
 			maxTries, configuration.effectiveSeed(),
 			shrinkingEnabled,
 			configuration.maxRuntime(),
-			configuration.supplyExecutorService()
+			configuration.executorService()
 		);
 	}
 
@@ -48,7 +48,7 @@ public class PropertyCase {
 		int maxTries, Optional<String> effectiveSeed,
 		boolean shrinkingEnabled,
 		Duration maxDuration,
-		Supplier<ExecutorService> executorServiceSupplier
+		Optional<ExecutorService> optionalExecutorService
 	) {
 		var genericGenerators = generators.stream().map(Generator::asGeneric).toList();
 		SampleGenerator sampleGenerator = new SampleGenerator(genericGenerators);
@@ -60,7 +60,7 @@ public class PropertyCase {
 			Triple<SortedSet<FalsifiedSample>, Boolean, Guidance> collectedRunResults = runAndCollectFalsifiedSamples(
 				iterableGenSource, maxTries, sampleGenerator,
 				countTries, countChecks,
-				maxDuration, executorServiceSupplier
+				maxDuration, optionalExecutorService
 			);
 
 			SortedSet<FalsifiedSample> falsifiedSamples = collectedRunResults.first();
@@ -159,12 +159,14 @@ public class PropertyCase {
 		AtomicInteger countTries,
 		AtomicInteger countChecks,
 		Duration maxDuration,
-		Supplier<ExecutorService> executorServiceSupplier
+		Optional<ExecutorService> optionalExecutorService
 	) {
 		SortedSet<FalsifiedSample> falsifiedSamples = Collections.synchronizedSortedSet(new TreeSet<>());
 		Consumer<FalsifiedSample> onFalsified = falsifiedSamples::add;
 
-		var runner = new ConcurrentRunner(executorServiceSupplier.get(), maxDuration);
+		TaskRunner runner = optionalExecutorService
+								.map(s -> (TaskRunner) new ConcurrentRunner(s, maxDuration))
+								.orElseGet(() -> new InMainThreadRunner(maxDuration));
 
 		final Iterator<SampleSource> genSources = iterableGenSource.iterator();
 

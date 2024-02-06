@@ -21,7 +21,7 @@ class ConcurrentRunnerTests {
 	@Provide
 	Arbitrary<Pair<String, Supplier<ExecutorService>>> services() {
 		return Arbitraries.of(
-			new Pair<>("newSingleThreadExecutor", () -> Executors.newSingleThreadExecutor()),
+			new Pair<>("newSingleThreadExecutor", () -> Executors.newSingleThreadExecutor()), // not used in jqwik
 			new Pair<>("newFixedThreadPool", () -> Executors.newFixedThreadPool(2)),
 			new Pair<>("newCachedThreadPool", () -> Executors.newCachedThreadPool()),
 			new Pair<>(NEW_VIRTUAL_THREAD_PER_TASK_EXECUTOR, () -> Executors.newVirtualThreadPerTaskExecutor())
