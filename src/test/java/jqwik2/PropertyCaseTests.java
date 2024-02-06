@@ -3,7 +3,6 @@ package jqwik2;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.*;
 import java.util.function.*;
 
 import jqwik2.api.Assume;
@@ -17,7 +16,7 @@ import net.jqwik.api.*;
 import static jqwik2.internal.PropertyRunConfiguration.*;
 import static org.assertj.core.api.Assertions.*;
 
-class RunningPropertyTests {
+class PropertyCaseTests {
 
 	@Example
 	void runSuccessfulProperty() {
