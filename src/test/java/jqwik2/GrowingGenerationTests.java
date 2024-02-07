@@ -8,6 +8,7 @@ import java.util.function.*;
 import jqwik2.api.Arbitrary;
 import jqwik2.api.*;
 import jqwik2.api.arbitraries.*;
+import jqwik2.api.stateful.*;
 import jqwik2.internal.*;
 import jqwik2.internal.generators.*;
 import jqwik2.internal.growing.*;
@@ -235,6 +236,31 @@ class GrowingGenerationTests {
 			}
 		);
 		assertThat(counter.get()).isEqualTo(39);
+	}
+
+	@Example
+	void statefulChain() {
+
+		ChainArbitrary<Integer> chains =
+			Chain.startWith(() -> 1)
+				 .withTransformation(i -> Numbers.integers().between(1, i).map(
+					 j -> Transformer.transform("+" + j, n -> n + j)
+				 ))
+				 .withMaxTransformations(5);
+
+		SampleGenerator sampleGenerator = SampleGenerator.from(chains.generator());
+
+		AtomicInteger counter = new AtomicInteger(0);
+		forAllGrowingSamples(
+			sampleGenerator,
+			sample -> {
+				counter.incrementAndGet();
+				Chain<Integer> chain = (Chain<Integer>) sample.values().get(0);
+				chain.forEachRemaining(i -> {});
+				// System.out.println(chain.transformations());
+			}
+		);
+		assertThat(counter.get()).isEqualTo(397);
 	}
 
 	// IterableGrowingSource cannot be directly iterated since it is a sequential guided source that requires guidance being triggered
