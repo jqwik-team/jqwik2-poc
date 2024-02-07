@@ -1,24 +1,20 @@
 package jqwik2.api.statistics;
 
+import java.util.*;
 import java.util.function.*;
+
+import jqwik2.internal.*;
+import jqwik2.internal.statistics.*;
 
 public interface Collector {
 
-	/**
-	 * Call this method to record an entry for statistical data about generated values.
-	 *
-	 * @param values Can be anything. The list of these values is considered
-	 *               a key for the reported table of frequencies. Constraints:
-	 *               <ul>
-	 *               <li>There must be at least one value</li>
-	 *               <li>The number of values for the same collector (i.e. same label)
-	 *               must always be the same in a single property</li>
-	 *               <li>Values can be {@code null}</li>
-	 *               </ul>
-	 * @return The current instance of collector to allow a fluent coverage API
-	 * @throws IllegalArgumentException if one of the constraints on {@code values} is violated
-	 */
-	Collector collect(Object... values);
+	static Collector.C1<Object> create(String label) {
+		return create(label, Object.class);
+	}
+
+	static <T1> Collector.C1<T1> create(String label, Class<T1> valueType) {
+		return new StatisticsCollector(label).forTypes(valueType);
+	}
 
 	/**
 	 * Perform coverage checking for successful property on statistics.
@@ -26,4 +22,30 @@ public interface Collector {
 	 * @param coverage Code that consumes a {@linkplain Coverage} object
 	 */
 	void coverage(Consumer<Coverage> coverage);
+
+	interface C1<T1> extends Collector {
+		/**
+		 * Call this method to record a single value of type {@code T1}
+		 * for statistical data about generated values.
+		 */
+		void collect(T1 v1);
+
+		int count(T1 v1);
+
+		/**
+		 * Returns all distinct values of type {@code T1} that have been collected.
+		 * Sorted by frequency of occurrence in descending order.
+		 */
+		List<T1> values();
+	}
+
+	interface C2<T1, T2> extends Collector {
+		/**
+		 * Call this method to record two values of type {@code T1} and {@code T2}
+		 * for statistical data about generated values.
+		 */
+		void collect(T1 v1, T2 v2);
+
+		int count(T1 v1, T2 v2);
+	}
 }

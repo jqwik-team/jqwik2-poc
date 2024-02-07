@@ -267,6 +267,22 @@ public class JqwikProperty {
 		return new JqwikProperty(id, clonedStrategy, database);
 	}
 
+	public JqwikProperty withEdgeCases(PropertyRunStrategy.EdgeCasesMode edgeCasesMode) {
+		PropertyRunStrategy clonedStrategy = PropertyRunStrategy.create(
+			strategy.maxTries(),
+			strategy.maxRuntime(),
+			strategy.filterOutDuplicateSamples(),
+			strategy.seedSupplier(),
+			strategy.samples(),
+			strategy.shrinking(),
+			strategy.generation(),
+			edgeCasesMode,
+			strategy.afterFailure(),
+			strategy.concurrency()
+		);
+		return new JqwikProperty(id, clonedStrategy, database);	}
+
+
 	public void failureDatabase(FailureDatabase database) {
 		this.database = database;
 		if (onFailureHandlers.isEmpty()) {
