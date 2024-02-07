@@ -10,7 +10,7 @@
     - Recursive generators using lazy evaluation of arbitrary
     - String (based on unicode code points)
     - Values.frequencyOf(...)
-        - Empty / Null Arbitrary -> When used in combinations, nothing is generated
+    - Empty / Null Arbitrary -> When used in combinations, nothing is generated
 
 - Target-based generation and shrinking
     - Target a statistical classifier, e.g. percentage of generated parameter type > 20%
