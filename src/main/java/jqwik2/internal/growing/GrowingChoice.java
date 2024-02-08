@@ -41,9 +41,11 @@ class GrowingChoice extends AbstractGrowingSource implements GenSource.Choice {
 		}
 		if (choiceMaxAndValue == null) {
 			choiceMaxAndValue = new Pair<>(maxExcluded, 0);
+		} else {
+			choiceMaxAndValue = new Pair<>(maxExcluded, choiceMaxAndValue.second());
 		}
 		choiceRequested = true;
-		return choiceMaxAndValue.second();
+		return choiceMaxAndValue.second() % maxExcluded;
 	}
 
 	@Override
