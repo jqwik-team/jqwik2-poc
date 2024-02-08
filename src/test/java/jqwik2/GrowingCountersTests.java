@@ -10,6 +10,8 @@ import org.assertj.core.api.*;
 
 import net.jqwik.api.*;
 
+import static org.assertj.core.api.Assertions.*;
+
 class GrowingCountersTests {
 	// @Example
 	void experiment() {
@@ -48,7 +50,7 @@ class GrowingCountersTests {
 			// System.out.println(counter);
 		});
 
-		Assertions.assertThat(count.get()).isEqualTo(4);
+		assertThat(count.get()).isEqualTo(4);
 	}
 
 	@Example
@@ -60,10 +62,40 @@ class GrowingCountersTests {
 		AtomicInteger count = new AtomicInteger(0);
 		counters.iterator(5).forEachRemaining(counter -> {
 			count.incrementAndGet();
-			System.out.println(counter);
+			// System.out.println(counter);
 		});
 
-		Assertions.assertThat(count.get()).isEqualTo(16);
+		assertThat(count.get()).isEqualTo(16);
+	}
+
+	@Example
+	void threeCounters() {
+		GrowingCounters counters = new GrowingCounters(
+			List.of(3, 2, 1000)
+		);
+
+		AtomicInteger count = new AtomicInteger(0);
+		counters.iterator(10).forEachRemaining(counter -> {
+			count.incrementAndGet();
+			// System.out.println(counter);
+		});
+
+		assertThat(count.get()).isEqualTo(132);
+	}
+
+	@Example
+	void manyLargeCounters() {
+		GrowingCounters counters = new GrowingCounters(
+			List.of(3000, 2000, 1000, 4000)
+		);
+
+		AtomicInteger count = new AtomicInteger(0);
+		counters.iterator(9).forEachRemaining(counter -> {
+			count.incrementAndGet();
+			// System.out.println(counter);
+		});
+
+		assertThat(count.get()).isEqualTo(10000);
 	}
 
 }
@@ -80,7 +112,7 @@ class GrowingCounters {
 
 	public Iterator<List<Integer>> iterator(int maxDepth) {
 		List<Stream<List<Integer>>> streams = streams(maxDepth);
-		return StreamConcatenation.concat(streams).limit(1000).iterator();
+		return StreamConcatenation.concat(streams).iterator();
 	}
 
 	private List<Stream<List<Integer>>> streams(int maxDepth) {
@@ -91,23 +123,29 @@ class GrowingCounters {
 	}
 
 	private Stream<List<Integer>> streamForDepth(int depth) {
-		Stream<List<Integer>> result = Stream.empty();
+		Supplier<Stream<List<Integer>>>[] result = new Supplier[counters.size()];
 		List<Supplier<Stream<Integer>>> suppliers = streamSuppliers(depth);
 		for (int i = suppliers.size() - 1; i >= 0; i--) {
-			var supplier = suppliers.get(i);
-			if (i >= suppliers.size() - 1) {
-				result = supplier.get().map(List::of);
+			var index = i; // Needed for lambda
+			var supplier = suppliers.get(index);
+			if (index >= suppliers.size() - 1) {
+				result[index] = () -> supplier.get().map(List::of);
 			} else {
-				// TODO: flatMap to combine with previous result
-				// result = result.flatMap(value -> supplier.get().flatMap(v -> {
-				// 	var copy = new ArrayList<>(value);
-				// 	copy.add(v);
-				// 	return copy;
-				// }));
+				result[index] = () -> supplier.get().flatMap(
+					v -> result[index + 1].get().map(list -> {
+						var copy = new ArrayList<>(list);
+						copy.addFirst(v);
+						return copy;
+					}));
 			}
 		}
 
-		return result.filter(list -> list.stream().noneMatch(e -> e != depth));
+		Stream<List<Integer>> stream = result[0].get();
+		return stream.filter(list -> contains(list, depth));
+	}
+
+	private static boolean contains(List<Integer> list, int depth) {
+		return list.contains(depth);
 	}
 
 	private List<Supplier<Stream<Integer>>> streamSuppliers(int depth) {
