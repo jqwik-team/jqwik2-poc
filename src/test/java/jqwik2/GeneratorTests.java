@@ -118,6 +118,67 @@ class GeneratorTests {
 	}
 
 	@Group
+	class OneOf {
+		@Example
+		void oneOfGenerator() {
+			Generator<Integer> choices = BaseGenerators.oneOf(
+				List.of(
+					BaseGenerators.integers(0, 10),
+					BaseGenerators.integers(20, 30),
+					BaseGenerators.just(42)
+				)
+			);
+
+			GenSource source = new RandomGenSource("42");
+
+			for (int i = 0; i < 10; i++) {
+				GenRecorder recorder = new GenRecorder(source);
+				int value = choices.generate(recorder);
+				assertThat(value).matches(
+					v -> v >= 0 && v <= 10 || v >= 20 && v <= 30 || v == 42
+				);
+
+				GenSource recordedSource = RecordedSource.of(recorder.recording());
+				int regenerated = choices.generate(recordedSource);
+				assertThat(regenerated).isEqualTo(value);
+			}
+		}
+
+		@Example
+		void oneOfGeneratorEdgeCases() {
+			Generator<Integer> choices = BaseGenerators.oneOf(
+				List.of(
+					BaseGenerators.integers(0, 10),
+					BaseGenerators.integers(20, 30),
+					BaseGenerators.just(42)
+				)
+			);
+
+			var edgeCases = EdgeCasesTests.collectAllEdgeCases(choices);
+			assertThat(edgeCases).containsExactlyInAnyOrder(0, 10, 20, 30, 42);
+		}
+
+		@Example
+		void oneOfGeneratorExhaustiveGeneration() {
+			Generator<Integer> choices = BaseGenerators.oneOf(
+				List.of(
+					BaseGenerators.integers(0, 10),
+					BaseGenerators.integers(20, 30),
+					BaseGenerators.just(42)
+				)
+			);
+
+			var exhaustiveSource = choices.exhaustive();
+			assertThat(exhaustiveSource).isPresent();
+			assertThat(exhaustiveSource.get().maxCount()).isEqualTo(23);
+
+			var values = ExhaustiveGenerationTests.collectAll(exhaustiveSource.get(), choices);
+			assertThat(values).contains(0, 5, 25, 42);
+		}
+
+	}
+
+	@Group
 	class Filtering {
 		@Example
 		void mapIntsToStrings() {
