@@ -4,76 +4,59 @@ import java.util.*;
 
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
-import jqwik2.api.support.*;
 import jqwik2.internal.*;
+import jqwik2.internal.recording.*;
 
 import static jqwik2.api.recording.Recording.*;
 
 public class FrequencyOfGenerator<T> implements Generator<T> {
 
-	private final List<Pair<Integer, Generator<T>>> frequencies;
-	private final List<Generator<T>> values;
-	private final RandomChoice.Distribution distribution;
+	private final Generator<Generator<T>> generatorFrequency;
+	private final List<Pair<Recording, Generator<T>>> sourceAndGenerators;
 
 	public FrequencyOfGenerator(Collection<Pair<Integer, Generator<T>>> frequencies) {
-		this.values = values(frequencies);
-		this.frequencies = frequencies.stream()
-									  .filter(p -> p.first() > 0)
-									  .map(p -> new Pair<>(p.first(), p.second()))
-									  .toList();
-		this.distribution = frequencyDistribution();
+		this.generatorFrequency = BaseGenerators.frequency(frequencies);
+		this.sourceAndGenerators = sourceAndGenerators(generatorFrequency);
 	}
 
-	private List<Generator<T>> values(Collection<Pair<Integer, Generator<T>>> frequencies) {
-		return frequencies.stream()
-						  .filter(p -> p.first() > 0)
-						  .map(Pair::second)
-						  .distinct()
-						  .toList();
+	private List<Pair<Recording, Generator<T>>> sourceAndGenerators(Generator<Generator<T>> generatorFrequency) {
+		// TODO: This is involved. Should there be an easier way to get all values and their recordings?
+		List<Pair<Recording, Generator<T>>> sourceAndGenerators = new ArrayList<>();
+		generatorFrequency.exhaustive().ifPresent(exhaustive -> {
+			for (GenSource genSource : exhaustive) {
+				GenRecorder recorder = new GenRecorder(genSource);
+				Generator<T> generator = generatorFrequency.generate(recorder);
+				sourceAndGenerators.add(Pair.of(recorder.recording(), generator));
+			}
+		});
+		return sourceAndGenerators;
 	}
 
 	@Override
 	public T generate(GenSource source) {
-		if (frequencies.isEmpty()) {
-			throw new CannotGenerateException("No values to choose from");
-		}
-		var frequencyOfSource = source.tuple();
-		var generator = chooseGenerator(frequencyOfSource.nextValue());
-		return generator.generate(frequencyOfSource.nextValue());
-	}
-
-	private Generator<T> chooseGenerator(GenSource chooseGeneratorSource) {
-		int index = chooseGeneratorSource.choice().choose(frequencies.size(), distribution);
-		return frequencies.get(index).second();
-	}
-
-	private RandomChoice.Distribution frequencyDistribution() {
-		return new FrequencyBasedDistribution(frequencies);
+		return generatorFrequency.flatMap(g -> g).generate(source);
 	}
 
 	@Override
 	public Iterable<Recording> edgeCases() {
 		// TODO: make sure this does not run infinitely in highly nested cases
 		Set<Recording> recordings = new LinkedHashSet<>();
-		for (int index = 0; index < values.size(); index++) {
-			Generator<T> generator = values.get(index);
-			for (Recording edgeCase : generator.edgeCases()) {
+		for (Pair<Recording, Generator<T>> sourceAndGenerator : sourceAndGenerators) {
+			Recording sourceRecording = sourceAndGenerator.first();
+			Generator<T> generator = sourceAndGenerator.second();
+			for (Recording childRecording : generator.edgeCases()) {
 				recordings.add(tuple(
-					Recording.choice(index),
-					edgeCase
+					sourceRecording,
+					childRecording
 				));
 			}
 		}
 		return recordings;
-
 	}
 
 	@Override
 	public Optional<ExhaustiveSource<?>> exhaustive() {
-		return ExhaustiveSource.flatMap(
-			ExhaustiveSource.choice(values.size() - 1),
-			head -> chooseGenerator(head).exhaustive()
-		);
+		return generatorFrequency.flatMap(g -> g).exhaustive();
 	}
 
 }
