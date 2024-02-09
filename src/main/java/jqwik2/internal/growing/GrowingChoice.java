@@ -61,4 +61,19 @@ class GrowingChoice extends AbstractGrowingSource<GrowingChoice> implements GenS
 	public GrowingChoice copy() {
 		return new GrowingChoice(choiceMaxAndValue);
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		GrowingChoice that = (GrowingChoice) o;
+
+		return Objects.equals(choiceMaxAndValue, that.choiceMaxAndValue);
+	}
+
+	@Override
+	public int hashCode() {
+		return choiceMaxAndValue != null ? choiceMaxAndValue.hashCode() : 0;
+	}
 }

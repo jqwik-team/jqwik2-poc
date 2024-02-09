@@ -23,7 +23,7 @@ abstract class AbstractGrowingCollection<T extends GrowingSource<T>> extends Abs
 	}
 
 	AbstractGrowingCollection(java.util.List<GrowingSourceContainer> sources) {
-		this.sources = sources;
+		this.sources = new ArrayList<>(sources);
 	}
 
 	@Override
@@ -33,11 +33,27 @@ abstract class AbstractGrowingCollection<T extends GrowingSource<T>> extends Abs
 			int index = i;
 			GrowingSourceContainer source = sources.get(i);
 			Set<GrowingSourceContainer> grown = source.grow();
-			Set<T> grownContainers = grown.stream().map(c -> replace(index, c)).collect(Collectors.toSet());
+			Set<T> grownContainers = grown.stream()
+										  .map(c -> replace(index, c))
+										  .collect(Collectors.toSet());
 			result.addAll(grownContainers);
 		}
 		return result;
 	}
 
 	protected abstract T replace(int position, GrowingSourceContainer source);
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		AbstractGrowingCollection<?> that = (AbstractGrowingCollection<?>) o;
+		return Objects.equals(sources, that.sources);
+	}
+
+	@Override
+	public int hashCode() {
+		return sources != null ? sources.hashCode() : 0;
+	}
 }

@@ -34,6 +34,9 @@ class GrowingSourceContainer implements GrowingSource<GrowingSourceContainer> {
 
 	@Override
 	public Set<GrowingSourceContainer> grow() {
+		if (source == null) {
+			return Set.of();
+		}
 		return source.grow().stream()
 				.map(GrowingSourceContainer::new)
 				.collect(Collectors.toSet());
@@ -41,6 +44,20 @@ class GrowingSourceContainer implements GrowingSource<GrowingSourceContainer> {
 
 	@Override
 	public GrowingSourceContainer copy() {
-		return new GrowingSourceContainer(source.copy());
+		return new GrowingSourceContainer(source == null ? null : source.copy());
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		GrowingSourceContainer that = (GrowingSourceContainer) o;
+		return Objects.equals(source, that.source);
+	}
+
+	@Override
+	public int hashCode() {
+		return source != null ? source.hashCode() : 0;
 	}
 }

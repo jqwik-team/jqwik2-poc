@@ -39,4 +39,18 @@ class GrowingGenSource extends AbstractGrowingSource<GrowingGenSource> {
 	public GrowingGenSource copy() {
 		return new GrowingGenSource(currentSource.copy());
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		GrowingGenSource source = (GrowingGenSource) o;
+		return Objects.equals(currentSource, source.currentSource);
+	}
+
+	@Override
+	public int hashCode() {
+		return currentSource != null ? currentSource.hashCode() : 0;
+	}
 }

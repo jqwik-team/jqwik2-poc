@@ -91,7 +91,7 @@ class GrowingGenerationTests {
 			sampleGenerator,
 			sample -> {
 				counter.incrementAndGet();
-				System.out.println(sample);
+				// System.out.println(sample);
 			}
 		);
 		assertThat(counter.get()).isEqualTo(60);
@@ -164,6 +164,7 @@ class GrowingGenerationTests {
 		SampleGenerator sampleGenerator = SampleGenerator.from(
 			BaseGenerators.integers(0, 5).list(0, 2)
 		);
+		sampleGenerator.filterOutDuplicates();
 
 		AtomicInteger counter = new AtomicInteger(0);
 		forAllGrowingSamples(
@@ -181,6 +182,7 @@ class GrowingGenerationTests {
 		SampleGenerator sampleGenerator = SampleGenerator.from(
 			BaseGenerators.integers(0, 5).set(0, 2)
 		);
+		sampleGenerator.filterOutDuplicates();
 
 		AtomicInteger counter = new AtomicInteger(0);
 		forAllGrowingSamples(
@@ -205,6 +207,7 @@ class GrowingGenerationTests {
 				))
 			))
 		);
+		sampleGenerator.filterOutDuplicates();
 
 		AtomicInteger counter = new AtomicInteger(0);
 		forAllGrowingSamples(
@@ -250,6 +253,7 @@ class GrowingGenerationTests {
 		});
 
 		SampleGenerator sampleGenerator = SampleGenerator.from(combined);
+		sampleGenerator.filterOutDuplicates();
 
 		AtomicInteger counter = new AtomicInteger(0);
 		forAllGrowingSamples(
