@@ -15,10 +15,8 @@ class GrowingSourceContainer implements GrowingSource {
 		if (resourceRequested) {
 			throw new CannotGenerateException("Already requested a resource");
 		}
-		if (source == null) {
+		if (!genSourceType.isInstance(source)) {
 			source = genSourceSupplier.get();
-		} else if (!genSourceType.isInstance(source)) {
-			throw new CannotGenerateException("Source is not a " + genSourceType.getSimpleName());
 		}
 		resourceRequested = true;
 		return (T) source;

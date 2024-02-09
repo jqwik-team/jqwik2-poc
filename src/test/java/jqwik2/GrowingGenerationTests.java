@@ -194,6 +194,30 @@ class GrowingGenerationTests {
 	}
 
 	@Example
+	void oneOfGenerator() {
+		SampleGenerator sampleGenerator = SampleGenerator.from(
+			BaseGenerators.oneOf(List.of(
+				BaseGenerators.just(List.of(0, 0, 0)),
+				BaseGenerators.integers(0, 5).list(0, 2),
+				BaseGenerators.choose(List.of(
+					List.of(1, 2, 3),
+					List.of(4, 5, 6)
+				))
+			))
+		);
+
+		AtomicInteger counter = new AtomicInteger(0);
+		forAllGrowingSamples(
+			sampleGenerator,
+			sample -> {
+				counter.incrementAndGet();
+				// System.out.println(sample);
+			}
+		);
+		assertThat(counter.get()).isEqualTo(46); // 1 + 43 + 2
+	}
+
+	@Example
 	void simpleCombinations() {
 		Arbitrary<Integer> ints = Numbers.integers().between(1, 5);
 		Arbitrary<Integer> tens = Numbers.integers().between(1, 5).map(i -> i * 10);
@@ -263,7 +287,7 @@ class GrowingGenerationTests {
 		assertThat(counter.get()).isEqualTo(397);
 	}
 
-	// IterableGrowingSource cannot be directly iterated since it is a sequential guided source that requires guidance being triggered
+	// IterableGrowingSource cannot be directly iterated since it is a SequentialGuidedSource that requires guidance being triggered
 	private static void forAllGrowingSamples(SampleGenerator sampleGenerator, Consumer<Sample> whenGenerated) {
 		GuidedGeneration iterator = (GuidedGeneration) new IterableGrowingSource().iterator();
 		while (iterator.hasNext()) {
