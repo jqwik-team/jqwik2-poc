@@ -29,13 +29,23 @@ public class BaseGenerators {
 		return new CreateGenerator<>(supplier);
 	}
 
+	@SuppressWarnings("unchecked")
 	public static <T> Generator<T> choose(Collection<? extends T> values) {
-		return new ChooseGenerator<>(values);
+		Collection<Pair<Integer, T>> frequencies = values.stream()
+														.map(v -> (Pair<Integer, T>) Pair.of(1, v))
+														.toList();
+		return new FrequencyGenerator<>(frequencies);
 	}
 
 	public static <T> Generator<T> frequency(Collection<Pair<Integer, T>> frequencies) {
 		return new FrequencyGenerator<>(frequencies);
 	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> Generator<T> oneOf(Collection<Generator<? extends T>> generators) {
+		return choose(generators).flatMap(g -> (Generator<T>) g);
+	}
+
 
 	public static <T> Generator<T> combine(Function<Combinators.Sampler, T> combinator) {
 		return new CombineGenerator<>(combinator);

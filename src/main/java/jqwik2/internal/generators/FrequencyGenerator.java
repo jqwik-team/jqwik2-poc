@@ -41,7 +41,7 @@ public class FrequencyGenerator<T> implements Generator<T> {
 	}
 
 	private RandomChoice.Distribution frequencyDistribution() {
-		return new FrequencyBasedDistribution();
+		return new FrequencyBasedDistribution(frequencies);
 	}
 
 	@Override
@@ -52,41 +52,6 @@ public class FrequencyGenerator<T> implements Generator<T> {
 	@Override
 	public Optional<ExhaustiveSource<?>> exhaustive() {
 		return ExhaustiveSource.choice(values.size() - 1);
-	}
-
-	private class FrequencyBasedDistribution implements RandomChoice.Distribution {
-
-		private final List<Integer> ranges;
-		private final int maxRange;
-
-		private FrequencyBasedDistribution() {
-			List<Integer> weights = frequencies.stream().map(Pair::first).toList();
-			this.ranges = calculateRanges(weights);
-			this.maxRange = ranges.getLast() + 1;
-		}
-
-		@Override
-		public int nextInt(RandomChoice random, int maxExcluded) {
-			int range = random.nextInt(maxRange);
-			for (int i = 0; i < ranges.size(); i++) {
-				if (range <= ranges.get(i)) {
-					return i;
-				}
-			}
-			// Should never happen
-			return 0;
-		}
-
-		private java.util.List<Integer> calculateRanges(List<Integer> weights) {
-			int upper = 0;
-			List<Integer> ranges = new ArrayList<>();
-			for (int weight : weights) {
-				upper += weight;
-				ranges.add(upper);
-			}
-			return ranges;
-		}
-
 	}
 
 }
