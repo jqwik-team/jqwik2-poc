@@ -267,7 +267,6 @@ class GrowingGenerationTests {
 	}
 
 	@Example
-	@Disabled("Not implemented yet")
 	void statefulChain() {
 
 		ChainArbitrary<Integer> chains =
@@ -289,7 +288,9 @@ class GrowingGenerationTests {
 				// System.out.println(chain.transformations());
 			}
 		);
-		assertThat(counter.get()).isEqualTo(397);
+		// There can be duplicates since different sources can lead to same value
+		// due to automatic expansion of lists and tuples
+		assertThat(counter.get()).isGreaterThanOrEqualTo(397);
 	}
 
 	// IterableGrowingSource cannot be directly iterated since it is a SequentialGuidedSource that requires guidance being triggered
