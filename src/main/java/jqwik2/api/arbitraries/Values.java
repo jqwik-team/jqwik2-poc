@@ -22,12 +22,7 @@ public class Values {
 
 	@SafeVarargs
 	public static <T> Arbitrary<T> of(T... values) {
-		return new CacheableArbitrary<>((Object[]) values) {
-			@Override
-			public Generator<T> generator() {
-				return BaseGenerators.choose(Arrays.asList(values));
-			}
-		};
+		return of(Arrays.asList(values));
 	}
 
 	public static <T> Arbitrary<T> of(Collection<T> values) {
@@ -46,6 +41,26 @@ public class Values {
 			@Override
 			public Generator<T> generator() {
 				return BaseGenerators.frequency(frequencyList);
+			}
+		};
+	}
+
+	@SafeVarargs
+	public static <T> Arbitrary<T> oneOf(Arbitrary<T>... arbitraries) {
+		return oneOf(Arrays.asList(arbitraries));
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> Arbitrary<T> oneOf(Collection<Arbitrary<? extends T>> arbitraries) {
+		Collection<Generator<T>> generators =
+			arbitraries.stream()
+					   .map((Arbitrary<? extends T> arbitrary) -> (Generator<T>) arbitrary.generator())
+					   .toList();
+
+		return new CacheableArbitrary<>(arbitraries) {
+			@Override
+			public Generator<T> generator() {
+				return BaseGenerators.oneOf(generators);
 			}
 		};
 	}

@@ -31,8 +31,8 @@ public class BaseGenerators {
 
 	public static <T> Generator<T> choose(Collection<? extends T> values) {
 		Collection<Pair<Integer, T>> frequencies = values.stream()
-														.map(v -> Pair.of(1, (T) v))
-														.toList();
+														 .map(v -> Pair.of(1, (T) v))
+														 .toList();
 		return new FrequencyGenerator<>(frequencies);
 	}
 
@@ -40,14 +40,13 @@ public class BaseGenerators {
 		return new FrequencyGenerator<>(frequencies);
 	}
 
-	@SuppressWarnings("unchecked")
-	public static <T> Generator<T> oneOf(Collection<Generator<? extends T>> generators) {
-		Collection<Pair<Integer, Generator<T>>> frequencies = generators.stream()
-														 .map(v -> Pair.of(1, (Generator<T>) v))
-														 .toList();
+	public static <T> Generator<T> oneOf(Collection<Generator<T>> generators) {
+		Collection<Pair<Integer, Generator<T>>> frequencies =
+			generators.stream()
+					  .map(v -> Pair.of(1, v))
+					  .toList();
 		return new FrequencyOfGenerator<>(frequencies);
 	}
-
 
 	public static <T> Generator<T> combine(Function<Combinators.Sampler, T> combinator) {
 		return new CombineGenerator<>(combinator);

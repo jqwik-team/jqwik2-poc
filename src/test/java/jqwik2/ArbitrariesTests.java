@@ -125,7 +125,6 @@ class ArbitrariesTests {
 
 		assertThat(choices).isEqualTo(Values.of("a", "b", "c"));
 		assertThat(choices).isNotEqualTo(Values.of("a", "b", null));
-
 	}
 
 	@Example
@@ -146,6 +145,27 @@ class ArbitrariesTests {
 			new Pair<>(10, "c")
 		));
 		assertThat(choices).isNotEqualTo(Values.of("a", "b", "c"));
+	}
+
+	@Example
+	void chooseArbitrary() {
+		Arbitrary<Integer> choices = Values.oneOf(
+			Numbers.integers().between(1, 5),
+			Values.just(42)
+		);
+		choices.samples(false).limit(10).forEach(sample -> {
+			// System.out.println(sample);
+			assertThat(sample).isIn(1, 2, 3, 4, 5, 42);
+		});
+
+		assertThat(choices).isEqualTo(Values.oneOf(
+			Numbers.integers().between(1, 5),
+			Values.just(42)
+		));
+		assertThat(choices).isNotEqualTo(Values.oneOf(
+			Numbers.integers().between(1, 5),
+			Values.just(43)
+		));
 	}
 
 }
