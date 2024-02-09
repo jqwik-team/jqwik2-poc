@@ -1,9 +1,9 @@
 package jqwik2.internal.growing;
 
-import jqwik2.api.*;
+import java.util.*;
 
-public interface GrowingSource {
-	boolean advance();
-	void reset();
-	void next();
+public interface GrowingSource<T extends GrowingSource<T>> {
+	default Set<T> grow() {
+		throw new UnsupportedOperationException("Override in each source");
+	}
 }

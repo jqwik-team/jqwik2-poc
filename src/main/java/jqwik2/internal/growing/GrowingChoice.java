@@ -1,37 +1,28 @@
 package jqwik2.internal.growing;
 
+import java.util.*;
+
 import jqwik2.api.*;
 import jqwik2.internal.*;
 
-class GrowingChoice extends AbstractGrowingSource implements GenSource.Choice {
+class GrowingChoice extends AbstractGrowingSource<GrowingChoice> implements GenSource.Choice {
 	private Pair<Integer, Integer> choiceMaxAndValue = null;
 	private boolean choiceRequested = false;
 
-	@Override
-	public boolean advance() {
-		if (choiceMaxAndValue != null && choiceNotExhausted()) {
-			advanceChoice();
-			return true;
-		}
-		return false;
+	GrowingChoice() {
+		this(null);
 	}
 
-	private void advanceChoice() {
-		choiceMaxAndValue = new Pair<>(choiceMaxAndValue.first(), choiceMaxAndValue.second() + 1);
+	public GrowingChoice(Pair<Integer, Integer> choiceMaxAndValue) {
+		this.choiceMaxAndValue = choiceMaxAndValue;
+	}
+
+	private Pair<Integer, Integer> advanceChoiceAndMaxValue() {
+		return new Pair<>(choiceMaxAndValue.first(), choiceMaxAndValue.second() + 1);
 	}
 
 	private boolean choiceNotExhausted() {
 		return choiceMaxAndValue.second() < choiceMaxAndValue.first() - 1;
-	}
-
-	@Override
-	public void reset() {
-		choiceMaxAndValue = null;
-	}
-
-	@Override
-	public void next() {
-		choiceRequested = false;
 	}
 
 	@Override
@@ -56,5 +47,13 @@ class GrowingChoice extends AbstractGrowingSource implements GenSource.Choice {
 	@Override
 	public Choice choice() {
 		return this;
+	}
+
+	@Override
+	public Set<GrowingChoice> grow() {
+		if (choiceNotExhausted()) {
+			return Set.of(new GrowingChoice(advanceChoiceAndMaxValue()));
+		}
+		return Set.of();
 	}
 }

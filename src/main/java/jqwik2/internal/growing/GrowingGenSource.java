@@ -1,8 +1,19 @@
 package jqwik2.internal.growing;
 
-class GrowingGenSource extends AbstractGrowingSource {
+import java.util.*;
+import java.util.stream.*;
 
-	private GrowingSourceContainer currentSource = new GrowingSourceContainer();
+class GrowingGenSource extends AbstractGrowingSource<GrowingGenSource> {
+
+	private GrowingSourceContainer currentSource;
+
+	GrowingGenSource() {
+		this(new GrowingSourceContainer());
+	}
+
+	public GrowingGenSource(GrowingSourceContainer growingSourceContainer) {
+		this.currentSource = growingSourceContainer;
+	}
 
 	@Override
 	public Choice choice() {
@@ -20,18 +31,7 @@ class GrowingGenSource extends AbstractGrowingSource {
 	}
 
 	@Override
-	public boolean advance() {
-		return currentSource.advance();
+	public Set<GrowingGenSource> grow() {
+		return currentSource.grow().stream().map(GrowingGenSource::new).collect(Collectors.toSet());
 	}
-
-	@Override
-	public void reset() {
-		currentSource.reset();
-	}
-
-	@Override
-	public void next() {
-		currentSource.next();
-	}
-
 }

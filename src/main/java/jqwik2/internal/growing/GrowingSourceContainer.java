@@ -1,14 +1,24 @@
 package jqwik2.internal.growing;
 
+import java.util.*;
 import java.util.function.*;
+import java.util.stream.*;
 
 import jqwik2.api.*;
 import jqwik2.internal.*;
 
-class GrowingSourceContainer implements GrowingSource {
+class GrowingSourceContainer implements GrowingSource<GrowingSourceContainer> {
 
-	private GrowingSource source;
+	private GrowingSource<?> source;
 	private boolean resourceRequested = false;
+
+	GrowingSourceContainer() {
+		this(null);
+	}
+
+	GrowingSourceContainer(GrowingSource<?> source) {
+		this.source = source;
+	}
 
 	@SuppressWarnings("unchecked")
 	<T extends GenSource> T get(Class<T> genSourceType, Supplier<GrowingSource> genSourceSupplier) {
@@ -23,28 +33,9 @@ class GrowingSourceContainer implements GrowingSource {
 	}
 
 	@Override
-	public void next() {
-		resourceRequested = false;
-		if (source == null) {
-			return;
-		}
-		source.next();
+	public Set<GrowingSourceContainer> grow() {
+		return source.grow().stream()
+				.map(GrowingSourceContainer::new)
+				.collect(Collectors.toSet());
 	}
-
-	@Override
-	public boolean advance() {
-		if (source == null) {
-			return false;
-		}
-		return source.advance();
-	}
-
-	@Override
-	public void reset() {
-		if (source == null) {
-			return;
-		}
-		source.reset();
-	}
-
 }

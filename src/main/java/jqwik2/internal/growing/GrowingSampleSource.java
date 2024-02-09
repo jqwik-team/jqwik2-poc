@@ -6,14 +6,22 @@ import jqwik2.api.*;
 import jqwik2.internal.*;
 
 public class GrowingSampleSource extends SequentialGuidedGeneration implements SampleSource {
-	private final List<GrowingGenSource> sources = new ArrayList<>();
+
+	private List<GrowingTuple> currentSizeSources = new ArrayList<>();
+	private int currentIndex = 0;
+
+	public GrowingSampleSource() {
+		currentSizeSources.add(new GrowingTuple());
+	}
 
 	@Override
 	public List<GenSource> sources(int size) {
+		GrowingTuple current = currentSizeSources.get(currentIndex);
+		List<GenSource> sources = new ArrayList<>();
 		while (sources.size() < size) {
-			sources.add(new GrowingGenSource());
+			sources.add(current.nextValue());
 		}
-		return sources.stream().map(s -> (GenSource) s).toList();
+		return sources;
 	}
 
 	@Override
@@ -37,20 +45,17 @@ public class GrowingSampleSource extends SequentialGuidedGeneration implements S
 	}
 
 	private boolean grow() {
-		sources.forEach(GrowingGenSource::next);
-		int i = sources.size() - 1;
-		while (i >= 0) {
-			var source = sources.get(i);
-			if (source.advance()) {
-				resetSourcesAfter(i);
-				return true;
-			}
-			i--;
+		if (currentIndex < currentSizeSources.size() - 1) {
+			currentIndex++;
+			return true;
 		}
-		return false;
-	}
-
-	private void resetSourcesAfter(int resourceIndex) {
-		sources.subList(resourceIndex + 1, sources.size()).forEach(GrowingGenSource::reset);
+		List<GrowingTuple> nextSizeSources = new ArrayList<>();
+		for (GrowingTuple source : currentSizeSources) {
+			Set<GrowingTuple> grownSources = source.grow();
+			nextSizeSources.addAll(grownSources);
+		}
+		currentSizeSources = nextSizeSources;
+		currentIndex = 0;
+		return currentSizeSources.size() > 0;
 	}
 }

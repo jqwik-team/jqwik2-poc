@@ -3,7 +3,7 @@ package jqwik2.internal.growing;
 import jqwik2.api.*;
 import jqwik2.internal.*;
 
-abstract class AbstractGrowingSource implements GrowingSource, GenSource {
+abstract class AbstractGrowingSource<T extends GrowingSource<T>> implements GrowingSource<T>, GenSource {
 
 	@Override
 	public Choice choice() {

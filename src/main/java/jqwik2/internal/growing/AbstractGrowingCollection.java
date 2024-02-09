@@ -1,12 +1,13 @@
 package jqwik2.internal.growing;
 
 import java.util.*;
+import java.util.stream.*;
 
 import jqwik2.api.*;
 
-class AbstractGrowingCollection extends AbstractGrowingSource {
+abstract class AbstractGrowingCollection<T extends GrowingSource<T>> extends AbstractGrowingSource<T> {
 
-	private final java.util.List<GrowingSourceContainer> sources = new ArrayList<>();
+	protected final java.util.List<GrowingSourceContainer> sources;
 	private int currentSourceIndex = 0;
 
 	protected GenSource nextSource() {
@@ -17,32 +18,25 @@ class AbstractGrowingCollection extends AbstractGrowingSource {
 		return sources.get(currentSourceIndex++).get(GenSource.class, GrowingGenSource::new);
 	}
 
+	AbstractGrowingCollection() {
+		this(new ArrayList<>());
+	}
+
+	AbstractGrowingCollection(java.util.List<GrowingSourceContainer> sources) {
+		this.sources = sources;
+	}
+
 	@Override
-	public boolean advance() {
-		int i = sources.size() - 1;
-		while (i >= 0) {
-			var source = sources.get(i);
-			if (source.advance()) {
-				resetSourcesAfter(i);
-				return true;
-			}
-			i--;
+	public Set<T> grow() {
+		Set<T> result = new HashSet<>();
+		for (int i = 0; i < sources.size(); i++) {
+			int index = i;
+			GrowingSourceContainer source = sources.get(i);
+			Set<GrowingSourceContainer> grown = source.grow();
+			result.addAll(grown.stream().map(c -> replace(index, c)).collect(Collectors.toSet()));
 		}
-		return false;
+		return result;
 	}
 
-	private void resetSourcesAfter(int index) {
-		sources.subList(index + 1, sources.size()).forEach(GrowingSourceContainer::reset);
-	}
-
-	@Override
-	public void reset() {
-		sources.forEach(GrowingSourceContainer::reset);
-	}
-
-	@Override
-	public void next() {
-		currentSourceIndex = 0;
-		sources.forEach(GrowingSourceContainer::next);
-	}
+	protected abstract T replace(int position, GrowingSourceContainer source);
 }
