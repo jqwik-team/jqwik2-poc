@@ -12,6 +12,10 @@ import net.jqwik.api.*;
 
 import static org.assertj.core.api.Assertions.*;
 
+/**
+ * These tests are currently not related to the rest of jqwik2.
+ * They serve to experiment with a new way to generate growing counters.
+ */
 class GrowingCountersTests {
 	// @Example
 	void experiment() {
@@ -100,6 +104,25 @@ class GrowingCountersTests {
 
 }
 
+/**
+ * Current solution generates all possible combinations of counters for one target depth.
+ * Then it filters out those that do not contain the target depth.
+ *
+ * Alternative algorithmic solution idea:
+ * - Consider tuples of choices to be vectors of size n, where n is the sum of all counters
+ * - Generate list with all values == 0,
+ * - for next size of "vectors" add all vectors of size 1 and remember resulting set
+ * - repeat until your target size has been reached
+ * Advantages:
+ * - It is independent of number of generators since choices can cross generator boundaries
+ * - Values grow by size (not depth),
+ * - easy to implement,
+ * - could probably be done concurrently within same size
+ * Disadvantage: Memory grows quadratically with each increasing size
+ * Open questions:
+ * - How to map structured sources onto vectors?
+ * - How to handle changing dimensions, e.g. through oneOf generators?
+ */
 class GrowingCounters {
 
 	private final List<Integer> counters;
