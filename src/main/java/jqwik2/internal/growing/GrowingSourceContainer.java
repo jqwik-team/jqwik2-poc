@@ -21,7 +21,7 @@ class GrowingSourceContainer implements GrowingSource<GrowingSourceContainer> {
 	}
 
 	@SuppressWarnings("unchecked")
-	<T extends GenSource> T get(Class<T> genSourceType, Supplier<GrowingSource> genSourceSupplier) {
+	<T extends GenSource> T get(Class<T> genSourceType, Supplier<GrowingSource<?>> genSourceSupplier) {
 		if (resourceRequested) {
 			throw new CannotGenerateException("Already requested a resource");
 		}
@@ -37,5 +37,10 @@ class GrowingSourceContainer implements GrowingSource<GrowingSourceContainer> {
 		return source.grow().stream()
 				.map(GrowingSourceContainer::new)
 				.collect(Collectors.toSet());
+	}
+
+	@Override
+	public GrowingSourceContainer copy() {
+		return new GrowingSourceContainer(source.copy());
 	}
 }

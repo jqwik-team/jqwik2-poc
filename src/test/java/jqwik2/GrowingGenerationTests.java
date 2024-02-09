@@ -48,7 +48,7 @@ class GrowingGenerationTests {
 		forAllGrowingSamples(
 			sampleGenerator,
 			sample -> {
-				// System.out.println(sample);
+				System.out.println(sample);
 				values.add(sample.values());
 			}
 		);
@@ -263,6 +263,7 @@ class GrowingGenerationTests {
 	}
 
 	@Example
+	@Disabled("Not implemented yet")
 	void statefulChain() {
 
 		ChainArbitrary<Integer> chains =

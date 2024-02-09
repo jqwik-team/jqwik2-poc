@@ -26,9 +26,15 @@ class GrowingList extends AbstractGrowingCollection<GrowingList> implements GenS
 
 	@Override
 	protected GrowingList replace(int position, GrowingSourceContainer container) {
-		java.util.List<GrowingSourceContainer> newSources = new ArrayList<>(sources);
+		var clonedSources = sources.stream().map(GrowingSourceContainer::copy).toList();
+		java.util.List<GrowingSourceContainer> newSources = new ArrayList<>(clonedSources);
 		newSources.set(position, container);
 		return new GrowingList(newSources);
 	}
 
+	@Override
+	public GrowingList copy() {
+		var clonedSources = sources.stream().map(GrowingSourceContainer::copy).toList();
+		return new GrowingList(clonedSources);
+	}
 }

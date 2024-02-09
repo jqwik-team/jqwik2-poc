@@ -56,6 +56,6 @@ public class GrowingSampleSource extends SequentialGuidedGeneration implements S
 		}
 		currentSizeSources = nextSizeSources;
 		currentIndex = 0;
-		return currentSizeSources.size() > 0;
+		return !currentSizeSources.isEmpty();
 	}
 }

@@ -56,4 +56,9 @@ class GrowingChoice extends AbstractGrowingSource<GrowingChoice> implements GenS
 		}
 		return Set.of();
 	}
+
+	@Override
+	public GrowingChoice copy() {
+		return new GrowingChoice(choiceMaxAndValue);
+	}
 }

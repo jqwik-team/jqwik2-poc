@@ -33,7 +33,8 @@ abstract class AbstractGrowingCollection<T extends GrowingSource<T>> extends Abs
 			int index = i;
 			GrowingSourceContainer source = sources.get(i);
 			Set<GrowingSourceContainer> grown = source.grow();
-			result.addAll(grown.stream().map(c -> replace(index, c)).collect(Collectors.toSet()));
+			Set<T> grownContainers = grown.stream().map(c -> replace(index, c)).collect(Collectors.toSet());
+			result.addAll(grownContainers);
 		}
 		return result;
 	}

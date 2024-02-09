@@ -26,8 +26,17 @@ class GrowingTuple extends AbstractGrowingCollection<GrowingTuple> implements Ge
 
 	@Override
 	protected GrowingTuple replace(int position, GrowingSourceContainer container) {
-		java.util.List<GrowingSourceContainer> newSources = new ArrayList<>(sources);
+		java.util.List<GrowingSourceContainer> clonedSources =
+			sources.stream().map(GrowingSourceContainer::copy).toList();
+		java.util.List<GrowingSourceContainer> newSources = new ArrayList<>(clonedSources);
 		newSources.set(position, container);
 		return new GrowingTuple(newSources);
+	}
+
+	@Override
+	public GrowingTuple copy() {
+		java.util.List<GrowingSourceContainer> clonedSources =
+			sources.stream().map(GrowingSourceContainer::copy).toList();
+		return new GrowingTuple(clonedSources);
 	}
 }

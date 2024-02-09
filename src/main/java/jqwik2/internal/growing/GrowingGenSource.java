@@ -34,4 +34,9 @@ class GrowingGenSource extends AbstractGrowingSource<GrowingGenSource> {
 	public Set<GrowingGenSource> grow() {
 		return currentSource.grow().stream().map(GrowingGenSource::new).collect(Collectors.toSet());
 	}
+
+	@Override
+	public GrowingGenSource copy() {
+		return new GrowingGenSource(currentSource.copy());
+	}
 }

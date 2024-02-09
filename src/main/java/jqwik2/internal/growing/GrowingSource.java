@@ -6,4 +6,6 @@ public interface GrowingSource<T extends GrowingSource<T>> {
 	default Set<T> grow() {
 		throw new UnsupportedOperationException("Override in each source");
 	}
+
+	T copy();
 }
