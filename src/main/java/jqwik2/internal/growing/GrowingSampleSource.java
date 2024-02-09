@@ -7,16 +7,18 @@ import jqwik2.internal.*;
 
 public class GrowingSampleSource extends SequentialGuidedGeneration implements SampleSource {
 
-	private List<GrowingTuple> currentSizeSources = new ArrayList<>();
-	private int currentIndex = 0;
+	private Set<GrowingTuple> currentSizeSources = new LinkedHashSet<>();
+	private Iterator<GrowingTuple> iterator;
 
 	public GrowingSampleSource() {
 		currentSizeSources.add(new GrowingTuple());
+		iterator = currentSizeSources.iterator();
 	}
 
 	@Override
 	public List<GenSource> sources(int size) {
-		GrowingTuple current = currentSizeSources.get(currentIndex);
+		GrowingTuple current = iterator.next();
+		// GrowingTuple current = currentSizeSources.get(currentIndex);
 		List<GenSource> sources = new ArrayList<>();
 		while (sources.size() < size) {
 			sources.add(current.nextValue());
@@ -45,17 +47,16 @@ public class GrowingSampleSource extends SequentialGuidedGeneration implements S
 	}
 
 	private boolean grow() {
-		if (currentIndex < currentSizeSources.size() - 1) {
-			currentIndex++;
+		if (iterator.hasNext()) {
 			return true;
 		}
-		List<GrowingTuple> nextSizeSources = new ArrayList<>();
+		Set<GrowingTuple> nextSizeSources = new LinkedHashSet<>();
 		for (GrowingTuple source : currentSizeSources) {
 			Set<GrowingTuple> grownSources = source.grow();
 			nextSizeSources.addAll(grownSources);
 		}
 		currentSizeSources = nextSizeSources;
-		currentIndex = 0;
+		iterator = currentSizeSources.iterator();
 		return !currentSizeSources.isEmpty();
 	}
 }

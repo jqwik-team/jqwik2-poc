@@ -48,7 +48,7 @@ class GrowingGenerationTests {
 		forAllGrowingSamples(
 			sampleGenerator,
 			sample -> {
-				System.out.println(sample);
+				// System.out.println(sample);
 				values.add(sample.values());
 			}
 		);
@@ -91,7 +91,7 @@ class GrowingGenerationTests {
 			sampleGenerator,
 			sample -> {
 				counter.incrementAndGet();
-				// System.out.println(sample);
+				System.out.println(sample);
 			}
 		);
 		assertThat(counter.get()).isEqualTo(60);
