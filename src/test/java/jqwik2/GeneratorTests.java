@@ -6,6 +6,7 @@ import jqwik2.api.Arbitrary;
 import jqwik2.api.Shrinkable;
 import jqwik2.api.*;
 import jqwik2.api.arbitraries.*;
+import jqwik2.api.arbitraries.Combinators;
 import jqwik2.api.recording.*;
 import jqwik2.internal.*;
 import jqwik2.internal.generators.*;
@@ -557,6 +558,63 @@ class GeneratorTests {
 
 			var values = ExhaustiveGenerationTests.collectAll(exhaustive.get(), lazy);
 			assertThat(values).contains(0, 10);
+		}
+
+		@Example
+		void recursiveLazyGenerator() {
+			Generator<Tree> trees = trees().generator();
+
+			assertThat(trees.edgeCases()).isEmpty();
+			assertThat(trees.exhaustive()).isEmpty();
+
+			RandomGenSource source = new RandomGenSource("42");
+
+			for (int i = 0; i < 10; i++) {
+				Tree value = trees.generate(source);
+				System.out.println("value=" + value);
+				assertThat(value).isNotNull();
+			}
+		}
+
+		private Arbitrary<Tree> trees() {
+			return Combinators.combine(sampler -> {
+				String name = sampler.draw(aName());
+				Tree left = sampler.draw(aBranch());
+				Tree right = sampler.draw(aBranch());
+				return new Tree(name, left, right);
+			});
+		}
+
+		private Arbitrary<String> aName() {
+			return Values.of(
+				"AAA", "BBB", "CCC", "DDD", "EEE"
+			);
+		}
+
+		private Arbitrary<Tree> aBranch() {
+			return Values.lazy(() -> Values.frequencyOf(List.of(
+				Pair.of(2, Values.just(null)),
+				Pair.of(1, trees())
+			)));
+		}
+
+	}
+
+	private record Tree(String name, GeneratorTests.Tree left, GeneratorTests.Tree right) {
+
+		@Override
+		public String toString() {
+			return String.format("%s[%s]", name, depth());
+		}
+
+		private int depth() {
+			if (left == null && right == null) {
+				return 0;
+			}
+			return Math.max(
+				left == null ? 0 : left.depth() + 1,
+				right == null ? 0 : right.depth() + 1
+			);
 		}
 	}
 

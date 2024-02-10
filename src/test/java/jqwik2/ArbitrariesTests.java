@@ -148,7 +148,7 @@ class ArbitrariesTests {
 	}
 
 	@Example
-	void chooseArbitrary() {
+	void oneOfArbitrary() {
 		Arbitrary<Integer> choices = Values.oneOf(
 			Numbers.integers().between(1, 5),
 			Values.just(42)
@@ -165,6 +165,27 @@ class ArbitrariesTests {
 		assertThat(choices).isNotEqualTo(Values.oneOf(
 			Numbers.integers().between(1, 5),
 			Values.just(43)
+		));
+	}
+
+	@Example
+	void frequencyOfArbitrary() {
+		Arbitrary<Integer> choices = Values.frequencyOf(
+			Pair.of(5, Numbers.integers().between(1, 5)),
+			Pair.of(1, Values.just(42))
+		);
+		choices.samples(false).limit(10).forEach(sample -> {
+			// System.out.println(sample);
+			assertThat(sample).isIn(1, 2, 3, 4, 5, 42);
+		});
+
+		assertThat(choices).isEqualTo(Values.frequencyOf(
+			Pair.of(5, Numbers.integers().between(1, 5)),
+			Pair.of(1, Values.just(42))
+		));
+		assertThat(choices).isNotEqualTo(Values.frequencyOf(
+			Pair.of(5, Numbers.integers().between(1, 5)),
+			Pair.of(1, Values.just(43))
 		));
 	}
 

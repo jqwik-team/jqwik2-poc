@@ -66,6 +66,25 @@ public class Values {
 		};
 	}
 
+	@SuppressWarnings("unchecked")
+	public static <T> Arbitrary<T> frequencyOf(Pair<Integer, Arbitrary<? extends T>>... frequencies) {
+		return frequencyOf(Arrays.asList(frequencies));
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> Arbitrary<T> frequencyOf(Collection<Pair<Integer, Arbitrary<? extends T>>> frequencies) {
+		Collection<Pair<Integer, Generator<T>>> generatorFrequencies =
+			frequencies.stream()
+					   .map(p -> new Pair<>(p.first(), (Generator<T>) p.second().generator()))
+					   .toList();
+		return new CacheableArbitrary<>(frequencies) {
+			@Override
+			public Generator<T> generator() {
+				return BaseGenerators.frequencyOf(generatorFrequencies);
+			}
+		};
+	}
+
 	public static <T> Arbitrary<T> lazy(Supplier<Arbitrary<T>> supplier) {
 		Supplier<Generator<T>> genSupplier = () -> supplier.get().generator();
 		return new CacheableArbitrary<>(supplier) {

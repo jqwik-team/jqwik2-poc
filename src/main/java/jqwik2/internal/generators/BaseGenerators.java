@@ -48,6 +48,10 @@ public class BaseGenerators {
 		return new FrequencyOfGenerator<>(frequencies);
 	}
 
+	public static <T> Generator<T> frequencyOf(Collection<Pair<Integer, Generator<T>>> frequencies) {
+		return new FrequencyOfGenerator<>(frequencies);
+	}
+
 	public static <T> Generator<T> combine(Function<Combinators.Sampler, T> combinator) {
 		return new CombineGenerator<>(combinator);
 	}
