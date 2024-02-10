@@ -6,7 +6,6 @@
       analyze their commonalities
 
 - Additional generators and arbitraries
-    - Recursive generators using lazy evaluation of arbitrary
     - String (based on unicode code points)
     - Values.frequencyOf(...) // FrequencyOfGenerator is already implemented
     - Empty / Null Arbitrary -> When used in combinations, nothing is generated

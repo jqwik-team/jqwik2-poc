@@ -8,6 +8,7 @@ import java.util.function.*;
 import jqwik2.api.Arbitrary;
 import jqwik2.api.*;
 import jqwik2.api.arbitraries.*;
+import jqwik2.api.arbitraries.Combinators;
 import jqwik2.api.stateful.*;
 import jqwik2.internal.*;
 import jqwik2.internal.generators.*;
@@ -218,6 +219,47 @@ class GrowingGenerationTests {
 			}
 		);
 		assertThat(counter.get()).isEqualTo(46); // 1 + 43 + 2
+	}
+
+	@Example
+	@Disabled("This runs forever. Rework to make deterministic.")
+	void lazyRecursiveGenerator() {
+		Generator<Integer> combined = combinedInts().generator();
+
+		SampleGenerator sampleGenerator = SampleGenerator.from(combined);
+
+		AtomicInteger counter = new AtomicInteger(0);
+		forAllGrowingSamples(
+			sampleGenerator,
+			sample -> {
+				counter.incrementAndGet();
+				System.out.println(sample);
+			}
+		);
+		assertThat(counter.get()).isEqualTo(25);
+	}
+
+	private static Arbitrary<Integer> combinedInts() {
+		return Combinators.combine(sampler -> {
+			int anInt = sampler.draw(lazyInts());
+			int aTen = sampler.draw(recursiveInts());
+			return anInt + aTen;
+		});
+	}
+
+	private static Arbitrary<Integer> lazyInts() {
+		return Values.lazy(() -> Numbers.integers().between(1, 5));
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Arbitrary<Integer> recursiveInts() {
+		return Values.lazy(
+			() -> Values.frequencyOf(
+				Pair.of(5, lazyInts()),
+				Pair.of(1, combinedInts()),
+				Pair.of(1, Values.just(10)
+			)
+		));
 	}
 
 	@Example
