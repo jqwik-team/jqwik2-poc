@@ -571,7 +571,7 @@ class GeneratorTests {
 
 			for (int i = 0; i < 10; i++) {
 				Tree value = trees.generate(source);
-				System.out.println("value=" + value);
+				// System.out.println("value=" + value);
 				assertThat(value).isNotNull();
 			}
 		}

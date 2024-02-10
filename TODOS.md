@@ -7,7 +7,6 @@
 
 - Additional generators and arbitraries
     - String (based on unicode code points)
-    - Values.frequencyOf(...) // FrequencyOfGenerator is already implemented
     - Empty / Null Arbitrary -> When used in combinations, nothing is generated
 
 - Target-based generation and shrinking

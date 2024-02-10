@@ -29,9 +29,10 @@ class StatisticsTests {
 			return true;
 		});
 
-		for (Integer value : collector.values()) {
-			System.out.println("Value " + value + " occurred " + collector.count(value) + " times");
-		}
+		// TODO: Check for reasonable values in collector
+		// for (Integer value : collector.values()) {
+		// 	System.out.println("Value " + value + " occurred " + collector.count(value) + " times");
+		// }
 	}
 
 }

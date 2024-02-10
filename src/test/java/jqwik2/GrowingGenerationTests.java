@@ -17,6 +17,7 @@ import jqwik2.internal.growing.*;
 import net.jqwik.api.*;
 
 import static jqwik2.api.PropertyRunResult.Status.*;
+import static jqwik2.api.arbitraries.Values.*;
 import static org.assertj.core.api.Assertions.*;
 
 class GrowingGenerationTests {
@@ -222,9 +223,8 @@ class GrowingGenerationTests {
 	}
 
 	@Example
-	@Disabled("This runs forever. Rework to make deterministic.")
 	void lazyRecursiveGenerator() {
-		Generator<Integer> combined = combinedInts().generator();
+		Generator<Integer> combined = recursiveInts().generator();
 
 		SampleGenerator sampleGenerator = SampleGenerator.from(combined);
 
@@ -233,32 +233,17 @@ class GrowingGenerationTests {
 			sampleGenerator,
 			sample -> {
 				counter.incrementAndGet();
-				System.out.println(sample);
-			}
+				// System.out.println(sample);
+			}, 100 // without limit this would run forever
 		);
-		assertThat(counter.get()).isEqualTo(25);
+		assertThat(counter.get()).isEqualTo(100);
 	}
 
-	private static Arbitrary<Integer> combinedInts() {
-		return Combinators.combine(sampler -> {
-			int anInt = sampler.draw(lazyInts());
-			int aTen = sampler.draw(recursiveInts());
-			return anInt + aTen;
-		});
-	}
-
-	private static Arbitrary<Integer> lazyInts() {
-		return Values.lazy(() -> Numbers.integers().between(1, 5));
-	}
-
-	@SuppressWarnings("unchecked")
 	private static Arbitrary<Integer> recursiveInts() {
 		return Values.lazy(
-			() -> Values.frequencyOf(
-				Pair.of(5, lazyInts()),
-				Pair.of(1, combinedInts()),
-				Pair.of(1, Values.just(10)
-			)
+			() -> Values.oneOf(
+				just(1),
+				recursiveInts().map(i -> i + 1)
 		));
 	}
 
@@ -337,13 +322,19 @@ class GrowingGenerationTests {
 
 	// IterableGrowingSource cannot be directly iterated since it is a SequentialGuidedSource that requires guidance being triggered
 	private static void forAllGrowingSamples(SampleGenerator sampleGenerator, Consumer<Sample> whenGenerated) {
+		forAllGrowingSamples(sampleGenerator, whenGenerated, 1000);
+	}
+
+	private static void forAllGrowingSamples(SampleGenerator sampleGenerator, Consumer<Sample> whenGenerated, int max) {
+		AtomicInteger counter = new AtomicInteger(0);
 		GuidedGeneration iterator = (GuidedGeneration) new IterableGrowingSource().iterator();
-		while (iterator.hasNext()) {
+		while (iterator.hasNext() && counter.get() < max) {
 			SampleSource sampleSource = iterator.next();
 			sampleGenerator.generate(sampleSource).ifPresentOrElse(
 				sample -> {
 					whenGenerated.accept(sample);
 					iterator.guide(null, null);
+					counter.incrementAndGet();
 				},
 				() -> iterator.onEmptyGeneration(sampleSource)
 			);
