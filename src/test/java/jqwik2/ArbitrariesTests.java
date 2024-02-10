@@ -168,4 +168,12 @@ class ArbitrariesTests {
 		));
 	}
 
+	@Example
+	void lazyArbitrary() {
+		Arbitrary<Integer> choices = Values.lazy(() -> Values.of(1, 2, 3));
+		choices.samples(false).limit(10).forEach(sample -> {
+			// System.out.println(sample);
+			assertThat(sample).isIn(1, 2, 3);
+		});
+	}
 }

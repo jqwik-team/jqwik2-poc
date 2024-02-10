@@ -525,6 +525,42 @@ class GeneratorTests {
 	}
 
 	@Group
+	class Lazy {
+
+		@Example
+		void singleLazyGenerator() {
+			Generator<Integer> lazy = BaseGenerators.lazy(() -> BaseGenerators.integers(0, 10));
+
+			RandomGenSource source = new RandomGenSource("42");
+
+			for (int i = 0; i < 10; i++) {
+				Integer value = lazy.generate(source);
+				assertThat(value).isBetween(0, 10);
+			}
+		}
+
+		@Example
+		void lazyEdgeCases() {
+			Generator<Integer> lazy = BaseGenerators.lazy(() -> BaseGenerators.integers(0, 10));
+
+			var edgeCases = EdgeCasesTests.collectAllEdgeCases(lazy);
+			assertThat(edgeCases).containsExactlyInAnyOrder(0, 10);
+		}
+
+		@Example
+		void lazyExhaustiveGeneration() {
+			Generator<Integer> lazy = BaseGenerators.lazy(() -> BaseGenerators.integers(0, 10));
+
+			var exhaustive = lazy.exhaustive();
+			assertThat(exhaustive).isPresent();
+			assertThat(exhaustive.get().maxCount()).isEqualTo(11);
+
+			var values = ExhaustiveGenerationTests.collectAll(exhaustive.get(), lazy);
+			assertThat(values).contains(0, 10);
+		}
+	}
+
+	@Group
 	class Integrals {
 
 		@Example

@@ -51,4 +51,8 @@ public class BaseGenerators {
 	public static <T> Generator<T> combine(Function<Combinators.Sampler, T> combinator) {
 		return new CombineGenerator<>(combinator);
 	}
+
+	public static <T> Generator<T> lazy(Supplier<Generator<T>> generatorSupplier) {
+		return new LazyGenerator(generatorSupplier);
+	}
 }

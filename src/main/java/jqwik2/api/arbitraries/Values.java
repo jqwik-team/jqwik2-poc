@@ -1,6 +1,7 @@
 package jqwik2.api.arbitraries;
 
 import java.util.*;
+import java.util.function.*;
 
 import jqwik2.api.*;
 import jqwik2.internal.*;
@@ -65,4 +66,13 @@ public class Values {
 		};
 	}
 
+	public static <T> Arbitrary<T> lazy(Supplier<Arbitrary<T>> supplier) {
+		Supplier<Generator<T>> genSupplier = () -> supplier.get().generator();
+		return new CacheableArbitrary<>(supplier) {
+			@Override
+			public Generator<T> generator() {
+				return BaseGenerators.lazy(genSupplier);
+			}
+		};
+	}
 }
