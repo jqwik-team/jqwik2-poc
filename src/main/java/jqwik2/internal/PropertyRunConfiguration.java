@@ -82,6 +82,23 @@ public interface PropertyRunConfiguration {
 		);
 	}
 
+	static PropertyRunConfiguration randomizedGuided(
+		Function<IterableSampleSource, GuidedGeneration> guidanceSupplier,
+		String seed, int maxTries, boolean shrinkingEnabled,
+		Duration maxRuntime,
+		Supplier<ExecutorService> supplyExecutorService
+	) {
+		return new RunConfigurationRecord(
+			null,
+			maxTries,
+			shrinkingEnabled,
+			maxRuntime,
+			false,
+			supplyExecutorService,
+			() -> new GuidedGenerationSource(() -> guidanceSupplier.apply(randomSource(seed)))
+		);
+	}
+
 	static PropertyRunConfiguration growing(
 		int maxTries, boolean shrinkingEnabled, Duration maxRuntime
 	) {
