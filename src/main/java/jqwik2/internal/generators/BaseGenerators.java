@@ -21,6 +21,10 @@ public class BaseGenerators {
 		return new IntegerGenerator(min, max, distribution);
 	}
 
+	public static Generator<String> strings(Generator<Integer> codepoints, int minLength, int maxLength) {
+		return new StringGenerator(codepoints, minLength, maxLength);
+	}
+
 	public static <T> Generator<T> just(T value) {
 		return create(() -> value);
 	}
