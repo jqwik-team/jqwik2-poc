@@ -5,20 +5,34 @@ import java.util.*;
 import jqwik2.api.*;
 import jqwik2.internal.*;
 
+/**
+ * The implementation is more involved than it may seem necessary at first.
+ * There are two reasons for this:
+ * <ul>
+ *     <li>Prevent generation of duplicate sources if possible.</li>
+ *     <li>Generate "grown" sources in smaller batches in order to prevent "pausing"
+ *     while generating all sources with size + 1 in one go.</li>
+ * </ul>
+ */
 public class GrowingSampleSource extends SequentialGuidedGeneration implements SampleSource {
 
-	private Set<GrowingTuple> currentSizeSources = new LinkedHashSet<>();
-	private Iterator<GrowingTuple> iterator;
+	private final Set<GrowingTuple> currentSizeSources = new LinkedHashSet<>();
+	private Iterator<GrowingTuple> previousSizeIterator;
+	private Iterator<GrowingTuple> currentBatchIterator;
+	private GrowingTuple current;
 
 	public GrowingSampleSource() {
-		currentSizeSources.add(new GrowingTuple());
-		iterator = currentSizeSources.iterator();
+		previousSizeIterator = Collections.emptyIterator();
+		currentBatchIterator = Collections.emptyIterator();
+		current = new GrowingTuple();
 	}
 
 	@Override
 	public List<GenSource> sources(int size) {
-		GrowingTuple current = iterator.next();
-		// GrowingTuple current = currentSizeSources.get(currentIndex);
+		if (current == null) {
+			throw new IllegalStateException("GrowingSampleSource has been exhausted.");
+		}
+		currentSizeSources.add(current);
 		List<GenSource> sources = new ArrayList<>();
 		while (sources.size() < size) {
 			sources.add(current.nextValue());
@@ -47,16 +61,26 @@ public class GrowingSampleSource extends SequentialGuidedGeneration implements S
 	}
 
 	private boolean grow() {
-		if (iterator.hasNext()) {
+		while (currentBatchIterator.hasNext()) {
+			var next = currentBatchIterator.next();
+			if (currentSizeSources.contains(next)) {
+				continue;
+			}
+			current = next;
 			return true;
 		}
-		Set<GrowingTuple> nextSizeSources = new LinkedHashSet<>();
-		for (GrowingTuple source : currentSizeSources) {
-			Set<GrowingTuple> grownSources = source.grow();
-			nextSizeSources.addAll(grownSources);
+		while (previousSizeIterator.hasNext()) {
+			currentBatchIterator = previousSizeIterator.next().grow().iterator();
+			if (currentBatchIterator.hasNext()) {
+				return grow();
+			}
 		}
-		currentSizeSources = nextSizeSources;
-		iterator = currentSizeSources.iterator();
-		return !currentSizeSources.isEmpty();
+		previousSizeIterator = new ArrayList<>(currentSizeSources).iterator();
+		currentSizeSources.clear();
+		currentBatchIterator = Collections.emptyIterator();
+		if (!previousSizeIterator.hasNext()) {
+			return false;
+		}
+		return grow();
 	}
 }

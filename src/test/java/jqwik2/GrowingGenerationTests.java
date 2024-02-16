@@ -8,7 +8,6 @@ import java.util.function.*;
 import jqwik2.api.Arbitrary;
 import jqwik2.api.*;
 import jqwik2.api.arbitraries.*;
-import jqwik2.api.arbitraries.Combinators;
 import jqwik2.api.stateful.*;
 import jqwik2.internal.*;
 import jqwik2.internal.generators.*;
@@ -244,7 +243,7 @@ class GrowingGenerationTests {
 			() -> Values.oneOf(
 				just(1),
 				recursiveInts().map(i -> i + 1)
-		));
+			));
 	}
 
 	@Example
