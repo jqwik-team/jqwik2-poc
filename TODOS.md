@@ -6,7 +6,7 @@
       analyze their commonalities
 
 - Additional generators and arbitraries
-    - String (based on unicode code points)
+    - StringArbitrary: withChar(char... chars), withChar(CharSet chars), withCharRange(from, to)
     - Empty / Null Arbitrary -> When used in combinations, nothing is generated
 
 - Target-based generation and shrinking

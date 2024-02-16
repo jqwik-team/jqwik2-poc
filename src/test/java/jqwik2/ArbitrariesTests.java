@@ -197,4 +197,43 @@ class ArbitrariesTests {
 			assertThat(sample).isIn(1, 2, 3);
 		});
 	}
+
+	@Group
+	class StringArbitraries {
+
+		@Example
+		void defaultUnicodesAreInMLP0() {
+			Arbitrary<String> strings = Strings.strings().ofMinLength(3).ofMaxLength(5);
+			strings.samples(false).limit(10).forEach(sample -> {
+				// System.out.println(sample);
+				assertThat(sample).hasSizeBetween(3, 5);
+				assertThat(sample).matches("[\\u0000-\\uFFFF]*");
+			});
+		}
+
+		@Example
+		void alphaNumericAndWhitespace() {
+			Arbitrary<String> strings = Strings.strings()
+											   .alpha().numeric().whitespace()
+											   .ofMaxLength(10);
+
+			strings.samples(false).limit(20).forEach(sample -> {
+				// System.out.println(sample);
+				assertThat(sample).hasSizeBetween(0, 10);
+				assertThat(sample.codePoints()).allMatch(
+					c -> Character.isUpperCase(c) || Character.isLowerCase(c) || Character.isDigit(c) || Character.isWhitespace(c));
+			});
+		}
+
+		@Example
+		void ascii() {
+			Arbitrary<String> strings = Strings.strings().ascii().ofMaxLength(10);
+
+			strings.samples(false).limit(20).forEach(sample -> {
+				// System.out.println(sample);
+				assertThat(sample).hasSizeBetween(0, 10);
+				assertThat(sample.codePoints()).allMatch(c -> c <= StringArbitrary.MAX_ASCII_CODEPOINT);
+			});
+		}
+	}
 }
