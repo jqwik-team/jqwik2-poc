@@ -1,3 +1,8 @@
+- Statistical checker
+    - Use real statistics to determine if a property is stable
+    - Provide better error message for percentage based checks
+    - see http://proper.softlab.ntua.gr/Publications.html
+
 - JqwikProperty
     - Introduce Builder for PropertyRunStrategy
     - Report all falsified samples, checks, tries, effective seed
@@ -10,8 +15,6 @@
     - Empty / Null Arbitrary -> When used in combinations, nothing is generated
 
 - Target-based generation and shrinking
-    - Target a statistical classifier, e.g. percentage of generated parameter type > 20%
-    - see http://proper.softlab.ntua.gr/Publications.html
     - simulated annealing: https://www.baeldung.com/java-simulated-annealing-for-traveling-salesman
 
 - Allow JqwikDefaults to be changed programmatically

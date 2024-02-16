@@ -4,11 +4,12 @@ import java.util.*;
 import java.util.function.*;
 
 import jqwik2.api.*;
+import jqwik2.api.statistics.*;
 
 public class PropertyVerifier2<T1, T2> extends AbstractPropertyVerifier implements JqwikProperty.Verifier2<T1, T2> {
 
 	public PropertyVerifier2(
-		Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig,
+		BiFunction<List<Generator<?>>, Checker, PropertyRunConfiguration> supplyConfig,
 		Runnable onSuccessful,
 		BiConsumer<PropertyRunResult, Throwable> onFailed,
 		Consumer<Optional<Throwable>> onAborted,
@@ -25,7 +26,7 @@ public class PropertyVerifier2<T1, T2> extends AbstractPropertyVerifier implemen
 			T1 v1 = (T1) args.get(0);
 			T2 v2 = (T2) args.get(1);
 			return checker.check(v1, v2);
-		});
+		}, null);
 	}
 
 	@Override

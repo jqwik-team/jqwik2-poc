@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.function.*;
 
 import jqwik2.api.*;
+import jqwik2.api.statistics.*;
 import jqwik2.api.support.*;
 import org.opentest4j.*;
 
@@ -14,7 +15,7 @@ class AbstractPropertyVerifier {
 		boolean apply(List<Object> args) throws Throwable;
 	}
 
-	private final Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig;
+	private final BiFunction<List<Generator<?>>, Checker, PropertyRunConfiguration> supplyConfig;
 	private final Runnable onSuccessful;
 	private final BiConsumer<PropertyRunResult, Throwable> onFailed;
 	private final Consumer<Optional<Throwable>> onAborted;
@@ -22,7 +23,7 @@ class AbstractPropertyVerifier {
 	private final List<Arbitrary<?>> arbitraries;
 
 	protected AbstractPropertyVerifier(
-		Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig,
+		BiFunction<List<Generator<?>>, Checker, PropertyRunConfiguration> supplyConfig,
 		Runnable onSuccessful,
 		BiConsumer<PropertyRunResult, Throwable> onFailed,
 		Consumer<Optional<Throwable>> onAborted,
@@ -56,9 +57,9 @@ class AbstractPropertyVerifier {
 		});
 	}
 
-	private PropertyRunResult run(List<Generator<?>> generators, Tryable tryable) {
+	private PropertyRunResult run(List<Generator<?>> generators, Tryable tryable, Checker statisticalCheck) {
 		var propertyCase = new PropertyCase(generators, tryable);
-		var result = propertyCase.run(supplyConfig.apply(generators));
+		var result = propertyCase.run(supplyConfig.apply(generators, statisticalCheck));
 		executeResultCallbacks(result);
 		return result;
 	}
@@ -98,10 +99,11 @@ class AbstractPropertyVerifier {
 		return generators;
 	}
 
-	protected PropertyRunResult run(ThrowingTryable unsafeTryable) {
+	protected PropertyRunResult run(ThrowingTryable unsafeTryable, Checker statisticalCheck) {
 		return run(
 			generators(),
-			safeTryable(unsafeTryable)
+			safeTryable(unsafeTryable),
+			statisticalCheck
 		);
 	}
 }

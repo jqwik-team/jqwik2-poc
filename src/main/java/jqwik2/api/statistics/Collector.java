@@ -16,13 +16,6 @@ public interface Collector {
 		return new StatisticsCollector(label).forTypes(valueType);
 	}
 
-	/**
-	 * Perform coverage checking for successful property on statistics.
-	 *
-	 * @param coverage Code that consumes a {@linkplain Coverage} object
-	 */
-	void coverage(Consumer<Coverage> coverage);
-
 	interface C1<T1> extends Collector {
 		/**
 		 * Call this method to record a single value of type {@code T1}

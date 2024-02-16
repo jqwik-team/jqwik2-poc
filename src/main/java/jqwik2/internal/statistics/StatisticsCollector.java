@@ -26,18 +26,13 @@ public class StatisticsCollector {
 		return new C1Impl();
 	}
 
-	public void coverage(Consumer<Coverage> coverage) {
+	public void coverage(Consumer<Checker> coverage) {
 
 	}
 
 	private class C1Impl<T1> implements Collector.C1<T1> {
 
 		private List<T1> values = null;
-
-		@Override
-		public void coverage(Consumer<Coverage> coverage) {
-			throw new UnsupportedOperationException();
-		}
 
 		@Override
 		public void collect(T1 v1) {
