@@ -6,6 +6,8 @@ import jqwik2.api.*;
 
 public class SampleGenerator {
 
+	private final static int MAX_DUPLICATE_SAMPLES = 1000;
+
 	public static SampleGenerator from(Generator<?>... generators) {
 		return new SampleGenerator(toObjectGenerators(List.of(generators)));
 	}
@@ -19,24 +21,29 @@ public class SampleGenerator {
 	}
 
 	public Optional<Sample> generate(SampleSource multiSource) {
-		List<GenSource> genSources = multiSource.sources(generators.size());
-		List<Shrinkable<Object>> shrinkables = new ArrayList<>();
-		try {
-			for (int i = 0; i < generators.size(); i++) {
-				Generator<Object> generator = generators.get(i);
-				shrinkables.add(createShrinkable(genSources.get(i), generator));
-			}
-		} catch (CannotGenerateException cge) {
-			return Optional.empty();
-		}
-		var sample = new Sample(shrinkables);
-		if (filterOutDuplicates) {
-			if (generatedSamples.contains(sample)) {
+		int countDuplicates = 0;
+		while (countDuplicates < MAX_DUPLICATE_SAMPLES) {
+			List<GenSource> genSources = multiSource.sources(generators.size());
+			List<Shrinkable<Object>> shrinkables = new ArrayList<>();
+			try {
+				for (int i = 0; i < generators.size(); i++) {
+					Generator<Object> generator = generators.get(i);
+					shrinkables.add(createShrinkable(genSources.get(i), generator));
+				}
+			} catch (CannotGenerateException cge) {
 				return Optional.empty();
 			}
-			generatedSamples.add(sample);
+			var sample = new Sample(shrinkables);
+			if (filterOutDuplicates) {
+				if (generatedSamples.contains(sample)) {
+					countDuplicates++;
+					continue;
+				}
+				generatedSamples.add(sample);
+			}
+			return Optional.of(sample);
 		}
-		return Optional.of(sample);
+		throw new CannotGenerateException("Too many (%s) duplicate samples".formatted(MAX_DUPLICATE_SAMPLES));
 	}
 
 	private static List<Generator<Object>> toObjectGenerators(List<Generator<?>> generators) {

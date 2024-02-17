@@ -289,6 +289,33 @@ class JqwikPropertyTests {
 	}
 
 	@Example
+	void generationMode_GROWING() {
+		PropertyRunStrategy strategy = PropertyRunStrategy.create(
+			100, Duration.ZERO, false, null,
+			List.of(),
+			PropertyRunStrategy.ShrinkingMode.OFF,
+			PropertyRunStrategy.GenerationMode.GROWING,
+			PropertyRunStrategy.EdgeCasesMode.OFF,
+			PropertyRunStrategy.AfterFailureMode.REPLAY,
+			PropertyRunStrategy.ConcurrencyMode.SINGLE_THREAD
+		);
+		var property = new JqwikProperty(strategy);
+
+		PropertyRunResult result = property.forAll(
+			Numbers.integers().between(-100, 100),
+			Numbers.integers().between(10, 20)
+		).verify((i1, i2) -> {
+			// System.out.println(i1 + " " + i2);
+			assertThat(i1).isBetween(-100, 100);
+			assertThat(i2).isBetween(10, 20);
+		});
+
+		assertThat(result.isSuccessful()).isTrue();
+		assertThat(result.countTries()).isEqualTo(100);
+		assertThat(result.countChecks()).isEqualTo(100);
+	}
+
+	@Example
 	void failedPropertyRunWillBeSavedToFailureDatabase() {
 		var property = new JqwikProperty("myId");
 		var database = mock(FailureDatabase.class);
@@ -369,7 +396,7 @@ class JqwikPropertyTests {
 		});
 
 		assertThat(initialResult.isSuccessful()).isTrue();
-		assertThat(initialResult.countTries()).isEqualTo(1000);
+		assertThat(initialResult.countTries()).isGreaterThanOrEqualTo(1000);
 	}
 
 	@Example
