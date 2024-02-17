@@ -5,12 +5,12 @@ import java.util.concurrent.*;
 
 public interface TaskRunner {
 	@FunctionalInterface
-	public interface Task {
+	interface Task {
 		void run(Shutdown shutdown) throws Throwable;
 	}
 
 	@FunctionalInterface
-	public interface Shutdown {
+	interface Shutdown {
 		void shutdown();
 	}
 
