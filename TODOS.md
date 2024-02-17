@@ -1,7 +1,7 @@
 - Statistical checker
     - Use real statistics to determine if a property is stable
     - Provide better error message for percentage based checks
-    - see http://proper.softlab.ntua.gr/Publications.html
+    - Python implementation: https://github.com/Testispuncher/Sequential-Probability-Ratio-Test
 
 - JqwikProperty
     - Introduce Builder for PropertyRunStrategy
@@ -16,6 +16,7 @@
 
 - Target-based generation and shrinking
     - simulated annealing: https://www.baeldung.com/java-simulated-annealing-for-traveling-salesman
+    - see http://proper.softlab.ntua.gr/Publications.html
 
 - Allow JqwikDefaults to be changed programmatically
 
