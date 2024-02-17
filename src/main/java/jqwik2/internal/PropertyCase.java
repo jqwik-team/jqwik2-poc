@@ -278,15 +278,24 @@ public class PropertyCase {
 		}
 
 		private boolean maxTriesNotReached() {
-			return maxTries == 0 || count < maxTries;
+			return maxTries == 0 || countTries.get() < maxTries;
 		}
 
 		@Override
 		public ConcurrentRunner.Task next() {
-			// TODO: Move generation and try counting out of task
-			//       Only count try if a sample has been generated
-			SampleSource trySource = genSources.next();
-			count++;
+			Optional<Sample> optionalSample;
+			try {
+				generationLock.lock();
+				SampleSource trySource = genSources.next();
+				optionalSample = sampleGenerator.generate(trySource);
+				optionalSample.ifPresentOrElse(
+					sample -> countTries.incrementAndGet(),
+					() -> guidance.onEmptyGeneration(trySource)
+				);
+			} finally {
+				generationLock.unlock();
+			}
+
 			return shutdown -> {
 				TaskRunner.Shutdown shutdownAndStop = () -> {
 					shutdown.shutdown();
@@ -298,24 +307,11 @@ public class PropertyCase {
 						generationLock.unlock();
 					}
 				};
-
-				Optional<Sample> optionalSample;
-				try {
-					generationLock.lock();
-					optionalSample = sampleGenerator.generate(trySource);
-					optionalSample.ifPresentOrElse(
-						sample -> {
-							countTries.incrementAndGet();
-							task.accept(sample, shutdownAndStop);
-						},
-						() -> guidance.onEmptyGeneration(trySource)
-					);
-				} finally {
-					generationLock.unlock();
-				}
+				optionalSample.ifPresent(
+					sample -> task.accept(sample, shutdownAndStop)
+				);
 			};
 		}
-
 	}
 
 }

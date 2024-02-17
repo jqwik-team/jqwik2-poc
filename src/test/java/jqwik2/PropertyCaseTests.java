@@ -124,7 +124,9 @@ class PropertyCaseTests {
 		);
 		assertThat(result.status()).isEqualTo(Status.FAILED);
 		assertThat(result.countTries()).isGreaterThanOrEqualTo(1);
-		assertThat(result.countChecks()).isEqualTo(result.countTries());
+		assertThat(result.countChecks()).isGreaterThanOrEqualTo(1);
+		// In concurrent runs checks can be fewer than tries
+		assertThat(result.countChecks()).isLessThanOrEqualTo(result.countTries());
 		assertThat(result.falsifiedSamples()).hasSizeGreaterThanOrEqualTo(1);
 		assertThat(result.failureReason()).isEmpty();
 		assertThat(result.falsifiedSamples()).anyMatch(s -> s.values().equals(List.of(lastArg[0])));
