@@ -59,7 +59,8 @@ public interface PropertyRunStrategy {
 		RANDOMIZED,
 		EXHAUSTIVE,
 		SMART, // Use exhaustive if maxCount <= maxTries, otherwise use randomized,
-		SAMPLES
+		SAMPLES,
+		GROWING
 	}
 
 	enum ShrinkingMode {

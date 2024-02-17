@@ -8,10 +8,8 @@ import java.util.function.*;
 import jqwik2.api.*;
 
 record RunConfigurationRecord(
-	String seed, int maxTries,
-	boolean shrinkingEnabled,
-	Duration maxRuntime,
-	boolean filterOutDuplicateSamples,
+	String seed, int maxTries, Duration maxRuntime,
+	boolean shrinkingEnabled, boolean filterOutDuplicateSamples,
 	Supplier<ExecutorService> supplyExecutorService,
 	Supplier<IterableSampleSource> supplySource
 ) implements PropertyRunConfiguration {

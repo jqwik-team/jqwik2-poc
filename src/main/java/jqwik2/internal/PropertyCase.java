@@ -30,14 +30,11 @@ public class PropertyCase {
 
 	public PropertyRunResult run(PropertyRunConfiguration configuration) {
 		IterableSampleSource iterableGenSource = randomSource(configuration);
-		int maxTries = configuration.maxTries();
-		boolean shrinkingEnabled = configuration.shrinkingEnabled();
 
 		return runAndShrink(
 			iterableGenSource,
-			maxTries, configuration.effectiveSeed(),
-			shrinkingEnabled,
-			configuration.maxRuntime(),
+			configuration.effectiveSeed(), configuration.maxTries(), configuration.maxRuntime(),
+			configuration.shrinkingEnabled(), configuration.filterOutDuplicateSamples(),
 			configuration.executorService()
 		);
 	}
@@ -45,13 +42,13 @@ public class PropertyCase {
 	@SuppressWarnings("OverlyLongMethod")
 	private PropertyRunResult runAndShrink(
 		IterableSampleSource iterableGenSource,
-		int maxTries, Optional<String> effectiveSeed,
-		boolean shrinkingEnabled,
-		Duration maxDuration,
+		Optional<String> effectiveSeed, int maxTries, Duration maxDuration,
+		boolean shrinkingEnabled, boolean filterOutDuplicateSamples,
 		Optional<ExecutorService> optionalExecutorService
 	) {
 		var genericGenerators = generators.stream().map(Generator::asGeneric).toList();
 		SampleGenerator sampleGenerator = new SampleGenerator(genericGenerators);
+		sampleGenerator.filterOutDuplicates(filterOutDuplicateSamples);
 
 		AtomicInteger countTries = new AtomicInteger(0);
 		AtomicInteger countChecks = new AtomicInteger(0);

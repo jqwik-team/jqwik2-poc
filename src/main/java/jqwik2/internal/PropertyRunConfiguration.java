@@ -31,9 +31,8 @@ public interface PropertyRunConfiguration {
 
 	static PropertyRunConfiguration randomized(String seed, int maxTries) {
 		return randomized(
-			seed, maxTries, true,
-			Duration.ofMinutes(10),
-			false,
+			seed, maxTries, Duration.ofMinutes(10),
+			true, false,
 			DEFAULT_EXECUTOR_SERVICE_SUPPLIER
 		);
 	}
@@ -42,23 +41,20 @@ public interface PropertyRunConfiguration {
 		String seed, int maxTries, boolean shrinkingEnabled, boolean filterOutDuplicateSamples
 	) {
 		return randomized(
-			seed, maxTries,
-			shrinkingEnabled,
-			Duration.ofSeconds(10),
-			filterOutDuplicateSamples,
+			seed, maxTries, Duration.ofSeconds(10),
+			shrinkingEnabled, filterOutDuplicateSamples,
 			Executors::newSingleThreadExecutor
 		);
 	}
 
 	static PropertyRunConfiguration randomized(
-		String seed, int maxTries, boolean shrinkingEnabled,
-		Duration maxRuntime, boolean filterOutDuplicateSamples,
+		String seed, int maxTries, Duration maxRuntime,
+		boolean shrinkingEnabled, boolean filterOutDuplicateSamples,
 		Supplier<ExecutorService> supplyExecutorService
 	) {
 		return new RunConfigurationRecord(
 			seed, maxTries,
-			shrinkingEnabled,
-			maxRuntime,
+			maxRuntime, shrinkingEnabled,
 			filterOutDuplicateSamples,
 			supplyExecutorService,
 			() -> randomSource(seed)
@@ -67,16 +63,13 @@ public interface PropertyRunConfiguration {
 
 	static PropertyRunConfiguration guided(
 		Supplier<GuidedGeneration> guidanceSupplier,
-		int maxTries, boolean shrinkingEnabled,
-		Duration maxRuntime,
+		int maxTries, Duration maxRuntime,
+		boolean shrinkingEnabled, boolean filterOutDuplicateSamples,
 		Supplier<ExecutorService> supplyExecutorService
 	) {
 		return new RunConfigurationRecord(
-			null,
-			maxTries,
-			shrinkingEnabled,
-			maxRuntime,
-			false,
+			null, maxTries, maxRuntime,
+			shrinkingEnabled, filterOutDuplicateSamples,
 			supplyExecutorService,
 			() -> new GuidedGenerationSource(guidanceSupplier)
 		);
@@ -91,8 +84,7 @@ public interface PropertyRunConfiguration {
 		return new RunConfigurationRecord(
 			null,
 			maxTries,
-			shrinkingEnabled,
-			maxRuntime,
+			maxRuntime, shrinkingEnabled,
 			false,
 			supplyExecutorService,
 			() -> new GuidedGenerationSource(() -> guidanceSupplier.apply(randomSource(seed)))
@@ -104,8 +96,7 @@ public interface PropertyRunConfiguration {
 	) {
 		return new RunConfigurationRecord(
 			null, maxTries,
-			shrinkingEnabled,
-			maxRuntime,
+			maxRuntime, shrinkingEnabled,
 			true,
 			Executors::newSingleThreadExecutor,
 			IterableGrowingSource::new
@@ -132,8 +123,7 @@ public interface PropertyRunConfiguration {
 									});
 		return new RunConfigurationRecord(
 			null, maxTries,
-			false,
-			maxRuntime,
+			maxRuntime, false,
 			false,
 			supplyExecutorService,
 			() -> sampleSources
@@ -150,14 +140,13 @@ public interface PropertyRunConfiguration {
 		if (exhaustive.isEmpty() || exhaustive.get().maxCount() > maxTries) {
 			return randomized(
 				seed, maxTries,
-				shrinkingEnabled, maxRuntime, filterOutDuplicateSamples,
+				maxRuntime, shrinkingEnabled, filterOutDuplicateSamples,
 				supplyExecutorService
 			);
 		}
 		return new RunConfigurationRecord(
 			null, maxTries,
-			false,
-			maxRuntime,
+			maxRuntime, false,
 			filterOutDuplicateSamples,
 			supplyExecutorService,
 			exhaustive::get
@@ -173,8 +162,7 @@ public interface PropertyRunConfiguration {
 		IterableSampleSource sampleSource = new RecordedSamplesSource(samples);
 		return new RunConfigurationRecord(
 			null, samples.size(),
-			shrinkingEnabled,
-			maxRuntime,
+			maxRuntime, shrinkingEnabled,
 			false,
 			defaultExecutorServiceSupplier,
 			() -> sampleSource

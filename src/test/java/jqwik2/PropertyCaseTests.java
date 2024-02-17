@@ -42,8 +42,7 @@ class PropertyCaseTests {
 		PropertyRunResult result = propertyCase.run(
 			randomized(
 				"42", 10,
-				false,
-				Duration.ofSeconds(10),
+				Duration.ofSeconds(10), false,
 				false,
 				serviceSupplier
 			)
@@ -91,8 +90,7 @@ class PropertyCaseTests {
 		PropertyRunResult result = propertyCase.run(
 			randomized(
 				"42", 10,
-				false,
-				Duration.ofSeconds(10),
+				Duration.ofSeconds(10), false,
 				false,
 				serviceSupplier
 			)
@@ -119,8 +117,7 @@ class PropertyCaseTests {
 		PropertyRunResult result = propertyCase.run(
 			randomized(
 				"42", 10,
-				false,
-				Duration.ofSeconds(10),
+				Duration.ofSeconds(10), false,
 				false,
 				serviceSupplier
 			)
@@ -146,8 +143,7 @@ class PropertyCaseTests {
 		PropertyRunResult result = propertyCase.run(
 			randomized(
 				"42", 10,
-				true,
-				Duration.ofSeconds(10),
+				Duration.ofSeconds(10), true,
 				false,
 				serviceSupplier
 			)
@@ -202,8 +198,7 @@ class PropertyCaseTests {
 		PropertyRunResult result = propertyCase.run(
 			randomized(
 				"4242", 100,
-				true,
-				Duration.ofSeconds(10),
+				Duration.ofSeconds(10), true,
 				false,
 				serviceSupplier
 			)
@@ -240,8 +235,8 @@ class PropertyCaseTests {
 
 		PropertyRunResult result = propertyCase.run(
 			randomized(
-				"42", 1000, false,
-				Duration.ofSeconds(1), false,
+				"42", 1000, Duration.ofSeconds(1), false,
+				false,
 				serviceSupplier
 			)
 		);
@@ -267,8 +262,8 @@ class PropertyCaseTests {
 
 		PropertyRunResult result = propertyCase.run(
 			randomized(
-				"42", 100, false,
-				Duration.ofMillis(200), false,
+				"42", 100, Duration.ofMillis(200), false,
+				false,
 				serviceSupplier
 			)
 		);
@@ -295,8 +290,7 @@ class PropertyCaseTests {
 		String seed = RandomChoice.generateRandomSeed();
 		PropertyRunResult result = propertyCase.run(
 			randomized(
-				seed, 100, true,
-				Duration.ofMinutes(10),
+				seed, 100, Duration.ofMinutes(10), true,
 				false,
 				serviceSupplier
 			)
@@ -349,8 +343,8 @@ class PropertyCaseTests {
 		propertyCase.onSuccessful(samples1::add);
 
 		PropertyRunConfiguration runConfiguration = randomized(
-			Long.toString(seed), 10, false,
-			Duration.ofSeconds(10), false,
+			Long.toString(seed), 10, Duration.ofSeconds(10), false,
+			false,
 			serviceSupplier
 		);
 

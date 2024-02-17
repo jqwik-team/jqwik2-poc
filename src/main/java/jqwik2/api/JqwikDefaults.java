@@ -18,7 +18,7 @@ public class JqwikDefaults {
 	}
 
 	static boolean defaultFilterOutDuplicateSamples() {
-		return true;
+		return false;
 	}
 
 	public static PropertyRunStrategy.ShrinkingMode defaultShrinkingMode() {

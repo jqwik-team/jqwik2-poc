@@ -195,7 +195,10 @@ class JqwikPropertyTests {
 	@Example
 	void generationMode_SMART() {
 		PropertyRunStrategy strategy = PropertyRunStrategy.create(
-			100, Duration.ofMinutes(10), true, RandomChoice::generateRandomSeed,
+			100,
+			Duration.ofMinutes(10),
+			false,
+			RandomChoice::generateRandomSeed,
 			List.of(),
 			PropertyRunStrategy.ShrinkingMode.OFF,
 			PropertyRunStrategy.GenerationMode.SMART,
@@ -224,7 +227,10 @@ class JqwikPropertyTests {
 	@Example
 	void edgeCasesMode_MIXIN() {
 		PropertyRunStrategy strategy = PropertyRunStrategy.create(
-			1000, Duration.ofMinutes(10), true, RandomChoice::generateRandomSeed,
+			1000,
+			Duration.ofMinutes(10),
+			false,
+			RandomChoice::generateRandomSeed,
 			List.of(),
 			PropertyRunStrategy.ShrinkingMode.OFF,
 			PropertyRunStrategy.GenerationMode.SMART,

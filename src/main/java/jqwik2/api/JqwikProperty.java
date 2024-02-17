@@ -10,6 +10,7 @@ import jqwik2.api.database.*;
 import jqwik2.api.recording.*;
 import jqwik2.api.statistics.*;
 import jqwik2.internal.*;
+import jqwik2.internal.growing.*;
 
 public class JqwikProperty {
 
@@ -135,8 +136,7 @@ public class JqwikProperty {
 					yield PropertyRunConfiguration.randomized(
 						seedSupplier.get(),
 						strategy.maxTries(),
-						isShrinkingEnabled(),
-						strategy.maxRuntime(),
+						strategy.maxRuntime(), isShrinkingEnabled(),
 						strategy.filterOutDuplicateSamples(),
 						serviceSupplier()
 					);
@@ -170,6 +170,12 @@ public class JqwikProperty {
 				strategy.maxRuntime(),
 				isShrinkingEnabled(),
 				strategy.samples(),
+				serviceSupplier()
+			);
+			case GROWING -> PropertyRunConfiguration.guided(
+				GrowingSampleSource::new,
+				strategy.maxTries(), strategy.maxRuntime(),
+				false, true,
 				serviceSupplier()
 			);
 			case null -> throw new IllegalArgumentException("Unsupported generation strategy: " + strategy.generation());

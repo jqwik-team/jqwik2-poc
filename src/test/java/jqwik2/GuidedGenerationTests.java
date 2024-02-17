@@ -74,9 +74,8 @@ class GuidedGenerationTests {
 		PropertyRunResult result = propertyCase.run(
 			guided(
 				() -> generate42Values,
-				1000,
-				false,
-				Duration.ofSeconds(5),
+				1000, Duration.ofSeconds(5),
+				false, false,
 				supplier
 			)
 		);
@@ -137,9 +136,8 @@ class GuidedGenerationTests {
 		PropertyRunResult result = propertyCase.run(
 			guided(
 				() -> generateUntil91isGenerated,
-				1000,
-				false,
-				Duration.ofSeconds(5),
+				1000, Duration.ofSeconds(5),
+				false, false,
 				supplier
 			)
 		);
@@ -197,9 +195,8 @@ class GuidedGenerationTests {
 		PropertyRunResult result = propertyCase.run(
 			guided(
 				() -> generate42Values,
-				1000,
-				false,
-				Duration.ofSeconds(5),
+				1000, Duration.ofSeconds(5),
+				false, false,
 				supplier
 			)
 		);
