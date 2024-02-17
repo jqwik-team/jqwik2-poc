@@ -84,7 +84,7 @@ class StatisticsTests {
 			Checker.check("Even number occurs at least 80%", n -> countEven.get() / n > 0.8)
 		);
 
-		System.out.println(result.failureReason().get().getMessage());
+		// System.out.println(result.failureReason().get().getMessage());
 		assertThat(result.isFailed()).isTrue();
 	}
 

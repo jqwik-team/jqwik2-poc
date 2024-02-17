@@ -16,7 +16,6 @@ import org.mockito.*;
 import org.opentest4j.*;
 
 import net.jqwik.api.*;
-import net.jqwik.api.lifecycle.*;
 
 import static jqwik2.api.recording.Recording.list;
 import static jqwik2.api.recording.Recording.*;
@@ -25,11 +24,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 class JqwikPropertyTests {
-
-	@BeforeProperty
-	void clearFailureDatabase() {
-		JqwikDefaults.defaultFailureDatabase().clear();
-	}
 
 	@Example
 	void propertyWith1ParameterSucceeds() {
