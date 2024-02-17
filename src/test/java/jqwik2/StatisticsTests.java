@@ -26,7 +26,7 @@ class StatisticsTests {
 			throw new RuntimeException("Property failed: " + r, e);
 		});
 
-		Statistics.Collector.C1<Integer> collector = Statistics.collect("numbers", Integer.class);
+		Statistics.Collector.C1<Integer> collector = Statistics.collector("numbers", Integer.class);
 
 		IntegerArbitrary integers = Numbers.integers().between(0, 100);
 		PropertyRunResult result = property.forAll(integers).check(i -> {
@@ -57,9 +57,11 @@ class StatisticsTests {
 					countEven.incrementAndGet();
 				}
 			},
-			Statistics.check("Even number occurs at least 40%", n -> countEven.get() / n > 0.4)
+			// TODO: API is wrong. The predicate should be i % 2.
+			// check("blabla", i % 2 == 0, p -> p > 0.48)
+			Statistics.check("Even number occurs at least 48%", n -> countEven.get() / n > 0.48)
 		);
-		// System.out.println(countEven.get());
+		System.out.println(countEven.get() + " of " + result.countChecks());
 		assertThat(result.isSuccessful()).isTrue();
 	}
 
@@ -80,10 +82,11 @@ class StatisticsTests {
 					countEven.incrementAndGet();
 				}
 			},
-			Statistics.check("Even number occurs at least 80%", n -> countEven.get() / n > 0.8)
+			Statistics.check("Even number occurs at least 52%", n -> countEven.get() / n > 0.52)
 		);
 
-		// System.out.println(result.failureReason().get().getMessage());
+		System.out.println(countEven.get() + " of " + result.countChecks());
+		System.out.println(result.failureReason().get().getMessage());
 		assertThat(result.isFailed()).isTrue();
 	}
 

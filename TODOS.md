@@ -1,7 +1,8 @@
 - Statistical checker
-    - Use real statistics to determine if a property is stable
-    - Provide better error message for percentage based checks
-    - Python implementation: https://github.com/Testispuncher/Sequential-Probability-Ratio-Test
+    - Use real statistics instead of ad-hoc statistics to determine if a property is stable.
+      See Python implementation: https://github.com/Testispuncher/Sequential-Probability-Ratio-Test
+    - Provide better API and error message for percentage based checks
+    - Allow checking directly from collectors
 
 - JqwikProperty
     - Introduce Builder for PropertyRunStrategy

@@ -10,11 +10,11 @@ public class Statistics {
 
 	private Statistics() {}
 
-	public static Collector.C1<Object> collect(String label) {
-		return collect(label, Object.class);
+	public static Collector.C1<Object> collector(String label) {
+		return collector(label, Object.class);
 	}
 
-	public static <T1> Collector.C1<T1> collect(String label, Class<T1> valueType) {
+	public static <T1> Collector.C1<T1> collector(String label, Class<T1> valueType) {
 		return new StatisticsCollector(label).forTypes(valueType);
 	}
 

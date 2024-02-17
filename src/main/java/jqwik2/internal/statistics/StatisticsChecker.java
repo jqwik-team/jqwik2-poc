@@ -9,11 +9,12 @@ import jqwik2.api.statistics.*;
 import org.opentest4j.*;
 
 public class StatisticsChecker implements Statistics.Checker {
+	public static final int MIN_TRIES = 100;
 	private List<Hypothesis> hypotheses = new ArrayList<>();
 
 	@Override
 	public Statistics.Checker and(String label, Predicate<Double> nPredicate) {
-		hypotheses.add(Hypothesis.claim(label, nPredicate));
+		hypotheses.add(new Hypothesis(label, nPredicate));
 		return this;
 	}
 
@@ -30,18 +31,33 @@ public class StatisticsChecker implements Statistics.Checker {
 		private final Iterator<SampleSource> source;
 		private final AtomicInteger counter = new AtomicInteger(0);
 
-
 		public GuidedStatisticsChecker(IterableSampleSource source) {
 			this.source = source.iterator();
 		}
 
 		@Override
 		public boolean hasNext() {
-			// TODO: Test hypotheses constantly to see if sufficient number of tests has been run
-			if (counter.get() >= 1000) {
+			if (!source.hasNext()) {
 				return false;
 			}
-			return source.hasNext();
+			if (counter.get() < MIN_TRIES) {
+				return true;
+			}
+			if (anyHypothesisRejected()) {
+				return false;
+			}
+			if (allHypothesesAccepted()) {
+				return false;
+			}
+			return true;
+		}
+
+		private boolean allHypothesesAccepted() {
+			return hypotheses.stream().allMatch(h -> h.check(counter.get()) == Hypothesis.CheckResult.ACCEPT);
+		}
+
+		private boolean anyHypothesisRejected() {
+			return hypotheses.stream().anyMatch(h -> h.check(counter.get()) == Hypothesis.CheckResult.REJECT);
 		}
 
 		@Override
@@ -52,6 +68,7 @@ public class StatisticsChecker implements Statistics.Checker {
 		@Override
 		public void guide(TryExecutionResult result, Sample sample) {
 			counter.incrementAndGet();
+			hypotheses.forEach(h -> h.checkAndAdapt(counter.get()));
 		}
 
 		@Override
@@ -60,7 +77,8 @@ public class StatisticsChecker implements Statistics.Checker {
 				return originalResult;
 			}
 			for (Hypothesis hypothesis : hypotheses) {
-				if (!hypothesis.test(counter.get())) {
+				var hypothesisTest = hypothesis.test(counter.get());
+				if (!hypothesisTest) {
 					var failureReason = new AssertionFailedError("Hypothesis [%s] failed".formatted(hypothesis.label()));
 					return originalResult.withStatus(PropertyRunResult.Status.FAILED)
 										 .withFailureReason(failureReason);
