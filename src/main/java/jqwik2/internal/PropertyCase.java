@@ -283,6 +283,8 @@ public class PropertyCase {
 
 		@Override
 		public ConcurrentRunner.Task next() {
+			// TODO: Move generation and try counting out of task
+			//       Only count try if a sample has been generated
 			SampleSource trySource = genSources.next();
 			count++;
 			return shutdown -> {
