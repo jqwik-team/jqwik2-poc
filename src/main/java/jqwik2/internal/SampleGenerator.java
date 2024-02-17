@@ -1,6 +1,7 @@
 package jqwik2.internal;
 
 import java.util.*;
+import java.util.concurrent.atomic.*;
 
 import jqwik2.api.*;
 
@@ -14,6 +15,7 @@ public class SampleGenerator {
 
 	private final List<Generator<Object>> generators;
 	private final Set<Sample> generatedSamples = new HashSet<>();
+	private final AtomicInteger countDuplicates = new AtomicInteger(0);
 	private boolean filterOutDuplicates = false;
 
 	public SampleGenerator(List<Generator<Object>> generators) {
@@ -21,8 +23,6 @@ public class SampleGenerator {
 	}
 
 	public Optional<Sample> generate(SampleSource multiSource) {
-		int countDuplicates = 0;
-		while (countDuplicates < MAX_DUPLICATE_SAMPLES) {
 			List<GenSource> genSources = multiSource.sources(generators.size());
 			List<Shrinkable<Object>> shrinkables = new ArrayList<>();
 			try {
@@ -36,14 +36,15 @@ public class SampleGenerator {
 			var sample = new Sample(shrinkables);
 			if (filterOutDuplicates) {
 				if (generatedSamples.contains(sample)) {
-					countDuplicates++;
-					continue;
+					countDuplicates.incrementAndGet();
+					if (countDuplicates.get() > MAX_DUPLICATE_SAMPLES) {
+						throw new CannotGenerateException("Too many (%s) duplicate samples".formatted(MAX_DUPLICATE_SAMPLES));
+					}
+					return Optional.empty();
 				}
 				generatedSamples.add(sample);
 			}
 			return Optional.of(sample);
-		}
-		throw new CannotGenerateException("Too many (%s) duplicate samples".formatted(MAX_DUPLICATE_SAMPLES));
 	}
 
 	private static List<Generator<Object>> toObjectGenerators(List<Generator<?>> generators) {

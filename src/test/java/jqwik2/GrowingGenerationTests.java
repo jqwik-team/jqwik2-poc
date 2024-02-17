@@ -348,14 +348,18 @@ class GrowingGenerationTests {
 		GuidedGeneration iterator = (GuidedGeneration) new IterableGrowingSource().iterator();
 		while (iterator.hasNext() && counter.get() < max) {
 			SampleSource sampleSource = iterator.next();
-			sampleGenerator.generate(sampleSource).ifPresentOrElse(
-				sample -> {
-					whenGenerated.accept(sample);
-					iterator.guide(null, null);
-					counter.incrementAndGet();
-				},
-				() -> iterator.onEmptyGeneration(sampleSource)
-			);
+			try {
+				sampleGenerator.generate(sampleSource).ifPresentOrElse(
+					sample -> {
+						whenGenerated.accept(sample);
+						iterator.guide(null, null);
+						counter.incrementAndGet();
+					},
+					() -> iterator.onEmptyGeneration(sampleSource)
+				);
+			} catch (CannotGenerateException cge) {
+				break;
+			}
 		}
 	}
 
