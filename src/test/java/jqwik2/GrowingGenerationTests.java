@@ -80,6 +80,25 @@ class GrowingGenerationTests {
 	}
 
 	@Example
+	void sampleWithTwoParameters() {
+		SampleGenerator sampleGenerator = SampleGenerator.from(
+			Numbers.integers().between(-100, 100).generator(),
+			Numbers.integers().between(10, 20).generator()
+		);
+
+		AtomicInteger counter = new AtomicInteger(0);
+		forAllGrowingSamples(
+			sampleGenerator,
+			sample -> {
+				counter.incrementAndGet();
+				// System.out.println(sample);
+			},
+			100
+		);
+		assertThat(counter.get()).isEqualTo(100);
+	}
+
+	@Example
 	void sampleWithThreeParameters() {
 		SampleGenerator sampleGenerator = SampleGenerator.from(
 			BaseGenerators.integers(0, 2),
