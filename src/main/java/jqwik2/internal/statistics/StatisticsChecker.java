@@ -8,11 +8,11 @@ import jqwik2.api.*;
 import jqwik2.api.statistics.*;
 import org.opentest4j.*;
 
-public class StatisticsChecker implements jqwik2.api.statistics.Checker {
+public class StatisticsChecker implements Statistics.Checker {
 	private List<Hypothesis> hypotheses = new ArrayList<>();
 
 	@Override
-	public Checker and(String label, Predicate<Double> nPredicate) {
+	public Statistics.Checker and(String label, Predicate<Double> nPredicate) {
 		hypotheses.add(Hypothesis.claim(label, nPredicate));
 		return this;
 	}

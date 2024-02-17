@@ -5,7 +5,6 @@ import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.stream.*;
 
-import jqwik2.api.statistics.Collector;
 import jqwik2.api.statistics.*;
 
 public class StatisticsCollector {
@@ -22,15 +21,15 @@ public class StatisticsCollector {
 		counts.put(values, count + 1);
 	}
 
-	public <T1> Collector.C1<T1> forTypes(Class<T1> type) {
+	public <T1> Statistics.Collector.C1<T1> forTypes(Class<T1> type) {
 		return new C1Impl();
 	}
 
-	public void coverage(Consumer<Checker> coverage) {
+	public void coverage(Consumer<Statistics.Checker> coverage) {
 
 	}
 
-	private class C1Impl<T1> implements Collector.C1<T1> {
+	private class C1Impl<T1> implements Statistics.Collector.C1<T1> {
 
 		private List<T1> values = null;
 

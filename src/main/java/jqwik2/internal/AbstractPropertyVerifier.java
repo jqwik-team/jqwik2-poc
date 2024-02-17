@@ -15,7 +15,7 @@ class AbstractPropertyVerifier {
 		boolean apply(List<Object> args) throws Throwable;
 	}
 
-	private final BiFunction<List<Generator<?>>, Checker, PropertyRunConfiguration> supplyConfig;
+	private final BiFunction<List<Generator<?>>, Statistics.Checker, PropertyRunConfiguration> supplyConfig;
 	private final Runnable onSuccessful;
 	private final BiConsumer<PropertyRunResult, Throwable> onFailed;
 	private final Consumer<Optional<Throwable>> onAborted;
@@ -23,7 +23,7 @@ class AbstractPropertyVerifier {
 	private final List<Arbitrary<?>> arbitraries;
 
 	protected AbstractPropertyVerifier(
-		BiFunction<List<Generator<?>>, Checker, PropertyRunConfiguration> supplyConfig,
+		BiFunction<List<Generator<?>>, Statistics.Checker, PropertyRunConfiguration> supplyConfig,
 		Runnable onSuccessful,
 		BiConsumer<PropertyRunResult, Throwable> onFailed,
 		Consumer<Optional<Throwable>> onAborted,
@@ -57,7 +57,7 @@ class AbstractPropertyVerifier {
 		});
 	}
 
-	private PropertyRunResult run(List<Generator<?>> generators, Tryable tryable, Checker statisticalCheck) {
+	private PropertyRunResult run(List<Generator<?>> generators, Tryable tryable, Statistics.Checker statisticalCheck) {
 		var propertyCase = new PropertyCase(generators, tryable);
 		var result = propertyCase.run(supplyConfig.apply(generators, statisticalCheck));
 		executeResultCallbacks(result);
@@ -99,7 +99,7 @@ class AbstractPropertyVerifier {
 		return generators;
 	}
 
-	protected PropertyRunResult run(ThrowingTryable unsafeTryable, Checker statisticalCheck) {
+	protected PropertyRunResult run(ThrowingTryable unsafeTryable, Statistics.Checker statisticalCheck) {
 		return run(
 			generators(),
 			safeTryable(unsafeTryable),

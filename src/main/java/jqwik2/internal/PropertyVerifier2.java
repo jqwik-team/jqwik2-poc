@@ -9,7 +9,7 @@ import jqwik2.api.statistics.*;
 public class PropertyVerifier2<T1, T2> extends AbstractPropertyVerifier implements JqwikProperty.Verifier2<T1, T2> {
 
 	public PropertyVerifier2(
-		BiFunction<List<Generator<?>>, Checker, PropertyRunConfiguration> supplyConfig,
+		BiFunction<List<Generator<?>>, Statistics.Checker, PropertyRunConfiguration> supplyConfig,
 		Runnable onSuccessful,
 		BiConsumer<PropertyRunResult, Throwable> onFailed,
 		Consumer<Optional<Throwable>> onAborted,

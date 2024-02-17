@@ -97,7 +97,7 @@ public class JqwikProperty {
 		database.deleteProperty(id);
 	}
 
-	private PropertyRunConfiguration buildConfiguration(List<Generator<?>> generators, Checker statisticalCheck) {
+	private PropertyRunConfiguration buildConfiguration(List<Generator<?>> generators, Statistics.Checker statisticalCheck) {
 		if (database.hasFailed(id)) {
 			return switch (strategy.afterFailure()) {
 				case REPLAY -> replayLastRun(generators, statisticalCheck);
@@ -120,7 +120,7 @@ public class JqwikProperty {
 		return buildDefaultConfiguration(generators, strategy.seedSupplier(), statisticalCheck);
 	}
 
-	private PropertyRunConfiguration replayLastRun(List<Generator<?>> generators, Checker statisticalCheck) {
+	private PropertyRunConfiguration replayLastRun(List<Generator<?>> generators, Statistics.Checker statisticalCheck) {
 		Supplier<String> seedSupplier = database.loadSeed(id)
 												.map(s -> (Supplier<String>) () -> s)
 												.orElseGet(strategy::seedSupplier);
@@ -128,7 +128,7 @@ public class JqwikProperty {
 	}
 
 	private PropertyRunConfiguration buildDefaultConfiguration(
-		List<Generator<?>> generators, Supplier<String> seedSupplier, Checker statisticalCheck
+		List<Generator<?>> generators, Supplier<String> seedSupplier, Statistics.Checker statisticalCheck
 	) {
 		return switch (strategy.generation()) {
 			case RANDOMIZED -> {
@@ -335,9 +335,9 @@ public class JqwikProperty {
 			return verify(verifier, null);
 		}
 
-		PropertyRunResult check(C1<T1> checker, Checker statisticalCheck);
+		PropertyRunResult check(C1<T1> checker, Statistics.Checker statisticalCheck);
 
-		PropertyRunResult verify(V1<T1> verifier, Checker statisticalCheck);
+		PropertyRunResult verify(V1<T1> verifier, Statistics.Checker statisticalCheck);
 	}
 
 	public interface Verifier2<T1, T2> {

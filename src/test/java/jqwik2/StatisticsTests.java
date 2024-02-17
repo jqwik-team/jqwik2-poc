@@ -8,7 +8,6 @@ import jqwik2.api.arbitraries.*;
 import jqwik2.api.statistics.*;
 
 import net.jqwik.api.*;
-import net.jqwik.api.lifecycle.*;
 
 import static jqwik2.api.PropertyRunStrategy.GenerationMode.*;
 import static org.assertj.core.api.Assertions.*;
@@ -27,7 +26,7 @@ class StatisticsTests {
 			throw new RuntimeException("Property failed: " + r, e);
 		});
 
-		Collector.C1<Integer> collector = Collector.create("numbers", Integer.class);
+		Statistics.Collector.C1<Integer> collector = Statistics.collect("numbers", Integer.class);
 
 		IntegerArbitrary integers = Numbers.integers().between(0, 100);
 		PropertyRunResult result = property.forAll(integers).check(i -> {
@@ -58,7 +57,7 @@ class StatisticsTests {
 					countEven.incrementAndGet();
 				}
 			},
-			Checker.check("Even number occurs at least 40%", n -> countEven.get() / n > 0.4)
+			Statistics.check("Even number occurs at least 40%", n -> countEven.get() / n > 0.4)
 		);
 		// System.out.println(countEven.get());
 		assertThat(result.isSuccessful()).isTrue();
@@ -81,7 +80,7 @@ class StatisticsTests {
 					countEven.incrementAndGet();
 				}
 			},
-			Checker.check("Even number occurs at least 80%", n -> countEven.get() / n > 0.8)
+			Statistics.check("Even number occurs at least 80%", n -> countEven.get() / n > 0.8)
 		);
 
 		// System.out.println(result.failureReason().get().getMessage());
