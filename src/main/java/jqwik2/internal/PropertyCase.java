@@ -172,12 +172,22 @@ public class PropertyCase {
 				? g
 				: Guidance.NULL;
 
+		var generationLock = iterableGenSource.lock();
+		BiConsumer<TryExecutionResult, Sample> guide = (tryResult, sample) -> {
+			try {
+				generationLock.lock();
+				guidance.guide(tryResult, sample);
+			} finally {
+				generationLock.unlock();
+			}
+		};
+
 		var taskIterator = new ConcurrentTaskIterator(
-			genSources, maxTries,
-			(trySource, shutdown) -> executeTry(
-				sampleGenerator, trySource, countTries, countChecks,
-				shutdown, iterableGenSource.stopWhenFalsified(),
-				guidance, onFalsified, onSatisfied, iterableGenSource.lock()
+			genSources, maxTries, sampleGenerator, countTries, guidance, generationLock,
+			(sample, shutdown) -> executeTry(
+				sample, countChecks,
+				iterableGenSource.stopWhenFalsified(),
+				onFalsified, onSatisfied, guide, shutdown
 			)
 		);
 
@@ -191,53 +201,28 @@ public class PropertyCase {
 	}
 
 	private void executeTry(
-		SampleGenerator sampleGenerator,
-		SampleSource multiSource,
-		AtomicInteger countTries,
-		AtomicInteger countChecks,
-		ConcurrentRunner.Shutdown shutdown, boolean stopWhenFalsified,
-		Guidance guidance, Consumer<FalsifiedSample> onFalsified, Consumer<Sample> onSatisfied,
-		Lock generationLock
+		Sample sample, AtomicInteger countChecks,
+		boolean stopWhenFalsified,
+		Consumer<FalsifiedSample> onFalsified,
+		Consumer<Sample> onSatisfied,
+		BiConsumer<TryExecutionResult, Sample> guide,
+		TaskRunner.Shutdown shutdownAndStop
 	) {
-		Optional<Sample> optionalSample;
-		try {
-			generationLock.lock();
-			optionalSample = sampleGenerator.generate(multiSource);
-		} finally {
-			generationLock.unlock();
+		TryExecutionResult tryResult = tryable.apply(sample);
+		guide.accept(tryResult, sample);
+		if (tryResult.status() != TryExecutionResult.Status.INVALID) {
+			countChecks.incrementAndGet();
 		}
-		optionalSample.ifPresentOrElse(
-			sample -> {
-				countTries.incrementAndGet();
-				TryExecutionResult tryResult = tryable.apply(sample);
-				try {
-					generationLock.lock();
-					guidance.guide(tryResult, sample);
-				} finally {
-					generationLock.unlock();
-				}
-				if (tryResult.status() != TryExecutionResult.Status.INVALID) {
-					countChecks.incrementAndGet();
-				}
-				if (tryResult.status() == TryExecutionResult.Status.FALSIFIED) {
-					FalsifiedSample originalSample = new FalsifiedSample(sample, tryResult.throwable());
-					onFalsified.accept(originalSample);
-					if (stopWhenFalsified) {
-						shutdown.shutdown();
-						try {
-							generationLock.lock();
-							guidance.stop();
-						} finally {
-							generationLock.unlock();
-						}
-					}
-				}
-				if (tryResult.status() == TryExecutionResult.Status.SATISFIED) {
-					onSatisfied.accept(sample);
-				}
-			},
-			() -> guidance.onEmptyGeneration(multiSource)
-		);
+		if (tryResult.status() == TryExecutionResult.Status.FALSIFIED) {
+			FalsifiedSample originalSample = new FalsifiedSample(sample, tryResult.throwable());
+			onFalsified.accept(originalSample);
+			if (stopWhenFalsified) {
+				shutdownAndStop.shutdown();
+			}
+		}
+		if (tryResult.status() == TryExecutionResult.Status.SATISFIED) {
+			onSatisfied.accept(sample);
+		}
 	}
 
 	private static IterableSampleSource randomSource(PropertyRunConfiguration configuration) {
@@ -257,7 +242,11 @@ public class PropertyCase {
 	private static class ConcurrentTaskIterator implements Iterator<ConcurrentRunner.Task> {
 		private final Iterator<SampleSource> genSources;
 		private final int maxTries;
-		private final BiConsumer<SampleSource, ConcurrentRunner.Shutdown> task;
+		private final SampleGenerator sampleGenerator;
+		private final AtomicInteger countTries;
+		private final Guidance guidance;
+		private final Lock generationLock;
+		private final BiConsumer<Sample, TaskRunner.Shutdown> task;
 
 		private volatile int count = 0;
 		private volatile boolean stopped = false;
@@ -265,10 +254,18 @@ public class PropertyCase {
 		private ConcurrentTaskIterator(
 			Iterator<SampleSource> genSources,
 			int maxTries,
-			BiConsumer<SampleSource, ConcurrentRunner.Shutdown> task
+			SampleGenerator sampleGenerator,
+			AtomicInteger countTries,
+			Guidance guidance,
+			Lock generationLock,
+			BiConsumer<Sample, TaskRunner.Shutdown> task
 		) {
 			this.genSources = genSources;
 			this.maxTries = maxTries;
+			this.sampleGenerator = sampleGenerator;
+			this.countTries = countTries;
+			this.guidance = guidance;
+			this.generationLock = generationLock;
 			this.task = task;
 		}
 
@@ -289,11 +286,31 @@ public class PropertyCase {
 			SampleSource trySource = genSources.next();
 			count++;
 			return shutdown -> {
-				ConcurrentRunner.Shutdown shutdownAndStop = () -> {
+				TaskRunner.Shutdown shutdownAndStop = () -> {
 					shutdown.shutdown();
 					stopped = true;
+					try {
+						generationLock.lock();
+						guidance.stop();
+					} finally {
+						generationLock.unlock();
+					}
 				};
-				task.accept(trySource, shutdownAndStop);
+
+				Optional<Sample> optionalSample;
+				try {
+					generationLock.lock();
+					optionalSample = sampleGenerator.generate(trySource);
+					optionalSample.ifPresentOrElse(
+						sample -> {
+							countTries.incrementAndGet();
+							task.accept(sample, shutdownAndStop);
+						},
+						() -> guidance.onEmptyGeneration(trySource)
+					);
+				} finally {
+					generationLock.unlock();
+				}
 			};
 		}
 
