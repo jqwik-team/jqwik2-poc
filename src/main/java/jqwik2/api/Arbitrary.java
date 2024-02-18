@@ -19,6 +19,10 @@ public interface Arbitrary<T> {
 		return samples(withEdgeCases).findFirst().orElseThrow();
 	}
 
+	default Stream<T> samples() {
+		return samples(false);
+	}
+
 	default Stream<T> samples(boolean withEdgeCases) {
 		var generator = generator();
 		if (withEdgeCases) {
