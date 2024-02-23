@@ -18,10 +18,6 @@ public class Statistics {
 		return new StatisticsCollector(label).forTypes(valueType);
 	}
 
-	public static Checker check(String label, Predicate<Double> nPredicate) {
-		return new StatisticsChecker().and(label, nPredicate);
-	}
-
 	public interface Collector {
 
 		interface C1<T1> extends Collector {

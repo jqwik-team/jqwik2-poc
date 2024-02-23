@@ -56,17 +56,17 @@ class StatisticsTests {
 		IntegerArbitrary integers = Numbers.integers().between(0, 100);
 
 		AtomicInteger countEven = new AtomicInteger(0);
-		PropertyRunResult result = property.forAll(integers).verify(
-			i -> {
-				if (i % 2 == 0) {
-					countEven.incrementAndGet();
-				}
-			},
-			// TODO: API is wrong. The predicate should be i % 2.
-			// check("blabla", i % 2 == 0, p -> p > 0.48)
-			Statistics.check("Even number occurs at least 48%", n -> countEven.get() / n > 0.48)
-		);
-		System.out.println(countEven.get() + " of " + result.countChecks());
+		// PropertyRunResult result = property.forAll(integers).verify(
+		// 	i -> {
+		// 		if (i % 2 == 0) {
+		// 			countEven.incrementAndGet();
+		// 		}
+		// 	},
+		// 	// TODO: API is wrong. The predicate should be i % 2.
+		// 	// check("blabla", i % 2 == 0, p -> p > 0.48)
+		// 	Statistics.check("Even number occurs at least 48%", n -> countEven.get() / n > 0.48)
+		// );
+		// System.out.println(countEven.get() + " of " + result.countChecks());
 		// assertThat(result.isSuccessful()).isTrue();
 	}
 
@@ -82,18 +82,18 @@ class StatisticsTests {
 		IntegerArbitrary integers = Numbers.integers().between(0, 100);
 
 		AtomicInteger countEven = new AtomicInteger(0);
-		PropertyRunResult result = property.forAll(integers).verify(
-			i -> {
-				if (i % 2 == 0) {
-					countEven.incrementAndGet();
-				}
-			},
-			Statistics.check("Even number occurs at least 52%", n -> countEven.get() / n > 0.52)
-		);
+		// PropertyRunResult result = property.forAll(integers).verify(
+		// 	i -> {
+		// 		if (i % 2 == 0) {
+		// 			countEven.incrementAndGet();
+		// 		}
+		// 	},
+		// 	Statistics.check("Even number occurs at least 52%", n -> countEven.get() / n > 0.52)
+		// );
 
-		System.out.println(countEven.get() + " of " + result.countChecks());
-		System.out.println(result.failureReason().get().getMessage());
-		assertThat(result.isFailed()).isTrue();
+		// System.out.println(countEven.get() + " of " + result.countChecks());
+		// System.out.println(result.failureReason().get().getMessage());
+		// assertThat(result.isFailed()).isTrue();
 	}
 
 	@Example
@@ -202,11 +202,11 @@ class StatisticsTests {
 				classifier.classify(List.of(integers.generate(source)));
 			}
 
-			System.out.println();
-			System.out.println(classifier.total());
-			System.out.println(classifier.percentages());
-			System.out.println(classifier.deviations());
-			System.out.println(classifier.checkCoverage(3.0));
+			// System.out.println();
+			// System.out.println(classifier.total());
+			// System.out.println(classifier.percentages());
+			// System.out.println(classifier.deviations());
+			// System.out.println(classifier.checkCoverage(3.0));
 
 			assertThat(classifier.checkCoverage(3.0)).isEqualTo(Classifier.CoverageCheck.REJECT);
 		}

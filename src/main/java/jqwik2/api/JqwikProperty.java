@@ -8,7 +8,6 @@ import java.util.stream.*;
 
 import jqwik2.api.database.*;
 import jqwik2.api.recording.*;
-import jqwik2.api.statistics.*;
 import jqwik2.internal.*;
 import jqwik2.internal.growing.*;
 
@@ -97,14 +96,14 @@ public class JqwikProperty {
 		database.deleteProperty(id);
 	}
 
-	private PropertyRunConfiguration buildConfiguration(List<Generator<?>> generators, Statistics.Checker statisticalCheck) {
+	private PropertyRunConfiguration buildConfiguration(List<Generator<?>> generators) {
 		if (database.hasFailed(id)) {
 			return switch (strategy.afterFailure()) {
-				case REPLAY -> replayLastRun(generators, statisticalCheck);
+				case REPLAY -> replayLastRun(generators);
 				case SAMPLES_ONLY -> {
 					List<SampleRecording> samples = new ArrayList<>(database.loadFailingSamples(id));
 					if (samples.isEmpty()) {
-						yield replayLastRun(generators, statisticalCheck);
+						yield replayLastRun(generators);
 					}
 					Collections.sort(samples); // Sorts from smallest to largest
 					yield PropertyRunConfiguration.samples(
@@ -117,40 +116,27 @@ public class JqwikProperty {
 				case null -> throw new IllegalStateException("Property has failed before: " + id);
 			};
 		}
-		return buildDefaultConfiguration(generators, strategy.seedSupplier(), statisticalCheck);
+		return buildDefaultConfiguration(generators, strategy.seedSupplier());
 	}
 
-	private PropertyRunConfiguration replayLastRun(List<Generator<?>> generators, Statistics.Checker statisticalCheck) {
+	private PropertyRunConfiguration replayLastRun(List<Generator<?>> generators) {
 		Supplier<String> seedSupplier = database.loadSeed(id)
 												.map(s -> (Supplier<String>) () -> s)
 												.orElseGet(strategy::seedSupplier);
-		return buildDefaultConfiguration(generators, seedSupplier, statisticalCheck);
+		return buildDefaultConfiguration(generators, seedSupplier);
 	}
 
 	private PropertyRunConfiguration buildDefaultConfiguration(
-		List<Generator<?>> generators, Supplier<String> seedSupplier, Statistics.Checker statisticalCheck
+		List<Generator<?>> generators, Supplier<String> seedSupplier
 	) {
 		return switch (strategy.generation()) {
-			case RANDOMIZED -> {
-				if (statisticalCheck == null) {
-					yield PropertyRunConfiguration.randomized(
-						seedSupplier.get(),
-						strategy.maxTries(),
-						strategy.maxRuntime(), isShrinkingEnabled(),
-						strategy.filterOutDuplicateSamples(),
-						serviceSupplier()
-					);
-				} else {
-					yield PropertyRunConfiguration.randomizedGuided(
-						statisticalCheck::guideWith,
-						seedSupplier.get(),
-						strategy.maxTries(),
-						isShrinkingEnabled(),
-						strategy.maxRuntime(),
-						serviceSupplier()
-					);
-				}
-			}
+			case RANDOMIZED -> PropertyRunConfiguration.randomized(
+				seedSupplier.get(),
+				strategy.maxTries(),
+				strategy.maxRuntime(), isShrinkingEnabled(),
+				strategy.filterOutDuplicateSamples(),
+				serviceSupplier()
+			);
 			case EXHAUSTIVE -> PropertyRunConfiguration.exhaustive(
 				strategy.maxTries(),
 				strategy.maxRuntime(),
@@ -307,8 +293,8 @@ public class JqwikProperty {
 			strategy.afterFailure(),
 			strategy.concurrency()
 		);
-		return new JqwikProperty(id, clonedStrategy, database);	}
-
+		return new JqwikProperty(id, clonedStrategy, database);
+	}
 
 	public void failureDatabase(FailureDatabase database) {
 		this.database = database;
@@ -327,17 +313,9 @@ public class JqwikProperty {
 	}
 
 	public interface Verifier1<T1> {
-		default PropertyRunResult check(C1<T1> checker) {
-			return check(checker, null);
-		}
+		PropertyRunResult check(C1<T1> checker);
 
-		default PropertyRunResult verify(V1<T1> verifier) {
-			return verify(verifier, null);
-		}
-
-		PropertyRunResult check(C1<T1> checker, Statistics.Checker statisticalCheck);
-
-		PropertyRunResult verify(V1<T1> verifier, Statistics.Checker statisticalCheck);
+		PropertyRunResult verify(V1<T1> verifier);
 	}
 
 	public interface Verifier2<T1, T2> {

@@ -174,9 +174,9 @@ class JqwikPropertyTests {
 	}
 
 	@Example
-	void propertyId() {
+	void autoPropertyId() {
 		var propertyWithDefaultId = new JqwikProperty();
-		String defaultId = getClass().getName() + "#" + "propertyId";
+		String defaultId = getClass().getName() + "#" + "autoPropertyId";
 		assertThat(propertyWithDefaultId.id()).isEqualTo(defaultId);
 
 		var propertyWithExplicitId = new JqwikProperty("myId");
@@ -292,6 +292,8 @@ class JqwikPropertyTests {
 	@Example
 	void failedTryWillStopEndlessRunningProperty() {
 		var checkingProperty = new JqwikProperty()
+								   .withGeneration(PropertyRunStrategy.GenerationMode.RANDOMIZED)
+								   .withAfterFailure(PropertyRunStrategy.AfterFailureMode.REPLAY)
 								   .withMaxTries(0)
 								   .withMaxRuntime(Duration.ZERO);
 
@@ -300,7 +302,11 @@ class JqwikPropertyTests {
 														   .verify(i -> {
 															   // System.out.println(counter.get());
 															   counter.incrementAndGet();
-															   Thread.sleep(10);
+															   try {
+																   Thread.sleep(10);
+															   } catch (InterruptedException ignore) {
+																   // Within a test run the thread can sometimes be interrupted
+															   }
 															   assertThat(counter.get()).isLessThan(100);
 														   });
 
