@@ -10,7 +10,7 @@ public class StatisticalGuidance implements GuidedGeneration {
 	private final Classifier classifier;
 	private final double maxStandardDeviationFactor;
 	private final Iterator<SampleSource> source;
-	private volatile boolean earlyFailure = false;
+	private volatile boolean stopped = false;
 
 	public StatisticalGuidance(Classifier classifier, double maxStandardDeviationFactor, IterableSampleSource randomSource) {
 		this.classifier = classifier;
@@ -20,7 +20,7 @@ public class StatisticalGuidance implements GuidedGeneration {
 
 	@Override
 	public boolean hasNext() {
-		if (!source.hasNext() || earlyFailure) {
+		if (!source.hasNext() || stopped) {
 			return false;
 		}
 		return isCoverageUnstable();
@@ -39,7 +39,8 @@ public class StatisticalGuidance implements GuidedGeneration {
 	public void guide(TryExecutionResult result, Sample sample) {
 		// The statistical classification is done in the call to classifier.classify() in the tryable
 		if (result.status() != TryExecutionResult.Status.SATISFIED) {
-			this.earlyFailure = true;
+			// This is necessary since guided generation is not stopped automatically by falsified samples
+			this.stopped = true;
 		}
 	}
 
@@ -56,5 +57,10 @@ public class StatisticalGuidance implements GuidedGeneration {
 								 .withFailureReason(failureReason);
 		}
 		return originalResult;
+	}
+
+	@Override
+	public void stop() {
+		this.stopped = true;
 	}
 }
