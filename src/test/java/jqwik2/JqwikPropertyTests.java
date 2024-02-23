@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.*;
 import java.util.function.*;
 
 import jqwik2.api.Arbitrary;
+import jqwik2.api.Assume;
 import jqwik2.api.*;
 import jqwik2.api.arbitraries.*;
 import jqwik2.api.database.*;
@@ -50,6 +51,29 @@ class JqwikPropertyTests {
 		assertThat(result.isSuccessful()).isTrue();
 		assertThat(result.countTries()).isEqualTo(100);
 		assertThat(result.countChecks()).isEqualTo(100);
+	}
+
+	@Example
+	void propertyWithAssumptionSucceeds() {
+		var property = new JqwikProperty();
+
+		PropertyRunResult result = property.forAll(Numbers.integers()).check(i -> {
+			assertThat(i).isInstanceOf(Integer.class);
+			return true;
+		});
+		assertThat(result.isSuccessful()).isTrue();
+		assertThat(result.countTries()).isEqualTo(100);
+		assertThat(result.countChecks()).isEqualTo(100);
+
+		result = property.forAll(Numbers.integers()).verify(i -> {
+			Assume.that(i % 2 == 0);
+			// Thread.sleep(10);
+			// System.out.println(i);
+		});
+		assertThat(result.isSuccessful()).isTrue();
+		assertThat(result.countTries()).isEqualTo(100);
+		// System.out.println(result.countChecks());
+		assertThat(result.countChecks()).isBetween(20, 80);
 	}
 
 	@Example
