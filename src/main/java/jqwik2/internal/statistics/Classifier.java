@@ -105,13 +105,13 @@ public class Classifier {
 		return Math.sqrt(percentageSquare - percentage * percentage);
 	}
 
-	public Classifier.CoverageCheck checkCoverage(double maxDeviationFactor) {
+	public Classifier.CoverageCheck checkCoverage(double maxStandardDeviationFactor) {
 		if (total.get() < MIN_TRIES) {
 			return Classifier.CoverageCheck.UNSTABLE;
 		}
 
 		var checks = cases.stream()
-						  .map(c -> checkCoverage(c, maxDeviationFactor))
+						  .map(c -> checkCoverage(c, maxStandardDeviationFactor))
 						  .toList();
 
 		if (checks.stream().anyMatch(c -> c == Classifier.CoverageCheck.REJECT)) {
@@ -123,10 +123,10 @@ public class Classifier {
 		return Classifier.CoverageCheck.ACCEPT;
 	}
 
-	private Classifier.CoverageCheck checkCoverage(Classifier.Case c, double maxDeviationFactor) {
+	private Classifier.CoverageCheck checkCoverage(Classifier.Case c, double maxStandardDeviationFactor) {
 		var percentage = percentage(c);
 		var minPercentage = c.minPercentage();
-		var maxDeviation = deviation(c) * maxDeviationFactor;
+		var maxDeviation = deviation(c) * maxStandardDeviationFactor;
 		if (percentage < minPercentage) {
 			if ((minPercentage - percentage) <= maxDeviation) {
 				return Classifier.CoverageCheck.UNSTABLE;

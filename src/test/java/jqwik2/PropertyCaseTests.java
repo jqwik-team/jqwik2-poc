@@ -11,6 +11,7 @@ import jqwik2.api.*;
 import jqwik2.api.PropertyRunResult.*;
 import jqwik2.internal.*;
 import jqwik2.internal.generators.*;
+import jqwik2.internal.statistics.*;
 
 import net.jqwik.api.Arbitrary;
 import net.jqwik.api.*;
@@ -100,6 +101,43 @@ class PropertyCaseTests {
 		// 5 invalids - depends on random seed
 		assertThat(result.countChecks()).isEqualTo(3);
 	}
+
+	@Example
+	//@Property(generation = GenerationMode.EXHAUSTIVE)
+	void failPropertyCaseWithStatisticalGuidance(@ForAll("serviceSuppliers") Supplier<ExecutorService> serviceSupplier) {
+
+		List<Generator<?>> generators = List.of(
+			BaseGenerators.integers(0, 100)
+		);
+
+		var classifier = new Classifier();
+		classifier.addCase("Even", 60.0, args -> (int) args.get(0) % 2 == 0);
+		classifier.addCase("Odd", 40.0, args -> (int) args.get(0) % 2 != 0);
+
+		Tryable tryable = Tryable.from(classifier::classify);
+
+		PropertyCase propertyCase = new PropertyCase(generators, tryable);
+
+		PropertyRunResult result = propertyCase.run(
+			randomizedGuided(
+				randomSource -> new StatisticalGuidance(classifier, 2.0, randomSource),
+				"42", 0, Duration.ZERO, false,
+				null
+			)
+		);
+		assertThat(result.status()).isEqualTo(PropertyRunResult.Status.FAILED);
+		assertThat(result.failureReason()).isPresent();
+		result.failureReason().ifPresent(throwable -> {
+			assertThat(throwable.getMessage())
+				.startsWith("Coverage of case 'Even' expected to be at least 60.0%");
+		});
+
+		// System.out.println(result.failureReason().get().getMessage());
+		// System.out.println(classifier.total());
+		// System.out.println(classifier.percentages());
+		// System.out.println(classifier.rejections());
+	}
+
 
 	@Property(generation = GenerationMode.EXHAUSTIVE)
 	void failPropertyWithNoReason(@ForAll("serviceSuppliers") Supplier<ExecutorService> serviceSupplier) {

@@ -77,12 +77,11 @@ public interface PropertyRunConfiguration {
 
 	static PropertyRunConfiguration randomizedGuided(
 		Function<IterableSampleSource, GuidedGeneration> guidanceSupplier,
-		String seed, int maxTries, boolean shrinkingEnabled,
-		Duration maxRuntime,
+		String seed, int maxTries, Duration maxRuntime, boolean shrinkingEnabled,
 		Supplier<ExecutorService> supplyExecutorService
 	) {
 		return new RunConfigurationRecord(
-			null,
+			seed,
 			maxTries,
 			maxRuntime, shrinkingEnabled,
 			false,
