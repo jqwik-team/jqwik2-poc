@@ -1,5 +1,6 @@
 package jqwik2;
 
+import java.text.*;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
@@ -114,81 +115,110 @@ class StatisticsTests {
 		// )
 	}
 
-	@Example
-	void classifierAccept() {
-		var classifier = new Classifier();
-		classifier.addCase("Case 1", 40.0, args -> (int) args.get(0) >= 10);
-		classifier.addCase("Case 2", 40.0, args -> (int) args.get(0) <= -10);
-		classifier.addCase("Default", 5.0, args -> true);
+	@Group
+	class Classifiers {
+		@Example
+		void classifierAccept() {
+			var classifier = new Classifier();
+			classifier.addCase("Case 1", 40.0, args -> (int) args.get(0) >= 10);
+			classifier.addCase("Case 2", 40.0, args -> (int) args.get(0) <= -10);
+			classifier.addCase("Default", 5.0, args -> true);
 
-		Generator<Integer> integers = BaseGenerators.integers(-100, 100);
-		GenSource source = new RandomGenSource();
+			Generator<Integer> integers = BaseGenerators.integers(-100, 100);
+			GenSource source = new RandomGenSource();
 
-		while (classifier.checkCoverage(1.0) == Classifier.CoverageCheck.UNSTABLE) {
-			classifier.classify(List.of(integers.generate(source)));
+			while (classifier.checkCoverage(1.0) == Classifier.CoverageCheck.UNSTABLE) {
+				classifier.classify(List.of(integers.generate(source)));
+			}
+
+			// System.out.println();
+			// System.out.println(classifier.total());
+			// System.out.println(classifier.percentages());
+			// System.out.println(classifier.checkCoverage(1.0));
+
+			assertThat(classifier.checkCoverage(1.0)).isEqualTo(Classifier.CoverageCheck.ACCEPT);
+			assertThat(classifier.rejections()).isEmpty();
 		}
 
-		System.out.println();
-		System.out.println(classifier.total());
-		// System.out.println(classifier.counts());
-		System.out.println(classifier.percentages());
-		// System.out.println(classifier.deviations());
-		System.out.println(classifier.checkCoverage(1.0));
+		@Example
+		void classifierReject() {
+			var classifier = new Classifier();
+			classifier.addCase("Case 1", 40.0, args -> (int) args.get(0) >= 10);
+			classifier.addCase("Case 2", 40.0, args -> (int) args.get(0) <= -10);
+			classifier.addCase("Default", 12.0, args -> true);
 
-		assertThat(classifier.checkCoverage(1.0)).isEqualTo(Classifier.CoverageCheck.ACCEPT);
-	}
+			Generator<Integer> integers = BaseGenerators.integers(-100, 100);
+			GenSource source = new RandomGenSource();
 
-	@Example
-	void tightAccept() {
-		var classifier = new Classifier();
-		classifier.addCase("even", 49.5, args -> (int) args.get(0) % 2 == 0);
-		classifier.addCase("odd", 49.5, args -> (int) args.get(0) % 2 != 0);
+			while (classifier.checkCoverage(1.0) == Classifier.CoverageCheck.UNSTABLE) {
+				classifier.classify(List.of(integers.generate(source)));
+			}
 
-		Generator<Integer> integers = BaseGenerators.integers(1, 100);
-		GenSource source = new RandomGenSource();
+			// System.out.println();
+			// System.out.println(classifier.total());
+			// System.out.println(classifier.counts());
+			// System.out.println(classifier.percentages());
+			// System.out.println(classifier.deviations());
+			// System.out.println(classifier.checkCoverage(1.0));
 
-		while (classifier.checkCoverage(3.0) == Classifier.CoverageCheck.UNSTABLE) {
-			classifier.classify(List.of(integers.generate(source)));
+			assertThat(classifier.checkCoverage(1.0)).isEqualTo(Classifier.CoverageCheck.REJECT);
+			assertThat(classifier.rejections()).hasSize(1);
+
+			String rejection = classifier.rejections().iterator().next();
+			// System.out.println(rejection);
+			assertThat(rejection).startsWith("Coverage of case 'Default' expected to be at least 12.0% but was only ");
 		}
 
-		System.out.println();
-		System.out.println(classifier.total());
-		// System.out.println(classifier.counts());
-		System.out.println(classifier.percentages());
-		System.out.println(classifier.deviations());
-		System.out.println(classifier.checkCoverage(3.0));
+		@Example
+		void tightAccept() {
+			var classifier = new Classifier();
+			classifier.addCase("even", 49.5, args -> (int) args.get(0) % 2 == 0);
+			classifier.addCase("odd", 49.5, args -> (int) args.get(0) % 2 != 0);
 
-		assertThat(classifier.checkCoverage(3.0)).isEqualTo(Classifier.CoverageCheck.ACCEPT);
-	}
+			Generator<Integer> integers = BaseGenerators.integers(1, 100);
+			GenSource source = new RandomGenSource();
 
-	@Example
-	void classifierReject() {
-		var classifier = new Classifier();
-		classifier.addCase("Case 1", 42.0, args -> (int) args.get(0) >= 10);
-		classifier.addCase("Case 2", 42.0, args -> (int) args.get(0) <= -10);
-		classifier.addCase("Default", 12.0, args -> true);
+			while (classifier.checkCoverage(3.0) == Classifier.CoverageCheck.UNSTABLE) {
+				classifier.classify(List.of(integers.generate(source)));
+			}
 
-		Generator<Integer> integers = BaseGenerators.integers(-100, 100);
-		GenSource source = new RandomGenSource();
+			// System.out.println();
+			// System.out.println(classifier.total());
+			// System.out.println(classifier.percentages());
+			// System.out.println(classifier.deviations());
+			// System.out.println(classifier.checkCoverage(3.0));
 
-		while (classifier.checkCoverage(1.0) == Classifier.CoverageCheck.UNSTABLE) {
-			classifier.classify(List.of(integers.generate(source)));
+			assertThat(classifier.checkCoverage(3.0)).isEqualTo(Classifier.CoverageCheck.ACCEPT);
 		}
 
-		System.out.println();
-		System.out.println(classifier.total());
-		System.out.println(classifier.counts());
-		System.out.println(classifier.percentages());
-		System.out.println(classifier.deviations());
-		System.out.println(classifier.checkCoverage(1.0));
+		@Example
+		void tightReject() {
+			var classifier = new Classifier();
+			classifier.addCase("even", 50.5, args -> (int) args.get(0) % 2 == 0);
+			classifier.addCase("odd", 49.5, args -> (int) args.get(0) % 2 != 0);
 
-		assertThat(classifier.checkCoverage(1.0)).isEqualTo(Classifier.CoverageCheck.REJECT);
+			Generator<Integer> integers = BaseGenerators.integers(1, 100);
+			GenSource source = new RandomGenSource();
+
+			while (classifier.checkCoverage(3.0) == Classifier.CoverageCheck.UNSTABLE) {
+				classifier.classify(List.of(integers.generate(source)));
+			}
+
+			System.out.println();
+			System.out.println(classifier.total());
+			System.out.println(classifier.percentages());
+			System.out.println(classifier.deviations());
+			System.out.println(classifier.checkCoverage(3.0));
+
+			assertThat(classifier.checkCoverage(3.0)).isEqualTo(Classifier.CoverageCheck.REJECT);
+		}
 	}
 }
 
 class Classifier {
 
 	public static final int MIN_TRIES = 100;
+	public static final DecimalFormat PERCENTAGE_FORMAT = new DecimalFormat("#.0###", new DecimalFormatSymbols(Locale.US));
 	private final List<Case> cases = new ArrayList<>();
 	private final Map<Case, Integer> counts = new HashMap<>();
 	private final Map<Case, Double> sumOfPercentages = new HashMap<>();
@@ -316,6 +346,26 @@ class Classifier {
 
 	int total() {
 		return total.get();
+	}
+
+	Set<String> rejections() {
+		return cases.stream()
+					.map(c -> Pair.of(c, percentage(c)))
+					.filter(p -> p.second() <= p.first().minPercentage())
+					.map(p -> rejectionMessage(p))
+					.collect(Collectors.toSet());
+	}
+
+	private String rejectionMessage(Pair<Case, Double> caseAndPercentage) {
+		var aCase = caseAndPercentage.first();
+		var percentage = caseAndPercentage.second();
+		return "Coverage of case '%s' expected to be at least %s%% but was only %s%% (%d/%d)".formatted(
+			aCase.label(),
+			PERCENTAGE_FORMAT.format(aCase.minPercentage()),
+			PERCENTAGE_FORMAT.format(percentage),
+			counts.get(aCase),
+			total.get()
+		);
 	}
 }
 
