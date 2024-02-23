@@ -34,7 +34,7 @@ public class Classifier {
 		sumOfPercentageSquares.put(newCase, 0.0);
 	}
 
-	public void classify(List<Object> args) {
+	public synchronized void classify(List<Object> args) {
 		total.incrementAndGet();
 		for (Classifier.Case c : cases) {
 			if (c.condition().test(args)) {
@@ -105,7 +105,7 @@ public class Classifier {
 		return Math.sqrt(percentageSquare - percentage * percentage);
 	}
 
-	public Classifier.CoverageCheck checkCoverage(double maxStandardDeviationFactor) {
+	public synchronized Classifier.CoverageCheck checkCoverage(double maxStandardDeviationFactor) {
 		if (total.get() < MIN_TRIES) {
 			return Classifier.CoverageCheck.UNSTABLE;
 		}

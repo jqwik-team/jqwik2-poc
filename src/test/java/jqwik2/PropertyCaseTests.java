@@ -102,16 +102,15 @@ class PropertyCaseTests {
 		assertThat(result.countChecks()).isEqualTo(3);
 	}
 
-	@Example
-	//@Property(generation = GenerationMode.EXHAUSTIVE)
-	void failPropertyCaseWithStatisticalGuidance(@ForAll("serviceSuppliers") Supplier<ExecutorService> serviceSupplier) {
+	@Property(generation = GenerationMode.EXHAUSTIVE)
+	void failStatisticallyGuided(@ForAll("serviceSuppliers") Supplier<ExecutorService> serviceSupplier) {
 
 		List<Generator<?>> generators = List.of(
 			BaseGenerators.integers(0, 100)
 		);
 
 		var classifier = new Classifier();
-		classifier.addCase("Even", 60.0, args -> (int) args.get(0) % 2 == 0);
+		classifier.addCase("Even", 55.0, args -> (int) args.get(0) % 2 == 0);
 		classifier.addCase("Odd", 40.0, args -> (int) args.get(0) % 2 != 0);
 
 		Tryable tryable = Tryable.from(classifier::classify);
@@ -122,20 +121,82 @@ class PropertyCaseTests {
 			randomizedGuided(
 				randomSource -> new StatisticalGuidance(classifier, 2.0, randomSource),
 				"42", 0, Duration.ZERO, false,
-				null
+				serviceSupplier
 			)
 		);
 		assertThat(result.status()).isEqualTo(PropertyRunResult.Status.FAILED);
 		assertThat(result.failureReason()).isPresent();
 		result.failureReason().ifPresent(throwable -> {
 			assertThat(throwable.getMessage())
-				.startsWith("Coverage of case 'Even' expected to be at least 60.0%");
+				.startsWith("Coverage of case 'Even' expected to be at least 55.0%");
 		});
 
 		// System.out.println(result.failureReason().get().getMessage());
 		// System.out.println(classifier.total());
 		// System.out.println(classifier.percentages());
 		// System.out.println(classifier.rejections());
+	}
+
+	@Property(generation = GenerationMode.EXHAUSTIVE)
+	void failStatisticalGuidedWithNormalFailure(@ForAll("serviceSuppliers") Supplier<ExecutorService> serviceSupplier) {
+
+		List<Generator<?>> generators = List.of(
+			BaseGenerators.integers(0, 100)
+		);
+
+		var classifier = new Classifier();
+		classifier.addCase("Even", 45.0, args -> (int) args.get(0) % 2 == 0);
+		classifier.addCase("Odd", 45.0, args -> (int) args.get(0) % 2 != 0);
+
+		Tryable tryable = Tryable.from(args -> {
+			classifier.classify(args);
+			return classifier.total() < 100;
+		});
+
+		PropertyCase propertyCase = new PropertyCase(generators, tryable);
+
+		PropertyRunResult result = propertyCase.run(
+			randomizedGuided(
+				randomSource -> new StatisticalGuidance(classifier, 2.0, randomSource),
+				"42", 0, Duration.ZERO, false,
+				serviceSupplier
+			)
+		);
+		assertThat(result.status()).isEqualTo(PropertyRunResult.Status.FAILED);
+		assertThat(result.failureReason()).isEmpty();
+
+		// countChecks should be relatively close to 100, but parallel execution can make it higher
+		// System.out.println(result.countChecks());
+	}
+
+	@Property(generation = GenerationMode.EXHAUSTIVE)
+	void statisticalGuidedPropertiesCanAlsoBeShrunk(@ForAll("serviceSuppliers") Supplier<ExecutorService> serviceSupplier) {
+
+		List<Generator<?>> generators = List.of(
+			BaseGenerators.integers(0, 100)
+		);
+
+		var classifier = new Classifier();
+		classifier.addCase("Even", 40.0, args -> (int) args.get(0) % 2 == 0);
+		classifier.addCase("Odd", 40.0, args -> (int) args.get(0) % 2 != 0);
+
+		Tryable tryable = Tryable.from(args -> {
+			classifier.classify(args);
+			int anInt = (int) args.get(0);
+			return anInt < 30;
+		});
+
+		PropertyCase propertyCase = new PropertyCase(generators, tryable);
+
+		PropertyRunResult result = propertyCase.run(
+			randomizedGuided(
+				randomSource -> new StatisticalGuidance(classifier, 2.0, randomSource),
+				"42", 0, Duration.ZERO, true,
+				serviceSupplier
+			)
+		);
+		assertThat(result.status()).isEqualTo(PropertyRunResult.Status.FAILED);
+		assertThat(result.falsifiedSamples().getFirst().values()).isEqualTo(List.of(30));
 	}
 
 
