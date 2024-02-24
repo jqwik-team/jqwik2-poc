@@ -33,6 +33,7 @@ public interface Guidance {
 	 * <p>
 	 * Can be used to override the result of a property run.
 	 */
+	// TODO: Extract to separate interface, eg. PropertyRunResultModifier
 	default PropertyRunResult overridePropertyResult(PropertyRunResult originalResult) {
 		return originalResult;
 	}

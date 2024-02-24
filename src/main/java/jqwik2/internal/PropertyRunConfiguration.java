@@ -21,6 +21,8 @@ public interface PropertyRunConfiguration {
 
 	Optional<String> effectiveSeed();
 
+	Supplier<ExecutorService> supplyExecutorService();
+
 	Optional<ExecutorService> executorService();
 
 	boolean shrinkingEnabled();
@@ -75,18 +77,16 @@ public interface PropertyRunConfiguration {
 		);
 	}
 
-	static PropertyRunConfiguration randomizedGuided(
-		Function<IterableSampleSource, GuidedGeneration> guidanceSupplier,
-		String seed, int maxTries, Duration maxRuntime, boolean shrinkingEnabled,
-		Supplier<ExecutorService> supplyExecutorService
+	static PropertyRunConfiguration wrapSource(
+		PropertyRunConfiguration configuration,
+		Function<IterableSampleSource, IterableSampleSource> sourceWrapper
 	) {
 		return new RunConfigurationRecord(
-			seed,
-			maxTries,
-			maxRuntime, shrinkingEnabled,
-			false,
-			supplyExecutorService,
-			() -> new GuidedGenerationSource(() -> guidanceSupplier.apply(randomSource(seed)))
+			configuration.effectiveSeed().orElse(null),
+			configuration.maxTries(), configuration.maxRuntime(),
+			configuration.shrinkingEnabled(), configuration.filterOutDuplicateSamples(),
+			configuration.supplyExecutorService(),
+			() -> sourceWrapper.apply(configuration.source())
 		);
 	}
 
