@@ -8,9 +8,9 @@ import java.util.stream.*;
 
 import jqwik2.internal.*;
 
-public class Classifier {
+public class Classifier<C> {
 
-	public record Case(String label, double minPercentage, Predicate<List<Object>> condition) {
+	public record Case<C>(String label, double minPercentage, Predicate<C> condition) {
 	}
 
 	public enum CoverageCheck {
@@ -20,23 +20,23 @@ public class Classifier {
 	private static final int MIN_TRIES = 100;
 	static final DecimalFormat PERCENTAGE_FORMAT = new DecimalFormat("#.0###", new DecimalFormatSymbols(Locale.US));
 
-	private final List<Classifier.Case> cases = new ArrayList<>();
-	private final Map<Classifier.Case, Integer> counts = new HashMap<>();
-	private final Map<Classifier.Case, Double> sumOfPercentages = new HashMap<>();
-	private final Map<Classifier.Case, Double> sumOfPercentageSquares = new HashMap<>();
+	private final List<Classifier.Case<C>> cases = new ArrayList<>();
+	private final Map<Classifier.Case<C>, Integer> counts = new HashMap<>();
+	private final Map<Classifier.Case<C>, Double> sumOfPercentages = new HashMap<>();
+	private final Map<Classifier.Case<C>, Double> sumOfPercentageSquares = new HashMap<>();
 	private final AtomicInteger total = new AtomicInteger(0);
 
-	public void addCase(String label, double minPercentage, Predicate<List<Object>> condition) {
-		var newCase = new Classifier.Case(label, minPercentage, condition);
+	public void addCase(String label, double minPercentage, Predicate<C> condition) {
+		var newCase = new Classifier.Case<C>(label, minPercentage, condition);
 		cases.add(newCase);
 		counts.put(newCase, 0);
 		sumOfPercentages.put(newCase, 0.0);
 		sumOfPercentageSquares.put(newCase, 0.0);
 	}
 
-	public synchronized void classify(List<Object> args) {
+	public synchronized void classify(C args) {
 		total.incrementAndGet();
-		for (Classifier.Case c : cases) {
+		for (Classifier.Case<C> c : cases) {
 			if (c.condition().test(args)) {
 				counts.put(c, counts.get(c) + 1);
 				updateSums();
@@ -62,7 +62,7 @@ public class Classifier {
 		});
 	}
 
-	private double percentage(Classifier.Case c) {
+	private double percentage(Classifier.Case<C> c) {
 		if (total.get() == 0) {
 			return 0.0;
 		}
@@ -106,7 +106,7 @@ public class Classifier {
 					 );
 	}
 
-	private double deviation(Classifier.Case key) {
+	private double deviation(Classifier.Case<C> key) {
 		var percentage = sumOfPercentages.get(key) / total.get();
 		var percentageSquare = sumOfPercentageSquares.get(key) / total.get();
 		return Math.sqrt(percentageSquare - percentage * percentage);
@@ -130,7 +130,7 @@ public class Classifier {
 		return Classifier.CoverageCheck.ACCEPT;
 	}
 
-	private Classifier.CoverageCheck checkCoverage(Classifier.Case c, double maxStandardDeviationFactor) {
+	private Classifier.CoverageCheck checkCoverage(Classifier.Case<C> c, double maxStandardDeviationFactor) {
 		var percentage = percentage(c);
 		var minPercentage = c.minPercentage();
 		var maxDeviation = deviation(c) * maxStandardDeviationFactor;
@@ -156,11 +156,11 @@ public class Classifier {
 		return cases.stream()
 					.map(c -> Pair.of(c, percentage(c)))
 					.filter(p -> p.second() <= p.first().minPercentage())
-					.map(p -> rejectionDetail(p))
+					.map(this::rejectionDetail)
 					.collect(Collectors.toSet());
 	}
 
-	private String rejectionDetail(Pair<Classifier.Case, Double> caseAndPercentage) {
+	private String rejectionDetail(Pair<Classifier.Case<C>, Double> caseAndPercentage) {
 		var aCase = caseAndPercentage.first();
 		var percentage = caseAndPercentage.second();
 		return "Coverage of case '%s' expected to be at least %s%% but was only %s%% (%d/%d)".formatted(

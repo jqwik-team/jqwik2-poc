@@ -35,15 +35,15 @@ public class StatisticalPropertySource implements IterableSampleSource {
 	private class StatisticalPropertyIterator implements Iterator<SampleSource>, Guidance {
 
 		private final Iterator<SampleSource> source = randomSource.iterator();
-		private final Classifier classifier;
+		private final Classifier<TryExecutionResult> classifier;
 		private volatile boolean stopped = false;
 
 		private StatisticalPropertyIterator() {
-			classifier = new Classifier();
-			classifier.addCase(SATISFIED_TRIES, minSatisfiedPercentage, params -> {
-				TryExecutionResult tryResult = (TryExecutionResult) params.getFirst();
-				return tryResult.status() == TryExecutionResult.Status.SATISFIED;
-			});
+			classifier = new Classifier<>();
+			classifier.addCase(
+				SATISFIED_TRIES, minSatisfiedPercentage,
+				tryResult -> tryResult.status() == TryExecutionResult.Status.SATISFIED
+			);
 			classifier.addCase("falsified", 0.0, ignore -> true);
 		}
 
@@ -66,7 +66,7 @@ public class StatisticalPropertySource implements IterableSampleSource {
 
 		@Override
 		public void guide(TryExecutionResult result, Sample sample) {
-			classifier.classify(List.of(result));
+			classifier.classify(result);
 		}
 
 		@Override

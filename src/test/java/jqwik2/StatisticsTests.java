@@ -115,9 +115,10 @@ class StatisticsTests {
 
 	@Group
 	class Classifiers {
+
 		@Example
 		void classifierAccept() {
-			var classifier = new Classifier();
+			var classifier = new Classifier<List<Object>>();
 			classifier.addCase("Case 1", 40.0, args -> (int) args.get(0) >= 10);
 			classifier.addCase("Case 2", 40.0, args -> (int) args.get(0) <= -10);
 			classifier.addCase("Default", 5.0, args -> true);
@@ -140,7 +141,7 @@ class StatisticsTests {
 
 		@Example
 		void classifierReject() {
-			var classifier = new Classifier();
+			var classifier = new Classifier<List<Object>>();
 			classifier.addCase("Case 1", 40.0, args -> (int) args.get(0) >= 10);
 			classifier.addCase("Case 2", 40.0, args -> (int) args.get(0) <= -10);
 			classifier.addCase("Default", 12.0, args -> true);
@@ -169,7 +170,7 @@ class StatisticsTests {
 
 		@Example
 		void tightAccept() {
-			var classifier = new Classifier();
+			var classifier = new Classifier<List<Object>>();
 			classifier.addCase("even", 49.5, args -> (int) args.get(0) % 2 == 0);
 			classifier.addCase("odd", 49.5, args -> (int) args.get(0) % 2 != 0);
 
@@ -191,7 +192,7 @@ class StatisticsTests {
 
 		@Example
 		void tightReject() {
-			var classifier = new Classifier();
+			var classifier = new Classifier<List<Object>>();
 			classifier.addCase("even", 50.5, args -> (int) args.get(0) % 2 == 0);
 			classifier.addCase("odd", 49.5, args -> (int) args.get(0) % 2 != 0);
 

@@ -8,22 +8,17 @@ import org.opentest4j.*;
 public class StatisticallyGuidedGenerationSource implements IterableSampleSource {
 
 	private final IterableSampleSource randomSource;
-	private final Set<Classifier> classifiers;
+	private final Set<Classifier<List<Object>>> classifiers;
 	private final double maxStandardDeviationFactor;
 
 	public StatisticallyGuidedGenerationSource(
 		IterableSampleSource randomSource,
-		Set<Classifier> classifiers,
+		Set<Classifier<List<Object>>> classifiers,
 		double maxStandardDeviationFactor
 	) {
 		this.randomSource = randomSource;
 		this.classifiers = classifiers;
 		this.maxStandardDeviationFactor = maxStandardDeviationFactor;
-	}
-
-	@Override
-	public boolean stopWhenFalsified() {
-		return true;
 	}
 
 	@Override

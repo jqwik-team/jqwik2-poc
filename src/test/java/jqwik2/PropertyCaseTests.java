@@ -434,7 +434,7 @@ class PropertyCaseTests {
 				BaseGenerators.integers(0, 100)
 			);
 
-			var classifier = new Classifier();
+			var classifier = new Classifier<List<Object>>();
 			classifier.addCase("Even", 40.0, args -> (int) args.get(0) % 2 == 0);
 			classifier.addCase("Odd", 40.0, args -> (int) args.get(0) % 2 != 0);
 
@@ -465,7 +465,7 @@ class PropertyCaseTests {
 				BaseGenerators.integers(0, 100)
 			);
 
-			var classifier = new Classifier();
+			var classifier = new Classifier<List<Object>>();
 			classifier.addCase("Even", 55.0, args -> (int) args.get(0) % 2 == 0);
 			classifier.addCase("Odd", 40.0, args -> (int) args.get(0) % 2 != 0);
 
@@ -503,7 +503,7 @@ class PropertyCaseTests {
 				BaseGenerators.integers(0, 100)
 			);
 
-			var classifier = new Classifier();
+			var classifier = new Classifier<List<Object>>();
 			classifier.addCase("Even", 45.0, args -> (int) args.get(0) % 2 == 0);
 			classifier.addCase("Odd", 45.0, args -> (int) args.get(0) % 2 != 0);
 
@@ -538,7 +538,7 @@ class PropertyCaseTests {
 				BaseGenerators.integers(0, 100)
 			);
 
-			var classifier = new Classifier();
+			var classifier = new Classifier<List<Object>>();
 			classifier.addCase("Even", 20.0, args -> (int) args.get(0) % 2 == 0);
 			classifier.addCase("Odd", 20.0, args -> (int) args.get(0) % 2 != 0);
 
@@ -570,7 +570,7 @@ class PropertyCaseTests {
 				BaseGenerators.integers(0, 100)
 			);
 
-			var classifier = new Classifier();
+			var classifier = new Classifier<List<Object>>();
 			classifier.addCase("Even", 40.0, args -> (int) args.get(0) % 2 == 0);
 			classifier.addCase("Odd", 40.0, args -> (int) args.get(0) % 2 != 0);
 
