@@ -363,6 +363,68 @@ class PropertyCaseTests {
 	}
 
 	@Group
+	class StatisticalProperties {
+
+		@Property(generation = GenerationMode.EXHAUSTIVE)
+		void succeedWithMinPercentage(@ForAll("serviceSuppliers") Supplier<ExecutorService> serviceSupplier) {
+
+			List<Generator<?>> generators = List.of(
+				BaseGenerators.integers(0, 100)
+			);
+
+			Tryable tryable = Tryable.from(args -> {
+				int anInt = (int) args.get(0);
+				return anInt < 95;
+			});
+
+			PropertyCase propertyCase = new PropertyCase(generators, tryable);
+
+			PropertyRunResult result = propertyCase.run(
+				wrapSource(
+					randomized(
+						"42", 0, Duration.ZERO,
+						false, false,
+						serviceSupplier
+					),
+					source -> new StatisticalPropertySource(source, 93.0, 2.0)
+				)
+			);
+			// System.out.println(result.countChecks());
+			assertThat(result.status()).isEqualTo(PropertyRunResult.Status.SUCCESSFUL);
+		}
+
+		@Property(generation = GenerationMode.EXHAUSTIVE)
+		void failWithMinPercentage(@ForAll("serviceSuppliers") Supplier<ExecutorService> serviceSupplier) {
+
+			List<Generator<?>> generators = List.of(
+				BaseGenerators.integers(0, 100)
+			);
+
+			Tryable tryable = Tryable.from(args -> {
+				int anInt = (int) args.get(0);
+				return anInt < 88;
+			});
+
+			PropertyCase propertyCase = new PropertyCase(generators, tryable);
+
+			PropertyRunResult result = propertyCase.run(
+				wrapSource(
+					randomized(
+						"42", 0, Duration.ZERO,
+						false, false,
+						serviceSupplier
+					),
+					source -> new StatisticalPropertySource(source, 90.0, 2.0)
+				)
+			);
+			// System.out.println(result.countChecks());
+			// System.out.println(result.failureReason().get().getMessage());
+			assertThat(result.status()).isEqualTo(PropertyRunResult.Status.FAILED);
+		}
+
+	}
+
+	@Group
 	class StatisticallyGuidedGeneration {
 
 		@Property(generation = GenerationMode.EXHAUSTIVE)

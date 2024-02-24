@@ -18,7 +18,7 @@ public class Classifier {
 	}
 
 	private static final int MIN_TRIES = 100;
-	private static final DecimalFormat PERCENTAGE_FORMAT = new DecimalFormat("#.0###", new DecimalFormatSymbols(Locale.US));
+	static final DecimalFormat PERCENTAGE_FORMAT = new DecimalFormat("#.0###", new DecimalFormatSymbols(Locale.US));
 
 	private final List<Classifier.Case> cases = new ArrayList<>();
 	private final Map<Classifier.Case, Integer> counts = new HashMap<>();
@@ -77,6 +77,13 @@ public class Classifier {
 							 Map.Entry::getValue
 						 )
 					 );
+	}
+
+	public Double percentage(String label) {
+		var aCase = cases.stream()
+						 .filter(c -> c.label().equals(label))
+						 .findFirst();
+		return aCase.map(this::percentage).orElse(0.0);
 	}
 
 	public Map<String, Double> percentages() {
