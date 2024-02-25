@@ -8,6 +8,7 @@ import org.opentest4j.*;
 public class StatisticalPropertySource implements IterableSampleSource {
 
 	public static final String SATISFIED_TRIES = "satisfied";
+
 	private final IterableSampleSource randomSource;
 	private final double minSatisfiedPercentage;
 	private final double maxStandardDeviationFactor;
@@ -44,7 +45,6 @@ public class StatisticalPropertySource implements IterableSampleSource {
 				SATISFIED_TRIES, minSatisfiedPercentage,
 				tryResult -> tryResult.status() == TryExecutionResult.Status.SATISFIED
 			);
-			classifier.addCase("falsified", 0.0, ignore -> true);
 		}
 
 		@Override

@@ -10,6 +10,8 @@ import jqwik2.internal.*;
 
 public class Classifier<C> {
 
+	private final static Case<?> DEFAULT_CASE = new Case<>("_", 0.0, ignore -> true);
+
 	public record Case<C>(String label, double minPercentage, Predicate<C> condition) {
 	}
 
@@ -26,9 +28,22 @@ public class Classifier<C> {
 	private final Map<Classifier.Case<C>, Double> sumOfPercentageSquares = new HashMap<>();
 	private final AtomicInteger total = new AtomicInteger(0);
 
+	public Classifier() {
+		initializeCase(defaultCase());
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <C> Case<C> defaultCase() {
+		return (Case<C>) DEFAULT_CASE;
+	}
+
 	public void addCase(String label, double minPercentage, Predicate<C> condition) {
-		var newCase = new Classifier.Case<C>(label, minPercentage, condition);
+		var newCase = new Case<C>(label, minPercentage, condition);
 		cases.add(newCase);
+		initializeCase(newCase);
+	}
+
+	private void initializeCase(Case<C> newCase) {
 		counts.put(newCase, 0);
 		sumOfPercentages.put(newCase, 0.0);
 		sumOfPercentageSquares.put(newCase, 0.0);
@@ -38,12 +53,17 @@ public class Classifier<C> {
 		total.incrementAndGet();
 		for (Classifier.Case<C> c : cases) {
 			if (c.condition().test(args)) {
-				counts.put(c, counts.get(c) + 1);
-				updateSums();
-				updateSquares();
-				break;
+				classifyCase(c);
+				return;
 			}
 		}
+		classifyCase(defaultCase());
+	}
+
+	private void classifyCase(Case<C> c) {
+		counts.put(c, counts.get(c) + 1);
+		updateSums();
+		updateSquares();
 	}
 
 	private void updateSquares() {

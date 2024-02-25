@@ -140,6 +140,27 @@ class StatisticsTests {
 		}
 
 		@Example
+		void singleCaseAccept() {
+			var classifier = new Classifier<Integer>();
+			classifier.addCase("Case 1", 40.0, anInt -> anInt >= 10);
+
+			Generator<Integer> integers = BaseGenerators.integers(-100, 100);
+			GenSource source = new RandomGenSource("42");
+
+			while (classifier.checkCoverage(1.0) == Classifier.CoverageCheck.UNSTABLE) {
+				classifier.classify(integers.generate(source));
+			}
+
+			// System.out.println();
+			// System.out.println(classifier.total());
+			// System.out.println(classifier.percentages());
+			// System.out.println(classifier.checkCoverage(1.0));
+
+			assertThat(classifier.checkCoverage(1.0)).isEqualTo(Classifier.CoverageCheck.ACCEPT);
+			assertThat(classifier.rejections()).isEmpty();
+		}
+
+		@Example
 		void classifierReject() {
 			var classifier = new Classifier<List<Object>>();
 			classifier.addCase("Case 1", 40.0, args -> (int) args.get(0) >= 10);
