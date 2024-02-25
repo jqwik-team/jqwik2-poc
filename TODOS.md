@@ -1,14 +1,12 @@
 - New JqwikCore API
     - JqwikCore... (see JqwikCoreAPITests.apiIdeas())
+        - validation
+        - classification
+        - statistical validation
     - property.analyze(): Find as many failing samples as possible and analyze their commonalities
-
-- Statistical checker
-    - Use real statistics instead of ad-hoc statistics to determine if a property is stable.
-      See Python implementation: https://github.com/Testispuncher/Sequential-Probability-Ratio-Test
-    - Provide JqwikProperty API for percentage based checks
-
-- JqwikProperty
-    - Report all falsified samples, checks, tries, effective seed
+    - Report 
+        - falsified samples, checks, tries, effective seed
+        - Allow classifiers and collectors to register themselves for reporting
     - Make afterFailure attribute multi value, e.g List.of(SAMPLES, REPLAY | RANDOMIZED)
 
 - Additional generators and arbitraries
