@@ -20,11 +20,14 @@ class StatisticsTests {
 
 	@Example
 	void collectSingleValue() {
-		var property = new JqwikProperty()
-						   .withGeneration(RANDOMIZED)
-						   .withEdgeCases(PropertyRunStrategy.EdgeCasesMode.OFF)
-						   .withMaxTries(1000)
-						   .withMaxRuntime(Duration.ZERO);
+		var strategy = PropertyRunStrategy.builder()
+										  .withGeneration(RANDOMIZED)
+										  .withEdgeCases(PropertyRunStrategy.EdgeCasesMode.OFF)
+										  .withMaxTries(1000)
+										  .withMaxRuntime(Duration.ZERO)
+										  .build();
+
+		var property = new JqwikProperty(strategy);
 
 		property.onFailed((r, e) -> {
 			throw new RuntimeException("Property failed: " + r, e);
@@ -47,11 +50,13 @@ class StatisticsTests {
 	@Example
 	@Disabled
 	void statisticalCheckSuccessful() {
-		var property = new JqwikProperty()
-						   .withGeneration(RANDOMIZED)
-						   .withEdgeCases(PropertyRunStrategy.EdgeCasesMode.OFF)
-						   .withMaxTries(0)
-						   .withMaxRuntime(Duration.ZERO);
+		var strategy = PropertyRunStrategy.builder()
+										  .withGeneration(RANDOMIZED)
+										  .withEdgeCases(PropertyRunStrategy.EdgeCasesMode.OFF)
+										  .withMaxTries(0)
+										  .withMaxRuntime(Duration.ZERO)
+										  .build();
+		var property = new JqwikProperty(strategy);
 
 		IntegerArbitrary integers = Numbers.integers().between(0, 100);
 
@@ -73,11 +78,14 @@ class StatisticsTests {
 	@Example
 	@Disabled
 	void statisticalCheckFailed() {
-		var property = new JqwikProperty()
-						   .withGeneration(RANDOMIZED)
-						   .withEdgeCases(PropertyRunStrategy.EdgeCasesMode.OFF)
-						   .withMaxTries(0)
-						   .withMaxRuntime(Duration.ZERO);
+		var strategy = PropertyRunStrategy.builder()
+										  .withGeneration(RANDOMIZED)
+										  .withEdgeCases(PropertyRunStrategy.EdgeCasesMode.OFF)
+										  .withMaxTries(0)
+										  .withMaxRuntime(Duration.ZERO)
+										  .build();
+
+		var property = new JqwikProperty(strategy);
 
 		IntegerArbitrary integers = Numbers.integers().between(0, 100);
 

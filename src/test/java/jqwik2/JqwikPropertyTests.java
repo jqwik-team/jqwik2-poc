@@ -27,34 +27,6 @@ import static org.mockito.Mockito.*;
 
 class JqwikPropertyTests {
 
-	// @Example
-	void apiIdeas() {
-/*
-		var property = Jqwik.property("my").forAll(Numbers.integers().between(0, 100))
-							.classify(
-								caseOf("Even number", 40.0, i -> i % 2 == 0),
-								caseOf("Odd number", 40.0, i -> i % 2 != 0)
-							)
-							.check((i, runContext) -> {
-								if (i % 2 == 0) {
-									return i % 2 == 0;
-								} else {
-									return i % 2 != 0;
-								}
-							});
-
-		property.validate();
-
-		PropertyRunStrategy strategy = PropertyRunStrategy.builder().withMaxTries(1000);
-		PropertyRunResult result = property.validate(strategy);
-
-		property.validateAndThrow(strategy);
-
-		property.validateStatistically(strategy, 90.0, 3);
-*/
-	}
-
-
 	@BeforeProperty
 	void resetFailureDatabase() {
 		JqwikDefaults.defaultFailureDatabase().clear();
@@ -173,8 +145,10 @@ class JqwikPropertyTests {
 
 	@Example
 	void propertyWith2ParametersSucceeds() {
-		var property = new JqwikProperty()
-						   .withGeneration(PropertyRunStrategy.GenerationMode.RANDOMIZED);
+		var strategy = PropertyRunStrategy.builder()
+										  .withGeneration(PropertyRunStrategy.GenerationMode.RANDOMIZED)
+										  .build();
+		var property = new JqwikProperty(strategy);
 
 		PropertyRunResult result = property.forAll(
 			Values.just(1),
@@ -225,18 +199,19 @@ class JqwikPropertyTests {
 
 	@Example
 	void edgeCasesMode_MIXIN() {
-		PropertyRunStrategy strategy = PropertyRunStrategy.create(
-			1000,
-			Duration.ofMinutes(10),
-			false,
-			RandomChoice::generateRandomSeed,
-			List.of(),
-			PropertyRunStrategy.ShrinkingMode.OFF,
-			PropertyRunStrategy.GenerationMode.SMART,
-			PropertyRunStrategy.EdgeCasesMode.MIXIN,
-			PropertyRunStrategy.AfterFailureMode.SAMPLES_ONLY,
-			PropertyRunStrategy.ConcurrencyMode.SINGLE_THREAD
-		);
+		PropertyRunStrategy strategy =
+			PropertyRunStrategy.builder()
+							   .withMaxTries(1000)
+							   .withMaxRuntime(Duration.ofMinutes(10))
+							   .withFilterOutDuplicateSamples(false)
+							   .withSeedSupplier(RandomChoice::generateRandomSeed)
+							   .withShrinking(PropertyRunStrategy.ShrinkingMode.OFF)
+							   .withGeneration(PropertyRunStrategy.GenerationMode.RANDOMIZED)
+							   .withEdgeCases(PropertyRunStrategy.EdgeCasesMode.MIXIN)
+							   .withAfterFailure(PropertyRunStrategy.AfterFailureMode.SAMPLES_ONLY)
+							   .withConcurrency(PropertyRunStrategy.ConcurrencyMode.SINGLE_THREAD)
+							   .build();
+
 		var property = new JqwikProperty(strategy);
 
 		List<Integer> values = Collections.synchronizedList(new ArrayList<>());
@@ -267,9 +242,11 @@ class JqwikPropertyTests {
 
 	@Example
 	void concurrencyMode_CACHED_THREAD_POOL() {
-		var property = new JqwikProperty()
-						   .withConcurrency(PropertyRunStrategy.ConcurrencyMode.CACHED_THREAD_POOL)
-						   .withMaxTries(1000);
+		var strategy = PropertyRunStrategy.builder()
+										  .withConcurrency(PropertyRunStrategy.ConcurrencyMode.CACHED_THREAD_POOL)
+										  .withMaxTries(1000)
+										  .build();
+		var property = new JqwikProperty(strategy);
 
 		var arbitrary = Numbers.integers();
 
@@ -284,9 +261,11 @@ class JqwikPropertyTests {
 
 	@Example
 	void propertyWithMaxTriesSetTo0_runsUntilTimeout() {
-		var checkingProperty = new JqwikProperty()
-								   .withMaxTries(0)
-								   .withMaxRuntime(Duration.ofSeconds(1));
+		var strategy = PropertyRunStrategy.builder()
+										  .withMaxTries(0)
+										  .withMaxRuntime(Duration.ofSeconds(1))
+										  .build();
+		var checkingProperty = new JqwikProperty(strategy);
 
 		AtomicInteger counter = new AtomicInteger();
 		PropertyRunResult checkingResult = checkingProperty.forAll(Numbers.integers())
@@ -300,9 +279,12 @@ class JqwikPropertyTests {
 
 	@Example
 	void propertyWithMaxDurationSetTo0_runsUntilMaxTriesIsReached() {
-		var checkingProperty = new JqwikProperty()
-								   .withMaxTries(10)
-								   .withMaxRuntime(Duration.ZERO);
+		var strategy = PropertyRunStrategy.builder()
+										  .withMaxTries(10)
+										  .withMaxRuntime(Duration.ZERO)
+										  .build();
+
+		var checkingProperty = new JqwikProperty(strategy);
 
 		AtomicInteger counter = new AtomicInteger();
 		PropertyRunResult checkingResult = checkingProperty.forAll(Numbers.integers())
@@ -319,11 +301,13 @@ class JqwikPropertyTests {
 
 	@Example
 	void failedTryWillStopEndlessRunningProperty() {
-		var checkingProperty = new JqwikProperty()
-								   .withGeneration(PropertyRunStrategy.GenerationMode.RANDOMIZED)
-								   .withAfterFailure(PropertyRunStrategy.AfterFailureMode.REPLAY)
-								   .withMaxTries(0)
-								   .withMaxRuntime(Duration.ZERO);
+		var strategy = PropertyRunStrategy.builder()
+										  .withGeneration(PropertyRunStrategy.GenerationMode.RANDOMIZED)
+										  .withAfterFailure(PropertyRunStrategy.AfterFailureMode.REPLAY)
+										  .withMaxTries(0)
+										  .withMaxRuntime(Duration.ZERO)
+										  .build();
+		var checkingProperty = new JqwikProperty(strategy);
 
 		AtomicInteger counter = new AtomicInteger();
 		PropertyRunResult checkingResult = checkingProperty.forAll(Numbers.integers())
@@ -348,8 +332,10 @@ class JqwikPropertyTests {
 
 		@Example
 		void afterFailureMode_REPLAY() {
-			var property = new JqwikProperty("idFor_REPLAY")
-							   .withAfterFailure(PropertyRunStrategy.AfterFailureMode.REPLAY);
+			var strategy = PropertyRunStrategy.builder()
+											  .withAfterFailure(PropertyRunStrategy.AfterFailureMode.REPLAY)
+											  .build();
+			var property = new JqwikProperty("idFor_REPLAY", strategy);
 
 			var integers = Numbers.integers().between(-1000, 1000);
 
@@ -372,8 +358,10 @@ class JqwikPropertyTests {
 
 		@Example
 		void afterFailureMode_SAMPLES_ONLY() {
-			var property = new JqwikProperty("idFor_SAMPLES_ONLY")
-							   .withAfterFailure(PropertyRunStrategy.AfterFailureMode.SAMPLES_ONLY);
+			var strategy = PropertyRunStrategy.builder()
+											  .withAfterFailure(PropertyRunStrategy.AfterFailureMode.SAMPLES_ONLY)
+											  .build();
+			var property = new JqwikProperty("idFor_SAMPLES_ONLY", strategy);
 
 			var integers = Numbers.integers().between(-1000, 1000);
 
@@ -401,15 +389,14 @@ class JqwikPropertyTests {
 
 		@Example
 		void generationMode_EXHAUSTIVE() {
-			PropertyRunStrategy strategy = PropertyRunStrategy.create(
-				100, Duration.ofMinutes(10), false, null,
-				List.of(),
-				PropertyRunStrategy.ShrinkingMode.OFF,
-				PropertyRunStrategy.GenerationMode.EXHAUSTIVE,
-				PropertyRunStrategy.EdgeCasesMode.OFF,
-				PropertyRunStrategy.AfterFailureMode.REPLAY,
-				PropertyRunStrategy.ConcurrencyMode.SINGLE_THREAD
-			);
+			PropertyRunStrategy strategy =
+				PropertyRunStrategy.builder()
+								   .withMaxTries(100)
+								   .withMaxRuntime(Duration.ofMinutes(10))
+								   .withGeneration(PropertyRunStrategy.GenerationMode.EXHAUSTIVE)
+								   .withConcurrency(PropertyRunStrategy.ConcurrencyMode.SINGLE_THREAD)
+								   .build();
+
 			var property = new JqwikProperty(strategy);
 
 			PropertyRunResult result = property.forAll(
@@ -428,18 +415,16 @@ class JqwikPropertyTests {
 
 		@Example
 		void generationMode_SMART() {
-			PropertyRunStrategy strategy = PropertyRunStrategy.create(
-				100,
-				Duration.ofMinutes(10),
-				false,
-				RandomChoice::generateRandomSeed,
-				List.of(),
-				PropertyRunStrategy.ShrinkingMode.OFF,
-				PropertyRunStrategy.GenerationMode.SMART,
-				PropertyRunStrategy.EdgeCasesMode.MIXIN,
-				PropertyRunStrategy.AfterFailureMode.SAMPLES_ONLY,
-				PropertyRunStrategy.ConcurrencyMode.SINGLE_THREAD
-			);
+			PropertyRunStrategy strategy =
+				PropertyRunStrategy.builder()
+								   .withMaxTries(100)
+								   .withMaxRuntime(Duration.ofMinutes(10))
+								   .withFilterOutDuplicateSamples(false)
+								   .withSeedSupplier(RandomChoice::generateRandomSeed)
+								   .withGeneration(PropertyRunStrategy.GenerationMode.SMART)
+								   .withConcurrency(PropertyRunStrategy.ConcurrencyMode.SINGLE_THREAD)
+								   .build();
+
 			var property = new JqwikProperty(strategy);
 
 			PropertyRunResult resultExhaustive = property.forAll(
@@ -481,15 +466,16 @@ class JqwikPropertyTests {
 				choice(0)
 			));
 
-			PropertyRunStrategy strategy = PropertyRunStrategy.create(
-				1000, Duration.ofMinutes(10), true, RandomChoice::generateRandomSeed,
-				sampleRecordings,
-				PropertyRunStrategy.ShrinkingMode.OFF,
-				PropertyRunStrategy.GenerationMode.SAMPLES,
-				PropertyRunStrategy.EdgeCasesMode.MIXIN,
-				PropertyRunStrategy.AfterFailureMode.SAMPLES_ONLY,
-				PropertyRunStrategy.ConcurrencyMode.SINGLE_THREAD
-			);
+			PropertyRunStrategy strategy =
+				PropertyRunStrategy.builder()
+								   .withMaxTries(1000)
+								   .withMaxRuntime(Duration.ofMinutes(10))
+								   .withFilterOutDuplicateSamples(true)
+								   .withSamples(sampleRecordings)
+								   .withShrinking(PropertyRunStrategy.ShrinkingMode.OFF)
+								   .withGeneration(PropertyRunStrategy.GenerationMode.SAMPLES)
+								   .withConcurrency(PropertyRunStrategy.ConcurrencyMode.SINGLE_THREAD)
+								   .build();
 			var property = new JqwikProperty(strategy);
 
 			List<Integer> values = Collections.synchronizedList(new ArrayList<>());
@@ -500,15 +486,16 @@ class JqwikPropertyTests {
 
 		@Example
 		void generationMode_GROWING() {
-			PropertyRunStrategy strategy = PropertyRunStrategy.create(
-				100, Duration.ZERO, false, null,
-				List.of(),
-				PropertyRunStrategy.ShrinkingMode.OFF,
-				PropertyRunStrategy.GenerationMode.GROWING,
-				PropertyRunStrategy.EdgeCasesMode.OFF,
-				PropertyRunStrategy.AfterFailureMode.REPLAY,
-				PropertyRunStrategy.ConcurrencyMode.SINGLE_THREAD
-			);
+			PropertyRunStrategy strategy =
+				PropertyRunStrategy.builder()
+								   .withMaxTries(100)
+								   .withMaxRuntime(Duration.ZERO)
+								   .withFilterOutDuplicateSamples(false)
+								   .withGeneration(PropertyRunStrategy.GenerationMode.GROWING)
+								   .withConcurrency(PropertyRunStrategy.ConcurrencyMode.SINGLE_THREAD)
+								   .build();
+
+
 			var property = new JqwikProperty(strategy);
 
 			PropertyRunResult result = property.forAll(

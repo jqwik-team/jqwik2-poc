@@ -1,15 +1,15 @@
+- New JqwikCore API
+    - JqwikCore... (see JqwikCoreAPITests.apiIdeas())
+    - property.analyze(): Find as many failing samples as possible and analyze their commonalities
+
 - Statistical checker
     - Use real statistics instead of ad-hoc statistics to determine if a property is stable.
       See Python implementation: https://github.com/Testispuncher/Sequential-Probability-Ratio-Test
-    - Provide better API and error message for percentage based checks
-    - Allow checking directly from collectors
+    - Provide JqwikProperty API for percentage based checks
 
 - JqwikProperty
-    - Introduce Builder for PropertyRunStrategy
     - Report all falsified samples, checks, tries, effective seed
-    - AfterFailureMode.SAMPLES_THEN_REPLAY
-    - AfterFailureMode.ANALYZE: Find as many failing samples as possible and
-      analyze their commonalities
+    - Make afterFailure attribute multi value, e.g List.of(SAMPLES, REPLAY | RANDOMIZED)
 
 - Additional generators and arbitraries
     - StringArbitrary: withChar(char... chars), withChar(CharSet chars), withCharRange(from, to)
