@@ -21,33 +21,6 @@ import static org.assertj.core.api.Assertions.*;
 
 class PropertyCaseTests {
 
-	// @Example
-	void apiIdeas() {
-/*
-		var property = Jqwik.property("my").forAll(Numbers.integers().between(0, 100))
-							.classify(
-								caseOf("Even number", 40.0, i -> i % 2 == 0),
-								caseOf("Odd number", 40.0, i -> i % 2 != 0)
-							)
-							.check((i, runContext) -> {
-								if (i % 2 == 0) {
-									return i % 2 == 0;
-								} else {
-									return i % 2 != 0;
-								}
-							});
-
-		property.validate();
-
-		PropertyRunStrategy strategy = PropertyRunStrategy.builder().withMaxTries(1000);
-		PropertyRunResult result = property.validate(strategy);
-
-		property.validateAndThrow(strategy);
-
-		property.validateStatistically(strategy, 90.0, 3);
-*/
-	}
-
 	@Provide
 	Arbitrary<Supplier<ExecutorService>> serviceSuppliers() {
 		return Arbitraries.of(
