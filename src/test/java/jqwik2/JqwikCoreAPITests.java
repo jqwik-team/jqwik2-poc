@@ -39,6 +39,7 @@ class JqwikCoreAPITests {
 		PropertyRunResult result = property.validate(strategy, failureDatabase, onFailedHandler, onAbortHandler);
 
 		property.validateAndThrow(strategy);
+		// Alternative: Make "throwOnFailure" a property of the strategy
 
 		property.validateAndThrow(strategy, failureDatabase);
 
