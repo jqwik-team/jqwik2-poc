@@ -11,11 +11,10 @@ public class PropertyVerifier2<T1, T2> extends AbstractPropertyVerifier implemen
 		Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig,
 		Runnable onSuccessful,
 		BiConsumer<PropertyRunResult, Throwable> onFailed,
-		Consumer<Optional<Throwable>> onAborted,
 		List<Generator.DecoratorFunction> decorators,
 		Arbitrary<T1> arbitrary1, Arbitrary<T2> arbitrary2
 	) {
-		super(supplyConfig, onSuccessful, onFailed, onAborted, decorators, List.of(arbitrary1, arbitrary2));
+		super(supplyConfig, onSuccessful, onFailed, decorators, List.of(arbitrary1, arbitrary2));
 	}
 
 	@SuppressWarnings("unchecked")

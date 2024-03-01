@@ -1,6 +1,5 @@
 package jqwik2.api;
 
-import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
@@ -16,7 +15,6 @@ public class JqwikProperty {
 	private final PropertyRunStrategy strategy;
 	private final String id;
 	private final List<BiConsumer<PropertyRunResult, Throwable>> onFailureHandlers = new ArrayList<>();
-	private final List<Consumer<Optional<Throwable>>> onAbortHandlers = new ArrayList<>();
 	private FailureDatabase database;
 
 	public JqwikProperty(PropertyRunStrategy strategy) {
@@ -60,7 +58,7 @@ public class JqwikProperty {
 
 	public <T1> Verifier1<T1> forAll(Arbitrary<T1> arbitrary) {
 		return new PropertyVerifier1<>(
-			this::buildConfiguration, this::onSuccessful, this::onFailed, this::onAborted,
+			this::buildConfiguration, this::onSuccessful, this::onFailed,
 			decorators(), arbitrary
 		);
 	}
@@ -79,17 +77,13 @@ public class JqwikProperty {
 		Arbitrary<T2> arbitrary2
 	) {
 		return new PropertyVerifier2<>(
-			this::buildConfiguration, this::onSuccessful, this::onFailed, this::onAborted,
+			this::buildConfiguration, this::onSuccessful, this::onFailed,
 			decorators(), arbitrary1, arbitrary2
 		);
 	}
 
 	private void onFailed(PropertyRunResult result, Throwable throwable) {
 		onFailureHandlers.forEach(h -> h.accept(result, throwable));
-	}
-
-	private void onAborted(Optional<Throwable> abortionReason) {
-		onAbortHandlers.forEach(h -> h.accept(abortionReason));
 	}
 
 	private void onSuccessful() {
@@ -184,20 +178,6 @@ public class JqwikProperty {
 
 	public String id() {
 		return id;
-	}
-
-	public void onFailed(BiConsumer<PropertyRunResult, Throwable> onFailureHandler) {
-		if (onFailureHandlers.contains(onFailureHandler)) {
-			return;
-		}
-		onFailureHandlers.add(onFailureHandler);
-	}
-
-	public void onAbort(Consumer<Optional<Throwable>> onAbortHandler) {
-		if (onAbortHandlers.contains(onAbortHandler)) {
-			return;
-		}
-		onAbortHandlers.add(onAbortHandler);
 	}
 
 	public void failureDatabase(FailureDatabase database) {

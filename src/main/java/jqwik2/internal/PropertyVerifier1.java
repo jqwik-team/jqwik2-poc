@@ -12,11 +12,10 @@ public class PropertyVerifier1<T1> extends AbstractPropertyVerifier implements J
 		Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig,
 		Runnable onSuccessful,
 		BiConsumer<PropertyRunResult, Throwable> onFailed,
-		Consumer<Optional<Throwable>> onAborted,
 		List<Generator.DecoratorFunction> decorators,
 		Arbitrary<T1> arbitrary
 	) {
-		super(supplyConfig, onSuccessful, onFailed, onAborted, decorators, List.of(arbitrary));
+		super(supplyConfig, onSuccessful, onFailed, decorators, List.of(arbitrary));
 	}
 
 	@SuppressWarnings("unchecked")

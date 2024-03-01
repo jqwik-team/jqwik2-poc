@@ -11,7 +11,6 @@ import jqwik2.api.*;
 import jqwik2.api.arbitraries.*;
 import jqwik2.api.database.*;
 import jqwik2.api.recording.*;
-import jqwik2.api.support.*;
 import jqwik2.internal.*;
 import org.mockito.*;
 import org.opentest4j.*;
@@ -98,23 +97,18 @@ class JqwikPropertyTests {
 	void failingPropertyThrowsExceptionWhenFailed() {
 		var property = new JqwikProperty();
 
-		property.onFailed((result, throwable) -> {
-			ExceptionSupport.throwAsUnchecked(throwable);
-		});
+		// property.onFailed((result, throwable) -> {
+		// 	ExceptionSupport.throwAsUnchecked(throwable);
+		// });
 
 		assertThatThrownBy(
-			() -> property.forAll(Values.just(42)).check(i -> false)
-		).isInstanceOf(AssertionError.class)
-		 .hasMessageContaining("failed");
+			() -> property.forAll(Values.just(42)).check(i -> false).throwOnFailure()
+		).isInstanceOf(AssertionError.class).hasMessageContaining("Property check failed");
 	}
 
 	@Example
-	void abortedPropertyThrowsAbortionErrorWhenAborted() {
+	void abortedPropertyAlwaysThrowsAbortionError() {
 		var property = new JqwikProperty();
-		property.onAbort(abortionReason -> {
-			abortionReason.ifPresent(ExceptionSupport::throwAsUnchecked);
-			throw new TestAbortedException("Property aborted for unknown reason");
-		});
 
 		var throwingArbitrary = new Arbitrary<Integer>() {
 			@Override
@@ -125,22 +119,6 @@ class JqwikPropertyTests {
 		assertThatThrownBy(
 			() -> property.forAll(throwingArbitrary).verify(i -> {})
 		).isInstanceOf(TestAbortedException.class);
-	}
-
-	@Example
-	void onFailureNotification() {
-		var property = new JqwikProperty();
-
-		BiConsumer<PropertyRunResult, Throwable> consumer1 = mock(BiConsumer.class);
-		BiConsumer<PropertyRunResult, Throwable> consumer2 = mock(BiConsumer.class);
-		property.onFailed(consumer1);
-		property.onFailed(consumer2);
-
-		PropertyRunResult result = property.forAll(Values.just(10)).check(i -> false);
-		assertThat(result.isFailed()).isTrue();
-
-		verify(consumer1).accept(any(PropertyRunResult.class), any(AssertionError.class));
-		verify(consumer2).accept(any(PropertyRunResult.class), any(AssertionError.class));
 	}
 
 	@Example

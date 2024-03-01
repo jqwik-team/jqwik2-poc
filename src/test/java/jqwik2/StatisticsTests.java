@@ -29,10 +29,6 @@ class StatisticsTests {
 
 		var property = new JqwikProperty(strategy);
 
-		property.onFailed((r, e) -> {
-			throw new RuntimeException("Property failed: " + r, e);
-		});
-
 		Statistics.Collector.C1<Integer> collector = Statistics.collector("numbers", Integer.class);
 
 		IntegerArbitrary integers = Numbers.integers().between(0, 100);

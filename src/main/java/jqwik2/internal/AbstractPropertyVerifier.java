@@ -18,22 +18,18 @@ class AbstractPropertyVerifier {
 	private final Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig;
 	private final Runnable onSuccessful;
 	private final BiConsumer<PropertyRunResult, Throwable> onFailed;
-	private final Consumer<Optional<Throwable>> onAborted;
 	private final List<Generator.DecoratorFunction> decorators;
 	private final List<Arbitrary<?>> arbitraries;
 
 	protected AbstractPropertyVerifier(
 		Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig,
-		Runnable onSuccessful,
-		BiConsumer<PropertyRunResult, Throwable> onFailed,
-		Consumer<Optional<Throwable>> onAborted,
+		Runnable onSuccessful, BiConsumer<PropertyRunResult, Throwable> onFailed,
 		List<Generator.DecoratorFunction> decorators,
 		List<Arbitrary<?>> arbitraries
 	) {
 		this.supplyConfig = supplyConfig;
 		this.onSuccessful = onSuccessful;
 		this.onFailed = onFailed;
-		this.onAborted = onAborted;
 		this.decorators = decorators;
 		this.arbitraries = arbitraries;
 	}
@@ -73,7 +69,7 @@ class AbstractPropertyVerifier {
 				onFailed.accept(result, failureException(result.falsifiedSamples()));
 				break;
 			case ABORTED:
-				onAborted.accept(result.abortionReason());
+				// TODO: Does abort really happen or will it be thrown as an exception?
 				break;
 		}
 	}

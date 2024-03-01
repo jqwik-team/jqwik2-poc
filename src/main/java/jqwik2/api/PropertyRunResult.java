@@ -2,6 +2,9 @@ package jqwik2.api;
 
 import java.util.*;
 
+import jqwik2.api.support.*;
+import org.opentest4j.*;
+
 public record PropertyRunResult(
 	Status status, int countTries, int countChecks,
 	Optional<String> effectiveSeed,
@@ -70,6 +73,23 @@ public record PropertyRunResult(
 			status, countTries, countChecks, effectiveSeed,
 			falsifiedSamples, Optional.ofNullable(changedFailureReason), abortionReason, timedOut
 		);
+	}
+
+	/**
+	 * Throw the appropriate exception if the property run has failed.
+	 */
+	public void throwOnFailure() {
+		if (isFailed()) {
+			failureReason.ifPresent(ExceptionSupport::throwAsUnchecked);
+			if (!falsifiedSamples.isEmpty()) {
+				var falsifiedSample = falsifiedSamples.first();
+				falsifiedSample.thrown().ifPresent(ExceptionSupport::throwAsUnchecked);
+				var message = "Property check failed with sample {%s}".formatted(falsifiedSample.sample().values());
+				var propertyCheckFailed = new AssertionFailedError(message);
+				ExceptionSupport.throwAsUnchecked(propertyCheckFailed);
+			}
+			ExceptionSupport.throwAsUnchecked(new AssertionFailedError("Property failed but no failure reason available"));
+		}
 	}
 }
 
