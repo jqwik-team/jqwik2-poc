@@ -14,7 +14,7 @@ public class JqwikProperty {
 
 	private final PropertyRunStrategy strategy;
 	private final String id;
-	private final List<BiConsumer<PropertyRunResult, Throwable>> onFailureHandlers = new ArrayList<>();
+	private final List<Consumer<PropertyRunResult>> onFailureHandlers = new ArrayList<>();
 	private FailureDatabase database;
 
 	public JqwikProperty(PropertyRunStrategy strategy) {
@@ -82,8 +82,8 @@ public class JqwikProperty {
 		);
 	}
 
-	private void onFailed(PropertyRunResult result, Throwable throwable) {
-		onFailureHandlers.forEach(h -> h.accept(result, throwable));
+	private void onFailed(PropertyRunResult result) {
+		onFailureHandlers.forEach(h -> h.accept(result));
 	}
 
 	private void onSuccessful() {
@@ -183,9 +183,9 @@ public class JqwikProperty {
 	public void failureDatabase(FailureDatabase database) {
 		this.database = database;
 		if (onFailureHandlers.isEmpty()) {
-			onFailureHandlers.addFirst((PropertyRunResult result, Throwable throwable) -> saveFailureToDatabase(result));
+			onFailureHandlers.addFirst(this::saveFailureToDatabase);
 		} else {
-			onFailureHandlers.set(0, (PropertyRunResult result, Throwable throwable) -> saveFailureToDatabase(result));
+			onFailureHandlers.set(0, this::saveFailureToDatabase);
 		}
 	}
 

@@ -3,7 +3,6 @@ package jqwik2;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
-import java.util.function.*;
 
 import jqwik2.api.Arbitrary;
 import jqwik2.api.Assume;
@@ -94,31 +93,31 @@ class JqwikPropertyTests {
 	}
 
 	@Example
-	void failingPropertyThrowsExceptionWhenFailed() {
+	void failingPropertyThrowsExceptionWith_throwIfNotSuccessful() {
 		var property = new JqwikProperty();
 
-		// property.onFailed((result, throwable) -> {
-		// 	ExceptionSupport.throwAsUnchecked(throwable);
-		// });
-
 		assertThatThrownBy(
-			() -> property.forAll(Values.just(42)).check(i -> false).throwOnFailure()
-		).isInstanceOf(AssertionError.class).hasMessageContaining("Property check failed");
+			() -> property.forAll(Values.just(42)).check(i -> false).throwIfNotSuccessful()
+		).isInstanceOf(AssertionError.class)
+		 .hasMessageContaining("Property check failed");
 	}
 
 	@Example
-	void abortedPropertyAlwaysThrowsAbortionError() {
+	void abortedPropertyThrowsExceptionWith_throwIfNotSuccessful() {
 		var property = new JqwikProperty();
 
 		var throwingArbitrary = new Arbitrary<Integer>() {
 			@Override
 			public Generator<Integer> generator() {
-				throw new TestAbortedException("Property aborted because of thrown exception");
+				return source -> {
+					throw new TestAbortedException("Property aborted because of thrown exception");
+				};
 			}
 		};
 		assertThatThrownBy(
-			() -> property.forAll(throwingArbitrary).verify(i -> {})
-		).isInstanceOf(TestAbortedException.class);
+			() -> property.forAll(throwingArbitrary).verify(i -> {}).throwIfNotSuccessful()
+		).isInstanceOf(TestAbortedException.class)
+		 .hasMessageContaining("Property aborted because of thrown exception");
 	}
 
 	@Example

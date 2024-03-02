@@ -17,13 +17,13 @@ class AbstractPropertyVerifier {
 
 	private final Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig;
 	private final Runnable onSuccessful;
-	private final BiConsumer<PropertyRunResult, Throwable> onFailed;
+	private final Consumer<PropertyRunResult> onFailed;
 	private final List<Generator.DecoratorFunction> decorators;
 	private final List<Arbitrary<?>> arbitraries;
 
 	protected AbstractPropertyVerifier(
 		Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig,
-		Runnable onSuccessful, BiConsumer<PropertyRunResult, Throwable> onFailed,
+		Runnable onSuccessful, Consumer<PropertyRunResult> onFailed,
 		List<Generator.DecoratorFunction> decorators,
 		List<Arbitrary<?>> arbitraries
 	) {
@@ -66,27 +66,11 @@ class AbstractPropertyVerifier {
 				onSuccessful.run();
 				break;
 			case FAILED:
-				onFailed.accept(result, failureException(result.falsifiedSamples()));
+				onFailed.accept(result);
 				break;
 			case ABORTED:
-				// TODO: Does abort really happen or will it be thrown as an exception?
 				break;
 		}
-	}
-
-	private Throwable failureException(SortedSet<FalsifiedSample> falsifiedSamples) {
-		if (falsifiedSamples.isEmpty()) {
-			return new AssertionFailedError("Property failed but no falsified samples found");
-		}
-		var smallestSample = falsifiedSamples.getFirst();
-		return smallestSample.thrown().orElseGet(
-			() -> {
-				var message = "Property failed with sample {%s}".formatted(
-					smallestSample.values()
-				);
-				return new AssertionError(message);
-			}
-		);
 	}
 
 	private List<Generator<?>> generators() {

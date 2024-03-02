@@ -11,7 +11,7 @@ public class PropertyVerifier1<T1> extends AbstractPropertyVerifier implements J
 	public PropertyVerifier1(
 		Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig,
 		Runnable onSuccessful,
-		BiConsumer<PropertyRunResult, Throwable> onFailed,
+		Consumer<PropertyRunResult> onFailed,
 		List<Generator.DecoratorFunction> decorators,
 		Arbitrary<T1> arbitrary
 	) {

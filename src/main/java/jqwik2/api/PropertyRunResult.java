@@ -78,7 +78,7 @@ public record PropertyRunResult(
 	/**
 	 * Throw the appropriate exception if the property run has failed.
 	 */
-	public void throwOnFailure() {
+	public void throwIfNotSuccessful() {
 		if (isFailed()) {
 			failureReason.ifPresent(ExceptionSupport::throwAsUnchecked);
 			if (!falsifiedSamples.isEmpty()) {
@@ -88,7 +88,11 @@ public record PropertyRunResult(
 				var propertyCheckFailed = new AssertionFailedError(message);
 				ExceptionSupport.throwAsUnchecked(propertyCheckFailed);
 			}
-			ExceptionSupport.throwAsUnchecked(new AssertionFailedError("Property failed but no failure reason available"));
+			ExceptionSupport.throwAsUnchecked(new AssertionFailedError("Property failed for unknown reason"));
+		}
+		if (isAborted()) {
+			abortionReason.ifPresent(ExceptionSupport::throwAsUnchecked);
+			ExceptionSupport.throwAsUnchecked(new TestAbortedException("Property aborted for unknown reason"));
 		}
 	}
 }
