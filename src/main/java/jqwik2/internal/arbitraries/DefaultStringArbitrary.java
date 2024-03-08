@@ -42,6 +42,7 @@ public class DefaultStringArbitrary implements StringArbitrary {
 	private final int minLength;
 	private final int maxLength;
 
+	// TODO: Save arbitraries to enable equals contract?
 	private final Set<Pair<Integer, Generator<Integer>>> unicodeFrequencies;
 
 	public DefaultStringArbitrary() {
@@ -153,4 +154,20 @@ public class DefaultStringArbitrary implements StringArbitrary {
 		return new DefaultStringArbitrary(newFrequencies, minLength, maxLength);
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		DefaultStringArbitrary that = (DefaultStringArbitrary) o;
+
+		if (minLength != that.minLength) return false;
+		if (maxLength != that.maxLength) return false;
+		return unicodeFrequencies.equals(that.unicodeFrequencies);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(minLength, maxLength, unicodeFrequencies);
+	}
 }
