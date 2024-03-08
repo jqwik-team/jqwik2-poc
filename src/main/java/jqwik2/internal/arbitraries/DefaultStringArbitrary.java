@@ -10,14 +10,14 @@ import jqwik2.internal.generators.*;
 
 public class DefaultStringArbitrary implements StringArbitrary {
 
-	static final Pair<Integer, Generator<Integer>> WHITESPACE_CHARS;
+	static final Pair<Integer, Arbitrary<? extends Integer>> WHITESPACE_CHARS;
 
 	static {
 		// determine WHITESPACE_CHARS at runtime because the environments differ . . .
 		var whitespace =
 			IntStream.range(Character.MIN_VALUE, Character.MAX_VALUE + 1)
 					 .filter(Character::isWhitespace).boxed().collect(Collectors.toSet());
-		WHITESPACE_CHARS = Pair.of(whitespace.size(), BaseGenerators.choose(whitespace));
+		WHITESPACE_CHARS = Pair.of(whitespace.size(), Values.of(whitespace));
 	}
 
 	private static Generator<Integer> defaultUnicodes() {
@@ -42,14 +42,13 @@ public class DefaultStringArbitrary implements StringArbitrary {
 	private final int minLength;
 	private final int maxLength;
 
-	// TODO: Save arbitraries to enable equals contract?
-	private final Set<Pair<Integer, Generator<Integer>>> unicodeFrequencies;
+	private final Set<Pair<Integer, Arbitrary<? extends Integer>>> unicodeFrequencies;
 
 	public DefaultStringArbitrary() {
 		this(Set.of(), 0, BaseGenerators.DEFAULT_COLLECTION_SIZE);
 	}
 
-	private DefaultStringArbitrary(Set<Pair<Integer, Generator<Integer>>> unicodeFrequencies, int minLength, int maxLength) {
+	private DefaultStringArbitrary(Set<Pair<Integer, Arbitrary<? extends Integer>>> unicodeFrequencies, int minLength, int maxLength) {
 		this.unicodeFrequencies = unicodeFrequencies;
 		if (minLength < 0) {
 			throw new IllegalArgumentException("minLength must be >= 0");
@@ -73,7 +72,7 @@ public class DefaultStringArbitrary implements StringArbitrary {
 		if (unicodeFrequencies.isEmpty()) {
 			return defaultUnicodes();
 		}
-		return BaseGenerators.frequencyOf(unicodeFrequencies);
+		return Values.frequencyOf(unicodeFrequencies).generator();
 	}
 
 	/**
@@ -145,10 +144,10 @@ public class DefaultStringArbitrary implements StringArbitrary {
 		if (minCodepoint < 0 || maxCodepoint < 0 || minCodepoint > maxCodepoint) {
 			throw new IllegalArgumentException("minCodepoint and maxCodepoint must be >= 0 and minCodepoint <= maxCodepoint");
 		}
-		return with(Pair.of(maxCodepoint - minCodepoint, BaseGenerators.integers(minCodepoint, maxCodepoint)));
+		return with(Pair.of(maxCodepoint - minCodepoint, Numbers.integers().between(minCodepoint, maxCodepoint)));
 	}
 
-	private DefaultStringArbitrary with(Pair<Integer, Generator<Integer>> frequency) {
+	private DefaultStringArbitrary with(Pair<Integer, Arbitrary<? extends Integer>> frequency) {
 		var newFrequencies = new LinkedHashSet<>(unicodeFrequencies);
 		newFrequencies.add(frequency);
 		return new DefaultStringArbitrary(newFrequencies, minLength, maxLength);

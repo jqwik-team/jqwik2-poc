@@ -235,5 +235,17 @@ class ArbitrariesTests {
 				assertThat(sample.codePoints()).allMatch(c -> c <= StringArbitrary.MAX_ASCII_CODEPOINT);
 			});
 		}
+
+		@Example
+		void equality() {
+			Arbitrary<String> strings = Strings.strings().ascii().ofMaxLength(10);
+
+			assertThat(strings).isEqualTo(Strings.strings().ascii().ofMaxLength(10));
+
+			assertThat(strings).isNotEqualTo(Strings.strings().ascii().ofMaxLength(11));
+			assertThat(strings).isNotEqualTo(Strings.strings().ascii().numeric().ofMaxLength(10));
+			assertThat(strings).isNotEqualTo(Strings.strings().numeric().ofMaxLength(10));
+			assertThat(strings).isNotEqualTo(Strings.strings().ofMaxLength(10));
+		}
 	}
 }
