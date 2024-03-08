@@ -27,7 +27,7 @@ class StatisticsTests {
 										  .withMaxRuntime(Duration.ZERO)
 										  .build();
 
-		var property = new JqwikProperty(strategy);
+		var property = new OLD_JqwikProperty(strategy);
 
 		Statistics.Collector.C1<Integer> collector = Statistics.collector("numbers", Integer.class);
 
@@ -52,7 +52,7 @@ class StatisticsTests {
 										  .withMaxTries(0)
 										  .withMaxRuntime(Duration.ZERO)
 										  .build();
-		var property = new JqwikProperty(strategy);
+		var property = new OLD_JqwikProperty(strategy);
 
 		IntegerArbitrary integers = Numbers.integers().between(0, 100);
 
@@ -81,7 +81,7 @@ class StatisticsTests {
 										  .withMaxRuntime(Duration.ZERO)
 										  .build();
 
-		var property = new JqwikProperty(strategy);
+		var property = new OLD_JqwikProperty(strategy);
 
 		IntegerArbitrary integers = Numbers.integers().between(0, 100);
 
@@ -102,7 +102,7 @@ class StatisticsTests {
 
 	@Example
 	void classificationExamples() {
-		var property = new JqwikProperty();
+		var property = new OLD_JqwikProperty();
 
 		// property.forAll(Numbers.integers()).classify(
 		// 	caseOf("Even number", percentage(40), i -> i % 2 == 0).verify(i -> i % 2 == 0),

@@ -4,11 +4,9 @@ import java.util.*;
 import java.util.function.*;
 
 import jqwik2.api.*;
-import jqwik2.api.statistics.*;
 import jqwik2.api.support.*;
-import org.opentest4j.*;
 
-class AbstractPropertyVerifier {
+class OLD_AbstractPropertyVerifier {
 
 	@FunctionalInterface
 	protected interface ThrowingTryable {
@@ -21,7 +19,7 @@ class AbstractPropertyVerifier {
 	private final List<Generator.DecoratorFunction> decorators;
 	private final List<Arbitrary<?>> arbitraries;
 
-	protected AbstractPropertyVerifier(
+	protected OLD_AbstractPropertyVerifier(
 		Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig,
 		Runnable onSuccessful, Consumer<PropertyRunResult> onFailed,
 		List<Generator.DecoratorFunction> decorators,
@@ -54,7 +52,7 @@ class AbstractPropertyVerifier {
 	}
 
 	private PropertyRunResult run(List<Generator<?>> generators, Tryable tryable) {
-		var propertyCase = new PropertyCase(generators, tryable);
+		var propertyCase = new PropertyRun(generators, tryable);
 		var result = propertyCase.run(supplyConfig.apply(generators));
 		executeResultCallbacks(result);
 		return result;

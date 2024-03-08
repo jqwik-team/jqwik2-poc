@@ -19,7 +19,7 @@ import net.jqwik.api.*;
 import static jqwik2.internal.PropertyRunConfiguration.*;
 import static org.assertj.core.api.Assertions.*;
 
-class PropertyCaseTests {
+class PropertyRunTests {
 
 	@Provide
 	Arbitrary<Supplier<ExecutorService>> serviceSuppliers() {
@@ -38,7 +38,7 @@ class PropertyCaseTests {
 		);
 		Tryable tryable = Tryable.from(args -> true);
 
-		PropertyCase propertyCase = new PropertyCase(generators, tryable);
+		PropertyRun propertyCase = new PropertyRun(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
 			randomized(
@@ -65,7 +65,7 @@ class PropertyCaseTests {
 			return first > second;
 		});
 
-		PropertyCase propertyCase = new PropertyCase(generators, tryable);
+		PropertyRun propertyCase = new PropertyRun(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
 			randomized("42", 10, false, false)
@@ -86,7 +86,7 @@ class PropertyCaseTests {
 			return true;
 		});
 
-		PropertyCase propertyCase = new PropertyCase(generators, tryable);
+		PropertyRun propertyCase = new PropertyRun(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
 			randomized(
@@ -113,7 +113,7 @@ class PropertyCaseTests {
 			return false;
 		});
 
-		PropertyCase propertyCase = new PropertyCase(generators, tryable);
+		PropertyRun propertyCase = new PropertyRun(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
 			randomized(
@@ -141,7 +141,7 @@ class PropertyCaseTests {
 			throw assertionError;
 		});
 
-		PropertyCase propertyCase = new PropertyCase(generators, tryable);
+		PropertyRun propertyCase = new PropertyRun(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
 			randomized(
@@ -170,7 +170,7 @@ class PropertyCaseTests {
 			fail("I failed!");
 		});
 
-		PropertyCase propertyCase = new PropertyCase(generators, tryable);
+		PropertyRun propertyCase = new PropertyRun(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
 			randomized("42", 10, false, false)
@@ -196,7 +196,7 @@ class PropertyCaseTests {
 			return anInt < 45;
 		});
 
-		PropertyCase propertyCase = new PropertyCase(generators, tryable);
+		PropertyRun propertyCase = new PropertyRun(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
 			randomized(
@@ -234,7 +234,7 @@ class PropertyCaseTests {
 			return true;
 		});
 
-		PropertyCase propertyCase = new PropertyCase(generators, tryable);
+		PropertyRun propertyCase = new PropertyRun(generators, tryable);
 
 		PropertyRunResult result = propertyCase.run(
 			randomized(
@@ -261,7 +261,7 @@ class PropertyCaseTests {
 		});
 
 		Generator<?> anyGenerator = new IntegerGenerator(0, 100);
-		PropertyCase propertyCase = new PropertyCase(List.of(anyGenerator), tryable);
+		PropertyRun propertyCase = new PropertyRun(List.of(anyGenerator), tryable);
 
 		PropertyRunResult result = propertyCase.run(
 			randomized(
@@ -288,7 +288,7 @@ class PropertyCaseTests {
 			throw abortion;
 		};
 
-		PropertyCase propertyCase = new PropertyCase(List.of(aFailingGenerator), tryable);
+		PropertyRun propertyCase = new PropertyRun(List.of(aFailingGenerator), tryable);
 
 		String seed = RandomChoice.generateRandomSeed();
 		PropertyRunResult result = propertyCase.run(
@@ -340,7 +340,7 @@ class PropertyCaseTests {
 		);
 		Tryable tryable = Tryable.from(args -> true);
 
-		PropertyCase propertyCase = new PropertyCase(generators, tryable);
+		PropertyRun propertyCase = new PropertyRun(generators, tryable);
 
 		final Set<Sample> samples1 = Collections.synchronizedSet(new HashSet<>());
 		propertyCase.onSuccessful(samples1::add);
@@ -377,7 +377,7 @@ class PropertyCaseTests {
 				return anInt < 95;
 			});
 
-			PropertyCase propertyCase = new PropertyCase(generators, tryable);
+			PropertyRun propertyCase = new PropertyRun(generators, tryable);
 
 			PropertyRunResult result = propertyCase.run(
 				wrapSource(
@@ -405,7 +405,7 @@ class PropertyCaseTests {
 				return anInt < 88;
 			});
 
-			PropertyCase propertyCase = new PropertyCase(generators, tryable);
+			PropertyRun propertyCase = new PropertyRun(generators, tryable);
 
 			PropertyRunResult result = propertyCase.run(
 				wrapSource(
@@ -440,7 +440,7 @@ class PropertyCaseTests {
 
 			Tryable tryable = Tryable.from(classifier::classify);
 
-			PropertyCase propertyCase = new PropertyCase(generators, tryable);
+			PropertyRun propertyCase = new PropertyRun(generators, tryable);
 
 			PropertyRunResult result = propertyCase.run(
 				wrapSource(
@@ -471,7 +471,7 @@ class PropertyCaseTests {
 
 			Tryable tryable = Tryable.from(classifier::classify);
 
-			PropertyCase propertyCase = new PropertyCase(generators, tryable);
+			PropertyRun propertyCase = new PropertyRun(generators, tryable);
 
 			PropertyRunResult result = propertyCase.run(
 				wrapSource(
@@ -512,7 +512,7 @@ class PropertyCaseTests {
 				return classifier.total() < 100;
 			});
 
-			PropertyCase propertyCase = new PropertyCase(generators, tryable);
+			PropertyRun propertyCase = new PropertyRun(generators, tryable);
 
 			PropertyRunResult result = propertyCase.run(
 				wrapSource(
@@ -547,7 +547,7 @@ class PropertyCaseTests {
 				return classifier.total() < 100;
 			});
 
-			PropertyCase propertyCase = new PropertyCase(generators, tryable);
+			PropertyRun propertyCase = new PropertyRun(generators, tryable);
 
 			PropertyRunResult result = propertyCase.run(
 				wrapSource(
@@ -580,7 +580,7 @@ class PropertyCaseTests {
 				return anInt < 30;
 			});
 
-			PropertyCase propertyCase = new PropertyCase(generators, tryable);
+			PropertyRun propertyCase = new PropertyRun(generators, tryable);
 
 			PropertyRunResult result = propertyCase.run(
 				wrapSource(

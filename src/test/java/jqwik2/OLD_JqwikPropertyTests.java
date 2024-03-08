@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-class JqwikPropertyTests {
+class OLD_JqwikPropertyTests {
 
 	@BeforeProperty
 	void resetFailureDatabase() {
@@ -32,7 +32,7 @@ class JqwikPropertyTests {
 
 	@Example
 	void propertyWith1ParameterSucceeds() {
-		var property = new JqwikProperty();
+		var property = new OLD_JqwikProperty();
 
 		PropertyRunResult result = property.forAll(Numbers.integers()).check(i -> {
 			assertThat(i).isInstanceOf(Integer.class);
@@ -53,7 +53,7 @@ class JqwikPropertyTests {
 
 	@Example
 	void propertyWithAssumptionSucceeds() {
-		var property = new JqwikProperty();
+		var property = new OLD_JqwikProperty();
 
 		PropertyRunResult result = property.forAll(Numbers.integers()).check(i -> {
 			assertThat(i).isInstanceOf(Integer.class);
@@ -76,14 +76,14 @@ class JqwikPropertyTests {
 
 	@Example
 	void propertyWith1ParameterFails() {
-		var checkingProperty = new JqwikProperty("cp");
+		var checkingProperty = new OLD_JqwikProperty("cp");
 
 		PropertyRunResult checkingResult = checkingProperty.forAll(Numbers.integers()).check(i -> false);
 		assertThat(checkingResult.isFailed()).isTrue();
 		assertThat(checkingResult.countTries()).isEqualTo(1);
 		assertThat(checkingResult.countChecks()).isEqualTo(1);
 
-		var verifyingProperty = new JqwikProperty("vp");
+		var verifyingProperty = new OLD_JqwikProperty("vp");
 		PropertyRunResult verifyingResult = verifyingProperty.forAll(Numbers.integers()).verify(i -> {
 			throw new AssertionError("failed");
 		});
@@ -94,7 +94,7 @@ class JqwikPropertyTests {
 
 	@Example
 	void failingPropertyThrowsExceptionWith_throwIfNotSuccessful() {
-		var property = new JqwikProperty();
+		var property = new OLD_JqwikProperty();
 
 		assertThatThrownBy(
 			() -> property.forAll(Values.just(42)).check(i -> false).throwIfNotSuccessful()
@@ -104,7 +104,7 @@ class JqwikPropertyTests {
 
 	@Example
 	void abortedPropertyThrowsExceptionWith_throwIfNotSuccessful() {
-		var property = new JqwikProperty();
+		var property = new OLD_JqwikProperty();
 
 		var throwingArbitrary = new Arbitrary<Integer>() {
 			@Override
@@ -125,7 +125,7 @@ class JqwikPropertyTests {
 		var strategy = PropertyRunStrategy.builder()
 										  .withGeneration(PropertyRunStrategy.GenerationMode.RANDOMIZED)
 										  .build();
-		var property = new JqwikProperty(strategy);
+		var property = new OLD_JqwikProperty(strategy);
 
 		PropertyRunResult result = property.forAll(
 			Values.just(1),
@@ -141,7 +141,7 @@ class JqwikPropertyTests {
 
 	@Example
 	void propertyWith2ParametersFails() {
-		var property = new JqwikProperty();
+		var property = new OLD_JqwikProperty();
 
 		PropertyRunResult result = property.forAll(
 			Values.just(1),
@@ -154,17 +154,17 @@ class JqwikPropertyTests {
 
 	@Example
 	void autoPropertyId() {
-		var propertyWithDefaultId = new JqwikProperty();
+		var propertyWithDefaultId = new OLD_JqwikProperty();
 		String defaultId = getClass().getName() + "#" + "autoPropertyId";
 		assertThat(propertyWithDefaultId.id()).isEqualTo(defaultId);
 
-		var propertyWithExplicitId = new JqwikProperty("myId");
+		var propertyWithExplicitId = new OLD_JqwikProperty("myId");
 		assertThat(propertyWithExplicitId.id()).isEqualTo("myId");
 	}
 
 	@Example
 	void propertyDefaultStrategyReporting() {
-		var property = new JqwikProperty();
+		var property = new OLD_JqwikProperty();
 		PropertyRunStrategy strategy = property.strategy();
 
 		assertThat(strategy.maxTries()).isEqualTo(100);
@@ -189,7 +189,7 @@ class JqwikPropertyTests {
 							   .withConcurrency(PropertyRunStrategy.ConcurrencyMode.SINGLE_THREAD)
 							   .build();
 
-		var property = new JqwikProperty(strategy);
+		var property = new OLD_JqwikProperty(strategy);
 
 		List<Integer> values = Collections.synchronizedList(new ArrayList<>());
 		PropertyRunResult resultExhaustive = property.forAll(Numbers.integers()).verify(values::add);
@@ -201,7 +201,7 @@ class JqwikPropertyTests {
 
 	@Example
 	void failedPropertyRunWillBeSavedToFailureDatabase() {
-		var property = new JqwikProperty("myId");
+		var property = new OLD_JqwikProperty("myId");
 		var database = mock(FailureDatabase.class);
 		property.failureDatabase(database);
 		property.forAll(Numbers.integers()).check(i -> false);
@@ -210,7 +210,7 @@ class JqwikPropertyTests {
 
 	@Example
 	void successfulPropertyRunWillBeRemovedFromFailureDatabase() {
-		var property = new JqwikProperty("myId");
+		var property = new OLD_JqwikProperty("myId");
 		var database = mock(FailureDatabase.class);
 		property.failureDatabase(database);
 		property.forAll(Numbers.integers()).check(i -> true);
@@ -223,7 +223,7 @@ class JqwikPropertyTests {
 										  .withConcurrency(PropertyRunStrategy.ConcurrencyMode.CACHED_THREAD_POOL)
 										  .withMaxTries(1000)
 										  .build();
-		var property = new JqwikProperty(strategy);
+		var property = new OLD_JqwikProperty(strategy);
 
 		var arbitrary = Numbers.integers();
 
@@ -242,7 +242,7 @@ class JqwikPropertyTests {
 										  .withMaxTries(0)
 										  .withMaxRuntime(Duration.ofSeconds(1))
 										  .build();
-		var checkingProperty = new JqwikProperty(strategy);
+		var checkingProperty = new OLD_JqwikProperty(strategy);
 
 		AtomicInteger counter = new AtomicInteger();
 		PropertyRunResult checkingResult = checkingProperty.forAll(Numbers.integers())
@@ -261,7 +261,7 @@ class JqwikPropertyTests {
 										  .withMaxRuntime(Duration.ZERO)
 										  .build();
 
-		var checkingProperty = new JqwikProperty(strategy);
+		var checkingProperty = new OLD_JqwikProperty(strategy);
 
 		AtomicInteger counter = new AtomicInteger();
 		PropertyRunResult checkingResult = checkingProperty.forAll(Numbers.integers())
@@ -284,7 +284,7 @@ class JqwikPropertyTests {
 										  .withMaxTries(0)
 										  .withMaxRuntime(Duration.ZERO)
 										  .build();
-		var checkingProperty = new JqwikProperty(strategy);
+		var checkingProperty = new OLD_JqwikProperty(strategy);
 
 		AtomicInteger counter = new AtomicInteger();
 		PropertyRunResult checkingResult = checkingProperty.forAll(Numbers.integers())
@@ -312,7 +312,7 @@ class JqwikPropertyTests {
 			var strategy = PropertyRunStrategy.builder()
 											  .withAfterFailure(PropertyRunStrategy.AfterFailureMode.REPLAY)
 											  .build();
-			var property = new JqwikProperty("idFor_REPLAY", strategy);
+			var property = new OLD_JqwikProperty("idFor_REPLAY", strategy);
 
 			var integers = Numbers.integers().between(-1000, 1000);
 
@@ -338,7 +338,7 @@ class JqwikPropertyTests {
 			var strategy = PropertyRunStrategy.builder()
 											  .withAfterFailure(PropertyRunStrategy.AfterFailureMode.SAMPLES_ONLY)
 											  .build();
-			var property = new JqwikProperty("idFor_SAMPLES_ONLY", strategy);
+			var property = new OLD_JqwikProperty("idFor_SAMPLES_ONLY", strategy);
 
 			var integers = Numbers.integers().between(-1000, 1000);
 
@@ -374,7 +374,7 @@ class JqwikPropertyTests {
 								   .withConcurrency(PropertyRunStrategy.ConcurrencyMode.SINGLE_THREAD)
 								   .build();
 
-			var property = new JqwikProperty(strategy);
+			var property = new OLD_JqwikProperty(strategy);
 
 			PropertyRunResult result = property.forAll(
 				Numbers.integers().between(0, 3),
@@ -402,7 +402,7 @@ class JqwikPropertyTests {
 								   .withConcurrency(PropertyRunStrategy.ConcurrencyMode.SINGLE_THREAD)
 								   .build();
 
-			var property = new JqwikProperty(strategy);
+			var property = new OLD_JqwikProperty(strategy);
 
 			PropertyRunResult resultExhaustive = property.forAll(
 				Numbers.integers().between(0, 3),
@@ -453,7 +453,7 @@ class JqwikPropertyTests {
 								   .withGeneration(PropertyRunStrategy.GenerationMode.SAMPLES)
 								   .withConcurrency(PropertyRunStrategy.ConcurrencyMode.SINGLE_THREAD)
 								   .build();
-			var property = new JqwikProperty(strategy);
+			var property = new OLD_JqwikProperty(strategy);
 
 			List<Integer> values = Collections.synchronizedList(new ArrayList<>());
 			PropertyRunResult resultExhaustive = property.forAll(integers).verify(values::add);
@@ -473,7 +473,7 @@ class JqwikPropertyTests {
 								   .build();
 
 
-			var property = new JqwikProperty(strategy);
+			var property = new OLD_JqwikProperty(strategy);
 
 			PropertyRunResult result = property.forAll(
 				Numbers.integers().between(-100, 100),

@@ -10,40 +10,40 @@ import jqwik2.api.recording.*;
 import jqwik2.internal.*;
 import jqwik2.internal.growing.*;
 
-public class JqwikProperty {
+public class OLD_JqwikProperty {
 
 	private final PropertyRunStrategy strategy;
 	private final String id;
 	private final List<Consumer<PropertyRunResult>> onFailureHandlers = new ArrayList<>();
 	private FailureDatabase database;
 
-	public JqwikProperty(PropertyRunStrategy strategy) {
+	public OLD_JqwikProperty(PropertyRunStrategy strategy) {
 		this(defaultId(), strategy);
 	}
 
-	public JqwikProperty() {
+	public OLD_JqwikProperty() {
 		this(PropertyRunStrategy.DEFAULT);
 	}
 
-	public JqwikProperty(String myId) {
+	public OLD_JqwikProperty(String myId) {
 		this(myId, PropertyRunStrategy.DEFAULT);
 	}
 
 	private static String defaultId() {
 		StackTraceElement[] stackTrace = new RuntimeException().getStackTrace();
 		for (StackTraceElement element : stackTrace) {
-			if (!element.getClassName().equals(JqwikProperty.class.getName())) {
+			if (!element.getClassName().equals(OLD_JqwikProperty.class.getName())) {
 				return element.getClassName() + "#" + element.getMethodName();
 			}
 		}
 		throw new IllegalStateException("Could not determine default id for property");
 	}
 
-	public JqwikProperty(String id, PropertyRunStrategy strategy) {
+	public OLD_JqwikProperty(String id, PropertyRunStrategy strategy) {
 		this(id, strategy, JqwikDefaults.defaultFailureDatabase());
 	}
 
-	private JqwikProperty(String id, PropertyRunStrategy strategy, FailureDatabase database) {
+	private OLD_JqwikProperty(String id, PropertyRunStrategy strategy, FailureDatabase database) {
 		if (id == null || id.isEmpty()) {
 			throw new IllegalArgumentException("id must not be null");
 		}
@@ -57,7 +57,7 @@ public class JqwikProperty {
 	}
 
 	public <T1> Verifier1<T1> forAll(Arbitrary<T1> arbitrary) {
-		return new PropertyVerifier1<>(
+		return new OLD_PropertyVerifier1<>(
 			this::buildConfiguration, this::onSuccessful, this::onFailed,
 			decorators(), arbitrary
 		);
@@ -76,7 +76,7 @@ public class JqwikProperty {
 		Arbitrary<T1> arbitrary1,
 		Arbitrary<T2> arbitrary2
 	) {
-		return new PropertyVerifier2<>(
+		return new OLD_PropertyVerifier2<>(
 			this::buildConfiguration, this::onSuccessful, this::onFailed,
 			decorators(), arbitrary1, arbitrary2
 		);

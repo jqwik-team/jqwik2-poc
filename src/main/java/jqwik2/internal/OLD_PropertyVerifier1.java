@@ -4,11 +4,10 @@ import java.util.*;
 import java.util.function.*;
 
 import jqwik2.api.*;
-import jqwik2.api.statistics.*;
 
-public class PropertyVerifier1<T1> extends AbstractPropertyVerifier implements JqwikProperty.Verifier1<T1> {
+public class OLD_PropertyVerifier1<T1> extends OLD_AbstractPropertyVerifier implements OLD_JqwikProperty.Verifier1<T1> {
 
-	public PropertyVerifier1(
+	public OLD_PropertyVerifier1(
 		Function<List<Generator<?>>, PropertyRunConfiguration> supplyConfig,
 		Runnable onSuccessful,
 		Consumer<PropertyRunResult> onFailed,
@@ -20,7 +19,7 @@ public class PropertyVerifier1<T1> extends AbstractPropertyVerifier implements J
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public PropertyRunResult check(JqwikProperty.C1<T1> checker) {
+	public PropertyRunResult check(OLD_JqwikProperty.C1<T1> checker) {
 		return run(args -> {
 			T1 v1 = (T1) args.get(0);
 			return checker.check(v1);
@@ -28,7 +27,7 @@ public class PropertyVerifier1<T1> extends AbstractPropertyVerifier implements J
 	}
 
 	@Override
-	public PropertyRunResult verify(JqwikProperty.V1<T1> verifier) {
+	public PropertyRunResult verify(OLD_JqwikProperty.V1<T1> verifier) {
 		return check(verifier.asCheck());
 	}
 }

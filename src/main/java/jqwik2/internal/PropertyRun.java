@@ -13,13 +13,13 @@ import jqwik2.internal.shrinking.*;
 
 import static jqwik2.api.PropertyRunResult.Status.*;
 
-public class PropertyCase {
+public class PropertyRun {
 	private final List<Generator<?>> generators;
 	private final Tryable tryable;
 
 	private Consumer<Sample> onSatisfied = ignore -> {};
 
-	public PropertyCase(List<Generator<?>> generators, Tryable tryable) {
+	public PropertyRun(List<Generator<?>> generators, Tryable tryable) {
 		this.generators = generators;
 		this.tryable = tryable;
 	}

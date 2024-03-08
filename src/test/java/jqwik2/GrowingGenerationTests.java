@@ -69,7 +69,7 @@ class GrowingGenerationTests {
 			// System.out.println(args);
 			return counter.get() < 100;
 		});
-		var propertyCase = new PropertyCase(generators, tryable);
+		var propertyCase = new PropertyRun(generators, tryable);
 
 		var result = propertyCase.run(PropertyRunConfiguration.growing(
 			10000, false, Duration.ofSeconds(10)
