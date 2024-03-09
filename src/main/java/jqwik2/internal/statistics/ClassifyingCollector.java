@@ -19,7 +19,8 @@ public class ClassifyingCollector<C> {
 		ACCEPT, REJECT, UNSTABLE
 	}
 
-	private static final int MIN_TRIES = 100;
+	private static final int MIN_TRIES_LOWER_BOUND = 100;
+
 	static final DecimalFormat PERCENTAGE_FORMAT = new DecimalFormat("#.0###", new DecimalFormatSymbols(Locale.US));
 
 	private final List<ClassifyingCollector.Case<C>> cases = new ArrayList<>();
@@ -27,6 +28,8 @@ public class ClassifyingCollector<C> {
 	private final Map<ClassifyingCollector.Case<C>, Double> sumOfPercentages = new HashMap<>();
 	private final Map<ClassifyingCollector.Case<C>, Double> sumOfPercentageSquares = new HashMap<>();
 	private final AtomicInteger total = new AtomicInteger(0);
+
+	private int minTries = 0;
 
 	public ClassifyingCollector() {
 		initializeCase(defaultCase());
@@ -133,7 +136,7 @@ public class ClassifyingCollector<C> {
 	}
 
 	public synchronized ClassifyingCollector.CoverageCheck checkCoverage(double maxStandardDeviationFactor) {
-		if (total.get() < MIN_TRIES) {
+		if (total.get() < minTries()) {
 			return ClassifyingCollector.CoverageCheck.UNSTABLE;
 		}
 
@@ -148,6 +151,23 @@ public class ClassifyingCollector<C> {
 			return ClassifyingCollector.CoverageCheck.UNSTABLE;
 		}
 		return ClassifyingCollector.CoverageCheck.ACCEPT;
+	}
+
+	private int minTries() {
+		if (minTries == 0) {
+			double minPercentage = cases.stream()
+										.mapToDouble(Case::minPercentage)
+										.filter(p -> p > 0.0)
+										.min()
+										.orElse(0.0);
+			if (minPercentage > 0.0) {
+				int averageTriesFor10Hits = (int) (100.0 / minPercentage) * 10;
+				minTries = Math.max(MIN_TRIES_LOWER_BOUND, averageTriesFor10Hits);
+			} else {
+				minTries = MIN_TRIES_LOWER_BOUND;
+			}
+		}
+		return minTries;
 	}
 
 	private ClassifyingCollector.CoverageCheck checkCoverage(ClassifyingCollector.Case<C> c, double maxStandardDeviationFactor) {
