@@ -5,7 +5,11 @@ import java.util.*;
 import jqwik2.api.*;
 import jqwik2.api.description.*;
 
-record PropertyVerifier1<T1>(String propertyId, Arbitrary<T1> a1, List<Classifier> classifiers)
+record PropertyVerifier1<T1>(
+	String propertyId,
+	List<Classifier> classifiers,
+	Arbitrary<T1> a1
+)
 	implements PropertyDescription.Verifier1<T1> {
 
 	@Override
@@ -25,7 +29,7 @@ record PropertyVerifier1<T1>(String propertyId, Arbitrary<T1> a1, List<Classifie
 								.toList();
 		var newClassifiers = new ArrayList<>(classifiers);
 		newClassifiers.add(new PropertyClassifier(genericCases));
-		return new PropertyVerifier1<>(propertyId, a1, newClassifiers);
+		return new PropertyVerifier1<>(propertyId, newClassifiers, a1);
 	}
 
 }

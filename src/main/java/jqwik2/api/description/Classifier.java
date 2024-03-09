@@ -14,6 +14,14 @@ public interface Classifier {
 		return caseOf(classify, label, 0.0);
 	}
 
+	static <T1, T2> Case<C2<T1, T2>> caseOf(C2<T1, T2> classify, String label, double minPercentage) {
+		return new Case<>(classify.asCondition(), label, minPercentage);
+	}
+
+	static <T1, T2> Case<C2<T1, T2>> caseOf(C2<T1, T2> classify, String label) {
+		return caseOf(classify, label, 0.0);
+	}
+
 	List<Case> cases();
 
 	record Case<C extends PropertyDescription.Check<C>>(Condition condition, String label, double minPercentage) {

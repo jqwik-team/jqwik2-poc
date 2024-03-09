@@ -88,13 +88,32 @@ class PropertyDescriptionTests {
 							   ))
 							   .check(i -> i == 42);
 
-		assertThat(property.id()).isEqualTo("myId");
 		assertThat(property.arity()).isEqualTo(1);
-		assertThat(property.arbitraries()).containsExactly(Numbers.integers());
 
-		var condition = property.condition();
-		assertThat(condition.check(List.of(42))).isTrue();
-		assertThat(condition.check(List.of(41))).isFalse();
+		var classifiers = property.classifiers();
+		assertThat(classifiers).hasSize(1);
+		var firstClassifier = classifiers.getFirst();
+		assertThat(firstClassifier.cases()).hasSize(3);
+
+		var labels = firstClassifier.cases().stream().map(Case::label).toList();
+		assertThat(labels).containsExactlyInAnyOrder("positive", "negative", "zero");
+		var minPercentages = firstClassifier.cases().stream().map(Case::minPercentage).toList();
+		assertThat(minPercentages).containsExactlyInAnyOrder(40.0, 40.0, 0.0);
+	}
+
+	@Example
+	void buildPropertyWith2ParamsAndClassifier() throws Throwable {
+		PropertyDescription property =
+			PropertyDescription.property("myId")
+							   .forAll(Numbers.integers(), Strings.strings())
+							   .classify(List.of(
+								   caseOf((i, s) -> i > 0, "positive", 40.0),
+								   caseOf((i, s) -> i < 0, "negative", 40.0),
+								   caseOf((i, s) -> i == 0, "zero")
+							   ))
+							   .check((i, s) -> i == s.length());
+
+		assertThat(property.arity()).isEqualTo(2);
 
 		var classifiers = property.classifiers();
 		assertThat(classifiers).hasSize(1);

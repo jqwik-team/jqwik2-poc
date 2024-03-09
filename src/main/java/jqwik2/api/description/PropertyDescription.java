@@ -39,6 +39,8 @@ public interface PropertyDescription {
 		PropertyDescription check(C2<T1, T2> checker);
 
 		PropertyDescription verify(V2<T1, T2> verifier);
+
+		Verifier2<T1, T2> classify(List<Classifier.Case<C2<T1, T2>>> cases);
 	}
 
 	interface Check<C extends Check<C>> {
@@ -65,7 +67,7 @@ public interface PropertyDescription {
 		}
 	}
 
-	interface C2<T1, T2> {
+	interface C2<T1, T2> extends Check<C2<T1, T2>> {
 		boolean check(T1 v1, T2 v2) throws Throwable;
 
 		@SuppressWarnings("unchecked")
