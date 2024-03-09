@@ -8,7 +8,7 @@ import java.util.stream.*;
 
 import jqwik2.internal.*;
 
-public class Classifier<C> {
+public class ClassifyingCollector<C> {
 
 	private final static Case<?> DEFAULT_CASE = new Case<>("_", 0.0, ignore -> true);
 
@@ -22,13 +22,13 @@ public class Classifier<C> {
 	private static final int MIN_TRIES = 100;
 	static final DecimalFormat PERCENTAGE_FORMAT = new DecimalFormat("#.0###", new DecimalFormatSymbols(Locale.US));
 
-	private final List<Classifier.Case<C>> cases = new ArrayList<>();
-	private final Map<Classifier.Case<C>, Integer> counts = new HashMap<>();
-	private final Map<Classifier.Case<C>, Double> sumOfPercentages = new HashMap<>();
-	private final Map<Classifier.Case<C>, Double> sumOfPercentageSquares = new HashMap<>();
+	private final List<ClassifyingCollector.Case<C>> cases = new ArrayList<>();
+	private final Map<ClassifyingCollector.Case<C>, Integer> counts = new HashMap<>();
+	private final Map<ClassifyingCollector.Case<C>, Double> sumOfPercentages = new HashMap<>();
+	private final Map<ClassifyingCollector.Case<C>, Double> sumOfPercentageSquares = new HashMap<>();
 	private final AtomicInteger total = new AtomicInteger(0);
 
-	public Classifier() {
+	public ClassifyingCollector() {
 		initializeCase(defaultCase());
 	}
 
@@ -51,7 +51,7 @@ public class Classifier<C> {
 
 	public synchronized void classify(C args) {
 		total.incrementAndGet();
-		for (Classifier.Case<C> c : cases) {
+		for (ClassifyingCollector.Case<C> c : cases) {
 			if (c.condition().test(args)) {
 				classifyCase(c);
 				return;
@@ -82,7 +82,7 @@ public class Classifier<C> {
 		});
 	}
 
-	private double percentage(Classifier.Case<C> c) {
+	private double percentage(ClassifyingCollector.Case<C> c) {
 		if (total.get() == 0) {
 			return 0.0;
 		}
@@ -126,46 +126,46 @@ public class Classifier<C> {
 					 );
 	}
 
-	private double deviation(Classifier.Case<C> key) {
+	private double deviation(ClassifyingCollector.Case<C> key) {
 		var percentage = sumOfPercentages.get(key) / total.get();
 		var percentageSquare = sumOfPercentageSquares.get(key) / total.get();
 		return Math.sqrt(percentageSquare - percentage * percentage);
 	}
 
-	public synchronized Classifier.CoverageCheck checkCoverage(double maxStandardDeviationFactor) {
+	public synchronized ClassifyingCollector.CoverageCheck checkCoverage(double maxStandardDeviationFactor) {
 		if (total.get() < MIN_TRIES) {
-			return Classifier.CoverageCheck.UNSTABLE;
+			return ClassifyingCollector.CoverageCheck.UNSTABLE;
 		}
 
 		var checks = cases.stream()
 						  .map(c -> checkCoverage(c, maxStandardDeviationFactor))
 						  .toList();
 
-		if (checks.stream().anyMatch(c -> c == Classifier.CoverageCheck.REJECT)) {
-			return Classifier.CoverageCheck.REJECT;
+		if (checks.stream().anyMatch(c -> c == ClassifyingCollector.CoverageCheck.REJECT)) {
+			return ClassifyingCollector.CoverageCheck.REJECT;
 		}
-		if (checks.stream().anyMatch(c -> c == Classifier.CoverageCheck.UNSTABLE)) {
-			return Classifier.CoverageCheck.UNSTABLE;
+		if (checks.stream().anyMatch(c -> c == ClassifyingCollector.CoverageCheck.UNSTABLE)) {
+			return ClassifyingCollector.CoverageCheck.UNSTABLE;
 		}
-		return Classifier.CoverageCheck.ACCEPT;
+		return ClassifyingCollector.CoverageCheck.ACCEPT;
 	}
 
-	private Classifier.CoverageCheck checkCoverage(Classifier.Case<C> c, double maxStandardDeviationFactor) {
+	private ClassifyingCollector.CoverageCheck checkCoverage(ClassifyingCollector.Case<C> c, double maxStandardDeviationFactor) {
 		var percentage = percentage(c);
 		var minPercentage = c.minPercentage();
 		var maxDeviation = deviation(c) * maxStandardDeviationFactor;
 		if (percentage < minPercentage) {
 			if ((minPercentage - percentage) <= maxDeviation) {
-				return Classifier.CoverageCheck.UNSTABLE;
+				return ClassifyingCollector.CoverageCheck.UNSTABLE;
 			} else {
-				return Classifier.CoverageCheck.REJECT;
+				return ClassifyingCollector.CoverageCheck.REJECT;
 			}
 		} else {
 			if ((percentage - minPercentage) <= maxDeviation) {
-				return Classifier.CoverageCheck.UNSTABLE;
+				return ClassifyingCollector.CoverageCheck.UNSTABLE;
 			}
 		}
-		return Classifier.CoverageCheck.ACCEPT;
+		return ClassifyingCollector.CoverageCheck.ACCEPT;
 	}
 
 	public int total() {
@@ -180,7 +180,7 @@ public class Classifier<C> {
 					.collect(Collectors.toSet());
 	}
 
-	private String rejectionDetail(Pair<Classifier.Case<C>, Double> caseAndPercentage) {
+	private String rejectionDetail(Pair<ClassifyingCollector.Case<C>, Double> caseAndPercentage) {
 		var aCase = caseAndPercentage.first();
 		var percentage = caseAndPercentage.second();
 		return "Coverage of case '%s' expected to be at least %s%% but was only %s%% (%d/%d)".formatted(

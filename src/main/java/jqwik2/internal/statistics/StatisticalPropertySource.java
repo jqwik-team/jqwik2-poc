@@ -36,11 +36,11 @@ public class StatisticalPropertySource implements IterableSampleSource {
 	private class StatisticalPropertyIterator implements Iterator<SampleSource>, Guidance {
 
 		private final Iterator<SampleSource> source = randomSource.iterator();
-		private final Classifier<TryExecutionResult> classifier;
+		private final ClassifyingCollector<TryExecutionResult> classifier;
 		private volatile boolean stopped = false;
 
 		private StatisticalPropertyIterator() {
-			classifier = new Classifier<>();
+			classifier = new ClassifyingCollector<>();
 			classifier.addCase(
 				SATISFIED_TRIES, minSatisfiedPercentage,
 				tryResult -> tryResult.status() == TryExecutionResult.Status.SATISFIED
@@ -56,7 +56,7 @@ public class StatisticalPropertySource implements IterableSampleSource {
 		}
 
 		private boolean isCoverageUnstable() {
-			return classifier.checkCoverage(maxStandardDeviationFactor) == Classifier.CoverageCheck.UNSTABLE;
+			return classifier.checkCoverage(maxStandardDeviationFactor) == ClassifyingCollector.CoverageCheck.UNSTABLE;
 		}
 
 		@Override
@@ -77,8 +77,8 @@ public class StatisticalPropertySource implements IterableSampleSource {
 			var optionalRejection = classifier.rejections().stream().findFirst();
 			return optionalRejection.map(rejectionDetail -> {
 				String message = "Satisfaction percentage expected to be at least %s%% but was only %s%% (%d/%d)".formatted(
-					Classifier.PERCENTAGE_FORMAT.format(minSatisfiedPercentage),
-					Classifier.PERCENTAGE_FORMAT.format(classifier.percentage(SATISFIED_TRIES)),
+					ClassifyingCollector.PERCENTAGE_FORMAT.format(minSatisfiedPercentage),
+					ClassifyingCollector.PERCENTAGE_FORMAT.format(classifier.percentage(SATISFIED_TRIES)),
 					classifier.counts().get(SATISFIED_TRIES),
 					classifier.total()
 				);

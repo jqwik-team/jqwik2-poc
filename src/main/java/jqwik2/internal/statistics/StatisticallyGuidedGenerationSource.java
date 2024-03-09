@@ -8,12 +8,12 @@ import org.opentest4j.*;
 public class StatisticallyGuidedGenerationSource implements IterableSampleSource {
 
 	private final IterableSampleSource randomSource;
-	private final Set<Classifier<List<Object>>> classifiers;
+	private final Set<ClassifyingCollector<List<Object>>> classifiers;
 	private final double maxStandardDeviationFactor;
 
 	public StatisticallyGuidedGenerationSource(
 		IterableSampleSource randomSource,
-		Set<Classifier<List<Object>>> classifiers,
+		Set<ClassifyingCollector<List<Object>>> classifiers,
 		double maxStandardDeviationFactor
 	) {
 		this.randomSource = randomSource;
@@ -41,7 +41,7 @@ public class StatisticallyGuidedGenerationSource implements IterableSampleSource
 
 		private boolean isCoverageUnstable() {
 			for (var classifier : classifiers) {
-				if (classifier.checkCoverage(maxStandardDeviationFactor) == Classifier.CoverageCheck.UNSTABLE) {
+				if (classifier.checkCoverage(maxStandardDeviationFactor) == ClassifyingCollector.CoverageCheck.UNSTABLE) {
 					return true;
 				}
 			}
