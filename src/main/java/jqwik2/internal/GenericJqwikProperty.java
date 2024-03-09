@@ -3,8 +3,9 @@ package jqwik2.internal;
 import java.util.*;
 
 import jqwik2.api.*;
+import jqwik2.api.description.*;
 
-class GenericJqwikProperty implements JqwikProperty {
+class GenericJqwikProperty implements PropertyDescription {
 	private final String propertyId;
 	private final List<Arbitrary<?>> arbitraries;
 	private final Condition condition;

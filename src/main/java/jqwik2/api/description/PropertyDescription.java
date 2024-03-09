@@ -1,40 +1,34 @@
-package jqwik2.api;
+package jqwik2.api.description;
 
 import java.util.*;
 
-import jqwik2.api.arbitraries.*;
+import jqwik2.api.*;
 import jqwik2.internal.*;
 
-public interface JqwikProperty {
+public interface PropertyDescription {
 
 	static Builder property(String propertyId) {
 		return new PropertyBuilder(propertyId);
 	}
 
-	static <T1> Verifier1<T1> forAll(Arbitrary<T1> arbitrary) {
-		return new PropertyBuilder().forAll(arbitrary);
+	static PropertyBuilder property() {
+		return new PropertyBuilder();
 	}
-
-
 
 	interface Builder {
 		<T1> Verifier1<T1> forAll(Arbitrary<T1> arbitrary);
 	}
 
-	interface Condition {
-		boolean check(List<Object> params) throws Throwable;
-	}
-
 	interface Verifier1<T1> {
-		JqwikProperty check(C1<T1> checker);
+		PropertyDescription check(C1<T1> checker);
 
-		JqwikProperty verify(V1<T1> verifier);
+		PropertyDescription verify(V1<T1> verifier);
 	}
 
 	interface Verifier2<T1, T2> {
-		JqwikProperty check(C2<T1, T2> checker);
+		PropertyDescription check(C2<T1, T2> checker);
 
-		JqwikProperty verify(V2<T1, T2> verifier);
+		PropertyDescription verify(V2<T1, T2> verifier);
 	}
 
 	interface C1<T1> {
