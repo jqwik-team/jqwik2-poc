@@ -102,6 +102,28 @@ class PropertyDescriptionTests {
 	}
 
 	@Example
+	void buildPropertyWithTwoClassifiers() throws Throwable {
+		PropertyDescription property =
+			PropertyDescription.property("myId")
+							   .forAll(Numbers.integers())
+							   .classify(List.of(
+								   caseOf(i -> i > 0, "positive", 40.0)
+							   ))
+							   .classify(List.of(
+								   caseOf(i -> i % 2 == 0, "even", 40.0)
+							   ))
+							   .check(i -> i == 42);
+
+		assertThat(property.arity()).isEqualTo(1);
+
+		var classifiers = property.classifiers();
+		assertThat(classifiers).hasSize(2);
+
+		assertThat(classifiers.getFirst().cases().getFirst().label()).isEqualTo("positive");
+		assertThat(classifiers.get(1).cases().getFirst().label()).isEqualTo("even");
+	}
+
+	@Example
 	void buildPropertyWith2ParamsAndClassifier() throws Throwable {
 		PropertyDescription property =
 			PropertyDescription.property("myId")
