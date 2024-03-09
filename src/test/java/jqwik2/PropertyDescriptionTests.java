@@ -5,6 +5,8 @@ import java.util.*;
 import jqwik2.api.Arbitrary;
 import jqwik2.api.arbitraries.*;
 import jqwik2.api.description.*;
+import org.assertj.core.api.*;
+import org.opentest4j.*;
 
 import net.jqwik.api.*;
 
@@ -25,6 +27,23 @@ class PropertyDescriptionTests {
 		var condition = property.condition();
 		assertThat(condition.check(List.of(42))).isTrue();
 		assertThat(condition.check(List.of(41))).isFalse();
+	}
+
+	@Example
+	void buildPropertyWithVerification() throws Throwable {
+		PropertyDescription property =
+			PropertyDescription.property("myIdVerify")
+							   .forAll(Numbers.integers())
+							   .verify(i -> Assertions.assertThat(i).isEqualTo(42));
+
+		assertThat(property.arity()).isEqualTo(1);
+		assertThat(property.arbitraries()).containsExactly(Numbers.integers());
+
+		var condition = property.condition();
+		assertThat(condition.check(List.of(42))).isTrue();
+		assertThatThrownBy(
+			() -> condition.check(List.of(41))
+		).isInstanceOf(AssertionFailedError.class);
 	}
 
 	@Example
