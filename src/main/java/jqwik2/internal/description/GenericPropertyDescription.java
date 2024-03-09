@@ -9,11 +9,13 @@ class GenericPropertyDescription implements PropertyDescription {
 	private final String propertyId;
 	private final List<Arbitrary<?>> arbitraries;
 	private final Condition condition;
+	private final List<Classifier> classifiers;
 
-	GenericPropertyDescription(String propertyId, List<Arbitrary<?>> arbitraries, Condition condition) {
+	GenericPropertyDescription(String propertyId, List<Arbitrary<?>> arbitraries, Condition condition, List<Classifier> classifiers) {
 		this.propertyId = propertyId;
 		this.arbitraries = arbitraries;
 		this.condition = condition;
+		this.classifiers = classifiers;
 	}
 
 	@Override
@@ -34,5 +36,10 @@ class GenericPropertyDescription implements PropertyDescription {
 	@Override
 	public int arity() {
 		return arbitraries.size();
+	}
+
+	@Override
+	public List<Classifier> classifiers() {
+		return classifiers;
 	}
 }

@@ -13,15 +13,7 @@ record PropertyVerifier2<T1, T2>(
 
 	@Override
 	public PropertyDescription check(PropertyDescription.C2<T1, T2> checker) {
-		return new GenericPropertyDescription(propertyId, List.of(a1, a2), toCondition(checker));
-	}
-
-	@SuppressWarnings("unchecked")
-	private Condition toCondition(PropertyDescription.C2<T1, T2> checker) {
-		return args -> checker.check(
-			(T1) args.get(0),
-			(T2) args.get(1)
-		);
+		return new GenericPropertyDescription(propertyId, List.of(a1, a2), checker.asCondition(), List.of());
 	}
 
 	@Override

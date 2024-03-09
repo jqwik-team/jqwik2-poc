@@ -10,6 +10,7 @@ import org.opentest4j.*;
 
 import net.jqwik.api.*;
 
+import static jqwik2.api.description.Classifier.*;
 import static org.assertj.core.api.Assertions.*;
 
 class PropertyDescriptionTests {
@@ -73,6 +74,37 @@ class PropertyDescriptionTests {
 		var condition = property.condition();
 		assertThat(condition.check(List.of(3, "abc"))).isTrue();
 		assertThat(condition.check(List.of(4, "abc"))).isFalse();
+	}
+
+	@Example
+	void buildPropertyWithClassifier() throws Throwable {
+		PropertyDescription property =
+			PropertyDescription.property("myId")
+							   .forAll(Numbers.integers())
+							   .classify(List.of(
+								   caseOf(i -> i > 0, "positive", 40.0),
+								   caseOf(i -> i < 0, "negative", 40.0),
+								   caseOf(i -> i == 0, "zero")
+							   ))
+							   .check(i -> i == 42);
+
+		assertThat(property.id()).isEqualTo("myId");
+		assertThat(property.arity()).isEqualTo(1);
+		assertThat(property.arbitraries()).containsExactly(Numbers.integers());
+
+		var condition = property.condition();
+		assertThat(condition.check(List.of(42))).isTrue();
+		assertThat(condition.check(List.of(41))).isFalse();
+
+		var classifiers = property.classifiers();
+		assertThat(classifiers).hasSize(1);
+		var firstClassifier = classifiers.getFirst();
+		assertThat(firstClassifier.cases()).hasSize(3);
+
+		var labels = firstClassifier.cases().stream().map(Case::label).toList();
+		assertThat(labels).containsExactlyInAnyOrder("positive", "negative", "zero");
+		var minPercentages = firstClassifier.cases().stream().map(Case::minPercentage).toList();
+		assertThat(minPercentages).containsExactlyInAnyOrder(40.0, 40.0, 0.0);
 	}
 
 }

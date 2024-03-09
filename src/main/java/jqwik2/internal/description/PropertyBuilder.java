@@ -1,5 +1,7 @@
 package jqwik2.internal.description;
 
+import java.util.*;
+
 import jqwik2.api.*;
 import jqwik2.api.description.*;
 
@@ -30,7 +32,7 @@ public class PropertyBuilder implements PropertyDescription.Builder {
 
 	@Override
 	public <T1> PropertyDescription.Verifier1<T1> forAll(Arbitrary<T1> arbitrary) {
-		return new PropertyVerifier1<>(propertyId, arbitrary);
+		return new PropertyVerifier1<>(propertyId, arbitrary, List.of());
 	}
 
 	@Override

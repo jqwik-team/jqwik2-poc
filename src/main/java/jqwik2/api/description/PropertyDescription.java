@@ -25,6 +25,14 @@ public interface PropertyDescription {
 		PropertyDescription check(C1<T1> checker);
 
 		PropertyDescription verify(V1<T1> verifier);
+
+		Verifier1<T1> classify(List<Classifier.Case<C1<T1>>> cases);
+
+		// TODO: Provide convenience methods for classify, eg
+		// Verifier1<T1> classify(
+		// C1<T1> c1, String l1, double mp1,
+		// C1<T1> c2, String l2, double mp2
+		// );
 	}
 
 	interface Verifier2<T1, T2> {
@@ -33,8 +41,17 @@ public interface PropertyDescription {
 		PropertyDescription verify(V2<T1, T2> verifier);
 	}
 
-	interface C1<T1> {
+	interface Check<C extends Check<C>> {
+		Condition asCondition();
+	}
+
+	interface C1<T1> extends Check<C1<T1>> {
 		boolean check(T1 v1) throws Throwable;
+
+		@SuppressWarnings("unchecked")
+		default Condition asCondition() {
+			return args -> this.check((T1) args.get(0));
+		}
 	}
 
 	interface V1<T1> {
@@ -50,6 +67,12 @@ public interface PropertyDescription {
 
 	interface C2<T1, T2> {
 		boolean check(T1 v1, T2 v2) throws Throwable;
+
+		@SuppressWarnings("unchecked")
+		default Condition asCondition() {
+			return args -> this.check((T1) args.get(0), (T2) args.get(1));
+		}
+
 	}
 
 	interface V2<T1, T2> {
@@ -70,4 +93,6 @@ public interface PropertyDescription {
 	Condition condition();
 
 	int arity();
+
+	List<Classifier> classifiers();
 }
