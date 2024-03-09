@@ -3,7 +3,7 @@ package jqwik2.api.description;
 import java.util.*;
 
 import jqwik2.api.*;
-import jqwik2.internal.*;
+import jqwik2.internal.description.*;
 
 public interface PropertyDescription {
 
@@ -17,6 +17,8 @@ public interface PropertyDescription {
 
 	interface Builder {
 		<T1> Verifier1<T1> forAll(Arbitrary<T1> arbitrary);
+
+		<T1, T2> Verifier2<T1, T2> forAll(Arbitrary<T1> a1, Arbitrary<T2> a2);
 	}
 
 	interface Verifier1<T1> {

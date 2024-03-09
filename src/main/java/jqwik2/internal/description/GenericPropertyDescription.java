@@ -1,16 +1,16 @@
-package jqwik2.internal;
+package jqwik2.internal.description;
 
 import java.util.*;
 
 import jqwik2.api.*;
 import jqwik2.api.description.*;
 
-class GenericJqwikProperty implements PropertyDescription {
+class GenericPropertyDescription implements PropertyDescription {
 	private final String propertyId;
 	private final List<Arbitrary<?>> arbitraries;
 	private final Condition condition;
 
-	GenericJqwikProperty(String propertyId, List<Arbitrary<?>> arbitraries, Condition condition) {
+	GenericPropertyDescription(String propertyId, List<Arbitrary<?>> arbitraries, Condition condition) {
 		this.propertyId = propertyId;
 		this.arbitraries = arbitraries;
 		this.condition = condition;

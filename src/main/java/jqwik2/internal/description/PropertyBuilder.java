@@ -1,6 +1,4 @@
-package jqwik2.internal;
-
-import java.util.*;
+package jqwik2.internal.description;
 
 import jqwik2.api.*;
 import jqwik2.api.description.*;
@@ -32,29 +30,12 @@ public class PropertyBuilder implements PropertyDescription.Builder {
 
 	@Override
 	public <T1> PropertyDescription.Verifier1<T1> forAll(Arbitrary<T1> arbitrary) {
-		return new PropertyVerifier1<>(arbitrary);
+		return new PropertyVerifier1<>(propertyId, arbitrary);
 	}
 
-	private class PropertyVerifier1<T1> implements PropertyDescription.Verifier1<T1> {
-		private final Arbitrary<T1> arbitrary;
-
-		public PropertyVerifier1(Arbitrary<T1> arbitrary) {
-			this.arbitrary = arbitrary;
-		}
-
-		@Override
-		public PropertyDescription check(PropertyDescription.C1<T1> checker) {
-			return new GenericJqwikProperty(propertyId, List.of(arbitrary), toCondition(checker));
-		}
-
-		@SuppressWarnings("unchecked")
-		private Condition toCondition(PropertyDescription.C1<T1> checker) {
-			return args -> checker.check((T1) args.get(0));
-		}
-
-		@Override
-		public PropertyDescription verify(PropertyDescription.V1<T1> verifier) {
-			return check(verifier.asCheck());
-		}
+	@Override
+	public <T1, T2> PropertyDescription.Verifier2<T1, T2> forAll(Arbitrary<T1> a1, Arbitrary<T2> a2) {
+		return new PropertyVerifier2<>(propertyId, a1, a2);
 	}
+
 }

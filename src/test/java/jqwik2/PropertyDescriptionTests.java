@@ -38,4 +38,22 @@ class PropertyDescriptionTests {
 		assertThat(property.arity()).isEqualTo(1);
 		assertThat(property.arbitraries()).containsExactly(Strings.strings());
 	}
+
+	@Example
+	void buildPropertyWithTwoParameters() throws Throwable {
+		PropertyDescription.Builder builder = PropertyDescription.property("myId2");
+		PropertyDescription.Verifier2<Integer, String> verifier = builder.forAll(
+			Numbers.integers(),
+			Strings.strings()
+		);
+		PropertyDescription property = verifier.check((i, s) -> s.length() == i);
+
+		assertThat(property.arity()).isEqualTo(2);
+		assertThat(property.arbitraries()).containsExactly(Numbers.integers(), Strings.strings());
+
+		var condition = property.condition();
+		assertThat(condition.check(List.of(3, "abc"))).isTrue();
+		assertThat(condition.check(List.of(4, "abc"))).isFalse();
+	}
+
 }
