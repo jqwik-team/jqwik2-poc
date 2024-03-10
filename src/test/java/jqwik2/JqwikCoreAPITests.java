@@ -5,6 +5,7 @@ import java.util.*;
 
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
+import jqwik2.api.validation.*;
 
 import net.jqwik.api.*;
 

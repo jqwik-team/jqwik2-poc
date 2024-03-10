@@ -4,6 +4,7 @@ import java.nio.file.*;
 import java.time.*;
 
 import jqwik2.api.database.*;
+import jqwik2.api.validation.*;
 
 public class JqwikDefaults {
 

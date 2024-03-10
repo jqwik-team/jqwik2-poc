@@ -1,9 +1,10 @@
-package jqwik2.api;
+package jqwik2.api.validation;
 
 import java.time.*;
 import java.util.*;
 import java.util.function.*;
 
+import jqwik2.api.*;
 import jqwik2.api.recording.*;
 
 public interface PropertyValidationStrategy {

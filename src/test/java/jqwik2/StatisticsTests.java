@@ -7,13 +7,14 @@ import java.util.concurrent.atomic.*;
 import jqwik2.api.*;
 import jqwik2.api.arbitraries.*;
 import jqwik2.api.statistics.*;
+import jqwik2.api.validation.*;
 import jqwik2.internal.*;
 import jqwik2.internal.generators.*;
 import jqwik2.internal.statistics.*;
 
 import net.jqwik.api.*;
 
-import static jqwik2.api.PropertyValidationStrategy.GenerationMode.*;
+import static jqwik2.api.validation.PropertyValidationStrategy.GenerationMode.*;
 import static org.assertj.core.api.Assertions.*;
 
 class StatisticsTests {

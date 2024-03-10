@@ -10,6 +10,7 @@ import jqwik2.api.*;
 import jqwik2.api.arbitraries.*;
 import jqwik2.api.database.*;
 import jqwik2.api.recording.*;
+import jqwik2.api.validation.*;
 import jqwik2.internal.*;
 import org.mockito.*;
 import org.opentest4j.*;
