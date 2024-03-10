@@ -6,6 +6,8 @@ import jqwik2.api.*;
 
 public interface PropertyValidationResult {
 
+	PropertyValidationStatus status();
+
 	boolean isSuccessful();
 
 	boolean isFailed();

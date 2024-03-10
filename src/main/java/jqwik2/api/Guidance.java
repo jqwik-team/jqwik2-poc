@@ -36,6 +36,11 @@ public interface Guidance {
 	 * <p>
 	 * Can be used to change validation status and failure exception.
 	 */
+	// TODO: Extract ResultModifier interface? Maybe with several methods, eg:
+	// interface ResultModifier {
+	//   Optional<PropertyValidationStatus> overrideValidationStatus(PropertyValidationStatus status);
+	//   Optional<Throwable> overrideFailure(Throwable failure);
+	// }
 	default Optional<Pair<PropertyValidationStatus, Throwable>> overrideValidationStatus(PropertyValidationStatus status) {
 		return Optional.empty();
 	}

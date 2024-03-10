@@ -16,18 +16,23 @@ public class PropertyValidationResultFacade implements PropertyValidationResult 
 	}
 
 	@Override
+	public PropertyValidationStatus status() {
+		return runResult.status();
+	}
+
+	@Override
 	public boolean isSuccessful() {
-		return runResult.isSuccessful();
+		return status().isSuccessful();
 	}
 
 	@Override
 	public boolean isFailed() {
-		return runResult.isFailed();
+		return status().isFailed();
 	}
 
 	@Override
 	public boolean isAborted() {
-		return runResult.isAborted();
+		return status().isAborted();
 	}
 
 	@Override

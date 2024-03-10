@@ -27,15 +27,15 @@ public record PropertyRunResult(
 	}
 
 	public boolean isSuccessful() {
-		return status == PropertyValidationStatus.SUCCESSFUL;
+		return status.isSuccessful();
 	}
 
 	public boolean isFailed() {
-		return status == PropertyValidationStatus.FAILED;
+		return status.isFailed();
 	}
 
 	public boolean isAborted() {
-		return status == PropertyValidationStatus.ABORTED;
+		return status.isAborted();
 	}
 
 	public Optional<Throwable> failureReason() {
@@ -50,6 +50,18 @@ public record PropertyRunResult(
 		}
 		return falsifiedSamples.first().thrown();
 	}
+
+	public PropertyRunResult withGuidance(Guidance guidance) {
+		var optionalModifiedStatus = guidance.overrideValidationStatus(status());
+		if (optionalModifiedStatus.isEmpty()) {
+			return this;
+		}
+		var modifiedStatus = optionalModifiedStatus.get().first();
+		var modifiedFailure = optionalModifiedStatus.get().second();
+
+		return withStatus(modifiedStatus).withFailureReason(modifiedFailure);
+	}
+
 
 	public PropertyRunResult withStatus(PropertyValidationStatus changedStatus) {
 		return new PropertyRunResult(
