@@ -27,9 +27,24 @@ import static org.mockito.Mockito.*;
 
 class PropertyValidationTests {
 
-	@BeforeProperty
+	// @BeforeProperty
 	void resetFailureDatabase() {
 		JqwikDefaults.defaultFailureDatabase().clear();
+	}
+
+	@Example
+	void defaultValidationStrategy() {
+		PropertyValidationStrategy strategy = PropertyValidationStrategy.DEFAULT;
+
+		assertThat(strategy.maxTries()).isEqualTo(100);
+		assertThat(strategy.maxRuntime()).isEqualTo(Duration.ofMinutes(10));
+		assertThat(strategy.shrinking()).isEqualTo(PropertyValidationStrategy.ShrinkingMode.FULL);
+		assertThat(strategy.generation()).isEqualTo(PropertyValidationStrategy.GenerationMode.SMART);
+		assertThat(strategy.edgeCases()).isEqualTo(PropertyValidationStrategy.EdgeCasesMode.MIXIN);
+		assertThat(strategy.afterFailure()).isEqualTo(PropertyValidationStrategy.AfterFailureMode.SAMPLES_ONLY);
+		assertThat(strategy.concurrency()).isEqualTo(PropertyValidationStrategy.ConcurrencyMode.SINGLE_THREAD);
+		assertThat(strategy.filterOutDuplicateSamples()).isFalse();
+		assertThat(strategy.seedSupplier().get()).isNotEmpty();
 	}
 
 	@Example
@@ -187,28 +202,6 @@ class PropertyValidationTests {
 			fail("failed");
 		});
 		assertThat(result.isFailed()).isTrue();
-	}
-
-	// @Example
-	void autoPropertyId() {
-		var propertyWithDefaultId = new OLD_JqwikProperty();
-		String defaultId = getClass().getName() + "#" + "autoPropertyId";
-		assertThat(propertyWithDefaultId.id()).isEqualTo(defaultId);
-
-		var propertyWithExplicitId = new OLD_JqwikProperty("myId");
-		assertThat(propertyWithExplicitId.id()).isEqualTo("myId");
-	}
-
-	// @Example
-	void propertyDefaultStrategyReporting() {
-		var property = new OLD_JqwikProperty();
-		PropertyValidationStrategy strategy = property.strategy();
-
-		assertThat(strategy.maxTries()).isEqualTo(100);
-		assertThat(strategy.maxRuntime()).isEqualTo(Duration.ofMinutes(10));
-		assertThat(strategy.shrinking()).isEqualTo(PropertyValidationStrategy.ShrinkingMode.FULL);
-		assertThat(strategy.generation()).isEqualTo(PropertyValidationStrategy.GenerationMode.SMART);
-		assertThat(strategy.edgeCases()).isEqualTo(PropertyValidationStrategy.EdgeCasesMode.MIXIN);
 	}
 
 	// @Example
