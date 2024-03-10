@@ -33,6 +33,8 @@ class StatisticsTests {
 		Statistics.Collector.C1<Integer> collector = Statistics.collector("numbers", Integer.class);
 
 		IntegerArbitrary integers = Numbers.integers().between(0, 100);
+
+		// TODO: Replace with property validator
 		PropertyRunResult result = property.forAll(integers).check(i -> {
 			collector.collect(i);
 			return true;

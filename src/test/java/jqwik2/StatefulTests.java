@@ -723,10 +723,10 @@ class StatefulTests {
 		}
 
 		private static <T> Chain<T> failAndShrink(long seed, Arbitrary<Chain<T>> chains, Tryable falsifier) {
-			PropertyRun propertyCase = new PropertyRun(List.of(chains.generator()), falsifier);
+			PropertyRun propertyRun = new PropertyRun(List.of(chains.generator()), falsifier);
 
 			PropertyRunConfiguration configuration = PropertyRunConfiguration.randomized(Long.toString(seed), 100);
-			PropertyRunResult result = propertyCase.run(configuration);
+			PropertyRunResult result = propertyRun.run(configuration);
 			assertThat(result.isFailed()).describedAs("property run should fail").isTrue();
 
 			FalsifiedSample smallestFalsifiedSample = result.falsifiedSamples().first();

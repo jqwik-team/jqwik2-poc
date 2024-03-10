@@ -2,6 +2,9 @@ package jqwik2.api;
 
 import java.util.*;
 
+import jqwik2.api.validation.*;
+import jqwik2.internal.*;
+
 /**
  * Must be implemented thread safe since it might be used from multiple threads.
  */
@@ -22,7 +25,7 @@ public interface Guidance {
 
 	/**
 	 * Called when a sample source will not be able to generate a valid sample.
-	 *
+	 * <p>
 	 * Especially sequential guided generation will have to use this to trigger next generation step.
 	 */
 	default void onEmptyGeneration(SampleSource failingSource) {
@@ -31,11 +34,10 @@ public interface Guidance {
 	/**
 	 * Called when a property run has finished.
 	 * <p>
-	 * Can be used to override the result of a property run.
+	 * Can be used to change validation status and failure exception.
 	 */
-	// TODO: Extract to separate interface, eg. PropertyRunResultModifier
-	default PropertyRunResult overridePropertyResult(PropertyRunResult originalResult) {
-		return originalResult;
+	default Optional<Pair<PropertyValidationStatus, Throwable>> overrideValidationStatus(PropertyValidationStatus status) {
+		return Optional.empty();
 	}
 
 	default void stop() {

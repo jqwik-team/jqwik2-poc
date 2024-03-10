@@ -69,11 +69,24 @@ public class PropertyRun {
 				falsifiedSamples, shrinkingEnabled, timedOut
 			);
 
-			return guidance.overridePropertyResult(runResult);
+			return letResultModifyByGuidance(runResult, guidance);
+
+			// return guidance.overridePropertyResult(runResult);
 		} catch (Throwable t) {
 			ExceptionSupport.rethrowIfBlacklisted(t);
 			return abortion(effectiveSeed, t, countTries, countChecks);
 		}
+	}
+
+	private PropertyRunResult letResultModifyByGuidance(PropertyRunResult runResult, Guidance guidance) {
+		var optionalModifiedStatus = guidance.overrideValidationStatus(runResult.status());
+		if (optionalModifiedStatus.isEmpty()) {
+			return runResult;
+		}
+		var modifiedStatus = optionalModifiedStatus.get().first();
+		var modifiedFailure = optionalModifiedStatus.get().second();
+
+		return runResult.withStatus(modifiedStatus).withFailureReason(modifiedFailure);
 	}
 
 	private PropertyRunResult createRunResult(

@@ -1,7 +1,8 @@
-package jqwik2.api;
+package jqwik2.internal;
 
 import java.util.*;
 
+import jqwik2.api.*;
 import jqwik2.api.support.*;
 import jqwik2.api.validation.*;
 import org.opentest4j.*;
@@ -15,7 +16,13 @@ public record PropertyRunResult(
 	boolean timedOut
 ) {
 
-	public PropertyRunResult(PropertyValidationStatus status, int countTries, int countChecks, Optional<String> effectiveSeed, boolean timedOut) {
+	public PropertyRunResult(
+		PropertyValidationStatus status,
+		int countTries,
+		int countChecks,
+		Optional<String> effectiveSeed,
+		boolean timedOut
+	) {
 		this(status, countTries, countChecks, effectiveSeed, new TreeSet<>(), Optional.empty(), Optional.empty(), timedOut);
 	}
 
@@ -52,9 +59,12 @@ public record PropertyRunResult(
 	}
 
 	public PropertyRunResult withFailureReason(Throwable changedFailureReason) {
+		var modifiedFailureReason = changedFailureReason != null
+										? Optional.of(changedFailureReason)
+										: failureReason;
 		return new PropertyRunResult(
 			status, countTries, countChecks, effectiveSeed,
-			falsifiedSamples, Optional.ofNullable(changedFailureReason), abortionReason, timedOut
+			falsifiedSamples, modifiedFailureReason, abortionReason, timedOut
 		);
 	}
 

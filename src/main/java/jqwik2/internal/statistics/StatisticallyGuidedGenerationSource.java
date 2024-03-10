@@ -4,6 +4,7 @@ import java.util.*;
 
 import jqwik2.api.*;
 import jqwik2.api.validation.*;
+import jqwik2.internal.*;
 import org.opentest4j.*;
 
 public class StatisticallyGuidedGenerationSource implements IterableSampleSource {
@@ -71,16 +72,15 @@ public class StatisticallyGuidedGenerationSource implements IterableSampleSource
 		}
 
 		@Override
-		public PropertyRunResult overridePropertyResult(PropertyRunResult originalResult) {
-			if (originalResult.isAborted() || originalResult.isFailed()) {
-				return originalResult;
+		public Optional<Pair<PropertyValidationStatus, Throwable>> overrideValidationStatus(PropertyValidationStatus status) {
+			if (status.isAborted() || status.isFailed()) {
+				return Optional.empty();
 			}
 			var optionalRejection = rejection();
 			return optionalRejection.map(rejectionDetail -> {
 				var failureReason = new AssertionFailedError(rejectionDetail);
-				return originalResult.withStatus(PropertyValidationStatus.FAILED)
-									 .withFailureReason(failureReason);
-			}).orElse(originalResult);
+				return Pair.of(PropertyValidationStatus.FAILED, failureReason);
+			});
 		}
 
 		@Override

@@ -5,6 +5,7 @@ import java.util.*;
 import jqwik2.api.*;
 import jqwik2.api.support.*;
 import jqwik2.api.validation.*;
+import jqwik2.internal.*;
 import org.opentest4j.*;
 
 public class PropertyValidationResultFacade implements PropertyValidationResult {

@@ -17,7 +17,6 @@ import org.mockito.*;
 import org.opentest4j.*;
 
 import net.jqwik.api.*;
-import net.jqwik.api.lifecycle.*;
 
 import static jqwik2.api.recording.Recording.list;
 import static jqwik2.api.recording.Recording.*;

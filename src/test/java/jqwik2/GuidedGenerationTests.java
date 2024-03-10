@@ -187,10 +187,9 @@ class GuidedGenerationTests {
 			}
 
 			@Override
-			public PropertyRunResult overridePropertyResult(PropertyRunResult originalResult) {
+			public Optional<Pair<PropertyValidationStatus, Throwable>> overrideValidationStatus(PropertyValidationStatus status) {
 				AssertionFailedError assertionError = new AssertionFailedError("Override");
-				return originalResult.withStatus(PropertyValidationStatus.FAILED)
-									 .withFailureReason(assertionError);
+				return Optional.of(Pair.of(PropertyValidationStatus.FAILED, assertionError));
 			}
 		};
 

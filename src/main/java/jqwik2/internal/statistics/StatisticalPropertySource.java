@@ -4,6 +4,7 @@ import java.util.*;
 
 import jqwik2.api.*;
 import jqwik2.api.validation.*;
+import jqwik2.internal.*;
 import org.opentest4j.*;
 
 public class StatisticalPropertySource implements IterableSampleSource {
@@ -71,12 +72,12 @@ public class StatisticalPropertySource implements IterableSampleSource {
 		}
 
 		@Override
-		public PropertyRunResult overridePropertyResult(PropertyRunResult originalResult) {
-			if (originalResult.isAborted() || originalResult.isSuccessful()) {
-				return originalResult;
+		public Optional<Pair<PropertyValidationStatus, Throwable>> overrideValidationStatus(PropertyValidationStatus status) {
+			if (status.isAborted() || status.isSuccessful()) {
+				return Optional.empty();
 			}
 			var optionalRejection = classifier.rejections().stream().findFirst();
-			return optionalRejection.map(rejectionDetail -> {
+			if (optionalRejection.isPresent()) {
 				String message = "Satisfaction percentage expected to be at least %s%% but was only %s%% (%d/%d)".formatted(
 					ClassifyingCollector.PERCENTAGE_FORMAT.format(minSatisfiedPercentage),
 					ClassifyingCollector.PERCENTAGE_FORMAT.format(classifier.percentage(SATISFIED_TRIES)),
@@ -84,9 +85,10 @@ public class StatisticalPropertySource implements IterableSampleSource {
 					classifier.total()
 				);
 				var failureReason = new AssertionFailedError(message);
-				return originalResult.withStatus(PropertyValidationStatus.FAILED)
-									 .withFailureReason(failureReason);
-			}).orElse(originalResult.withStatus(PropertyValidationStatus.SUCCESSFUL));
+				return Optional.of(Pair.of(PropertyValidationStatus.FAILED, failureReason));
+			} else {
+				return Optional.of(Pair.of(PropertyValidationStatus.SUCCESSFUL, null));
+			}
 		}
 
 		@Override
