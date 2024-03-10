@@ -21,8 +21,8 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		this.database = JqwikDefaults.defaultFailureDatabase();
 	}
 
-	public PropertyValidationResult validate() {
-		PropertyValidationStrategy strategy = PropertyValidationStrategy.DEFAULT;
+	@Override
+	public PropertyValidationResult validate(PropertyValidationStrategy strategy) {
 		PropertyRunResult result = run(strategy);
 		executeResultCallbacks(result);
 		return new PropertyValidationResultFacade(result);

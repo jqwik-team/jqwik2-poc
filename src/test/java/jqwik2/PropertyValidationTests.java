@@ -20,6 +20,7 @@ import net.jqwik.api.*;
 
 import static jqwik2.api.recording.Recording.list;
 import static jqwik2.api.recording.Recording.*;
+import static jqwik2.api.validation.PropertyValidationStrategy.GenerationMode.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -171,35 +172,37 @@ class PropertyValidationTests {
 		 .hasMessageContaining("Property aborted because of thrown exception");
 	}
 
-	// @Example
-	void propertyWith2ParametersSucceeds() {
-		var strategy = PropertyValidationStrategy.builder()
-												 .withGeneration(PropertyValidationStrategy.GenerationMode.RANDOMIZED)
-												 .build();
-		var property = new OLD_JqwikProperty(strategy);
-
-		PropertyRunResult result = property.forAll(
+	@Example
+	void verifyWith2ParametersSucceeds() {
+		var property = PropertyDescription.property().forAll(
 			Values.just(1),
 			Values.just(2)
 		).verify((i1, i2) -> {
 			assertThat(i1).isEqualTo(1);
 			assertThat(i2).isEqualTo(2);
 		});
+
+		var strategy = PropertyValidationStrategy.builder()
+												 .withGeneration(RANDOMIZED)
+												 .build();
+
+		var result = PropertyValidator.forProperty(property).validate(strategy);
+
 		assertThat(result.isSuccessful()).isTrue();
 		assertThat(result.countTries()).isEqualTo(100);
 		assertThat(result.countChecks()).isEqualTo(100);
 	}
 
-	// @Example
-	void propertyWith2ParametersFails() {
-		var property = new OLD_JqwikProperty();
-
-		PropertyRunResult result = property.forAll(
+	@Example
+	void verifyWith2ParametersFails() {
+		var property = PropertyDescription.property().forAll(
 			Values.just(1),
 			Values.just(2)
 		).verify((i1, i2) -> {
 			fail("failed");
 		});
+
+		var result = PropertyValidator.forProperty(property).validate();
 		assertThat(result.isFailed()).isTrue();
 	}
 
@@ -212,7 +215,7 @@ class PropertyValidationTests {
 									  .withFilterOutDuplicateSamples(false)
 									  .withSeedSupplier(RandomChoice::generateRandomSeed)
 									  .withShrinking(PropertyValidationStrategy.ShrinkingMode.OFF)
-									  .withGeneration(PropertyValidationStrategy.GenerationMode.RANDOMIZED)
+									  .withGeneration(RANDOMIZED)
 									  .withEdgeCases(PropertyValidationStrategy.EdgeCasesMode.MIXIN)
 									  .withAfterFailure(PropertyValidationStrategy.AfterFailureMode.SAMPLES_ONLY)
 									  .withConcurrency(PropertyValidationStrategy.ConcurrencyMode.SINGLE_THREAD)
@@ -308,7 +311,7 @@ class PropertyValidationTests {
 	// @Example
 	void failedTryWillStopEndlessRunningProperty() {
 		var strategy = PropertyValidationStrategy.builder()
-												 .withGeneration(PropertyValidationStrategy.GenerationMode.RANDOMIZED)
+												 .withGeneration(RANDOMIZED)
 												 .withAfterFailure(PropertyValidationStrategy.AfterFailureMode.REPLAY)
 												 .withMaxTries(0)
 												 .withMaxRuntime(Duration.ZERO)

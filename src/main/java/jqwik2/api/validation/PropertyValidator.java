@@ -9,5 +9,9 @@ public interface PropertyValidator {
 		return new PropertyValidatorImpl(property);
 	}
 
-	PropertyValidationResult validate();
+	default PropertyValidationResult validate() {
+		return validate(PropertyValidationStrategy.DEFAULT);
+	}
+
+	PropertyValidationResult validate(PropertyValidationStrategy strategy);
 }
