@@ -17,7 +17,7 @@ public class JqwikDefaults {
 		return Duration.ofMinutes(10);
 	}
 
-	static boolean defaultFilterOutDuplicateSamples() {
+	public static boolean defaultFilterOutDuplicateSamples() {
 		return false;
 	}
 
@@ -45,11 +45,11 @@ public class JqwikDefaults {
 		return defaultFailureDatabase;
 	}
 
-	static PropertyValidationStrategy.AfterFailureMode defaultAfterFailureMode() {
+	public static PropertyValidationStrategy.AfterFailureMode defaultAfterFailureMode() {
 		return PropertyValidationStrategy.AfterFailureMode.SAMPLES_ONLY;
 	}
 
-	static PropertyValidationStrategy.ConcurrencyMode defaultConcurrencyMode() {
+	public static PropertyValidationStrategy.ConcurrencyMode defaultConcurrencyMode() {
 		return PropertyValidationStrategy.ConcurrencyMode.SINGLE_THREAD;
 	}
 }
