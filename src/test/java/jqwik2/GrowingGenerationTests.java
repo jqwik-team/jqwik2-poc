@@ -15,8 +15,8 @@ import jqwik2.internal.growing.*;
 
 import net.jqwik.api.*;
 
-import static jqwik2.api.PropertyRunResult.Status.*;
 import static jqwik2.api.arbitraries.Values.*;
+import static jqwik2.api.validation.PropertyValidationStatus.*;
 import static org.assertj.core.api.Assertions.*;
 
 class GrowingGenerationTests {

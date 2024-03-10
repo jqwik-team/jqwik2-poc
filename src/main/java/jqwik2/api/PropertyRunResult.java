@@ -3,10 +3,11 @@ package jqwik2.api;
 import java.util.*;
 
 import jqwik2.api.support.*;
+import jqwik2.api.validation.*;
 import org.opentest4j.*;
 
 public record PropertyRunResult(
-	Status status, int countTries, int countChecks,
+	PropertyValidationStatus status, int countTries, int countChecks,
 	Optional<String> effectiveSeed,
 	SortedSet<FalsifiedSample> falsifiedSamples,
 	Optional<Throwable> failureReason, // Can be overridden e.g. by guided generation
@@ -14,38 +15,20 @@ public record PropertyRunResult(
 	boolean timedOut
 ) {
 
-	public PropertyRunResult(Status status, int countTries, int countChecks, Optional<String> effectiveSeed, boolean timedOut) {
+	public PropertyRunResult(PropertyValidationStatus status, int countTries, int countChecks, Optional<String> effectiveSeed, boolean timedOut) {
 		this(status, countTries, countChecks, effectiveSeed, new TreeSet<>(), Optional.empty(), Optional.empty(), timedOut);
 	}
 
-	public enum Status {
-		/**
-		 * Indicates that the execution of a property was <em>successful</em>.
-		 */
-		SUCCESSFUL,
-
-		/**
-		 * Indicates that the execution of a property was
-		 * <em>aborted</em> before the actual property method could be run.
-		 */
-		ABORTED,
-
-		/**
-		 * Indicates that the execution of a property has <em>failed</em>.
-		 */
-		FAILED
-	}
-
 	public boolean isSuccessful() {
-		return status == Status.SUCCESSFUL;
+		return status == PropertyValidationStatus.SUCCESSFUL;
 	}
 
 	public boolean isFailed() {
-		return status == Status.FAILED;
+		return status == PropertyValidationStatus.FAILED;
 	}
 
 	public boolean isAborted() {
-		return status == Status.ABORTED;
+		return status == PropertyValidationStatus.ABORTED;
 	}
 
 	public Optional<Throwable> failureReason() {
@@ -61,7 +44,7 @@ public record PropertyRunResult(
 		return falsifiedSamples.first().thrown();
 	}
 
-	public PropertyRunResult withStatus(Status changedStatus) {
+	public PropertyRunResult withStatus(PropertyValidationStatus changedStatus) {
 		return new PropertyRunResult(
 			changedStatus, countTries, countChecks, effectiveSeed,
 			falsifiedSamples, failureReason, abortionReason, timedOut

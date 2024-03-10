@@ -11,7 +11,7 @@ import jqwik2.api.*;
 import jqwik2.api.support.*;
 import jqwik2.internal.shrinking.*;
 
-import static jqwik2.api.PropertyRunResult.Status.*;
+import static jqwik2.api.validation.PropertyValidationStatus.*;
 
 public class PropertyRun {
 	private final List<Generator<?>> generators;

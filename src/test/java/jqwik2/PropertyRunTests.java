@@ -8,7 +8,7 @@ import java.util.function.*;
 
 import jqwik2.api.Assume;
 import jqwik2.api.*;
-import jqwik2.api.PropertyRunResult.*;
+import jqwik2.api.validation.*;
 import jqwik2.internal.*;
 import jqwik2.internal.generators.*;
 import jqwik2.internal.statistics.*;
@@ -16,6 +16,7 @@ import jqwik2.internal.statistics.*;
 import net.jqwik.api.Arbitrary;
 import net.jqwik.api.*;
 
+import static jqwik2.api.validation.PropertyValidationStatus.*;
 import static jqwik2.internal.PropertyRunConfiguration.*;
 import static org.assertj.core.api.Assertions.*;
 
@@ -48,7 +49,7 @@ class PropertyRunTests {
 				serviceSupplier
 			)
 		);
-		assertThat(result.status()).isEqualTo(Status.SUCCESSFUL);
+		assertThat(result.status()).isEqualTo(SUCCESSFUL);
 		assertThat(result.countTries()).isEqualTo(10);
 		assertThat(result.countChecks()).isEqualTo(10);
 	}
@@ -70,7 +71,7 @@ class PropertyRunTests {
 		PropertyRunResult result = propertyCase.run(
 			randomized("42", 10, false, false)
 		);
-		assertThat(result.status()).isEqualTo(Status.SUCCESSFUL);
+		assertThat(result.status()).isEqualTo(PropertyValidationStatus.SUCCESSFUL);
 		assertThat(result.countTries()).isEqualTo(10);
 		assertThat(result.countChecks()).isEqualTo(10);
 	}
@@ -96,7 +97,7 @@ class PropertyRunTests {
 				serviceSupplier
 			)
 		);
-		assertThat(result.status()).isEqualTo(Status.SUCCESSFUL);
+		assertThat(result.status()).isEqualTo(PropertyValidationStatus.SUCCESSFUL);
 		assertThat(result.countTries()).isEqualTo(10);
 		// 5 invalids - depends on random seed
 		assertThat(result.countChecks()).isEqualTo(3);
@@ -123,7 +124,7 @@ class PropertyRunTests {
 				serviceSupplier
 			)
 		);
-		assertThat(result.status()).isEqualTo(Status.FAILED);
+		assertThat(result.status()).isEqualTo(PropertyValidationStatus.FAILED);
 		assertThat(result.countTries()).isGreaterThanOrEqualTo(1);
 		assertThat(result.countChecks()).isGreaterThanOrEqualTo(1);
 		// In concurrent runs checks can be fewer than tries
@@ -151,7 +152,7 @@ class PropertyRunTests {
 				serviceSupplier
 			)
 		);
-		assertThat(result.status()).isEqualTo(Status.FAILED);
+		assertThat(result.status()).isEqualTo(PropertyValidationStatus.FAILED);
 		assertThat(result.falsifiedSamples()).hasSizeGreaterThanOrEqualTo(1);
 		assertThat(result.failureReason()).isPresent().hasValue(assertionError);
 
@@ -175,7 +176,7 @@ class PropertyRunTests {
 		PropertyRunResult result = propertyCase.run(
 			randomized("42", 10, false, false)
 		);
-		assertThat(result.status()).isEqualTo(Status.FAILED);
+		assertThat(result.status()).isEqualTo(PropertyValidationStatus.FAILED);
 		FalsifiedSample smallest = result.falsifiedSamples().getFirst();
 		assertThat(smallest.values())
 			.isEqualTo(List.of(lastArg[0]));
@@ -206,7 +207,7 @@ class PropertyRunTests {
 				serviceSupplier
 			)
 		);
-		assertThat(result.status()).isEqualTo(Status.FAILED);
+		assertThat(result.status()).isEqualTo(PropertyValidationStatus.FAILED);
 		assertThat(result.countTries()).isGreaterThan(1);
 		assertThat(result.falsifiedSamples()).hasSizeGreaterThan(1);
 		FalsifiedSample smallest = result.falsifiedSamples().getFirst();
@@ -243,7 +244,7 @@ class PropertyRunTests {
 				serviceSupplier
 			)
 		);
-		assertThat(result.status()).isEqualTo(Status.SUCCESSFUL);
+		assertThat(result.status()).isEqualTo(PropertyValidationStatus.SUCCESSFUL);
 		assertThat(result.timedOut()).isTrue();
 		assertThat(result.countTries()).isGreaterThan(0);
 		assertThat(result.countChecks()).isLessThanOrEqualTo(result.countTries());
@@ -270,7 +271,7 @@ class PropertyRunTests {
 				serviceSupplier
 			)
 		);
-		assertThat(result.status()).isIn(Status.FAILED, Status.ABORTED);
+		assertThat(result.status()).isIn(PropertyValidationStatus.FAILED, PropertyValidationStatus.ABORTED);
 	}
 
 	@Property(generation = GenerationMode.EXHAUSTIVE)
@@ -298,7 +299,7 @@ class PropertyRunTests {
 				serviceSupplier
 			)
 		);
-		assertThat(result.status()).isEqualTo(Status.ABORTED);
+		assertThat(result.status()).isEqualTo(PropertyValidationStatus.ABORTED);
 		assertThat(result.abortionReason()).hasValue(abortion);
 	}
 
@@ -352,12 +353,12 @@ class PropertyRunTests {
 		);
 
 		assertThat(propertyCase.run(runConfiguration).status())
-			.isEqualTo(Status.SUCCESSFUL);
+			.isEqualTo(PropertyValidationStatus.SUCCESSFUL);
 
 		final Set<Sample> samples2 = Collections.synchronizedSet(new HashSet<>());
 		propertyCase.onSuccessful(samples2::add);
 		assertThat(propertyCase.run(runConfiguration).status())
-			.isEqualTo(Status.SUCCESSFUL);
+			.isEqualTo(PropertyValidationStatus.SUCCESSFUL);
 
 		assertThat(samples1).hasSameElementsAs(samples2);
 	}
@@ -390,7 +391,7 @@ class PropertyRunTests {
 				)
 			);
 			// System.out.println(result.countChecks());
-			assertThat(result.status()).isEqualTo(PropertyRunResult.Status.SUCCESSFUL);
+			assertThat(result.status()).isEqualTo(PropertyValidationStatus.SUCCESSFUL);
 		}
 
 		@Property(generation = GenerationMode.EXHAUSTIVE)
@@ -419,7 +420,7 @@ class PropertyRunTests {
 			);
 			// System.out.println(result.countChecks());
 			// System.out.println(result.failureReason().get().getMessage());
-			assertThat(result.status()).isEqualTo(PropertyRunResult.Status.FAILED);
+			assertThat(result.status()).isEqualTo(PropertyValidationStatus.FAILED);
 		}
 
 	}
@@ -452,7 +453,7 @@ class PropertyRunTests {
 					source -> new StatisticallyGuidedGenerationSource(source, Set.of(classifier), 2.0)
 				)
 			);
-			assertThat(result.status()).isEqualTo(PropertyRunResult.Status.SUCCESSFUL);
+			assertThat(result.status()).isEqualTo(PropertyValidationStatus.SUCCESSFUL);
 
 			// System.out.println(classifier.total());
 			// System.out.println(classifier.percentages());
@@ -483,7 +484,7 @@ class PropertyRunTests {
 					source -> new StatisticallyGuidedGenerationSource(source, Set.of(classifier), 2.0)
 				)
 			);
-			assertThat(result.status()).isEqualTo(PropertyRunResult.Status.FAILED);
+			assertThat(result.status()).isEqualTo(PropertyValidationStatus.FAILED);
 			assertThat(result.failureReason()).isPresent();
 			result.failureReason().ifPresent(throwable -> {
 				assertThat(throwable.getMessage())
@@ -524,7 +525,7 @@ class PropertyRunTests {
 					source -> new StatisticallyGuidedGenerationSource(source, Set.of(classifier), 2.0)
 				)
 			);
-			assertThat(result.status()).isEqualTo(PropertyRunResult.Status.FAILED);
+			assertThat(result.status()).isEqualTo(PropertyValidationStatus.FAILED);
 			assertThat(result.failureReason()).isEmpty();
 
 			// countChecks should be relatively close to 100, but parallel execution can make it higher
@@ -559,7 +560,7 @@ class PropertyRunTests {
 					source -> new StatisticallyGuidedGenerationSource(source, Set.of(classifier), 2.0)
 				)
 			);
-			assertThat(result.status()).isEqualTo(PropertyRunResult.Status.FAILED);
+			assertThat(result.status()).isEqualTo(PropertyValidationStatus.FAILED);
 			assertThat(result.countChecks()).isEqualTo(100);
 		}
 
@@ -593,7 +594,7 @@ class PropertyRunTests {
 				)
 			);
 
-			assertThat(result.status()).isEqualTo(PropertyRunResult.Status.FAILED);
+			assertThat(result.status()).isEqualTo(PropertyValidationStatus.FAILED);
 			assertThat(result.falsifiedSamples().getFirst().values()).isEqualTo(List.of(30));
 		}
 

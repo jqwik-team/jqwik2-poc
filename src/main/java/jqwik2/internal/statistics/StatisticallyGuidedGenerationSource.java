@@ -3,6 +3,7 @@ package jqwik2.internal.statistics;
 import java.util.*;
 
 import jqwik2.api.*;
+import jqwik2.api.validation.*;
 import org.opentest4j.*;
 
 public class StatisticallyGuidedGenerationSource implements IterableSampleSource {
@@ -77,7 +78,7 @@ public class StatisticallyGuidedGenerationSource implements IterableSampleSource
 			var optionalRejection = rejection();
 			return optionalRejection.map(rejectionDetail -> {
 				var failureReason = new AssertionFailedError(rejectionDetail);
-				return originalResult.withStatus(PropertyRunResult.Status.FAILED)
+				return originalResult.withStatus(PropertyValidationStatus.FAILED)
 									 .withFailureReason(failureReason);
 			}).orElse(originalResult);
 		}

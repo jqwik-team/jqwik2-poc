@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.*;
 import java.util.function.*;
 
 import jqwik2.api.*;
+import jqwik2.api.validation.*;
 import jqwik2.internal.*;
 import jqwik2.internal.generators.*;
 import org.opentest4j.*;
@@ -14,6 +15,7 @@ import org.opentest4j.*;
 import net.jqwik.api.Arbitrary;
 import net.jqwik.api.*;
 
+import static jqwik2.api.validation.PropertyValidationStatus.*;
 import static jqwik2.internal.PropertyRunConfiguration.*;
 import static org.assertj.core.api.Assertions.*;
 
@@ -80,7 +82,7 @@ class GuidedGenerationTests {
 			)
 		);
 
-		assertThat(result.status()).isEqualTo(PropertyRunResult.Status.SUCCESSFUL);
+		assertThat(result.status()).isEqualTo(SUCCESSFUL);
 		assertThat(count.get()).isEqualTo(42);
 	}
 
@@ -145,7 +147,7 @@ class GuidedGenerationTests {
 		// System.out.println("countNextSourceCalls = " + countNextSourceCalls.get());
 		// System.out.println("result.countTries()  = " + result.countTries());
 
-		assertThat(result.status()).isEqualTo(PropertyRunResult.Status.FAILED);
+		assertThat(result.status()).isEqualTo(PropertyValidationStatus.FAILED);
 		FalsifiedSample smallest = result.falsifiedSamples().getFirst();
 		assertThat(smallest.values()).isEqualTo(List.of(91));
 	}
@@ -187,7 +189,7 @@ class GuidedGenerationTests {
 			@Override
 			public PropertyRunResult overridePropertyResult(PropertyRunResult originalResult) {
 				AssertionFailedError assertionError = new AssertionFailedError("Override");
-				return originalResult.withStatus(PropertyRunResult.Status.FAILED)
+				return originalResult.withStatus(PropertyValidationStatus.FAILED)
 									 .withFailureReason(assertionError);
 			}
 		};
@@ -202,7 +204,7 @@ class GuidedGenerationTests {
 		);
 
 		assertThat(result.countTries()).isEqualTo(42);
-		assertThat(result.status()).isEqualTo(PropertyRunResult.Status.FAILED);
+		assertThat(result.status()).isEqualTo(PropertyValidationStatus.FAILED);
 		assertThat(result.failureReason()).isPresent().get().isInstanceOf(AssertionFailedError.class);
 	}
 

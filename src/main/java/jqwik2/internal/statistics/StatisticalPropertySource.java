@@ -3,6 +3,7 @@ package jqwik2.internal.statistics;
 import java.util.*;
 
 import jqwik2.api.*;
+import jqwik2.api.validation.*;
 import org.opentest4j.*;
 
 public class StatisticalPropertySource implements IterableSampleSource {
@@ -83,9 +84,9 @@ public class StatisticalPropertySource implements IterableSampleSource {
 					classifier.total()
 				);
 				var failureReason = new AssertionFailedError(message);
-				return originalResult.withStatus(PropertyRunResult.Status.FAILED)
+				return originalResult.withStatus(PropertyValidationStatus.FAILED)
 									 .withFailureReason(failureReason);
-			}).orElse(originalResult.withStatus(PropertyRunResult.Status.SUCCESSFUL));
+			}).orElse(originalResult.withStatus(PropertyValidationStatus.SUCCESSFUL));
 		}
 
 		@Override
