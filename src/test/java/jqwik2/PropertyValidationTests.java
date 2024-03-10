@@ -57,6 +57,7 @@ class PropertyValidationTests {
 		PropertyValidationResult result = validator.validate();
 
 		assertThat(result.isSuccessful()).isTrue();
+		assertThat(result.failure()).isEmpty();
 		assertThat(result.countTries()).isEqualTo(100);
 		assertThat(result.countChecks()).isEqualTo(100);
 	}
@@ -70,6 +71,7 @@ class PropertyValidationTests {
 		PropertyValidationResult result = PropertyValidator.forProperty(property).validate();
 
 		assertThat(result.isSuccessful()).isTrue();
+		assertThat(result.failure()).isEmpty();
 		assertThat(result.countTries()).isEqualTo(100);
 		assertThat(result.countChecks()).isBetween(20, 80);
 	}
@@ -87,22 +89,35 @@ class PropertyValidationTests {
 		assertThat(result.countChecks()).isBetween(20, 80);
 	}
 
-	// @Example
-	void propertyWith1ParameterFails() {
-		var checkingProperty = new OLD_JqwikProperty("cp");
+	@Example
+	void checkWith1ParameterFails() {
+		var property = PropertyDescription.property("cp")
+										  .forAll(Numbers.integers()).check(i -> false);
 
-		PropertyRunResult checkingResult = checkingProperty.forAll(Numbers.integers()).check(i -> false);
-		assertThat(checkingResult.isFailed()).isTrue();
-		assertThat(checkingResult.countTries()).isEqualTo(1);
-		assertThat(checkingResult.countChecks()).isEqualTo(1);
+		PropertyValidationResult result = PropertyValidator.forProperty(property).validate();
 
-		var verifyingProperty = new OLD_JqwikProperty("vp");
-		PropertyRunResult verifyingResult = verifyingProperty.forAll(Numbers.integers()).verify(i -> {
-			throw new AssertionError("failed");
-		});
-		assertThat(verifyingResult.isFailed()).isTrue();
-		assertThat(verifyingResult.countTries()).isEqualTo(1);
-		assertThat(verifyingResult.countChecks()).isEqualTo(1);
+		assertThat(result.isFailed()).isTrue();
+		assertThat(result.failure()).isPresent();
+		result.failure().ifPresent(failure -> assertThat(failure).isInstanceOf(AssertionFailedError.class));
+		assertThat(result.countTries()).isEqualTo(1);
+		assertThat(result.countChecks()).isEqualTo(1);
+	}
+
+	@Example
+	void verifyWith1ParameterFails() {
+		var failure = new AssertionError("failed");
+		var property = PropertyDescription.property("cp")
+										  .forAll(Numbers.integers())
+										  .verify(i -> {
+											  throw failure;
+										  });
+
+		PropertyValidationResult result = PropertyValidator.forProperty(property).validate();
+
+		assertThat(result.isFailed()).isTrue();
+		assertThat(result.failure()).hasValue(failure);
+		assertThat(result.countTries()).isEqualTo(1);
+		assertThat(result.countChecks()).isEqualTo(1);
 	}
 
 	// @Example

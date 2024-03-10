@@ -1,7 +1,10 @@
 package jqwik2.internal.validation;
 
+import java.util.*;
+
 import jqwik2.api.*;
 import jqwik2.api.validation.*;
+import org.opentest4j.*;
 
 public class PropertyValidationResultFacade implements PropertyValidationResult {
 	private final PropertyRunResult runResult;
@@ -16,6 +19,11 @@ public class PropertyValidationResultFacade implements PropertyValidationResult 
 	}
 
 	@Override
+	public boolean isFailed() {
+		return runResult.isFailed();
+	}
+
+	@Override
 	public int countTries() {
 		return runResult.countTries();
 	}
@@ -24,4 +32,30 @@ public class PropertyValidationResultFacade implements PropertyValidationResult 
 	public int countChecks() {
 		return runResult.countChecks();
 	}
+
+	@Override
+	public Optional<Throwable> failure() {
+		if (!runResult.isFailed()) {
+			return Optional.empty();
+		}
+		return Optional.of(determineFailure());
+	}
+
+	private Throwable determineFailure() {
+		if (runResult.failureReason().isPresent()) {
+			return runResult.failureReason().get();
+		}
+		if (runResult.falsifiedSamples().isEmpty()) {
+			return new AssertionFailedError("Property failed for unknown reason");
+		}
+
+		var smallestFalsifiedSample = runResult.falsifiedSamples().first();
+		if (smallestFalsifiedSample.thrown().isPresent()) {
+			return smallestFalsifiedSample.thrown().get();
+		}
+
+		var message = "Property check failed with sample {%s}".formatted(smallestFalsifiedSample.sample().values());
+		return new AssertionFailedError(message);
+	}
+
 }
