@@ -3,6 +3,7 @@ package jqwik2.internal.validation;
 import java.util.*;
 
 import jqwik2.api.*;
+import jqwik2.api.support.*;
 import jqwik2.api.validation.*;
 import org.opentest4j.*;
 
@@ -21,6 +22,11 @@ public class PropertyValidationResultFacade implements PropertyValidationResult 
 	@Override
 	public boolean isFailed() {
 		return runResult.isFailed();
+	}
+
+	@Override
+	public boolean isAborted() {
+		return runResult.isAborted();
 	}
 
 	@Override
@@ -61,5 +67,16 @@ public class PropertyValidationResultFacade implements PropertyValidationResult 
 	@Override
 	public SortedSet<FalsifiedSample> falsifiedSamples() {
 		return runResult.falsifiedSamples();
+	}
+
+	@Override
+	public void throwIfNotSuccessful() {
+		if (isFailed()) {
+			ExceptionSupport.throwAsUnchecked(determineFailure());
+		}
+		if (isAborted()) {
+			runResult.abortionReason().ifPresent(ExceptionSupport::throwAsUnchecked);
+			ExceptionSupport.throwAsUnchecked(new TestAbortedException("Property aborted for unknown reason"));
+		}
 	}
 }

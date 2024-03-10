@@ -126,20 +126,19 @@ class PropertyValidationTests {
 		assertThat(result.falsifiedSamples()).hasSizeGreaterThanOrEqualTo(1);
 	}
 
-	// @Example
+	@Example
 	void failingPropertyThrowsExceptionWith_throwIfNotSuccessful() {
-		var property = new OLD_JqwikProperty();
+		var property = PropertyDescription.property().forAll(Values.just(42)).check(i -> false);
+		var result = PropertyValidator.forProperty(property).validate();
 
 		assertThatThrownBy(
-			() -> property.forAll(Values.just(42)).check(i -> false).throwIfNotSuccessful()
+			() -> result.throwIfNotSuccessful()
 		).isInstanceOf(AssertionError.class)
 		 .hasMessageContaining("Property check failed");
 	}
 
-	// @Example
+	@Example
 	void abortedPropertyThrowsExceptionWith_throwIfNotSuccessful() {
-		var property = new OLD_JqwikProperty();
-
 		var throwingArbitrary = new Arbitrary<Integer>() {
 			@Override
 			public Generator<Integer> generator() {
@@ -148,8 +147,12 @@ class PropertyValidationTests {
 				};
 			}
 		};
+
+		var property = PropertyDescription.property().forAll(throwingArbitrary).check(i -> true);
+		var result = PropertyValidator.forProperty(property).validate();
+
 		assertThatThrownBy(
-			() -> property.forAll(throwingArbitrary).verify(i -> {}).throwIfNotSuccessful()
+			() -> result.throwIfNotSuccessful()
 		).isInstanceOf(TestAbortedException.class)
 		 .hasMessageContaining("Property aborted because of thrown exception");
 	}

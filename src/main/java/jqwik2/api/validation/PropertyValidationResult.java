@@ -10,6 +10,8 @@ public interface PropertyValidationResult {
 
 	boolean isFailed();
 
+	boolean isAborted();
+
 	int countTries();
 
 	int countChecks();
@@ -17,4 +19,6 @@ public interface PropertyValidationResult {
 	Optional<Throwable> failure();
 
 	SortedSet<FalsifiedSample> falsifiedSamples();
+
+	void throwIfNotSuccessful();
 }
