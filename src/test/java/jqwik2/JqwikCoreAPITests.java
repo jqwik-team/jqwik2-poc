@@ -54,61 +54,61 @@ class JqwikCoreAPITests {
 	@Group
 	class RunStrategyBuilder {
 
-		PropertyRunStrategy.Builder builder = PropertyRunStrategy.builder();
+		PropertyValidationStrategy.Builder builder = PropertyValidationStrategy.builder();
 
 		@Example
 		void defaultStrategy() {
-			PropertyRunStrategy strategy = builder.build();
+			PropertyValidationStrategy strategy = builder.build();
 			assertThat(strategy.maxTries()).isEqualTo(JqwikDefaults.defaultMaxTries());
 		}
 
 		@Example
 		void changeStandardAttributes() {
-			PropertyRunStrategy strategy =
+			PropertyValidationStrategy strategy =
 				builder.withMaxTries(42)
 					   .withMaxRuntime(Duration.ofSeconds(42))
 					   .withFilterOutDuplicateSamples(true)
-					   .withGeneration(PropertyRunStrategy.GenerationMode.EXHAUSTIVE)
-					   .withAfterFailure(PropertyRunStrategy.AfterFailureMode.SAMPLES_ONLY)
-					   .withConcurrency(PropertyRunStrategy.ConcurrencyMode.VIRTUAL_THREADS)
+					   .withGeneration(PropertyValidationStrategy.GenerationMode.EXHAUSTIVE)
+					   .withAfterFailure(PropertyValidationStrategy.AfterFailureMode.SAMPLES_ONLY)
+					   .withConcurrency(PropertyValidationStrategy.ConcurrencyMode.VIRTUAL_THREADS)
 					   .build();
 
 			assertThat(strategy.maxTries()).isEqualTo(42);
 			assertThat(strategy.maxRuntime()).isEqualTo(Duration.ofSeconds(42));
 			assertThat(strategy.filterOutDuplicateSamples()).isTrue();
-			assertThat(strategy.generation()).isEqualTo(PropertyRunStrategy.GenerationMode.EXHAUSTIVE);
-			assertThat(strategy.afterFailure()).isEqualTo(PropertyRunStrategy.AfterFailureMode.SAMPLES_ONLY);
-			assertThat(strategy.concurrency()).isEqualTo(PropertyRunStrategy.ConcurrencyMode.VIRTUAL_THREADS);
+			assertThat(strategy.generation()).isEqualTo(PropertyValidationStrategy.GenerationMode.EXHAUSTIVE);
+			assertThat(strategy.afterFailure()).isEqualTo(PropertyValidationStrategy.AfterFailureMode.SAMPLES_ONLY);
+			assertThat(strategy.concurrency()).isEqualTo(PropertyValidationStrategy.ConcurrencyMode.VIRTUAL_THREADS);
 		}
 
 		@Example
 		void changeRandomizedGenerationAttributes() {
-			PropertyRunStrategy strategy =
-				builder.withGeneration(PropertyRunStrategy.GenerationMode.RANDOMIZED)
+			PropertyValidationStrategy strategy =
+				builder.withGeneration(PropertyValidationStrategy.GenerationMode.RANDOMIZED)
 					   .withSeedSupplier(() -> "42")
-					   .withEdgeCases(PropertyRunStrategy.EdgeCasesMode.MIXIN)
-					   .withShrinking(PropertyRunStrategy.ShrinkingMode.FULL)
+					   .withEdgeCases(PropertyValidationStrategy.EdgeCasesMode.MIXIN)
+					   .withShrinking(PropertyValidationStrategy.ShrinkingMode.FULL)
 					   .build();
 
-			assertThat(strategy.generation()).isEqualTo(PropertyRunStrategy.GenerationMode.RANDOMIZED);
+			assertThat(strategy.generation()).isEqualTo(PropertyValidationStrategy.GenerationMode.RANDOMIZED);
 			assertThat(strategy.seedSupplier().get()).isEqualTo("42");
-			assertThat(strategy.edgeCases()).isEqualTo(PropertyRunStrategy.EdgeCasesMode.MIXIN);
-			assertThat(strategy.shrinking()).isEqualTo(PropertyRunStrategy.ShrinkingMode.FULL);
+			assertThat(strategy.edgeCases()).isEqualTo(PropertyValidationStrategy.EdgeCasesMode.MIXIN);
+			assertThat(strategy.shrinking()).isEqualTo(PropertyValidationStrategy.ShrinkingMode.FULL);
 		}
 
 		@Example
 		void changeSamplesGenerationAttributes() {
 			var sample1 = new SampleRecording(Recording.choice(42));
 			var sample2 = new SampleRecording(Recording.choice(43));
-			PropertyRunStrategy strategy =
-				builder.withGeneration(PropertyRunStrategy.GenerationMode.SAMPLES)
+			PropertyValidationStrategy strategy =
+				builder.withGeneration(PropertyValidationStrategy.GenerationMode.SAMPLES)
 					   .withSamples(List.of(sample1, sample2))
-					   .withShrinking(PropertyRunStrategy.ShrinkingMode.OFF)
+					   .withShrinking(PropertyValidationStrategy.ShrinkingMode.OFF)
 					   .build();
 
-			assertThat(strategy.generation()).isEqualTo(PropertyRunStrategy.GenerationMode.SAMPLES);
+			assertThat(strategy.generation()).isEqualTo(PropertyValidationStrategy.GenerationMode.SAMPLES);
 			assertThat(strategy.samples()).containsExactly(sample1, sample2);
-			assertThat(strategy.shrinking()).isEqualTo(PropertyRunStrategy.ShrinkingMode.OFF);
+			assertThat(strategy.shrinking()).isEqualTo(PropertyValidationStrategy.ShrinkingMode.OFF);
 		}
 	}
 

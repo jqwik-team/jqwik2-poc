@@ -21,16 +21,16 @@ public class JqwikDefaults {
 		return false;
 	}
 
-	public static PropertyRunStrategy.ShrinkingMode defaultShrinkingMode() {
-		return PropertyRunStrategy.ShrinkingMode.FULL;
+	public static PropertyValidationStrategy.ShrinkingMode defaultShrinkingMode() {
+		return PropertyValidationStrategy.ShrinkingMode.FULL;
 	}
 
-	public static PropertyRunStrategy.GenerationMode defaultGenerationMode() {
-		return PropertyRunStrategy.GenerationMode.SMART;
+	public static PropertyValidationStrategy.GenerationMode defaultGenerationMode() {
+		return PropertyValidationStrategy.GenerationMode.SMART;
 	}
 
-	public static PropertyRunStrategy.EdgeCasesMode defaultEdgeCasesMode() {
-		return PropertyRunStrategy.EdgeCasesMode.MIXIN;
+	public static PropertyValidationStrategy.EdgeCasesMode defaultEdgeCasesMode() {
+		return PropertyValidationStrategy.EdgeCasesMode.MIXIN;
 	}
 
 	public static FailureDatabase defaultFailureDatabase() {
@@ -45,11 +45,11 @@ public class JqwikDefaults {
 		return defaultFailureDatabase;
 	}
 
-	static PropertyRunStrategy.AfterFailureMode defaultAfterFailureMode() {
-		return PropertyRunStrategy.AfterFailureMode.SAMPLES_ONLY;
+	static PropertyValidationStrategy.AfterFailureMode defaultAfterFailureMode() {
+		return PropertyValidationStrategy.AfterFailureMode.SAMPLES_ONLY;
 	}
 
-	static PropertyRunStrategy.ConcurrencyMode defaultConcurrencyMode() {
-		return PropertyRunStrategy.ConcurrencyMode.SINGLE_THREAD;
+	static PropertyValidationStrategy.ConcurrencyMode defaultConcurrencyMode() {
+		return PropertyValidationStrategy.ConcurrencyMode.SINGLE_THREAD;
 	}
 }

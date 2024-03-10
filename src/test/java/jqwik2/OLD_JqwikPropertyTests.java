@@ -122,9 +122,9 @@ class OLD_JqwikPropertyTests {
 
 	@Example
 	void propertyWith2ParametersSucceeds() {
-		var strategy = PropertyRunStrategy.builder()
-										  .withGeneration(PropertyRunStrategy.GenerationMode.RANDOMIZED)
-										  .build();
+		var strategy = PropertyValidationStrategy.builder()
+												 .withGeneration(PropertyValidationStrategy.GenerationMode.RANDOMIZED)
+												 .build();
 		var property = new OLD_JqwikProperty(strategy);
 
 		PropertyRunResult result = property.forAll(
@@ -165,29 +165,29 @@ class OLD_JqwikPropertyTests {
 	@Example
 	void propertyDefaultStrategyReporting() {
 		var property = new OLD_JqwikProperty();
-		PropertyRunStrategy strategy = property.strategy();
+		PropertyValidationStrategy strategy = property.strategy();
 
 		assertThat(strategy.maxTries()).isEqualTo(100);
 		assertThat(strategy.maxRuntime()).isEqualTo(Duration.ofMinutes(10));
-		assertThat(strategy.shrinking()).isEqualTo(PropertyRunStrategy.ShrinkingMode.FULL);
-		assertThat(strategy.generation()).isEqualTo(PropertyRunStrategy.GenerationMode.SMART);
-		assertThat(strategy.edgeCases()).isEqualTo(PropertyRunStrategy.EdgeCasesMode.MIXIN);
+		assertThat(strategy.shrinking()).isEqualTo(PropertyValidationStrategy.ShrinkingMode.FULL);
+		assertThat(strategy.generation()).isEqualTo(PropertyValidationStrategy.GenerationMode.SMART);
+		assertThat(strategy.edgeCases()).isEqualTo(PropertyValidationStrategy.EdgeCasesMode.MIXIN);
 	}
 
 	@Example
 	void edgeCasesMode_MIXIN() {
-		PropertyRunStrategy strategy =
-			PropertyRunStrategy.builder()
-							   .withMaxTries(1000)
-							   .withMaxRuntime(Duration.ofMinutes(10))
-							   .withFilterOutDuplicateSamples(false)
-							   .withSeedSupplier(RandomChoice::generateRandomSeed)
-							   .withShrinking(PropertyRunStrategy.ShrinkingMode.OFF)
-							   .withGeneration(PropertyRunStrategy.GenerationMode.RANDOMIZED)
-							   .withEdgeCases(PropertyRunStrategy.EdgeCasesMode.MIXIN)
-							   .withAfterFailure(PropertyRunStrategy.AfterFailureMode.SAMPLES_ONLY)
-							   .withConcurrency(PropertyRunStrategy.ConcurrencyMode.SINGLE_THREAD)
-							   .build();
+		PropertyValidationStrategy strategy =
+			PropertyValidationStrategy.builder()
+									  .withMaxTries(1000)
+									  .withMaxRuntime(Duration.ofMinutes(10))
+									  .withFilterOutDuplicateSamples(false)
+									  .withSeedSupplier(RandomChoice::generateRandomSeed)
+									  .withShrinking(PropertyValidationStrategy.ShrinkingMode.OFF)
+									  .withGeneration(PropertyValidationStrategy.GenerationMode.RANDOMIZED)
+									  .withEdgeCases(PropertyValidationStrategy.EdgeCasesMode.MIXIN)
+									  .withAfterFailure(PropertyValidationStrategy.AfterFailureMode.SAMPLES_ONLY)
+									  .withConcurrency(PropertyValidationStrategy.ConcurrencyMode.SINGLE_THREAD)
+									  .build();
 
 		var property = new OLD_JqwikProperty(strategy);
 
@@ -219,10 +219,10 @@ class OLD_JqwikPropertyTests {
 
 	@Example
 	void concurrencyMode_CACHED_THREAD_POOL() {
-		var strategy = PropertyRunStrategy.builder()
-										  .withConcurrency(PropertyRunStrategy.ConcurrencyMode.CACHED_THREAD_POOL)
-										  .withMaxTries(1000)
-										  .build();
+		var strategy = PropertyValidationStrategy.builder()
+												 .withConcurrency(PropertyValidationStrategy.ConcurrencyMode.CACHED_THREAD_POOL)
+												 .withMaxTries(1000)
+												 .build();
 		var property = new OLD_JqwikProperty(strategy);
 
 		var arbitrary = Numbers.integers();
@@ -238,10 +238,10 @@ class OLD_JqwikPropertyTests {
 
 	@Example
 	void propertyWithMaxTriesSetTo0_runsUntilTimeout() {
-		var strategy = PropertyRunStrategy.builder()
-										  .withMaxTries(0)
-										  .withMaxRuntime(Duration.ofSeconds(1))
-										  .build();
+		var strategy = PropertyValidationStrategy.builder()
+												 .withMaxTries(0)
+												 .withMaxRuntime(Duration.ofSeconds(1))
+												 .build();
 		var checkingProperty = new OLD_JqwikProperty(strategy);
 
 		AtomicInteger counter = new AtomicInteger();
@@ -256,10 +256,10 @@ class OLD_JqwikPropertyTests {
 
 	@Example
 	void propertyWithMaxDurationSetTo0_runsUntilMaxTriesIsReached() {
-		var strategy = PropertyRunStrategy.builder()
-										  .withMaxTries(10)
-										  .withMaxRuntime(Duration.ZERO)
-										  .build();
+		var strategy = PropertyValidationStrategy.builder()
+												 .withMaxTries(10)
+												 .withMaxRuntime(Duration.ZERO)
+												 .build();
 
 		var checkingProperty = new OLD_JqwikProperty(strategy);
 
@@ -278,12 +278,12 @@ class OLD_JqwikPropertyTests {
 
 	@Example
 	void failedTryWillStopEndlessRunningProperty() {
-		var strategy = PropertyRunStrategy.builder()
-										  .withGeneration(PropertyRunStrategy.GenerationMode.RANDOMIZED)
-										  .withAfterFailure(PropertyRunStrategy.AfterFailureMode.REPLAY)
-										  .withMaxTries(0)
-										  .withMaxRuntime(Duration.ZERO)
-										  .build();
+		var strategy = PropertyValidationStrategy.builder()
+												 .withGeneration(PropertyValidationStrategy.GenerationMode.RANDOMIZED)
+												 .withAfterFailure(PropertyValidationStrategy.AfterFailureMode.REPLAY)
+												 .withMaxTries(0)
+												 .withMaxRuntime(Duration.ZERO)
+												 .build();
 		var checkingProperty = new OLD_JqwikProperty(strategy);
 
 		AtomicInteger counter = new AtomicInteger();
@@ -309,9 +309,9 @@ class OLD_JqwikPropertyTests {
 
 		@Example
 		void afterFailureMode_REPLAY() {
-			var strategy = PropertyRunStrategy.builder()
-											  .withAfterFailure(PropertyRunStrategy.AfterFailureMode.REPLAY)
-											  .build();
+			var strategy = PropertyValidationStrategy.builder()
+													 .withAfterFailure(PropertyValidationStrategy.AfterFailureMode.REPLAY)
+													 .build();
 			var property = new OLD_JqwikProperty("idFor_REPLAY", strategy);
 
 			var integers = Numbers.integers().between(-1000, 1000);
@@ -335,9 +335,9 @@ class OLD_JqwikPropertyTests {
 
 		@Example
 		void afterFailureMode_SAMPLES_ONLY() {
-			var strategy = PropertyRunStrategy.builder()
-											  .withAfterFailure(PropertyRunStrategy.AfterFailureMode.SAMPLES_ONLY)
-											  .build();
+			var strategy = PropertyValidationStrategy.builder()
+													 .withAfterFailure(PropertyValidationStrategy.AfterFailureMode.SAMPLES_ONLY)
+													 .build();
 			var property = new OLD_JqwikProperty("idFor_SAMPLES_ONLY", strategy);
 
 			var integers = Numbers.integers().between(-1000, 1000);
@@ -366,13 +366,13 @@ class OLD_JqwikPropertyTests {
 
 		@Example
 		void generationMode_EXHAUSTIVE() {
-			PropertyRunStrategy strategy =
-				PropertyRunStrategy.builder()
-								   .withMaxTries(100)
-								   .withMaxRuntime(Duration.ofMinutes(10))
-								   .withGeneration(PropertyRunStrategy.GenerationMode.EXHAUSTIVE)
-								   .withConcurrency(PropertyRunStrategy.ConcurrencyMode.SINGLE_THREAD)
-								   .build();
+			PropertyValidationStrategy strategy =
+				PropertyValidationStrategy.builder()
+										  .withMaxTries(100)
+										  .withMaxRuntime(Duration.ofMinutes(10))
+										  .withGeneration(PropertyValidationStrategy.GenerationMode.EXHAUSTIVE)
+										  .withConcurrency(PropertyValidationStrategy.ConcurrencyMode.SINGLE_THREAD)
+										  .build();
 
 			var property = new OLD_JqwikProperty(strategy);
 
@@ -392,15 +392,15 @@ class OLD_JqwikPropertyTests {
 
 		@Example
 		void generationMode_SMART() {
-			PropertyRunStrategy strategy =
-				PropertyRunStrategy.builder()
-								   .withMaxTries(100)
-								   .withMaxRuntime(Duration.ofMinutes(10))
-								   .withFilterOutDuplicateSamples(false)
-								   .withSeedSupplier(RandomChoice::generateRandomSeed)
-								   .withGeneration(PropertyRunStrategy.GenerationMode.SMART)
-								   .withConcurrency(PropertyRunStrategy.ConcurrencyMode.SINGLE_THREAD)
-								   .build();
+			PropertyValidationStrategy strategy =
+				PropertyValidationStrategy.builder()
+										  .withMaxTries(100)
+										  .withMaxRuntime(Duration.ofMinutes(10))
+										  .withFilterOutDuplicateSamples(false)
+										  .withSeedSupplier(RandomChoice::generateRandomSeed)
+										  .withGeneration(PropertyValidationStrategy.GenerationMode.SMART)
+										  .withConcurrency(PropertyValidationStrategy.ConcurrencyMode.SINGLE_THREAD)
+										  .build();
 
 			var property = new OLD_JqwikProperty(strategy);
 
@@ -443,16 +443,16 @@ class OLD_JqwikPropertyTests {
 				choice(0)
 			));
 
-			PropertyRunStrategy strategy =
-				PropertyRunStrategy.builder()
-								   .withMaxTries(1000)
-								   .withMaxRuntime(Duration.ofMinutes(10))
-								   .withFilterOutDuplicateSamples(true)
-								   .withSamples(sampleRecordings)
-								   .withShrinking(PropertyRunStrategy.ShrinkingMode.OFF)
-								   .withGeneration(PropertyRunStrategy.GenerationMode.SAMPLES)
-								   .withConcurrency(PropertyRunStrategy.ConcurrencyMode.SINGLE_THREAD)
-								   .build();
+			PropertyValidationStrategy strategy =
+				PropertyValidationStrategy.builder()
+										  .withMaxTries(1000)
+										  .withMaxRuntime(Duration.ofMinutes(10))
+										  .withFilterOutDuplicateSamples(true)
+										  .withSamples(sampleRecordings)
+										  .withShrinking(PropertyValidationStrategy.ShrinkingMode.OFF)
+										  .withGeneration(PropertyValidationStrategy.GenerationMode.SAMPLES)
+										  .withConcurrency(PropertyValidationStrategy.ConcurrencyMode.SINGLE_THREAD)
+										  .build();
 			var property = new OLD_JqwikProperty(strategy);
 
 			List<Integer> values = Collections.synchronizedList(new ArrayList<>());
@@ -463,14 +463,14 @@ class OLD_JqwikPropertyTests {
 
 		@Example
 		void generationMode_GROWING() {
-			PropertyRunStrategy strategy =
-				PropertyRunStrategy.builder()
-								   .withMaxTries(100)
-								   .withMaxRuntime(Duration.ZERO)
-								   .withFilterOutDuplicateSamples(false)
-								   .withGeneration(PropertyRunStrategy.GenerationMode.GROWING)
-								   .withConcurrency(PropertyRunStrategy.ConcurrencyMode.SINGLE_THREAD)
-								   .build();
+			PropertyValidationStrategy strategy =
+				PropertyValidationStrategy.builder()
+										  .withMaxTries(100)
+										  .withMaxRuntime(Duration.ZERO)
+										  .withFilterOutDuplicateSamples(false)
+										  .withGeneration(PropertyValidationStrategy.GenerationMode.GROWING)
+										  .withConcurrency(PropertyValidationStrategy.ConcurrencyMode.SINGLE_THREAD)
+										  .build();
 
 
 			var property = new OLD_JqwikProperty(strategy);

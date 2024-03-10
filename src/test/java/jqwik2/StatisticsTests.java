@@ -13,19 +13,19 @@ import jqwik2.internal.statistics.*;
 
 import net.jqwik.api.*;
 
-import static jqwik2.api.PropertyRunStrategy.GenerationMode.*;
+import static jqwik2.api.PropertyValidationStrategy.GenerationMode.*;
 import static org.assertj.core.api.Assertions.*;
 
 class StatisticsTests {
 
 	@Example
 	void collectSingleValue() {
-		var strategy = PropertyRunStrategy.builder()
-										  .withGeneration(RANDOMIZED)
-										  .withEdgeCases(PropertyRunStrategy.EdgeCasesMode.OFF)
-										  .withMaxTries(1000)
-										  .withMaxRuntime(Duration.ZERO)
-										  .build();
+		var strategy = PropertyValidationStrategy.builder()
+												 .withGeneration(RANDOMIZED)
+												 .withEdgeCases(PropertyValidationStrategy.EdgeCasesMode.OFF)
+												 .withMaxTries(1000)
+												 .withMaxRuntime(Duration.ZERO)
+												 .build();
 
 		var property = new OLD_JqwikProperty(strategy);
 
@@ -46,12 +46,12 @@ class StatisticsTests {
 	@Example
 	@Disabled
 	void statisticalCheckSuccessful() {
-		var strategy = PropertyRunStrategy.builder()
-										  .withGeneration(RANDOMIZED)
-										  .withEdgeCases(PropertyRunStrategy.EdgeCasesMode.OFF)
-										  .withMaxTries(0)
-										  .withMaxRuntime(Duration.ZERO)
-										  .build();
+		var strategy = PropertyValidationStrategy.builder()
+												 .withGeneration(RANDOMIZED)
+												 .withEdgeCases(PropertyValidationStrategy.EdgeCasesMode.OFF)
+												 .withMaxTries(0)
+												 .withMaxRuntime(Duration.ZERO)
+												 .build();
 		var property = new OLD_JqwikProperty(strategy);
 
 		IntegerArbitrary integers = Numbers.integers().between(0, 100);
@@ -74,12 +74,12 @@ class StatisticsTests {
 	@Example
 	@Disabled
 	void statisticalCheckFailed() {
-		var strategy = PropertyRunStrategy.builder()
-										  .withGeneration(RANDOMIZED)
-										  .withEdgeCases(PropertyRunStrategy.EdgeCasesMode.OFF)
-										  .withMaxTries(0)
-										  .withMaxRuntime(Duration.ZERO)
-										  .build();
+		var strategy = PropertyValidationStrategy.builder()
+												 .withGeneration(RANDOMIZED)
+												 .withEdgeCases(PropertyValidationStrategy.EdgeCasesMode.OFF)
+												 .withMaxTries(0)
+												 .withMaxRuntime(Duration.ZERO)
+												 .build();
 
 		var property = new OLD_JqwikProperty(strategy);
 

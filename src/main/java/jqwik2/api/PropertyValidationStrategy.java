@@ -6,10 +6,10 @@ import java.util.function.*;
 
 import jqwik2.api.recording.*;
 
-public interface PropertyRunStrategy {
+public interface PropertyValidationStrategy {
 
 	interface Builder {
-		PropertyRunStrategy build();
+		PropertyValidationStrategy build();
 
 		Builder withMaxTries(int maxTries);
 
@@ -32,7 +32,7 @@ public interface PropertyRunStrategy {
 		Builder withSamples(List<SampleRecording> samples);
 	}
 
-	PropertyRunStrategy DEFAULT = builder().build();
+	PropertyValidationStrategy DEFAULT = builder().build();
 
 	static Builder builder() {
 		return new StrategyBuilder();
@@ -100,20 +100,20 @@ record DefaultStrategy(
 	EdgeCasesMode edgeCases,
 	AfterFailureMode afterFailure,
 	ConcurrencyMode concurrency
-) implements PropertyRunStrategy {}
+) implements PropertyValidationStrategy {}
 
-class StrategyBuilder implements PropertyRunStrategy.Builder, Cloneable {
+class StrategyBuilder implements PropertyValidationStrategy.Builder, Cloneable {
 
 	private int maxTries = JqwikDefaults.defaultMaxTries();
 	private Duration maxRuntime = JqwikDefaults.defaultMaxDuration();
 	private boolean filterOutDuplicateSamples = JqwikDefaults.defaultFilterOutDuplicateSamples();
 	private Supplier<String> seedSupplier = RandomChoice::generateRandomSeed;
 	private List<SampleRecording> samples = List.of();
-	private PropertyRunStrategy.ShrinkingMode shrinking = JqwikDefaults.defaultShrinkingMode();
-	private PropertyRunStrategy.GenerationMode generation = JqwikDefaults.defaultGenerationMode();
-	private PropertyRunStrategy.EdgeCasesMode edgeCases = JqwikDefaults.defaultEdgeCasesMode();
-	private PropertyRunStrategy.AfterFailureMode afterFailure = JqwikDefaults.defaultAfterFailureMode();
-	private PropertyRunStrategy.ConcurrencyMode concurrency = JqwikDefaults.defaultConcurrencyMode();
+	private PropertyValidationStrategy.ShrinkingMode shrinking = JqwikDefaults.defaultShrinkingMode();
+	private PropertyValidationStrategy.GenerationMode generation = JqwikDefaults.defaultGenerationMode();
+	private PropertyValidationStrategy.EdgeCasesMode edgeCases = JqwikDefaults.defaultEdgeCasesMode();
+	private PropertyValidationStrategy.AfterFailureMode afterFailure = JqwikDefaults.defaultAfterFailureMode();
+	private PropertyValidationStrategy.ConcurrencyMode concurrency = JqwikDefaults.defaultConcurrencyMode();
 
 	@Override
 	protected StrategyBuilder clone() {
@@ -132,7 +132,7 @@ class StrategyBuilder implements PropertyRunStrategy.Builder, Cloneable {
 	}
 
 	@Override
-	public PropertyRunStrategy build() {
+	public PropertyValidationStrategy build() {
 		return new DefaultStrategy(
 			maxTries, maxRuntime, filterOutDuplicateSamples,
 			seedSupplier, samples,
@@ -142,70 +142,70 @@ class StrategyBuilder implements PropertyRunStrategy.Builder, Cloneable {
 	}
 
 	@Override
-	public PropertyRunStrategy.Builder withMaxTries(int maxTries) {
+	public PropertyValidationStrategy.Builder withMaxTries(int maxTries) {
 		StrategyBuilder clone = clone();
 		clone.maxTries = maxTries;
 		return clone;
 	}
 
 	@Override
-	public PropertyRunStrategy.Builder withMaxRuntime(Duration maxRuntime) {
+	public PropertyValidationStrategy.Builder withMaxRuntime(Duration maxRuntime) {
 		StrategyBuilder clone = clone();
 		clone.maxRuntime = maxRuntime;
 		return clone;
 	}
 
 	@Override
-	public PropertyRunStrategy.Builder withFilterOutDuplicateSamples(boolean filterOutDuplicateSamples) {
+	public PropertyValidationStrategy.Builder withFilterOutDuplicateSamples(boolean filterOutDuplicateSamples) {
 		StrategyBuilder clone = clone();
 		clone.filterOutDuplicateSamples = filterOutDuplicateSamples;
 		return clone;
 	}
 
 	@Override
-	public PropertyRunStrategy.Builder withGeneration(PropertyRunStrategy.GenerationMode generation) {
+	public PropertyValidationStrategy.Builder withGeneration(PropertyValidationStrategy.GenerationMode generation) {
 		StrategyBuilder clone = clone();
 		clone.generation = generation;
 		return clone;
 	}
 
 	@Override
-	public PropertyRunStrategy.Builder withAfterFailure(PropertyRunStrategy.AfterFailureMode afterFailure) {
+	public PropertyValidationStrategy.Builder withAfterFailure(PropertyValidationStrategy.AfterFailureMode afterFailure) {
 		StrategyBuilder clone = clone();
 		clone.afterFailure = afterFailure;
 		return clone;
 	}
 
 	@Override
-	public PropertyRunStrategy.Builder withConcurrency(PropertyRunStrategy.ConcurrencyMode concurrency) {
+	public PropertyValidationStrategy.Builder withConcurrency(PropertyValidationStrategy.ConcurrencyMode concurrency) {
 		StrategyBuilder clone = clone();
 		clone.concurrency = concurrency;
 		return clone;
 	}
 
 	@Override
-	public PropertyRunStrategy.Builder withSeedSupplier(Supplier<String> seedSupplier) {
+	public PropertyValidationStrategy.Builder withSeedSupplier(Supplier<String> seedSupplier) {
 		StrategyBuilder clone = clone();
 		clone.seedSupplier = seedSupplier;
 		return clone;
 	}
 
 	@Override
-	public PropertyRunStrategy.Builder withEdgeCases(PropertyRunStrategy.EdgeCasesMode edgeCases) {
+	public PropertyValidationStrategy.Builder withEdgeCases(PropertyValidationStrategy.EdgeCasesMode edgeCases) {
 		StrategyBuilder clone = clone();
 		clone.edgeCases = edgeCases;
 		return clone;
 	}
 
 	@Override
-	public PropertyRunStrategy.Builder withShrinking(PropertyRunStrategy.ShrinkingMode shrinking) {
+	public PropertyValidationStrategy.Builder withShrinking(PropertyValidationStrategy.ShrinkingMode shrinking) {
 		StrategyBuilder clone = clone();
 		clone.shrinking = shrinking;
 		return clone;
 	}
 
 	@Override
-	public PropertyRunStrategy.Builder withSamples(List<SampleRecording> samples) {
+	public PropertyValidationStrategy.Builder withSamples(List<SampleRecording> samples) {
 		StrategyBuilder clone = clone();
 		clone.samples = samples;
 		return clone;

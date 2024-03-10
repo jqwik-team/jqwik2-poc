@@ -12,21 +12,21 @@ import jqwik2.internal.growing.*;
 
 public class OLD_JqwikProperty {
 
-	private final PropertyRunStrategy strategy;
+	private final PropertyValidationStrategy strategy;
 	private final String id;
 	private final List<Consumer<PropertyRunResult>> onFailureHandlers = new ArrayList<>();
 	private FailureDatabase database;
 
-	public OLD_JqwikProperty(PropertyRunStrategy strategy) {
+	public OLD_JqwikProperty(PropertyValidationStrategy strategy) {
 		this(defaultId(), strategy);
 	}
 
 	public OLD_JqwikProperty() {
-		this(PropertyRunStrategy.DEFAULT);
+		this(PropertyValidationStrategy.DEFAULT);
 	}
 
 	public OLD_JqwikProperty(String myId) {
-		this(myId, PropertyRunStrategy.DEFAULT);
+		this(myId, PropertyValidationStrategy.DEFAULT);
 	}
 
 	private static String defaultId() {
@@ -39,11 +39,11 @@ public class OLD_JqwikProperty {
 		throw new IllegalStateException("Could not determine default id for property");
 	}
 
-	public OLD_JqwikProperty(String id, PropertyRunStrategy strategy) {
+	public OLD_JqwikProperty(String id, PropertyValidationStrategy strategy) {
 		this(id, strategy, JqwikDefaults.defaultFailureDatabase());
 	}
 
-	private OLD_JqwikProperty(String id, PropertyRunStrategy strategy, FailureDatabase database) {
+	private OLD_JqwikProperty(String id, PropertyValidationStrategy strategy, FailureDatabase database) {
 		if (id == null || id.isEmpty()) {
 			throw new IllegalArgumentException("id must not be null");
 		}
@@ -52,7 +52,7 @@ public class OLD_JqwikProperty {
 		failureDatabase(database);
 	}
 
-	public PropertyRunStrategy strategy() {
+	public PropertyValidationStrategy strategy() {
 		return strategy;
 	}
 
@@ -173,7 +173,7 @@ public class OLD_JqwikProperty {
 	}
 
 	private boolean isShrinkingEnabled() {
-		return strategy.shrinking() == PropertyRunStrategy.ShrinkingMode.FULL;
+		return strategy.shrinking() == PropertyValidationStrategy.ShrinkingMode.FULL;
 	}
 
 	public String id() {
