@@ -33,7 +33,7 @@ class PropertyValidationTests {
 	}
 
 	@Example
-	void propertyCheckWith1ParameterSucceeds() {
+	void checkWith1ParameterSucceeds() {
 		var property = PropertyDescription.property().forAll(Numbers.integers()).check(i -> {
 			assertThat(i).isInstanceOf(Integer.class);
 			return true;
@@ -45,36 +45,45 @@ class PropertyValidationTests {
 		assertThat(result.isSuccessful()).isTrue();
 		assertThat(result.countTries()).isEqualTo(100);
 		assertThat(result.countChecks()).isEqualTo(100);
-
-		// result = property.forAll(Numbers.integers()).verify(i -> {
-		// 	// Thread.sleep(10);
-		// 	// System.out.println(i);
-		// });
-		// assertThat(result.isSuccessful()).isTrue();
-		// assertThat(result.countTries()).isEqualTo(100);
-		// assertThat(result.countChecks()).isEqualTo(100);
 	}
 
-	// @Example
-	void propertyWithAssumptionSucceeds() {
-		var property = new OLD_JqwikProperty();
-
-		PropertyRunResult result = property.forAll(Numbers.integers()).check(i -> {
+	@Example
+	void verifyWith1ParameterSucceeds() {
+		var property = PropertyDescription.property().forAll(Numbers.integers()).verify(i -> {
 			assertThat(i).isInstanceOf(Integer.class);
-			return true;
 		});
+
+		PropertyValidator validator = PropertyValidator.forProperty(property);
+		PropertyValidationResult result = validator.validate();
+
 		assertThat(result.isSuccessful()).isTrue();
 		assertThat(result.countTries()).isEqualTo(100);
 		assertThat(result.countChecks()).isEqualTo(100);
+	}
 
-		result = property.forAll(Numbers.integers()).verify(i -> {
+	@Example
+	void checkWithAssumptionSucceeds() {
+		var property = PropertyDescription.property().forAll(Numbers.integers()).check(i -> {
 			Assume.that(i % 2 == 0);
-			// Thread.sleep(10);
-			// System.out.println(i);
+			return i instanceof Integer;
 		});
+		PropertyValidationResult result = PropertyValidator.forProperty(property).validate();
+
 		assertThat(result.isSuccessful()).isTrue();
 		assertThat(result.countTries()).isEqualTo(100);
-		// System.out.println(result.countChecks());
+		assertThat(result.countChecks()).isBetween(20, 80);
+	}
+
+	@Example
+	void verifyWithAssumptionSucceeds() {
+		var property = PropertyDescription.property().forAll(Numbers.integers()).verify(i -> {
+			Assume.that(i % 2 == 0);
+			assertThat(i).isInstanceOf(Integer.class);
+		});
+		PropertyValidationResult result = PropertyValidator.forProperty(property).validate();
+
+		assertThat(result.isSuccessful()).isTrue();
+		assertThat(result.countTries()).isEqualTo(100);
 		assertThat(result.countChecks()).isBetween(20, 80);
 	}
 
