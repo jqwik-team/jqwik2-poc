@@ -101,6 +101,9 @@ class PropertyValidationTests {
 		result.failure().ifPresent(failure -> assertThat(failure).isInstanceOf(AssertionFailedError.class));
 		assertThat(result.countTries()).isEqualTo(1);
 		assertThat(result.countChecks()).isEqualTo(1);
+
+		// Shrinking usually reduces the initial falsified sample to a minimal falsified sample
+		assertThat(result.falsifiedSamples()).hasSizeGreaterThanOrEqualTo(1);
 	}
 
 	@Example
@@ -118,6 +121,9 @@ class PropertyValidationTests {
 		assertThat(result.failure()).hasValue(failure);
 		assertThat(result.countTries()).isEqualTo(1);
 		assertThat(result.countChecks()).isEqualTo(1);
+
+		// Shrinking usually reduces the initial falsified sample to a minimal falsified sample
+		assertThat(result.falsifiedSamples()).hasSizeGreaterThanOrEqualTo(1);
 	}
 
 	// @Example

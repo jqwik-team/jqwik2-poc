@@ -58,4 +58,8 @@ public class PropertyValidationResultFacade implements PropertyValidationResult 
 		return new AssertionFailedError(message);
 	}
 
+	@Override
+	public SortedSet<FalsifiedSample> falsifiedSamples() {
+		return runResult.falsifiedSamples();
+	}
 }

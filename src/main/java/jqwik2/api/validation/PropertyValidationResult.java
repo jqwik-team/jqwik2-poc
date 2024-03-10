@@ -2,6 +2,8 @@ package jqwik2.api.validation;
 
 import java.util.*;
 
+import jqwik2.api.*;
+
 public interface PropertyValidationResult {
 
 	boolean isSuccessful();
@@ -13,4 +15,6 @@ public interface PropertyValidationResult {
 	int countChecks();
 
 	Optional<Throwable> failure();
+
+	SortedSet<FalsifiedSample> falsifiedSamples();
 }
