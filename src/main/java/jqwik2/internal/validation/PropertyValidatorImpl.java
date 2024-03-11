@@ -14,7 +14,7 @@ import jqwik2.internal.*;
 public class PropertyValidatorImpl implements PropertyValidator {
 
 	private final PropertyDescription property;
-	private final FailureDatabase database;
+	private FailureDatabase database;
 
 	public PropertyValidatorImpl(PropertyDescription property) {
 		this.property = property;
@@ -102,4 +102,8 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		database.saveFailure(property.id(), result.effectiveSeed().orElse(null), sampleRecordings);
 	}
 
+	@Override
+	public void failureDatabase(FailureDatabase database) {
+		this.database = database;
+	}
 }

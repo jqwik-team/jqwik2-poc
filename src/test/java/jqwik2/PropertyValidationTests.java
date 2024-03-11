@@ -232,24 +232,6 @@ class PropertyValidationTests {
 	}
 
 	// @Example
-	void failedPropertyRunWillBeSavedToFailureDatabase() {
-		var property = new OLD_JqwikProperty("myId");
-		var database = mock(FailureDatabase.class);
-		property.failureDatabase(database);
-		property.forAll(Numbers.integers()).check(i -> false);
-		verify(database).saveFailure(Mockito.eq("myId"), anyString(), anySet());
-	}
-
-	// @Example
-	void successfulPropertyRunWillBeRemovedFromFailureDatabase() {
-		var property = new OLD_JqwikProperty("myId");
-		var database = mock(FailureDatabase.class);
-		property.failureDatabase(database);
-		property.forAll(Numbers.integers()).check(i -> true);
-		verify(database).deleteProperty("myId");
-	}
-
-	// @Example
 	void concurrencyMode_CACHED_THREAD_POOL() {
 		var strategy = PropertyValidationStrategy.builder()
 												 .withConcurrency(PropertyValidationStrategy.ConcurrencyMode.CACHED_THREAD_POOL)
@@ -334,6 +316,34 @@ class PropertyValidationTests {
 		assertThat(checkingResult.isFailed()).isTrue();
 		assertThat(checkingResult.countTries()).isEqualTo(100);
 		assertThat(checkingResult.countChecks()).isEqualTo(checkingResult.countTries());
+	}
+
+	@Group
+	class FailureDatabaseInteractions {
+
+		FailureDatabase database = mock(FailureDatabase.class);
+
+		@Example
+		void failedPropertyRunWillBeSavedToFailureDatabase() {
+			var property = PropertyDescription.property("myId").forAll(Numbers.integers()).check(i -> false);
+
+			var validator = PropertyValidator.forProperty(property);
+			validator.failureDatabase(database);
+			validator.validate();
+
+			verify(database).saveFailure(Mockito.eq("myId"), anyString(), anySet());
+		}
+
+		@Example
+		void successfulPropertyRunWillBeRemovedFromFailureDatabase() {
+			var property = PropertyDescription.property("myId").forAll(Numbers.integers()).check(i -> true);
+
+			var validator = PropertyValidator.forProperty(property);
+			validator.failureDatabase(database);
+			validator.validate();
+
+			verify(database).deleteProperty("myId");
+		}
 	}
 
 	@Group
