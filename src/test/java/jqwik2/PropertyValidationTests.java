@@ -231,38 +231,35 @@ class PropertyValidationTests {
 		assertThat(values).contains(0, 1, -1, Integer.MAX_VALUE, Integer.MIN_VALUE);
 	}
 
-	// @Example
+	@Example
 	void concurrencyMode_CACHED_THREAD_POOL() {
 		var strategy = PropertyValidationStrategy.builder()
 												 .withConcurrency(PropertyValidationStrategy.ConcurrencyMode.CACHED_THREAD_POOL)
 												 .withMaxTries(1000)
 												 .build();
-		var property = new OLD_JqwikProperty(strategy);
 
-		var arbitrary = Numbers.integers();
-
-		// Takes > 10 secs in single thread mode, but only 1 sec in cached thread pool mode
-		PropertyRunResult initialResult = property.forAll(arbitrary).verify(i -> {
+		var property = PropertyDescription.property().forAll(Numbers.integers()).verify(i -> {
 			ConcurrentRunnerTests.sleepInThread(10);
 		});
 
+		// Takes > 10 secs in single thread mode, but only 1 sec in cached thread pool mode
+		var initialResult = PropertyValidator.forProperty(property).validate(strategy);
 		assertThat(initialResult.isSuccessful()).isTrue();
 		assertThat(initialResult.countTries()).isEqualTo(1000);
 	}
 
-	// @Example
-	void propertyWithMaxTriesSetTo0_runsUntilTimeout() {
+	@Example
+	void maxTriesSetTo0_runsUntilTimeout() {
 		var strategy = PropertyValidationStrategy.builder()
 												 .withMaxTries(0)
 												 .withMaxRuntime(Duration.ofSeconds(1))
 												 .build();
-		var checkingProperty = new OLD_JqwikProperty(strategy);
 
-		AtomicInteger counter = new AtomicInteger();
-		PropertyRunResult checkingResult = checkingProperty.forAll(Numbers.integers())
-														   .verify(i -> counter.incrementAndGet());
+		var property = PropertyDescription.property().forAll(Numbers.integers())
+										  .verify(i -> {});
 
 		// Should take about 1 second till maxRuntime is reached
+		var checkingResult = PropertyValidator.forProperty(property).validate(strategy);
 		assertThat(checkingResult.isSuccessful()).isTrue();
 		assertThat(checkingResult.countTries()).isGreaterThan(1);
 		assertThat(checkingResult.countChecks()).isEqualTo(checkingResult.countTries());
