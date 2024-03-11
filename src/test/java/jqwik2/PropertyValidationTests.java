@@ -265,23 +265,18 @@ class PropertyValidationTests {
 		assertThat(checkingResult.countChecks()).isEqualTo(checkingResult.countTries());
 	}
 
-	// @Example
-	void propertyWithMaxDurationSetTo0_runsUntilMaxTriesIsReached() {
+	@Example
+	void maxDurationSetTo0_runsUntilMaxTriesIsReached() {
 		var strategy = PropertyValidationStrategy.builder()
 												 .withMaxTries(10)
 												 .withMaxRuntime(Duration.ZERO)
 												 .build();
 
-		var checkingProperty = new OLD_JqwikProperty(strategy);
-
-		AtomicInteger counter = new AtomicInteger();
-		PropertyRunResult checkingResult = checkingProperty.forAll(Numbers.integers())
-														   .verify(i -> {
-															   Thread.sleep(100);
-															   counter.incrementAndGet();
-														   });
+		var checkingProperty = PropertyDescription.property().forAll(Numbers.integers())
+												  .verify(i -> Thread.sleep(100));
 
 		// Should take about 1 second (10 * 100ms)
+		var checkingResult = PropertyValidator.forProperty(checkingProperty).validate(strategy);
 		assertThat(checkingResult.isSuccessful()).isTrue();
 		assertThat(checkingResult.countTries()).isEqualTo(10);
 		assertThat(checkingResult.countChecks()).isEqualTo(checkingResult.countTries());
