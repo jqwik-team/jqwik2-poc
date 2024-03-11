@@ -206,7 +206,7 @@ class PropertyValidationTests {
 		assertThat(result.isFailed()).isTrue();
 	}
 
-	// @Example
+	@Example
 	void edgeCasesMode_MIXIN() {
 		PropertyValidationStrategy strategy =
 			PropertyValidationStrategy.builder()
@@ -221,10 +221,10 @@ class PropertyValidationTests {
 									  .withConcurrency(PropertyValidationStrategy.ConcurrencyMode.SINGLE_THREAD)
 									  .build();
 
-		var property = new OLD_JqwikProperty(strategy);
-
 		List<Integer> values = Collections.synchronizedList(new ArrayList<>());
-		PropertyRunResult resultExhaustive = property.forAll(Numbers.integers()).verify(values::add);
+		var property = PropertyDescription.property().forAll(Numbers.integers()).verify(values::add);
+
+		PropertyValidationResult resultExhaustive = PropertyValidator.forProperty(property).validate(strategy);
 		assertThat(resultExhaustive.isSuccessful()).isTrue();
 		assertThat(resultExhaustive.countTries()).isEqualTo(1000);
 
