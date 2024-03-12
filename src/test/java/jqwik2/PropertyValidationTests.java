@@ -17,6 +17,7 @@ import org.mockito.*;
 import org.opentest4j.*;
 
 import net.jqwik.api.*;
+import net.jqwik.api.lifecycle.*;
 
 import static jqwik2.api.recording.Recording.list;
 import static jqwik2.api.recording.Recording.*;
@@ -27,7 +28,7 @@ import static org.mockito.Mockito.*;
 
 class PropertyValidationTests {
 
-	// @BeforeProperty
+	@BeforeProperty
 	void resetFailureDatabase() {
 		JqwikDefaults.defaultFailureDatabase().clear();
 	}
@@ -342,44 +343,47 @@ class PropertyValidationTests {
 	@Group
 	class AfterFailureModes {
 
-		// @Example
-		void afterFailureMode_REPLAY() {
+		@Example
+		void REPLAY() {
 			var strategy = PropertyValidationStrategy.builder()
 													 .withAfterFailure(PropertyValidationStrategy.AfterFailureMode.REPLAY)
 													 .build();
-			var property = new OLD_JqwikProperty("idFor_REPLAY", strategy);
 
 			var integers = Numbers.integers().between(-1000, 1000);
-
-			List<Integer> initiallyTriedValues = new ArrayList<>();
-			PropertyRunResult initialResult = property.forAll(integers).check(i -> {
-				initiallyTriedValues.add(i);
+			List<Integer> triedValues = new ArrayList<>();
+			var property = PropertyDescription.property("idFor_REPLAY").forAll(integers).check(i -> {
+				triedValues.add(i);
 				return i > -10 && i < 10;
 			});
+
+			var initialResult = PropertyValidator.forProperty(property).validate(strategy);
 			assertThat(initialResult.isFailed()).isTrue();
 			assertThat(initialResult.countTries()).isGreaterThan(0);
 
-			List<Integer> replayedTriedValues = new ArrayList<>();
-			PropertyRunResult replayedResult = property.forAll(integers).check(i -> {
-				replayedTriedValues.add(i);
-				return i > -10 && i < 10;
-			});
+			List<Integer> initiallyTriedValues = new ArrayList<>(triedValues);
+
+			triedValues.clear();
+			var replayedResult = PropertyValidator.forProperty(property).validate(strategy);
 			assertThat(replayedResult).isEqualTo(initialResult);
-			assertThat(replayedTriedValues).isEqualTo(initiallyTriedValues);
+
+			assertThat(triedValues).isEqualTo(initiallyTriedValues);
 		}
 
-		// @Example
-		void afterFailureMode_SAMPLES_ONLY() {
+		@Example
+		void SAMPLES_ONLY() {
 			var strategy = PropertyValidationStrategy.builder()
 													 .withAfterFailure(PropertyValidationStrategy.AfterFailureMode.SAMPLES_ONLY)
 													 .build();
-			var property = new OLD_JqwikProperty("idFor_SAMPLES_ONLY", strategy);
+
+			String idForSamplesOnly = "idFor_SAMPLES_ONLY";
 
 			var integers = Numbers.integers().between(-1000, 1000);
+			var property = PropertyDescription.property(idForSamplesOnly).forAll(integers)
+											  .check(i -> {
+												  return i > -10 && i < 10;
+											  });
 
-			PropertyRunResult initialResult = property.forAll(integers).check(i -> {
-				return i > -10 && i < 10;
-			});
+			var initialResult = PropertyValidator.forProperty(property).validate(strategy);
 			assertThat(initialResult.isFailed()).isTrue();
 			List<Integer> falsifiedValues = initialResult.falsifiedSamples().stream()
 														 .map(s -> (Integer) s.sample().values().get(0))
@@ -387,10 +391,12 @@ class PropertyValidationTests {
 			assertThat(falsifiedValues).hasSize(2);
 
 			List<Integer> samplesOnlyValues = new ArrayList<>();
-			PropertyRunResult replayedResult = property.forAll(integers).check(i -> {
-				samplesOnlyValues.add(i);
-				return true; // In order to try all previously falsified samples
-			});
+			var propertyForReplay = PropertyDescription.property(idForSamplesOnly).forAll(integers)
+													   .check(i -> {
+														   samplesOnlyValues.add(i);
+														   return true; // In order to try all previously falsified samples
+													   });
+			var replayedResult = PropertyValidator.forProperty(propertyForReplay).validate(strategy);
 			assertThat(replayedResult.countTries()).isEqualTo(2);
 			assertThat(samplesOnlyValues).isEqualTo(falsifiedValues);
 		}

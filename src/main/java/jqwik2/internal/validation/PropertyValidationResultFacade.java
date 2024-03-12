@@ -85,4 +85,17 @@ public class PropertyValidationResultFacade implements PropertyValidationResult 
 			ExceptionSupport.throwAsUnchecked(new TestAbortedException("Property aborted for unknown reason"));
 		}
 	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		PropertyValidationResultFacade that = (PropertyValidationResultFacade) o;
+		return Objects.equals(runResult, that.runResult);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(runResult);
+	}
 }
