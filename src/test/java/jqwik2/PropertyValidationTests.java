@@ -282,7 +282,7 @@ class PropertyValidationTests {
 		assertThat(checkingResult.countChecks()).isEqualTo(checkingResult.countTries());
 	}
 
-	// @Example
+	@Example
 	void failedTryWillStopEndlessRunningProperty() {
 		var strategy = PropertyValidationStrategy.builder()
 												 .withGeneration(RANDOMIZED)
@@ -290,20 +290,21 @@ class PropertyValidationTests {
 												 .withMaxTries(0)
 												 .withMaxRuntime(Duration.ZERO)
 												 .build();
-		var checkingProperty = new OLD_JqwikProperty(strategy);
 
 		AtomicInteger counter = new AtomicInteger();
-		PropertyRunResult checkingResult = checkingProperty.forAll(Numbers.integers())
-														   .verify(i -> {
-															   // System.out.println(counter.get());
-															   counter.incrementAndGet();
-															   try {
-																   Thread.sleep(10);
-															   } catch (InterruptedException ignore) {
-																   // Within a test run the thread can sometimes be interrupted
-															   }
-															   assertThat(counter.get()).isLessThan(100);
-														   });
+		var property = PropertyDescription.property().forAll(Numbers.integers())
+										  .verify(i -> {
+											  counter.incrementAndGet();
+											  try {
+												  Thread.sleep(10);
+											  } catch (InterruptedException ignore) {
+												  // Within a test run the thread can sometimes be interrupted
+											  }
+											  assertThat(counter.get()).isLessThan(100);
+										  });
+
+		// Should take about 1 second (100 * 10ms)
+		var checkingResult = PropertyValidator.forProperty(property).validate(strategy);
 
 		assertThat(checkingResult.isFailed()).isTrue();
 		assertThat(checkingResult.countTries()).isEqualTo(100);
