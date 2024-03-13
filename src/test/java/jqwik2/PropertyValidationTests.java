@@ -17,7 +17,6 @@ import org.mockito.*;
 import org.opentest4j.*;
 
 import net.jqwik.api.*;
-import net.jqwik.api.lifecycle.*;
 
 import static jqwik2.api.description.Classifier.*;
 import static jqwik2.api.recording.Recording.list;
@@ -294,41 +293,68 @@ class PropertyValidationTests {
 	}
 
 	@Group
-	class Classifying {
+	class Classifiers {
 
 		@Example
-		@Disabled
 		void classificationAccepted()  {
+			var strategy = PropertyValidationStrategy.builder()
+													 .withMaxTries(0)
+													 .withMaxRuntime(Duration.ofSeconds(1))
+													 .build();
 			PropertyDescription property =
 				PropertyDescription.property()
 								   .forAll(Numbers.integers())
 								   .classify(List.of(
-									   caseOf(i -> i > 0, "positive", 40.0),
-									   caseOf(i -> i < 0, "negative", 40.0),
+									   caseOf(i -> i > 0, "positive", 45.0),
+									   caseOf(i -> i < 0, "negative", 45.0),
 									   caseOf(i -> i == 0, "zero")
 								   ))
 								   .check(i -> true);
 
-			PropertyValidationResult result = PropertyValidator.forProperty(property).validate();
-			System.out.println(result.countChecks());
-			System.out.println(result.failure());
+			PropertyValidationResult result = PropertyValidator.forProperty(property).validate(strategy);
 			assertThat(result.isSuccessful()).isTrue();
 		}
 
 		@Example
-		@Disabled
 		void classificationRejected()  {
+			var strategy = PropertyValidationStrategy.builder()
+													 .withMaxTries(0)
+													 .withMaxRuntime(Duration.ofSeconds(1))
+													 .build();
+
 			PropertyDescription property =
 				PropertyDescription.property()
 								   .forAll(Numbers.integers())
 								   .classify(List.of(
-									   caseOf(i -> i > 0, "positive", 60.0)
+									   caseOf(i -> i > 0, "positive", 55.0)
 								   ))
 								   .check(i -> true);
 
-			PropertyValidationResult result = PropertyValidator.forProperty(property).validate();
+			PropertyValidationResult result = PropertyValidator.forProperty(property).validate(strategy);
 			assertThat(result.isFailed()).isTrue();
 		}
+
+		@Example
+		void withoutMinPercentages_plainStrategyIsUsed()  {
+			var strategy = PropertyValidationStrategy.builder()
+													 .withMaxTries(999)
+													 .withMaxRuntime(Duration.ofSeconds(1))
+													 .build();
+			PropertyDescription property =
+				PropertyDescription.property()
+								   .forAll(Numbers.integers())
+								   .classify(List.of(
+									   caseOf(i -> i > 0, "positive"),
+									   caseOf(i -> i < 0, "negative"),
+									   caseOf(i -> i == 0, "zero")
+								   ))
+								   .check(i -> true);
+
+			PropertyValidationResult result = PropertyValidator.forProperty(property).validate(strategy);
+			assertThat(result.isSuccessful()).isTrue();
+			assertThat(result.countChecks()).isEqualTo(999);
+		}
+
 	}
 
 	@Group

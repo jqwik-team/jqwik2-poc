@@ -1,5 +1,4 @@
 - New Core API
-    - classification: Hand classifiers to PropertyRun
     - PropertyValidator.validateStatistically(minPercentage, standardDeviation)
     - Report
       - falsified samples, checks, tries, effective seed

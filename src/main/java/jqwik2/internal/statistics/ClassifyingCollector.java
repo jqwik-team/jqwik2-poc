@@ -211,4 +211,8 @@ public class ClassifyingCollector<C> {
 			total.get()
 		);
 	}
+
+	public boolean hasCoverageCheck() {
+		return cases.stream().anyMatch(c -> c.minPercentage() > 0.0);
+	}
 }

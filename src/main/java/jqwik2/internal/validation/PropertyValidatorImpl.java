@@ -30,16 +30,19 @@ public class PropertyValidatorImpl implements PropertyValidator {
 	public PropertyValidationResult validate(PropertyValidationStrategy strategy) {
 		PropertyRunResult result = run(strategy);
 		executeResultCallbacks(result);
-		reportOnClassifiers();
 		return new PropertyValidationResultFacade(result);
 	}
 
 	private PropertyRunResult run(PropertyValidationStrategy strategy) {
 		List<Generator<?>> generators = generators(strategy);
-		Tryable tryable = safeTryable(property.condition());
+		Set<ClassifyingCollector<List<Object>>> collectors = asClassifyingCollectors(property.classifiers());
+		Tryable tryable = safeTryable(property.condition(), collectors);
 		PropertyRun propertyCase = new PropertyRun(generators, tryable);
-		PropertyRunConfiguration runConfiguration = buildRunConfiguration(generators, strategy);
-		return propertyCase.run(runConfiguration);
+		PropertyRunConfiguration runConfiguration = buildRunConfiguration(generators, collectors, strategy);
+		var propertyRunResult = propertyCase.run(runConfiguration);
+		// TODO: Design decent way to report on classifiers
+		reportClassificationResults(collectors);
+		return propertyRunResult;
 	}
 
 	private List<Generator<?>> generators(PropertyValidationStrategy strategy) {
@@ -56,9 +59,10 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		return generators;
 	}
 
-	private Tryable safeTryable(Condition condition) {
+	private Tryable safeTryable(Condition condition, Set<ClassifyingCollector<List<Object>>> collectors) {
 		return Tryable.from(args -> {
 			try {
+				collectors.forEach(c -> c.classify(args));
 				return condition.check(args);
 			} catch (Throwable t) {
 				ExceptionSupport.rethrowIfBlacklisted(t);
@@ -76,39 +80,41 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		};
 	}
 
-	private PropertyRunConfiguration buildRunConfiguration(List<Generator<?>> generators, PropertyValidationStrategy strategy) {
+	private PropertyRunConfiguration buildRunConfiguration(List<Generator<?>> generators,
+														   Set<ClassifyingCollector<List<Object>>> collectors,
+														   PropertyValidationStrategy strategy) {
 		var plainRunConfiguration = new RunConfigurationBuilder(property.id(), generators, strategy, database).build();
-		if (property.classifiers().isEmpty()) {
+		if (!isCoverageCheckPresent(collectors)) {
 			return plainRunConfiguration;
 		}
-		return wrapWithClassifierGuidance(plainRunConfiguration, property.classifiers());
+		return wrapWithClassifierGuidance(plainRunConfiguration, collectors);
+	}
+
+	private static boolean isCoverageCheckPresent(Set<ClassifyingCollector<List<Object>>> collectors) {
+		return collectors.stream().anyMatch(c -> c.hasCoverageCheck());
 	}
 
 	private PropertyRunConfiguration wrapWithClassifierGuidance(
 		PropertyRunConfiguration plainRunConfiguration,
-		List<Classifier> classifiers
+		Set<ClassifyingCollector<List<Object>>> collectors
 	) {
-		// TODO: Collectors must be created before tryable and passed to it
-		var collectors = asClassifyingCollectors(classifiers);
 		return wrapSource(
 			plainRunConfiguration,
 			source -> new StatisticallyGuidedGenerationSource(source, collectors, JqwikDefaults.defaultStandardDeviationThreshold())
 		);
 	}
 
-	private void reportOnClassifiers() {
-		// TODO: Make proper reporting
-		if (classifyingSource != null) {
-			for (var classifier : classifyingSource.classifyingCollectors()) {
-				System.out.println(classifier.counts());
-			}
+	private void reportClassificationResults(Set<ClassifyingCollector<List<Object>>> collectors) {
+		System.out.println("Classification results:");
+		for (var classifier : collectors) {
+			System.out.println(classifier.counts());
 		}
 	}
 
 	private Set<ClassifyingCollector<List<Object>>> asClassifyingCollectors(List<Classifier> classifiers) {
 		return classifiers.stream()
-					  .map(this::asClassifyingCollector)
-					  .collect(Collectors.toSet());
+						  .map(this::asClassifyingCollector)
+						  .collect(Collectors.toSet());
 	}
 
 	private ClassifyingCollector<List<Object>> asClassifyingCollector(Classifier classifier) {
