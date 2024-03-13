@@ -28,11 +28,6 @@ import static org.mockito.Mockito.*;
 
 class PropertyValidationTests {
 
-	@BeforeProperty
-	void resetFailureDatabase() {
-		JqwikDefaults.defaultFailureDatabase().clear();
-	}
-
 	@Example
 	void defaultValidationStrategy() {
 		PropertyValidationStrategy strategy = PropertyValidationStrategy.DEFAULT;
