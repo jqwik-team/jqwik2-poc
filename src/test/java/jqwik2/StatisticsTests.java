@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.*;
 
 import jqwik2.api.*;
 import jqwik2.api.arbitraries.*;
+import jqwik2.api.description.*;
 import jqwik2.api.statistics.*;
 import jqwik2.api.validation.*;
 import jqwik2.internal.*;
@@ -28,96 +29,21 @@ class StatisticsTests {
 												 .withMaxRuntime(Duration.ZERO)
 												 .build();
 
-		var property = new OLD_JqwikProperty(strategy);
 
 		Statistics.Collector.C1<Integer> collector = Statistics.collector("numbers", Integer.class);
 
 		IntegerArbitrary integers = Numbers.integers().between(0, 100);
 
-		// TODO: Replace with property validator
-		PropertyRunResult result = property.forAll(integers).check(i -> {
+		var property = PropertyDescription.property().forAll(integers).check(i -> {
 			collector.collect(i);
 			return true;
 		});
+		PropertyValidator.forProperty(property).validate(strategy);
 
 		// TODO: Check for reasonable values in collector
 		// for (Integer value : collector.values()) {
 		// 	System.out.println("Value " + value + " occurred " + collector.count(value) + " times");
 		// }
-	}
-
-	@Example
-	@Disabled
-	void statisticalCheckSuccessful() {
-		var strategy = PropertyValidationStrategy.builder()
-												 .withGeneration(RANDOMIZED)
-												 .withEdgeCases(PropertyValidationStrategy.EdgeCasesMode.OFF)
-												 .withMaxTries(0)
-												 .withMaxRuntime(Duration.ZERO)
-												 .build();
-		var property = new OLD_JqwikProperty(strategy);
-
-		IntegerArbitrary integers = Numbers.integers().between(0, 100);
-
-		AtomicInteger countEven = new AtomicInteger(0);
-		// PropertyRunResult result = property.forAll(integers).verify(
-		// 	i -> {
-		// 		if (i % 2 == 0) {
-		// 			countEven.incrementAndGet();
-		// 		}
-		// 	},
-		// 	// TODO: API is wrong. The predicate should be i % 2.
-		// 	// check("blabla", i % 2 == 0, p -> p > 0.48)
-		// 	Statistics.check("Even number occurs at least 48%", n -> countEven.get() / n > 0.48)
-		// );
-		// System.out.println(countEven.get() + " of " + result.countChecks());
-		// assertThat(result.isSuccessful()).isTrue();
-	}
-
-	@Example
-	@Disabled
-	void statisticalCheckFailed() {
-		var strategy = PropertyValidationStrategy.builder()
-												 .withGeneration(RANDOMIZED)
-												 .withEdgeCases(PropertyValidationStrategy.EdgeCasesMode.OFF)
-												 .withMaxTries(0)
-												 .withMaxRuntime(Duration.ZERO)
-												 .build();
-
-		var property = new OLD_JqwikProperty(strategy);
-
-		IntegerArbitrary integers = Numbers.integers().between(0, 100);
-
-		AtomicInteger countEven = new AtomicInteger(0);
-		// PropertyRunResult result = property.forAll(integers).verify(
-		// 	i -> {
-		// 		if (i % 2 == 0) {
-		// 			countEven.incrementAndGet();
-		// 		}
-		// 	},
-		// 	Statistics.check("Even number occurs at least 52%", n -> countEven.get() / n > 0.52)
-		// );
-
-		// System.out.println(countEven.get() + " of " + result.countChecks());
-		// System.out.println(result.failureReason().get().getMessage());
-		// assertThat(result.isFailed()).isTrue();
-	}
-
-	@Example
-	void classificationExamples() {
-		var property = new OLD_JqwikProperty();
-
-		// property.forAll(Numbers.integers()).classify(
-		// 	caseOf("Even number", percentage(40), i -> i % 2 == 0).verify(i -> i % 2 == 0),
-		// 	caseOf("Odd number", percentage(40), i -> i % 2 != 0).verify(i -> i % 2 != 0)
-		// );
-
-		// int i = 100;
-		// classify(
-		// 	caseOf("Even number", i -> i % 2 == 0, () -> {
-		//
-		// 	}),
-		// )
 	}
 
 	@Group

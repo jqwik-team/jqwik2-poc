@@ -19,6 +19,7 @@ import org.opentest4j.*;
 import net.jqwik.api.*;
 import net.jqwik.api.lifecycle.*;
 
+import static jqwik2.api.description.Classifier.*;
 import static jqwik2.api.recording.Recording.list;
 import static jqwik2.api.recording.Recording.*;
 import static jqwik2.api.validation.PropertyValidationStrategy.GenerationMode.*;
@@ -305,6 +306,42 @@ class PropertyValidationTests {
 		assertThat(checkingResult.isFailed()).isTrue();
 		assertThat(checkingResult.countTries()).isEqualTo(100);
 		assertThat(checkingResult.countChecks()).isEqualTo(checkingResult.countTries());
+	}
+
+	@Group
+	class Classifying {
+
+		@Example
+		@Disabled("Not yet implemented")
+		void classificationAccepted()  {
+			PropertyDescription property =
+				PropertyDescription.property()
+								   .forAll(Numbers.integers())
+								   .classify(List.of(
+									   caseOf(i -> i > 0, "positive", 40.0),
+									   caseOf(i -> i < 0, "negative", 40.0),
+									   caseOf(i -> i == 0, "zero")
+								   ))
+								   .check(i -> true);
+
+			PropertyValidationResult result = PropertyValidator.forProperty(property).validate();
+			assertThat(result.isSuccessful()).isTrue();
+		}
+
+		@Example
+		@Disabled("Not yet implemented")
+		void classificationRejected()  {
+			PropertyDescription property =
+				PropertyDescription.property()
+								   .forAll(Numbers.integers())
+								   .classify(List.of(
+									   caseOf(i -> i > 0, "positive", 60.0)
+								   ))
+								   .check(i -> true);
+
+			PropertyValidationResult result = PropertyValidator.forProperty(property).validate();
+			assertThat(result.isFailed()).isTrue();
+		}
 	}
 
 	@Group
