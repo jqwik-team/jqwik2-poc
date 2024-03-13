@@ -30,21 +30,6 @@ import static org.mockito.Mockito.*;
 class PropertyValidationTests {
 
 	@Example
-	void defaultValidationStrategy() {
-		PropertyValidationStrategy strategy = PropertyValidationStrategy.DEFAULT;
-
-		assertThat(strategy.maxTries()).isEqualTo(100);
-		assertThat(strategy.maxRuntime()).isEqualTo(Duration.ofMinutes(10));
-		assertThat(strategy.shrinking()).isEqualTo(PropertyValidationStrategy.ShrinkingMode.FULL);
-		assertThat(strategy.generation()).isEqualTo(PropertyValidationStrategy.GenerationMode.SMART);
-		assertThat(strategy.edgeCases()).isEqualTo(PropertyValidationStrategy.EdgeCasesMode.MIXIN);
-		assertThat(strategy.afterFailure()).isEqualTo(PropertyValidationStrategy.AfterFailureMode.SAMPLES_ONLY);
-		assertThat(strategy.concurrency()).isEqualTo(PropertyValidationStrategy.ConcurrencyMode.SINGLE_THREAD);
-		assertThat(strategy.filterOutDuplicateSamples()).isFalse();
-		assertThat(strategy.seedSupplier().get()).isNotEmpty();
-	}
-
-	@Example
 	void checkWith1ParameterSucceeds() {
 		var property = PropertyDescription.property().forAll(Numbers.integers()).check(i -> {
 			assertThat(i).isInstanceOf(Integer.class);

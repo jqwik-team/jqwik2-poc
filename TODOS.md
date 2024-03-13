@@ -1,42 +1,48 @@
-- New JqwikCore API
-    - JqwikCore... (see JqwikCoreAPITests.apiIdeas())
-        - validation
-        - classification
-        - statistical validation
-    - property.analyze(): Find as many failing samples as possible and analyze their commonalities
-    - Report 
-        - falsified samples, checks, tries, effective seed
-        - Allow classifiers and collectors to register themselves for reporting
-    - Make afterFailure attribute multi value, e.g List.of(SAMPLES, REPLAY | RANDOMIZED)
+- New Core API
+    - classification: Hand classifiers to PropertyRun
+    - PropertyValidator.validateStatistically(minPercentage, standardDeviation)
+    - Report
+      - falsified samples, checks, tries, effective seed
+      - Allow classifiers and collectors to register themselves for reporting
+    - Make afterFailure attribute multi value, e.g List.of(SAMPLES, REPLAY |
+      RANDOMIZED)
+        - PropertyAnalyzer: Find as many failing samples as possible and analyze
+          their commonalities
 
 - Additional generators and arbitraries
-    - StringArbitrary: withChar(char... chars), withChar(CharSet chars), withCharRange(from, to)
+    - StringArbitrary: withChar(char... chars), withChar(CharSet chars),
+      withCharRange(from, to)
     - Empty / Null Arbitrary -> When used in combinations, nothing is generated
 
 - Target-based generation and shrinking
-    - simulated annealing: https://www.baeldung.com/java-simulated-annealing-for-traveling-salesman
+    - simulated
+      annealing: https://www.baeldung.com/java-simulated-annealing-for-traveling-salesman
     - see http://proper.softlab.ntua.gr/Publications.html
 
 - Allow JqwikDefaults to be changed programmatically
-
+    - Maybe Introduce Jqwik class and then Jqwik.defaults() and Jqwik.defaults(new JqwikDefaults())
+  
 - Add descriptions to generators
     - Can target type of map / flatMap be inferred for description?
       E.g. by generating a single sample and using its type?
 
-- PropertyCase Execution
+- PropertyRun Execution
     - Fail if ratio checks/tries is too low
 
 - Stateful generators
-  - ActionChain?
-  - Model-based testing?
+    - ActionChain?
+    - Model-based testing?
 
 - Statistics
     - Collect and report statistics
-    - Generate until a statistical measurement is supposed to be stable.
-      - See   https://www.youtube.com/watch?v=NcJOiQlzlXQ&list=PLvL2NEhYV4ZvCRCVlXTfB6-d09K3r0Sxa
-      - See https://projecteuclid.org/journals/annals-of-mathematical-statistics/volume-16/issue-2/Sequential-Tests-of-Statistical-Hypotheses/10.1214/aoms/1177731118.full
-      - https://en.wikipedia.org/wiki/Sequential_probability_ratio_test
-      - Python implementation: https://github.com/Testispuncher/Sequential-Probability-Ratio-Test
+    - Replace ad-hoc approach for stability of classifiers with theoretical sound one:
+        -
+        See   https://www.youtube.com/watch?v=NcJOiQlzlXQ&list=PLvL2NEhYV4ZvCRCVlXTfB6-d09K3r0Sxa
+        -
+        See https://projecteuclid.org/journals/annals-of-mathematical-statistics/volume-16/issue-2/Sequential-Tests-of-Statistical-Hypotheses/10.1214/aoms/1177731118.full
+        - https://en.wikipedia.org/wiki/Sequential_probability_ratio_test
+        - Python
+          implementation: https://github.com/Testispuncher/Sequential-Probability-Ratio-Test
 
 - Shrinking (https://www.drmaciver.com/2019/01/notes-on-test-case-reduction/)
     - Compare shrinkables due to full length if different recording types are
