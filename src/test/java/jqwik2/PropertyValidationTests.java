@@ -297,7 +297,7 @@ class PropertyValidationTests {
 	class Classifying {
 
 		@Example
-		@Disabled("Not yet implemented")
+		@Disabled
 		void classificationAccepted()  {
 			PropertyDescription property =
 				PropertyDescription.property()
@@ -310,11 +310,13 @@ class PropertyValidationTests {
 								   .check(i -> true);
 
 			PropertyValidationResult result = PropertyValidator.forProperty(property).validate();
+			System.out.println(result.countChecks());
+			System.out.println(result.failure());
 			assertThat(result.isSuccessful()).isTrue();
 		}
 
 		@Example
-		@Disabled("Not yet implemented")
+		@Disabled
 		void classificationRejected()  {
 			PropertyDescription property =
 				PropertyDescription.property()

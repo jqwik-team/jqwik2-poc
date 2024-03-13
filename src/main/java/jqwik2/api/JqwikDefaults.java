@@ -53,4 +53,8 @@ public class JqwikDefaults {
 	public static PropertyValidationStrategy.ConcurrencyMode defaultConcurrencyMode() {
 		return PropertyValidationStrategy.ConcurrencyMode.SINGLE_THREAD;
 	}
+
+	public static double defaultStandardDeviationThreshold() {
+		return 3.0;
+	}
 }

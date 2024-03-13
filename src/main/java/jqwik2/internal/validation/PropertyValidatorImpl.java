@@ -1,6 +1,7 @@
 package jqwik2.internal.validation;
 
 import java.util.*;
+import java.util.function.*;
 import java.util.stream.*;
 
 import jqwik2.api.*;
@@ -10,11 +11,15 @@ import jqwik2.api.recording.*;
 import jqwik2.api.support.*;
 import jqwik2.api.validation.*;
 import jqwik2.internal.*;
+import jqwik2.internal.statistics.*;
+
+import static jqwik2.internal.PropertyRunConfiguration.*;
 
 public class PropertyValidatorImpl implements PropertyValidator {
 
 	private final PropertyDescription property;
 	private FailureDatabase database;
+	private StatisticallyGuidedGenerationSource classifyingSource = null;
 
 	public PropertyValidatorImpl(PropertyDescription property) {
 		this.property = property;
@@ -25,6 +30,7 @@ public class PropertyValidatorImpl implements PropertyValidator {
 	public PropertyValidationResult validate(PropertyValidationStrategy strategy) {
 		PropertyRunResult result = run(strategy);
 		executeResultCallbacks(result);
+		reportOnClassifiers();
 		return new PropertyValidationResultFacade(result);
 	}
 
@@ -71,7 +77,56 @@ public class PropertyValidatorImpl implements PropertyValidator {
 	}
 
 	private PropertyRunConfiguration buildRunConfiguration(List<Generator<?>> generators, PropertyValidationStrategy strategy) {
-		return new RunConfigurationBuilder(property.id(), generators, strategy, database).build();
+		var plainRunConfiguration = new RunConfigurationBuilder(property.id(), generators, strategy, database).build();
+		if (property.classifiers().isEmpty()) {
+			return plainRunConfiguration;
+		}
+		return wrapWithClassifierGuidance(plainRunConfiguration, property.classifiers());
+	}
+
+	private PropertyRunConfiguration wrapWithClassifierGuidance(
+		PropertyRunConfiguration plainRunConfiguration,
+		List<Classifier> classifiers
+	) {
+		// TODO: Collectors must be created before tryable and passed to it
+		var collectors = asClassifyingCollectors(classifiers);
+		return wrapSource(
+			plainRunConfiguration,
+			source -> new StatisticallyGuidedGenerationSource(source, collectors, JqwikDefaults.defaultStandardDeviationThreshold())
+		);
+	}
+
+	private void reportOnClassifiers() {
+		// TODO: Make proper reporting
+		if (classifyingSource != null) {
+			for (var classifier : classifyingSource.classifyingCollectors()) {
+				System.out.println(classifier.counts());
+			}
+		}
+	}
+
+	private Set<ClassifyingCollector<List<Object>>> asClassifyingCollectors(List<Classifier> classifiers) {
+		return classifiers.stream()
+					  .map(this::asClassifyingCollector)
+					  .collect(Collectors.toSet());
+	}
+
+	private ClassifyingCollector<List<Object>> asClassifyingCollector(Classifier classifier) {
+		var collector = new ClassifyingCollector<List<Object>>();
+		for (Classifier.Case<?> aCase : classifier.cases()) {
+			collector.addCase(aCase.label(), aCase.minPercentage(), asPredicate(aCase));
+		}
+		return collector;
+	}
+
+	private static Predicate<List<Object>> asPredicate(Classifier.Case<?> aCase) {
+		return args -> {
+			try {
+				return aCase.condition().check(args);
+			} catch (Throwable e) {
+				return false;
+			}
+		};
 	}
 
 	private void executeResultCallbacks(PropertyRunResult result) {

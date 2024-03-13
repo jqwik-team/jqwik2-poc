@@ -28,6 +28,10 @@ public class StatisticallyGuidedGenerationSource implements IterableSampleSource
 		return new ClassifiedIterator();
 	}
 
+	public Set<ClassifyingCollector<List<Object>>> classifyingCollectors() {
+		return classifiers;
+	}
+
 	private class ClassifiedIterator implements Iterator<SampleSource>, Guidance {
 
 		private final Iterator<SampleSource> source = randomSource.iterator();
