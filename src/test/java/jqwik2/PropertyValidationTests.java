@@ -405,7 +405,7 @@ class PropertyValidationTests {
 	@Group
 	class GenerationModes {
 
-		// @Example
+		@Example
 		void generationMode_EXHAUSTIVE() {
 			PropertyValidationStrategy strategy =
 				PropertyValidationStrategy.builder()
@@ -415,24 +415,22 @@ class PropertyValidationTests {
 										  .withConcurrency(PropertyValidationStrategy.ConcurrencyMode.SINGLE_THREAD)
 										  .build();
 
-			var property = new OLD_JqwikProperty(strategy);
-
-			PropertyRunResult result = property.forAll(
+			var property = PropertyDescription.property().forAll(
 				Numbers.integers().between(0, 3),
 				Numbers.integers().between(1, 2)
 			).verify((i1, i2) -> {
-				// System.out.println(i1 + " " + i2);
 				assertThat(i1).isBetween(0, 3);
 				assertThat(i2).isBetween(1, 2);
 			});
 
+			var result = PropertyValidator.forProperty(property).validate(strategy);
 			assertThat(result.isSuccessful()).isTrue();
 			assertThat(result.countTries()).isEqualTo(8);
 			assertThat(result.countChecks()).isEqualTo(8);
 		}
 
-		// @Example
-		void generationMode_SMART() {
+		@Example
+		void generationMode_SMART_chooseExhaustive() {
 			PropertyValidationStrategy strategy =
 				PropertyValidationStrategy.builder()
 										  .withMaxTries(100)
@@ -443,25 +441,42 @@ class PropertyValidationTests {
 										  .withConcurrency(PropertyValidationStrategy.ConcurrencyMode.SINGLE_THREAD)
 										  .build();
 
-			var property = new OLD_JqwikProperty(strategy);
-
-			PropertyRunResult resultExhaustive = property.forAll(
+			var exhaustiveProperty = PropertyDescription.property().forAll(
 				Numbers.integers().between(0, 3),
 				Numbers.integers().between(1, 2)
-			).verify((i1, i2) -> {});
+			).verify((i1, i2) -> {
+				assertThat(i1).isBetween(0, 3);
+				assertThat(i2).isBetween(1, 2);
+			});
+
+			var resultExhaustive = PropertyValidator.forProperty(exhaustiveProperty).validate(strategy);
 			assertThat(resultExhaustive.isSuccessful()).isTrue();
 			assertThat(resultExhaustive.countTries()).isEqualTo(8);
+		}
 
-			// 100 * 2 > 100 => randomized generation
-			PropertyRunResult resultRandomized = property.forAll(
+		@Example
+		void generationMode_SMART_chooseRandomize() {
+			PropertyValidationStrategy strategy =
+				PropertyValidationStrategy.builder()
+										  .withMaxTries(100)
+										  .withMaxRuntime(Duration.ofMinutes(10))
+										  .withFilterOutDuplicateSamples(false)
+										  .withSeedSupplier(RandomChoice::generateRandomSeed)
+										  .withGeneration(PropertyValidationStrategy.GenerationMode.SMART)
+										  .withConcurrency(PropertyValidationStrategy.ConcurrencyMode.SINGLE_THREAD)
+										  .build();
+
+			var randomizedProperty = PropertyDescription.property().forAll(
 				Numbers.integers().between(1, 100),
 				Numbers.integers().between(0, 1)
 			).verify((i1, i2) -> {});
+
+			var resultRandomized = PropertyValidator.forProperty(randomizedProperty).validate(strategy);
 			assertThat(resultRandomized.isSuccessful()).isTrue();
 			assertThat(resultRandomized.countTries()).isEqualTo(100);
 		}
 
-		// @Example
+		@Example
 		void generationMode_SAMPLES() {
 			var integers = Numbers.integers();
 			var generator = SampleGenerator.from(integers.generator());
@@ -494,15 +509,15 @@ class PropertyValidationTests {
 										  .withGeneration(PropertyValidationStrategy.GenerationMode.SAMPLES)
 										  .withConcurrency(PropertyValidationStrategy.ConcurrencyMode.SINGLE_THREAD)
 										  .build();
-			var property = new OLD_JqwikProperty(strategy);
 
 			List<Integer> values = Collections.synchronizedList(new ArrayList<>());
-			PropertyRunResult resultExhaustive = property.forAll(integers).verify(values::add);
-			assertThat(resultExhaustive.countTries()).isEqualTo(sampleValues.size());
+			var property = PropertyDescription.property().forAll(integers).verify(values::add);
+			var resultSamples = PropertyValidator.forProperty(property).validate(strategy);
+			assertThat(resultSamples.countTries()).isEqualTo(sampleValues.size());
 			assertThat(values).isEqualTo(sampleValues);
 		}
 
-		// @Example
+		@Example
 		void generationMode_GROWING() {
 			PropertyValidationStrategy strategy =
 				PropertyValidationStrategy.builder()
@@ -514,17 +529,15 @@ class PropertyValidationTests {
 										  .build();
 
 
-			var property = new OLD_JqwikProperty(strategy);
-
-			PropertyRunResult result = property.forAll(
+			var property = PropertyDescription.property().forAll(
 				Numbers.integers().between(-100, 100),
 				Numbers.integers().between(10, 20)
 			).verify((i1, i2) -> {
-				// System.out.println(i1 + " " + i2);
 				assertThat(i1).isBetween(-100, 100);
 				assertThat(i2).isBetween(10, 20);
 			});
 
+			var result = PropertyValidator.forProperty(property).validate(strategy);
 			assertThat(result.isSuccessful()).isTrue();
 			assertThat(result.countTries()).isEqualTo(100);
 			assertThat(result.countChecks()).isEqualTo(100);
