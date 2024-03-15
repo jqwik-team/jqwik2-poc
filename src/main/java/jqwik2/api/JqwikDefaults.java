@@ -57,4 +57,27 @@ public class JqwikDefaults {
 	public static double defaultStandardDeviationThreshold() {
 		return 3.0;
 	}
+
+	public static Publisher defaultPublisher() {
+		return new Publisher() {
+			@Override
+			public void report(String text) {
+				System.out.print(text);
+			}
+
+			@Override
+			public void reportLine(String text) {
+				System.out.println(text);
+			}
+
+			@Override
+			public boolean supportsAnsiCodes() {
+				return true;
+			}
+		};
+	}
+
+	public static boolean publishOnlyFailedResults() {
+		return false;
+	}
 }

@@ -18,12 +18,15 @@ import static jqwik2.internal.PropertyRunConfiguration.*;
 public class PropertyValidatorImpl implements PropertyValidator {
 
 	private final PropertyDescription property;
+	private final DefaultReporter reporter;
+
 	private FailureDatabase database;
 	private StatisticallyGuidedGenerationSource classifyingSource = null;
 
 	public PropertyValidatorImpl(PropertyDescription property) {
 		this.property = property;
 		this.database = JqwikDefaults.defaultFailureDatabase();
+		this.reporter = new DefaultReporter(JqwikDefaults.defaultPublisher());
 	}
 
 	@Override
@@ -37,12 +40,27 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		List<Generator<?>> generators = generators(strategy);
 		Set<ClassifyingCollector<List<Object>>> collectors = asClassifyingCollectors(property.classifiers());
 		Tryable tryable = safeTryable(property.condition(), collectors);
-		PropertyRun propertyCase = new PropertyRun(generators, tryable);
+		PropertyRun propertyRun = new PropertyRun(generators, tryable);
+
 		PropertyRunConfiguration runConfiguration = buildRunConfiguration(generators, collectors, strategy);
-		var propertyRunResult = propertyCase.run(runConfiguration);
-		// TODO: Design decent way to report on classifiers
-		reportClassificationResults(collectors);
+		// TODO: Report configuration parameters (generation, maxTries, maxDuration, shrinking, edge cases, concurrency)
+
+		// TODO: Let propertyRun report configuration parameter (seed)
+		var propertyRunResult = propertyRun.run(runConfiguration);
+
+		// TODO: Report result (status, tries, checks, time)
+
+		// TODO: Report falsified samples
+
+		reportClassifierResults(collectors);
+
+		publishFinalReport();
+
 		return propertyRunResult;
+	}
+
+	private void publishFinalReport() {
+		reporter.publishReport();
 	}
 
 	private List<Generator<?>> generators(PropertyValidationStrategy strategy) {
@@ -104,10 +122,13 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		);
 	}
 
-	private void reportClassificationResults(Set<ClassifyingCollector<List<Object>>> collectors) {
-		System.out.println("Classification results:");
+	private void reportClassifierResults(Set<ClassifyingCollector<List<Object>>> collectors) {
+		if (collectors.isEmpty()) {
+			return;
+		}
 		for (var classifier : collectors) {
-			System.out.println(classifier.counts());
+			// TODO: Hand in report with labels, counts, percentages and minPercentages
+			reporter.appendToReport(Reporter.CATEGORY_CLASSIFIER, Integer.toString(classifier.total()), classifier.percentages());
 		}
 	}
 
