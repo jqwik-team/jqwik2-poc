@@ -1,7 +1,8 @@
 - New Core API
     - PropertyValidator.validateStatistically(minPercentage, standardDeviation)
     - Report
-      - falsified samples, checks, tries, effective seed
+      - falsified samples, checks, tries, effective seed, time
+      - shrinking steps
       - Allow classifiers and collectors to register themselves for reporting
     - Make afterFailure attribute multi value, e.g List.of(SAMPLES, REPLAY |
       RANDOMIZED)

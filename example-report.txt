@@ -1,0 +1,51 @@
+my.project.Experiments:myFirstProperty =
+  java.lang.AssertionError:
+    Expecting actual:
+      100
+    to be less than:
+      100
+
+|---------------result--------------|
+  status  | FAILED
+  failure | java.lang.AssertionError
+  tries   | 4
+  checks  | 4
+  time    | 123 ms
+
+|-----------parameters---------------|
+  generation   | RANDOMIZED
+  seed         | -1622007228579086264
+  max tries    | 100
+  max duration | 1 min
+  shrinking    | FULL
+  edge cases   | MIXIN
+
+
+Original Falsified Sample
+-------------------------
+  i: 8498
+
+  Original Failure
+  ----------------
+  java.lang.AssertionError:
+    Expecting actual:
+      8498
+    to be less than:
+      100
+
+Smallest Falsified Sample (4 steps)
+-----------------------------------
+  i: 100
+
+
+java.lang.AssertionError:
+Expecting actual:
+  100
+to be less than:
+  100
+
+	at my.project.Experiments.myFirstProperty(Experiments.java:12)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at net.jqwik.engine.execution.CheckedPropertyFactory.lambda$createRawFunction$1(CheckedPropertyFactory.java:84)
+	at net.jqwik.engine.execution.CheckedPropertyFactory.lambda$createRawFunction$2(CheckedPropertyFactory.java:91)
+	at java.base/java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:188)
