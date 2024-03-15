@@ -20,6 +20,15 @@ my.project.Experiments:myFirstProperty =
   shrinking    | FULL
   edge cases   | MIXIN
 
+|---classifier (18926)---|
+  positive  (9193) | 48 % (> 45%)
+  negative  (9420) | 49 % (> 45%)
+  zero       (313) |  3 % (>  1%)
+
+|----------numbers (32)----------|
+  not divisible by 3 (23) | 72 %
+  divisible by 3     ( 9) | 28 %
+
 
 Original Falsified Sample
 -------------------------
