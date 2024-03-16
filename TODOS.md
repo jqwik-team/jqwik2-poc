@@ -1,6 +1,7 @@
 - New Core API
     - PropertyValidator.validateStatistically(minPercentage, standardDeviation)
     - Reporting
+      - Use approval tests for reporting
       - falsified samples
       - shrinking steps
       - run time

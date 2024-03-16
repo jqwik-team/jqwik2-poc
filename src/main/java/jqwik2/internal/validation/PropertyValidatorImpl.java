@@ -63,17 +63,32 @@ public class PropertyValidatorImpl implements PropertyValidator {
 	}
 
 	private void publishRunReport(PropertyValidationResult result) {
-		var status = result.status();
-		reporter.appendToReport(Reporter.CATEGORY_RESULT, "status", status);
+		reporter.appendToReport(Reporter.CATEGORY_RESULT, "status", result.status());
 		result.failure()
 			  .ifPresent(failure -> reporter.appendToReport(Reporter.CATEGORY_RESULT, "failure", failure.getClass().getName()));
 		reporter.appendToReport(Reporter.CATEGORY_RESULT, "# tries", result.countTries());
 		reporter.appendToReport(Reporter.CATEGORY_RESULT, "# checks", result.countChecks());
 
 		publisher.reportLine("");
-		var headline = "timestamp = %s, %s (%s) =".formatted(LocalDateTime.now(), property.id(), status);
+		var headline = "timestamp = %s, %s (%s) =".formatted(LocalDateTime.now(), property.id(), result.status());
 		publisher.reportLine(headline);
+
+		result.failure().ifPresent(failure -> reportFailure(failure));
+
 		reporter.publishReport(publisher);
+	}
+
+	private void reportFailure(Throwable throwable) {
+		String assertionClass = throwable.getClass().getName();
+		publisher.report(String.format("  %s", assertionClass));
+		List<String> assertionMessageLines = throwable.getMessage().lines().toList();
+		if (!assertionMessageLines.isEmpty()) {
+			publisher.report(":");
+			for (String line : assertionMessageLines) {
+				publisher.report(String.format("%n    %s", line));
+			}
+		}
+		publisher.report(String.format("%n"));
 	}
 
 	private boolean shouldPublishResult(PropertyValidationStatus status) {
