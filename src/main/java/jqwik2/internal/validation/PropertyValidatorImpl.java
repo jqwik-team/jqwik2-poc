@@ -20,14 +20,16 @@ public class PropertyValidatorImpl implements PropertyValidator {
 
 	private final PropertyDescription property;
 	private final DefaultReporter reporter;
-	private final Publisher publisher;
 
 	private FailureDatabase database;
+	private Publisher publisher;
+	private boolean publishOnlyFailedResults;
 
 	public PropertyValidatorImpl(PropertyDescription property) {
 		this.property = property;
 		this.database = JqwikDefaults.defaultFailureDatabase();
 		this.publisher = JqwikDefaults.defaultPublisher();
+		this.publishOnlyFailedResults = JqwikDefaults.publishOnlyFailedResults();
 		this.reporter = new DefaultReporter(publisher);
 	}
 
@@ -59,7 +61,7 @@ public class PropertyValidatorImpl implements PropertyValidator {
 
 	private void publishRunReport(PropertyValidationResult result) {
 		var status = result.status();
-		if (status == PropertyValidationStatus.SUCCESSFUL && JqwikDefaults.publishOnlyFailedResults()) {
+		if (status == PropertyValidationStatus.SUCCESSFUL && publishOnlyFailedResults) {
 			return;
 		}
 
@@ -218,5 +220,15 @@ public class PropertyValidatorImpl implements PropertyValidator {
 	@Override
 	public void failureDatabase(FailureDatabase database) {
 		this.database = database;
+	}
+
+	@Override
+	public void publisher(Publisher publisher) {
+		this.publisher = publisher;
+	}
+
+	@Override
+	public void publishOnlyFailedResults(boolean publishOnlyFailedResults) {
+		this.publishOnlyFailedResults = publishOnlyFailedResults;
 	}
 }

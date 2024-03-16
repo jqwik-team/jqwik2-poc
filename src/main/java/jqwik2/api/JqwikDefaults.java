@@ -78,6 +78,6 @@ public class JqwikDefaults {
 	}
 
 	public static boolean publishOnlyFailedResults() {
-		return false;
+		return true;
 	}
 }
