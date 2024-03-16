@@ -19,7 +19,7 @@ public interface PropertyValidator {
 
 	void publisher(Publisher publisher);
 
-	void publishOnlyFailedResults(boolean publishOnlyFailedResults);
+	void publishSuccessfulResults(boolean publishSuccessfulResults);
 
 	PropertyValidationResult validate(PropertyValidationStrategy strategy);
 }

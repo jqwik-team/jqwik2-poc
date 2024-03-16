@@ -7,10 +7,8 @@ import jqwik2.internal.*;
 
 public class DefaultReporter implements Reporter {
 	private final Map<String, List<Pair<String, Object>>> report = new LinkedHashMap<>();
-	private final Publisher platformPublisher;
 
-	DefaultReporter(Publisher platformPublisher) {
-		this.platformPublisher = platformPublisher;
+	DefaultReporter() {
 		List.of(Reporter.CATEGORY_RESULT, Reporter.CATEGORY_PARAMETER)
 				.forEach(category -> report.put(category, new ArrayList<>()));
 	}
@@ -20,17 +18,17 @@ public class DefaultReporter implements Reporter {
 		report.computeIfAbsent(category, k -> new ArrayList<>()).add(Pair.of(key, value));
 	}
 
-	public void publishReport() {
+	public void publishReport(Publisher publisher) {
 		report.forEach((category, pairs) -> {
 			if (pairs.isEmpty()) {
 				return;
 			}
-			platformPublisher.reportLine("");
+			publisher.reportLine("");
 
 			// TODO: Publish nicely formatted according to example-report.txt
-			platformPublisher.reportLine("|--" + category + "--|");
+			publisher.reportLine("|--" + category + "--|");
 			for (Pair<String, Object> keyValue : pairs) {
-				platformPublisher.reportLine("  " + keyValue.first() + " | " + keyValue.second());
+				publisher.reportLine("  " + keyValue.first() + " | " + keyValue.second());
 			}
 		});
 	}

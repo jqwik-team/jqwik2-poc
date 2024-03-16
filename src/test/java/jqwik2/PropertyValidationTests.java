@@ -302,7 +302,7 @@ class PropertyValidationTests {
 	class Classifiers {
 
 		@Example
-		void classificationAccepted()  {
+		void classificationAccepted() {
 			var strategy = PropertyValidationStrategy.builder()
 													 .withMaxTries(0)
 													 .withMaxRuntime(Duration.ofSeconds(1))
@@ -317,12 +317,14 @@ class PropertyValidationTests {
 								   ))
 								   .check(i -> true);
 
-			PropertyValidationResult result = PropertyValidator.forProperty(property).validate(strategy);
+			var validator = PropertyValidator.forProperty(property);
+			validator.publisher(Publisher.STDOUT);
+			PropertyValidationResult result = validator.validate(strategy);
 			assertThat(result.isSuccessful()).isTrue();
 		}
 
 		@Example
-		void classificationRejected()  {
+		void classificationRejected() {
 			var strategy = PropertyValidationStrategy.builder()
 													 .withMaxTries(0)
 													 .withMaxRuntime(Duration.ofSeconds(1))
@@ -336,12 +338,14 @@ class PropertyValidationTests {
 								   ))
 								   .check(i -> true);
 
-			PropertyValidationResult result = PropertyValidator.forProperty(property).validate(strategy);
+			var validator = PropertyValidator.forProperty(property);
+			validator.publisher(Publisher.STDOUT);
+			PropertyValidationResult result = validator.validate(strategy);
 			assertThat(result.isFailed()).isTrue();
 		}
 
 		@Example
-		void withoutMinPercentages_plainStrategyIsUsed()  {
+		void withoutMinPercentages_plainStrategyIsUsed() {
 			var strategy = PropertyValidationStrategy.builder()
 													 .withMaxTries(999)
 													 .withMaxRuntime(Duration.ofSeconds(1))
@@ -356,7 +360,9 @@ class PropertyValidationTests {
 								   ))
 								   .check(i -> true);
 
-			PropertyValidationResult result = PropertyValidator.forProperty(property).validate(strategy);
+			var validator = PropertyValidator.forProperty(property);
+			validator.publisher(Publisher.STDOUT);
+			PropertyValidationResult result = validator.validate(strategy);
 			assertThat(result.isSuccessful()).isTrue();
 			assertThat(result.countChecks()).isEqualTo(999);
 		}

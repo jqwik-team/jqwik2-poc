@@ -23,14 +23,14 @@ public class PropertyValidatorImpl implements PropertyValidator {
 
 	private FailureDatabase database;
 	private Publisher publisher;
-	private boolean publishOnlyFailedResults;
+	private boolean publishSuccessfulResults;
 
 	public PropertyValidatorImpl(PropertyDescription property) {
 		this.property = property;
 		this.database = JqwikDefaults.defaultFailureDatabase();
 		this.publisher = JqwikDefaults.defaultPublisher();
-		this.publishOnlyFailedResults = JqwikDefaults.publishOnlyFailedResults();
-		this.reporter = new DefaultReporter(publisher);
+		this.publishSuccessfulResults = JqwikDefaults.defaultPublishSuccessfulResults();
+		this.reporter = new DefaultReporter();
 	}
 
 	@Override
@@ -41,7 +41,10 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		executeResultCallbacks(result);
 
 		PropertyValidationResult validationResult = new PropertyValidationResultFacade(result);
-		publishRunReport(validationResult);
+
+		if (shouldPublishResult(validationResult.status())) {
+			publishRunReport(validationResult);
+		}
 
 		publishClassifyingReports(collectors);
 
@@ -61,10 +64,6 @@ public class PropertyValidatorImpl implements PropertyValidator {
 
 	private void publishRunReport(PropertyValidationResult result) {
 		var status = result.status();
-		if (status == PropertyValidationStatus.SUCCESSFUL && publishOnlyFailedResults) {
-			return;
-		}
-
 		reporter.appendToReport(Reporter.CATEGORY_RESULT, "status", status);
 		result.failure()
 			  .ifPresent(failure -> reporter.appendToReport(Reporter.CATEGORY_RESULT, "failure", failure.getClass().getName()));
@@ -74,7 +73,11 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		publisher.reportLine("");
 		var headline = "timestamp = %s, %s (%s) =".formatted(LocalDateTime.now(), property.id(), status);
 		publisher.reportLine(headline);
-		reporter.publishReport();
+		reporter.publishReport(publisher);
+	}
+
+	private boolean shouldPublishResult(PropertyValidationStatus status) {
+		return status != PropertyValidationStatus.SUCCESSFUL || publishSuccessfulResults;
 	}
 
 	private List<Generator<?>> generators(PropertyValidationStrategy strategy) {
@@ -228,7 +231,7 @@ public class PropertyValidatorImpl implements PropertyValidator {
 	}
 
 	@Override
-	public void publishOnlyFailedResults(boolean publishOnlyFailedResults) {
-		this.publishOnlyFailedResults = publishOnlyFailedResults;
+	public void publishSuccessfulResults(boolean publishSuccessfulResults) {
+		this.publishSuccessfulResults = publishSuccessfulResults;
 	}
 }

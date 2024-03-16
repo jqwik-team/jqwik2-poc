@@ -59,25 +59,10 @@ public class JqwikDefaults {
 	}
 
 	public static Publisher defaultPublisher() {
-		return new Publisher() {
-			@Override
-			public void report(String text) {
-				System.out.print(text);
-			}
-
-			@Override
-			public void reportLine(String text) {
-				System.out.println(text);
-			}
-
-			@Override
-			public boolean supportsAnsiCodes() {
-				return true;
-			}
-		};
+		return Publisher.NULL;
 	}
 
-	public static boolean publishOnlyFailedResults() {
+	public static boolean defaultPublishSuccessfulResults() {
 		return true;
 	}
 }
