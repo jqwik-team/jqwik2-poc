@@ -33,35 +33,42 @@ public class PropertyValidatorImpl implements PropertyValidator {
 
 	@Override
 	public PropertyValidationResult validate(PropertyValidationStrategy strategy) {
-		PropertyRunResult result = run(strategy);
-		executeResultCallbacks(result);
-		return new PropertyValidationResultFacade(result);
-	}
-
-	private PropertyRunResult run(PropertyValidationStrategy strategy) {
-		List<Generator<?>> generators = generators(strategy);
 		Set<ClassifyingCollector<List<Object>>> collectors = asClassifyingCollectors(property.classifiers());
-		Tryable tryable = safeTryable(property.condition(), collectors);
-		PropertyRun propertyRun = new PropertyRun(generators, tryable);
 
-		PropertyRunConfiguration runConfiguration = buildRunConfiguration(generators, collectors, strategy);
-		var propertyRunResult = propertyRun.run(runConfiguration);
+		PropertyRunResult result = run(strategy, collectors);
+		executeResultCallbacks(result);
 
-		// TODO: Report result (status, tries, checks, time)
-
-		publishRunReport(propertyRunResult.status());
+		PropertyValidationResult validationResult = new PropertyValidationResultFacade(result);
+		publishRunReport(validationResult);
 
 		publishClassifyingReports(collectors);
 
 		// TODO: Report falsified samples
 
-		return propertyRunResult;
+		return validationResult;
 	}
 
-	private void publishRunReport(PropertyValidationStatus status) {
+	private PropertyRunResult run(PropertyValidationStrategy strategy, Set<ClassifyingCollector<List<Object>>> collectors) {
+		List<Generator<?>> generators = generators(strategy);
+		Tryable tryable = safeTryable(property.condition(), collectors);
+		PropertyRun propertyRun = new PropertyRun(generators, tryable);
+
+		PropertyRunConfiguration runConfiguration = buildRunConfiguration(generators, collectors, strategy);
+		return propertyRun.run(runConfiguration);
+	}
+
+	private void publishRunReport(PropertyValidationResult result) {
+		var status = result.status();
 		if (status == PropertyValidationStatus.SUCCESSFUL && JqwikDefaults.publishOnlyFailedResults()) {
 			return;
 		}
+
+		reporter.appendToReport(Reporter.CATEGORY_RESULT, "status", status);
+		result.failure()
+			  .ifPresent(failure -> reporter.appendToReport(Reporter.CATEGORY_RESULT, "failure", failure.getClass().getName()));
+		reporter.appendToReport(Reporter.CATEGORY_RESULT, "# tries", result.countTries());
+		reporter.appendToReport(Reporter.CATEGORY_RESULT, "# checks", result.countChecks());
+
 		publisher.reportLine("");
 		var headline = "timestamp = %s, %s (%s) =".formatted(LocalDateTime.now(), property.id(), status);
 		publisher.reportLine(headline);

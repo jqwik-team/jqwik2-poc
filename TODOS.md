@@ -1,9 +1,10 @@
 - New Core API
     - PropertyValidator.validateStatistically(minPercentage, standardDeviation)
-    - Report
-      - falsified samples, checks, tries, effective seed, time
+    - Reporting
+      - run time
       - shrinking steps
-      - Allow classifiers and collectors to register themselves for reporting
+      - Do proper formatting in reports according to example-report.txt 
+      - Make publisher interface feasible for use with JUnitPlatform reporting
     - Make afterFailure attribute multi value, e.g List.of(SAMPLES, REPLAY |
       RANDOMIZED)
         - PropertyAnalyzer: Find as many failing samples as possible and analyze
@@ -60,3 +61,7 @@
       search: https://notebook.drmaciver.com/posts/2019-04-30-13:03.html
 
 - Jupiter Extension
+
+- Misc
+    - Loading samples that provide wrong number of gen sources -> IllegalArgumentException
+      Should be ignored and sample be deleted

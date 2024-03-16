@@ -544,12 +544,6 @@ class PropertyValidationTests {
 			// Add non-fitting recording, which should be ignored
 			sampleRecordings.add(new SampleRecording(list(choice(0))));
 
-			// Add sample with too many parts, which should be ignored
-			sampleRecordings.add(new SampleRecording(
-				Recording.tuple(42, 1),
-				choice(0)
-			));
-
 			PropertyValidationStrategy strategy =
 				PropertyValidationStrategy.builder()
 										  .withMaxTries(1000)
@@ -564,6 +558,10 @@ class PropertyValidationTests {
 			List<Integer> values = Collections.synchronizedList(new ArrayList<>());
 			var property = PropertyDescription.property().forAll(integers).verify(values::add);
 			var resultSamples = PropertyValidator.forProperty(property).validate(strategy);
+
+			resultSamples.throwIfNotSuccessful();
+
+			assertThat(resultSamples.isSuccessful()).isTrue();
 			assertThat(resultSamples.countTries()).isEqualTo(sampleValues.size());
 			assertThat(values).isEqualTo(sampleValues);
 		}

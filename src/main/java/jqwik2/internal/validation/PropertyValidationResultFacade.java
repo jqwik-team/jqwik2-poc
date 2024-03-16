@@ -47,10 +47,20 @@ public class PropertyValidationResultFacade implements PropertyValidationResult 
 
 	@Override
 	public Optional<Throwable> failure() {
-		if (!runResult.isFailed()) {
-			return Optional.empty();
+		if (runResult.isFailed()) {
+			return Optional.of(determineFailure());
 		}
-		return Optional.of(determineFailure());
+		if (runResult.isAborted()) {
+			return Optional.of(determineAbortion());
+		}
+		return Optional.empty();
+	}
+
+	private Throwable determineAbortion() {
+		if (runResult.abortionReason().isPresent()) {
+			return runResult.abortionReason().get();
+		}
+		return new TestAbortedException("Property aborted for unknown reason");
 	}
 
 	private Throwable determineFailure() {
