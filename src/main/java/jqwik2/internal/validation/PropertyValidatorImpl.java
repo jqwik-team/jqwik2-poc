@@ -1,6 +1,7 @@
 package jqwik2.internal.validation;
 
 import java.time.*;
+import java.time.temporal.*;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
@@ -70,7 +71,8 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		reporter.appendToReport(Reporter.CATEGORY_RESULT, "# checks", result.countChecks());
 
 		publisher.reportLine("");
-		var headline = "timestamp = %s, %s (%s) =".formatted(LocalDateTime.now(), property.id(), result.status());
+		var timestamp = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+		var headline = "timestamp = %s, %s (%s) =".formatted(timestamp, property.id(), result.status());
 		publisher.reportLine(headline);
 
 		result.failure().ifPresent(failure -> reportFailure(failure));

@@ -1,0 +1,19 @@
+
+timestamp = [Date1], cp (FAILED) =
+  java.lang.AssertionError:
+    failed
+
+|--result--|
+  status | FAILED
+  failure | java.lang.AssertionError
+  # tries | [tries]
+  # checks | [checks]
+
+|--parameters--|
+  generation | SMART (RANDOMIZED)
+  seed | [seed]
+  max tries | 100
+  max runtime | PT10M
+  shrinking | FULL
+  edge cases | MIXIN
+  concurrency | SINGLE_THREAD

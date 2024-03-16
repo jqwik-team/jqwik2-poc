@@ -13,6 +13,9 @@ import jqwik2.api.description.*;
 import jqwik2.api.recording.*;
 import jqwik2.api.validation.*;
 import jqwik2.internal.*;
+import org.approvaltests.*;
+import org.approvaltests.core.*;
+import org.approvaltests.scrubbers.*;
 import org.mockito.*;
 import org.opentest4j.*;
 
@@ -117,7 +120,11 @@ class PropertyValidationTests {
 											  throw failure;
 										  });
 
-		PropertyValidationResult result = PropertyValidator.forProperty(property).validate();
+		StringPublisher publisher = new StringPublisher();
+		PropertyValidationResult result = PropertyValidator
+											  .forProperty(property)
+											  .publisher(publisher)
+											  .validate();
 
 		assertThat(result.isFailed()).isTrue();
 		assertThat(result.failure()).hasValue(failure);
@@ -126,6 +133,44 @@ class PropertyValidationTests {
 
 		// Shrinking usually reduces the initial falsified sample to a minimal falsified sample
 		assertThat(result.falsifiedSamples()).hasSizeGreaterThanOrEqualTo(1);
+
+		Approvals.verify(publisher.contents(), validationReportApprovalTestsOptions());
+	}
+
+	@Example
+	void verifyFailsAndParameterIsShrunk() {
+		var property = PropertyDescription.property()
+										  .forAll(Numbers.integers().between(0, 10000))
+										  .verify(i -> {
+											  assertThat(i).isLessThan(42);
+										  });
+
+		PropertyValidationStrategy strategy = PropertyValidationStrategy.builder()
+																		.withGeneration(RANDOMIZED)
+																		.withEdgeCases(PropertyValidationStrategy.EdgeCasesMode.OFF)
+																		.withShrinking(PropertyValidationStrategy.ShrinkingMode.FULL)
+																		.build();
+		StringPublisher publisher = new StringPublisher();
+		PropertyValidationResult result = PropertyValidator
+											  .forProperty(property)
+											  .publisher(publisher)
+											  .validate(strategy);
+
+		assertThat(result.isFailed()).isTrue();
+
+		assertThat(result.falsifiedSamples()).hasSizeGreaterThanOrEqualTo(1);
+
+		Approvals.verify(publisher.contents(), validationReportApprovalTestsOptions());
+	}
+
+	private static Options validationReportApprovalTestsOptions() {
+		var trimWhitespaceScrubber = new TrimWhitespaceScrubber();
+		var timeStampScrubber = DateScrubber.getScrubberFor("2020-09-10T01:23:45.678Z");
+		var seedScrubber = new RegExScrubber("seed(\\s+)\\|(\\s+)\\d{1,14}", "seed | [seed]");
+		var countTriesScrubber = new RegExScrubber("# tries(\\s+)\\|(\\s+)\\d{1,10}", "# tries | [tries]");
+		var countChecksScrubber = new RegExScrubber("# checks(\\s+)\\|(\\s+)\\d{1,10}", "# checks | [checks]");
+		var scrubbers = Scrubbers.scrubAll(trimWhitespaceScrubber, timeStampScrubber, seedScrubber, countTriesScrubber, countChecksScrubber);
+		return new Options(scrubbers);
 	}
 
 	@Example

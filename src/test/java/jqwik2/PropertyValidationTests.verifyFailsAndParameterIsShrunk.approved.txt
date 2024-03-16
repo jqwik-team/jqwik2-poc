@@ -1,0 +1,23 @@
+
+timestamp = [Date1], jqwik2.PropertyValidationTests#verifyFailsAndParameterIsShrunk (FAILED) =
+  java.lang.AssertionError:
+
+    Expecting actual:
+      42
+    to be less than:
+      42
+
+|--result--|
+  status | FAILED
+  failure | java.lang.AssertionError
+  # tries | [tries]
+  # checks | [checks]
+
+|--parameters--|
+  generation | RANDOMIZED
+  seed | [seed]
+  max tries | 100
+  max runtime | PT10M
+  shrinking | FULL
+  edge cases | OFF
+  concurrency | SINGLE_THREAD
