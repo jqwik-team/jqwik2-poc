@@ -11,7 +11,7 @@ public class DefaultReporter implements Reporter {
 
 	DefaultReporter(Publisher platformPublisher) {
 		this.platformPublisher = platformPublisher;
-		List.of(Reporter.CATEGORY_RESULT, Reporter.CATEGORY_PARAMETER, Reporter.CATEGORY_CLASSIFIER)
+		List.of(Reporter.CATEGORY_RESULT, Reporter.CATEGORY_PARAMETER)
 				.forEach(category -> report.put(category, new ArrayList<>()));
 	}
 

@@ -24,15 +24,19 @@ public class ClassifyingCollector<C> {
 	static final DecimalFormat PERCENTAGE_FORMAT = new DecimalFormat("#.0###", new DecimalFormatSymbols(Locale.US));
 
 	private final List<ClassifyingCollector.Case<C>> cases = new ArrayList<>();
+
 	private final Map<ClassifyingCollector.Case<C>, Integer> counts = new HashMap<>();
 	private final Map<ClassifyingCollector.Case<C>, Double> sumOfPercentages = new HashMap<>();
 	private final Map<ClassifyingCollector.Case<C>, Double> sumOfPercentageSquares = new HashMap<>();
 	private final AtomicInteger total = new AtomicInteger(0);
-
 	private int minTries = 0;
 
 	public ClassifyingCollector() {
 		initializeCase(defaultCase());
+	}
+
+	public List<String> labels() {
+		return cases.stream().map(Case::label).toList();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -107,6 +111,23 @@ public class ClassifyingCollector<C> {
 						 .filter(c -> c.label().equals(label))
 						 .findFirst();
 		return aCase.map(this::percentage).orElse(0.0);
+	}
+
+	public Double minPercentage(String label) {
+		var aCase = cases.stream()
+						 .filter(c -> c.label().equals(label))
+						 .findFirst();
+		return aCase.map(c -> c.minPercentage).orElse(0.0);
+	}
+
+	public int count(String label) {
+		var aCase = cases.stream()
+						 .filter(c -> c.label().equals(label))
+						 .findFirst();
+		if (aCase.isEmpty()) {
+			throw new IllegalArgumentException("No such case: " + label);
+		}
+		return counts.getOrDefault(aCase.get(), 0);
 	}
 
 	public Map<String, Double> percentages() {

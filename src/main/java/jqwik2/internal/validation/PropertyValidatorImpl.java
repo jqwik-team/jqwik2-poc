@@ -19,14 +19,15 @@ public class PropertyValidatorImpl implements PropertyValidator {
 
 	private final PropertyDescription property;
 	private final DefaultReporter reporter;
+	private final Publisher publisher;
 
 	private FailureDatabase database;
-	private StatisticallyGuidedGenerationSource classifyingSource = null;
 
 	public PropertyValidatorImpl(PropertyDescription property) {
 		this.property = property;
 		this.database = JqwikDefaults.defaultFailureDatabase();
-		this.reporter = new DefaultReporter(JqwikDefaults.defaultPublisher());
+		this.publisher = JqwikDefaults.defaultPublisher();
+		this.reporter = new DefaultReporter(publisher);
 	}
 
 	@Override
@@ -50,16 +51,16 @@ public class PropertyValidatorImpl implements PropertyValidator {
 
 		// TODO: Report result (status, tries, checks, time)
 
+		publishRunReport();
+
+		publishClassifyingReports(collectors);
+
 		// TODO: Report falsified samples
-
-		reportClassifierResults(collectors);
-
-		publishFinalReport();
 
 		return propertyRunResult;
 	}
 
-	private void publishFinalReport() {
+	private void publishRunReport() {
 		reporter.publishReport();
 	}
 
@@ -122,13 +123,20 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		);
 	}
 
-	private void reportClassifierResults(Set<ClassifyingCollector<List<Object>>> collectors) {
-		if (collectors.isEmpty()) {
-			return;
-		}
+	private void publishClassifyingReports(Set<ClassifyingCollector<List<Object>>> collectors) {
 		for (var classifier : collectors) {
-			// TODO: Hand in report with labels, counts, percentages and minPercentages
-			reporter.appendToReport(Reporter.CATEGORY_CLASSIFIER, Integer.toString(classifier.total()), classifier.percentages());
+			publisher.reportLine("");
+			publisher.reportLine("|--classifier (%d)--|".formatted(classifier.total()));
+			for (String label : classifier.labels()) {
+				var minPercentage = classifier.minPercentage(label);
+				var minPercentagePart = minPercentage > 0.0 ? " (>= %.2f%%)".formatted(minPercentage) : "";
+				publisher.reportLine("  %s (%d) | %.2f%%%s".formatted(
+					label,
+					classifier.count(label),
+					classifier.percentage(label),
+					minPercentagePart
+				));
+			}
 		}
 	}
 
