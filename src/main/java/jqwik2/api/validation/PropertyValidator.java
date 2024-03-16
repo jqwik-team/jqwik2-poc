@@ -15,11 +15,11 @@ public interface PropertyValidator {
 		return validate(PropertyValidationStrategy.DEFAULT);
 	}
 
-	void failureDatabase(FailureDatabase database);
+	PropertyValidator failureDatabase(FailureDatabase database);
 
-	void publisher(Publisher publisher);
+	PropertyValidator publisher(Publisher publisher);
 
-	void publishSuccessfulResults(boolean publishSuccessfulResults);
+	PropertyValidator publishSuccessfulResults(boolean publishSuccessfulResults);
 
 	PropertyValidationResult validate(PropertyValidationStrategy strategy);
 }

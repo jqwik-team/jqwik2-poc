@@ -236,17 +236,20 @@ public class PropertyValidatorImpl implements PropertyValidator {
 	}
 
 	@Override
-	public void failureDatabase(FailureDatabase database) {
+	public PropertyValidator failureDatabase(FailureDatabase database) {
 		this.database = database;
+		return this;
 	}
 
 	@Override
-	public void publisher(Publisher publisher) {
+	public PropertyValidator publisher(Publisher publisher) {
 		this.publisher = publisher;
+		return this;
 	}
 
 	@Override
-	public void publishSuccessfulResults(boolean publishSuccessfulResults) {
+	public PropertyValidator publishSuccessfulResults(boolean publishSuccessfulResults) {
 		this.publishSuccessfulResults = publishSuccessfulResults;
+		return this;
 	}
 }

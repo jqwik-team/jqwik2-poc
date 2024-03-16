@@ -317,9 +317,9 @@ class PropertyValidationTests {
 								   ))
 								   .check(i -> true);
 
-			var validator = PropertyValidator.forProperty(property);
-			validator.publisher(Publisher.STDOUT);
-			PropertyValidationResult result = validator.validate(strategy);
+			PropertyValidationResult result = PropertyValidator.forProperty(property)
+															   .publisher(Publisher.STDOUT)
+															   .validate(strategy);
 			assertThat(result.isSuccessful()).isTrue();
 		}
 
@@ -338,9 +338,9 @@ class PropertyValidationTests {
 								   ))
 								   .check(i -> true);
 
-			var validator = PropertyValidator.forProperty(property);
-			validator.publisher(Publisher.STDOUT);
-			PropertyValidationResult result = validator.validate(strategy);
+			PropertyValidationResult result = PropertyValidator.forProperty(property)
+															   .publisher(Publisher.STDOUT)
+															   .validate(strategy);
 			assertThat(result.isFailed()).isTrue();
 		}
 
@@ -360,9 +360,9 @@ class PropertyValidationTests {
 								   ))
 								   .check(i -> true);
 
-			var validator = PropertyValidator.forProperty(property);
-			validator.publisher(Publisher.STDOUT);
-			PropertyValidationResult result = validator.validate(strategy);
+			PropertyValidationResult result = PropertyValidator.forProperty(property)
+															   .publisher(Publisher.STDOUT)
+															   .validate(strategy);
 			assertThat(result.isSuccessful()).isTrue();
 			assertThat(result.countChecks()).isEqualTo(999);
 		}
@@ -378,9 +378,7 @@ class PropertyValidationTests {
 		void failedPropertyRunWillBeSavedToFailureDatabase() {
 			var property = PropertyDescription.property("myId").forAll(Numbers.integers()).check(i -> false);
 
-			var validator = PropertyValidator.forProperty(property);
-			validator.failureDatabase(database);
-			validator.validate();
+			PropertyValidator.forProperty(property).failureDatabase(database).validate();
 
 			verify(database).saveFailure(Mockito.eq("myId"), anyString(), anySet());
 		}
@@ -389,9 +387,7 @@ class PropertyValidationTests {
 		void successfulPropertyRunWillBeRemovedFromFailureDatabase() {
 			var property = PropertyDescription.property("myId").forAll(Numbers.integers()).check(i -> true);
 
-			var validator = PropertyValidator.forProperty(property);
-			validator.failureDatabase(database);
-			validator.validate();
+			PropertyValidator.forProperty(property).failureDatabase(database).validate();
 
 			verify(database).deleteProperty("myId");
 		}
