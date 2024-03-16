@@ -11,6 +11,8 @@ import jqwik2.api.validation.*;
 import jqwik2.internal.*;
 import jqwik2.internal.growing.*;
 
+import static jqwik2.api.validation.PropertyValidationStrategy.GenerationMode.*;
+
 class RunConfigurationBuilder {
 
 	private final PropertyValidationStrategy strategy;
@@ -25,14 +27,15 @@ class RunConfigurationBuilder {
 		this.generators = generators;
 	}
 
-	public PropertyRunConfiguration build() {
+	PropertyRunConfiguration build(Reporter reporter) {
 		if (database.hasFailed(id)) {
+			reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "after failure", strategy.afterFailure().name());
 			return switch (strategy.afterFailure()) {
-				case REPLAY -> replayLastRun(generators);
+				case REPLAY -> replayLastRun(generators, reporter);
 				case SAMPLES_ONLY -> {
 					List<SampleRecording> samples = new ArrayList<>(database.loadFailingSamples(id));
 					if (samples.isEmpty()) {
-						yield replayLastRun(generators);
+						yield replayLastRun(generators, reporter);
 					}
 					Collections.sort(samples); // Sorts from smallest to largest
 					yield PropertyRunConfiguration.samples(
@@ -45,33 +48,41 @@ class RunConfigurationBuilder {
 				case null -> throw new IllegalStateException("Property has failed before: " + id);
 			};
 		}
-		return buildDefaultConfiguration(generators, strategy.seedSupplier());
+		return buildDefaultConfiguration(generators, strategy.seedSupplier(), reporter);
 	}
 
-	private PropertyRunConfiguration replayLastRun(List<Generator<?>> generators) {
+	private PropertyRunConfiguration replayLastRun(List<Generator<?>> generators, Reporter reporter) {
 		Supplier<String> seedSupplier = database.loadSeed(id)
 												.map(s -> (Supplier<String>) () -> s)
 												.orElseGet(strategy::seedSupplier);
-		return buildDefaultConfiguration(generators, seedSupplier);
+		return buildDefaultConfiguration(generators, seedSupplier, reporter);
 	}
 
 	private PropertyRunConfiguration buildDefaultConfiguration(
-		List<Generator<?>> generators, Supplier<String> seedSupplier
+		List<Generator<?>> generators,
+		Supplier<String> seedSupplier,
+		Reporter reporter
 	) {
 		return switch (strategy.generation()) {
-			case RANDOMIZED -> PropertyRunConfiguration.randomized(
-				seedSupplier.get(),
-				strategy.maxTries(),
-				strategy.maxRuntime(), isShrinkingEnabled(),
-				strategy.filterOutDuplicateSamples(),
-				serviceSupplier()
-			);
-			case EXHAUSTIVE -> PropertyRunConfiguration.exhaustive(
-				strategy.maxTries(),
-				strategy.maxRuntime(),
-				serviceSupplier(),
-				generators
-			);
+			case RANDOMIZED -> {
+				reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "generation", RANDOMIZED.name());
+				yield PropertyRunConfiguration.randomized(
+					seedSupplier.get(),
+					strategy.maxTries(),
+					strategy.maxRuntime(), isShrinkingEnabled(),
+					strategy.filterOutDuplicateSamples(),
+					serviceSupplier()
+				);
+			}
+			case EXHAUSTIVE -> {
+				reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "generation", EXHAUSTIVE.name());
+				yield PropertyRunConfiguration.exhaustive(
+					strategy.maxTries(),
+					strategy.maxRuntime(),
+					serviceSupplier(),
+					generators
+				);
+			}
 			case SMART -> PropertyRunConfiguration.smart(
 				seedSupplier.get(),
 				strategy.maxTries(),
@@ -79,20 +90,27 @@ class RunConfigurationBuilder {
 				isShrinkingEnabled(),
 				strategy.filterOutDuplicateSamples(),
 				serviceSupplier(),
-				generators
+				generators,
+				reporter
 			);
-			case SAMPLES -> PropertyRunConfiguration.samples(
-				strategy.maxRuntime(),
-				isShrinkingEnabled(),
-				strategy.samples(),
-				serviceSupplier()
-			);
-			case GROWING -> PropertyRunConfiguration.guided(
-				GrowingSampleSource::new,
-				strategy.maxTries(), strategy.maxRuntime(),
-				false, true,
-				serviceSupplier()
-			);
+			case SAMPLES -> {
+				reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "generation", EXHAUSTIVE.name());
+				yield PropertyRunConfiguration.samples(
+					strategy.maxRuntime(),
+					isShrinkingEnabled(),
+					strategy.samples(),
+					serviceSupplier()
+				);
+			}
+			case GROWING -> {
+				reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "generation", EXHAUSTIVE.name());
+				yield PropertyRunConfiguration.guided(
+					GrowingSampleSource::new,
+					strategy.maxTries(), strategy.maxRuntime(),
+					false, true,
+					serviceSupplier()
+				);
+			}
 			case null -> throw new IllegalArgumentException("Unsupported generation strategy: " + strategy.generation());
 		};
 	}

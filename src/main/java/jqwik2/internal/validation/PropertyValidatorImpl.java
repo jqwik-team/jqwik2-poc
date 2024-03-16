@@ -45,8 +45,6 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		PropertyRun propertyRun = new PropertyRun(generators, tryable);
 
 		PropertyRunConfiguration runConfiguration = buildRunConfiguration(generators, collectors, strategy);
-
-		// TODO: Let propertyRun report configuration parameter (generation, seed)
 		var propertyRunResult = propertyRun.run(runConfiguration);
 
 		// TODO: Report result (status, tries, checks, time)
@@ -105,11 +103,16 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		};
 	}
 
-	private PropertyRunConfiguration buildRunConfiguration(List<Generator<?>> generators,
-														   Set<ClassifyingCollector<List<Object>>> collectors,
-														   PropertyValidationStrategy strategy) {
-		var plainRunConfiguration = new RunConfigurationBuilder(property.id(), generators, strategy, database).build();
+	private PropertyRunConfiguration buildRunConfiguration(
+		List<Generator<?>> generators,
+		Set<ClassifyingCollector<List<Object>>> collectors,
+		PropertyValidationStrategy strategy
+	) {
+		var plainRunConfiguration = new RunConfigurationBuilder(property.id(), generators, strategy, database).build(reporter);
 
+		plainRunConfiguration.effectiveSeed()
+							 .ifPresent(seed -> reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "seed", seed)
+							 );
 		reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "max tries", strategy.maxTries());
 		reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "max runtime", strategy.maxRuntime());
 		reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "shrinking", strategy.shrinking());

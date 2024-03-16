@@ -7,8 +7,11 @@ import java.util.function.*;
 
 import jqwik2.api.*;
 import jqwik2.api.recording.*;
+import jqwik2.api.validation.*;
 import jqwik2.internal.exhaustive.*;
 import jqwik2.internal.growing.*;
+
+import static jqwik2.api.validation.PropertyValidationStrategy.GenerationMode.*;
 
 public interface PropertyRunConfiguration {
 
@@ -133,16 +136,19 @@ public interface PropertyRunConfiguration {
 		String seed, int maxTries, Duration maxRuntime,
 		boolean shrinkingEnabled, boolean filterOutDuplicateSamples,
 		Supplier<ExecutorService> supplyExecutorService,
-		List<Generator<?>> generators
+		List<Generator<?>> generators,
+		Reporter reporter
 	) {
 		var exhaustive = IterableExhaustiveSource.from(generators);
 		if (exhaustive.isEmpty() || exhaustive.get().maxCount() > maxTries) {
+			addSmartGenerationReport(RANDOMIZED, reporter);
 			return randomized(
 				seed, maxTries,
 				maxRuntime, shrinkingEnabled, filterOutDuplicateSamples,
 				supplyExecutorService
 			);
 		}
+		addSmartGenerationReport(EXHAUSTIVE, reporter);
 		return new RunConfigurationRecord(
 			null, maxTries,
 			maxRuntime, false,
@@ -150,6 +156,11 @@ public interface PropertyRunConfiguration {
 			supplyExecutorService,
 			exhaustive::get
 		);
+	}
+
+	private static void addSmartGenerationReport(PropertyValidationStrategy.GenerationMode randomized, Reporter reporter) {
+		var generationParameter = "%s (%s)".formatted(SMART.name(), randomized.name());
+		reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "generation", generationParameter);
 	}
 
 	static PropertyRunConfiguration samples(

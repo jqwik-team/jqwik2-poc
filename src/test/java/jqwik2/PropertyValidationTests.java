@@ -17,6 +17,7 @@ import org.mockito.*;
 import org.opentest4j.*;
 
 import net.jqwik.api.*;
+import net.jqwik.api.lifecycle.*;
 
 import static jqwik2.api.description.Classifier.*;
 import static jqwik2.api.recording.Recording.list;
@@ -27,6 +28,11 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 class PropertyValidationTests {
+
+	@BeforeProperty
+	void resetFailureDatabase() {
+		JqwikDefaults.defaultFailureDatabase().clear();
+	}
 
 	@Example
 	void checkWith1ParameterSucceeds() {
