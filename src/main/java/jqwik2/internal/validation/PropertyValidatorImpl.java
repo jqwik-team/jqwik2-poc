@@ -1,5 +1,6 @@
 package jqwik2.internal.validation;
 
+import java.time.*;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
@@ -44,14 +45,13 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		PropertyRun propertyRun = new PropertyRun(generators, tryable);
 
 		PropertyRunConfiguration runConfiguration = buildRunConfiguration(generators, collectors, strategy);
-		// TODO: Report configuration parameters (generation, maxTries, maxDuration, shrinking, edge cases, concurrency)
 
-		// TODO: Let propertyRun report configuration parameter (seed)
+		// TODO: Let propertyRun report configuration parameter (generation, seed)
 		var propertyRunResult = propertyRun.run(runConfiguration);
 
 		// TODO: Report result (status, tries, checks, time)
 
-		publishRunReport();
+		publishRunReport(propertyRunResult.status());
 
 		publishClassifyingReports(collectors);
 
@@ -60,7 +60,13 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		return propertyRunResult;
 	}
 
-	private void publishRunReport() {
+	private void publishRunReport(PropertyValidationStatus status) {
+		if (status == PropertyValidationStatus.SUCCESSFUL && JqwikDefaults.publishOnlyFailedResults()) {
+			return;
+		}
+		publisher.reportLine("");
+		var headline = "timestamp = %s, %s (%s) =".formatted(LocalDateTime.now(), property.id(), status);
+		publisher.reportLine(headline);
 		reporter.publishReport();
 	}
 
@@ -103,6 +109,13 @@ public class PropertyValidatorImpl implements PropertyValidator {
 														   Set<ClassifyingCollector<List<Object>>> collectors,
 														   PropertyValidationStrategy strategy) {
 		var plainRunConfiguration = new RunConfigurationBuilder(property.id(), generators, strategy, database).build();
+
+		reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "max tries", strategy.maxTries());
+		reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "max runtime", strategy.maxRuntime());
+		reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "shrinking", strategy.shrinking());
+		reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "edge cases", strategy.edgeCases());
+		reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "concurrency", strategy.concurrency());
+
 		if (!isCoverageCheckPresent(collectors)) {
 			return plainRunConfiguration;
 		}

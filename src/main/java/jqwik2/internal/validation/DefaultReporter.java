@@ -27,7 +27,7 @@ public class DefaultReporter implements Reporter {
 			}
 			platformPublisher.reportLine("");
 
-			// TODO: Publish different categories differently according to example-report.txt
+			// TODO: Publish nicely formatted according to example-report.txt
 			platformPublisher.reportLine("|--" + category + "--|");
 			for (Pair<String, Object> keyValue : pairs) {
 				platformPublisher.reportLine("  " + keyValue.first() + " | " + keyValue.second());
