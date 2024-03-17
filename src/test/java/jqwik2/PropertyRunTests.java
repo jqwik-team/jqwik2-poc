@@ -488,7 +488,7 @@ class PropertyRunTests {
 			assertThat(result.failureReason()).isPresent();
 			result.failureReason().ifPresent(throwable -> {
 				assertThat(throwable.getMessage())
-					.startsWith("Coverage of case 'Even' expected to be at least 55.0%");
+					.startsWith("Coverage of case 'Even' expected to be at least 55.00%");
 			});
 
 			// System.out.println(result.failureReason().get().getMessage());
