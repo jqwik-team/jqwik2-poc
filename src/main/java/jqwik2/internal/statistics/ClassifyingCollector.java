@@ -21,7 +21,7 @@ public class ClassifyingCollector<C> {
 
 	private static final int MIN_TRIES_LOWER_BOUND = 100;
 
-	static final DecimalFormat PERCENTAGE_FORMAT = new DecimalFormat("#.0###", new DecimalFormatSymbols(Locale.US));
+	static final DecimalFormat PERCENTAGE_FORMAT = new DecimalFormat("#.00", new DecimalFormatSymbols(Locale.US));
 
 	private final List<ClassifyingCollector.Case<C>> cases = new ArrayList<>();
 

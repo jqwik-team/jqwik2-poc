@@ -1,7 +1,5 @@
 package jqwik2.internal.validation;
 
-import java.time.*;
-import java.time.temporal.*;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
@@ -13,6 +11,7 @@ import jqwik2.api.recording.*;
 import jqwik2.api.support.*;
 import jqwik2.api.validation.*;
 import jqwik2.internal.*;
+import jqwik2.internal.reporting.*;
 import jqwik2.internal.statistics.*;
 
 import static jqwik2.internal.PropertyRunConfiguration.*;
@@ -20,18 +19,18 @@ import static jqwik2.internal.PropertyRunConfiguration.*;
 public class PropertyValidatorImpl implements PropertyValidator {
 
 	private final PropertyDescription property;
-	private final DefaultReporter reporter;
+	private final ReportSection parametersReport = new ReportSection("parameters");
+	private final ReportSection resultReport = new ReportSection("result");
 
 	private FailureDatabase database;
-	private Publisher publisher;
+	private PlatformPublisher platformPublisher;
 	private boolean publishSuccessfulResults;
 
 	public PropertyValidatorImpl(PropertyDescription property) {
 		this.property = property;
 		this.database = JqwikDefaults.defaultFailureDatabase();
-		this.publisher = JqwikDefaults.defaultPublisher();
+		this.platformPublisher = JqwikDefaults.defaultPlatformPublisher();
 		this.publishSuccessfulResults = JqwikDefaults.defaultPublishSuccessfulResults();
-		this.reporter = new DefaultReporter();
 	}
 
 	@Override
@@ -43,11 +42,11 @@ public class PropertyValidatorImpl implements PropertyValidator {
 
 		PropertyValidationResult validationResult = new PropertyValidationResultFacade(result);
 
+		publishClassifyingReports(collectors);
+
 		if (shouldPublishResult(validationResult.status())) {
 			publishRunReport(validationResult);
 		}
-
-		publishClassifyingReports(collectors);
 
 		// TODO: Report falsified samples
 
@@ -64,33 +63,40 @@ public class PropertyValidatorImpl implements PropertyValidator {
 	}
 
 	private void publishRunReport(PropertyValidationResult result) {
-		reporter.appendToReport(Reporter.CATEGORY_RESULT, "status", result.status());
-		result.failure()
-			  .ifPresent(failure -> reporter.appendToReport(Reporter.CATEGORY_RESULT, "failure", failure.getClass().getName()));
-		reporter.appendToReport(Reporter.CATEGORY_RESULT, "# tries", result.countTries());
-		reporter.appendToReport(Reporter.CATEGORY_RESULT, "# checks", result.countChecks());
 
-		publisher.reportLine("");
-		var timestamp = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-		var headline = "timestamp = %s, %s (%s) =".formatted(timestamp, property.id(), result.status());
-		publisher.reportLine(headline);
+		fillInResultReport(result);
 
-		result.failure().ifPresent(failure -> reportFailure(failure));
+		StringBuilder report = new StringBuilder();
 
-		reporter.publishReport(publisher);
+		result.failure().ifPresent(failure -> publishFailure(failure, report));
+		resultReport.publish(report);
+		parametersReport.publish(report);
+
+		String reportKey = "%s (%s)".formatted(property.id(), result.status().name());
+		platformPublisher.publish(reportKey, report.toString());
 	}
 
-	private void reportFailure(Throwable throwable) {
+	private void fillInResultReport(PropertyValidationResult result) {
+		resultReport.append("status", result.status().name());
+		result.failure()
+			  .ifPresent(failure -> resultReport.append("failure", failure.getClass().getName()));
+		resultReport.append("# tries", result.countTries());
+		resultReport.append("# checks", result.countChecks());
+	}
+
+	private void publishFailure(Throwable throwable, StringBuilder report) {
 		String assertionClass = throwable.getClass().getName();
-		publisher.report(String.format("  %s", assertionClass));
+		report.append("%n  %s".formatted(assertionClass));
 		List<String> assertionMessageLines = throwable.getMessage().lines().toList();
-		if (!assertionMessageLines.isEmpty()) {
-			publisher.report(":");
-			for (String line : assertionMessageLines) {
-				publisher.report(String.format("%n    %s", line));
-			}
+		if (assertionMessageLines.isEmpty()) {
+			return;
 		}
-		publisher.report(String.format("%n"));
+		report.append(":%n".formatted());
+		for (String line : assertionMessageLines) {
+			if (line.isBlank()) continue;
+			report.append("    %s%n".formatted(line));
+		}
+		report.append("%n".formatted());
 	}
 
 	private boolean shouldPublishResult(PropertyValidationStatus status) {
@@ -137,16 +143,16 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		Set<ClassifyingCollector<List<Object>>> collectors,
 		PropertyValidationStrategy strategy
 	) {
-		var plainRunConfiguration = new RunConfigurationBuilder(property.id(), generators, strategy, database).build(reporter);
+		var plainRunConfiguration = new RunConfigurationBuilder(property.id(), generators, strategy, database).build(parametersReport);
 
 		plainRunConfiguration.effectiveSeed()
-							 .ifPresent(seed -> reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "seed", seed)
+							 .ifPresent(seed -> parametersReport.append("seed", seed)
 							 );
-		reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "max tries", strategy.maxTries());
-		reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "max runtime", strategy.maxRuntime());
-		reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "shrinking", strategy.shrinking());
-		reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "edge cases", strategy.edgeCases());
-		reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "concurrency", strategy.concurrency());
+		parametersReport.append("max tries", strategy.maxTries());
+		parametersReport.append("max runtime", strategy.maxRuntime());
+		parametersReport.append("shrinking", strategy.shrinking());
+		parametersReport.append("edge cases", strategy.edgeCases());
+		parametersReport.append("concurrency", strategy.concurrency());
 
 		if (!isCoverageCheckPresent(collectors)) {
 			return plainRunConfiguration;
@@ -170,18 +176,17 @@ public class PropertyValidatorImpl implements PropertyValidator {
 
 	private void publishClassifyingReports(Set<ClassifyingCollector<List<Object>>> collectors) {
 		for (var classifier : collectors) {
-			publisher.reportLine("");
-			publisher.reportLine("|--classifier (%d)--|".formatted(classifier.total()));
+			var header = "classifier (%d)".formatted(classifier.total());
+			var classifierSection = new ReportSection(header);
 			for (String label : classifier.labels()) {
 				var minPercentage = classifier.minPercentage(label);
 				var minPercentagePart = minPercentage > 0.0 ? " (>= %.2f%%)".formatted(minPercentage) : "";
-				publisher.reportLine("  %s (%d) | %.2f%%%s".formatted(
-					label,
-					classifier.count(label),
-					classifier.percentage(label),
-					minPercentagePart
-				));
+				String key = "%s (%d)".formatted(label, classifier.count(label));
+				String value = "%.2f%%%s".formatted(classifier.percentage(label), minPercentagePart);
+				classifierSection.append(key, value);
 			}
+			String key = "%s: %s".formatted(property.id(), header);
+			classifierSection.publish(key, platformPublisher);
 		}
 	}
 
@@ -244,8 +249,8 @@ public class PropertyValidatorImpl implements PropertyValidator {
 	}
 
 	@Override
-	public PropertyValidator publisher(Publisher publisher) {
-		this.publisher = publisher;
+	public PropertyValidator publisher(PlatformPublisher publisher) {
+		this.platformPublisher = publisher;
 		return this;
 	}
 

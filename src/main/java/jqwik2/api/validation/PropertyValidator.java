@@ -17,7 +17,7 @@ public interface PropertyValidator {
 
 	PropertyValidator failureDatabase(FailureDatabase database);
 
-	PropertyValidator publisher(Publisher publisher);
+	PropertyValidator publisher(PlatformPublisher publisher);
 
 	PropertyValidator publishSuccessfulResults(boolean publishSuccessfulResults);
 

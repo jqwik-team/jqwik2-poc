@@ -1,3 +1,15 @@
+my.project.Experiments:myFirstProperty:classifier =
+|---classifier (18926)---|
+  positive  (9193) | 48 % (> 45%)
+  negative  (9420) | 49 % (> 45%)
+  zero       (313) |  3 % (>  1%)
+
+my.project.Experiments:myFirstProperty:collector =
+|----------numbers (32)----------|
+  not divisible by 3 (23) | 72 %
+  divisible by 3     ( 9) | 28 %
+
+
 my.project.Experiments:myFirstProperty =
   java.lang.AssertionError:
     Expecting actual:
@@ -19,16 +31,6 @@ my.project.Experiments:myFirstProperty =
   max duration | 1 min
   shrinking    | FULL
   edge cases   | MIXIN
-
-|---classifier (18926)---|
-  positive  (9193) | 48 % (> 45%)
-  negative  (9420) | 49 % (> 45%)
-  zero       (313) |  3 % (>  1%)
-
-|----------numbers (32)----------|
-  not divisible by 3 (23) | 72 %
-  divisible by 3     ( 9) | 28 %
-
 
 Original Falsified Sample
 -------------------------

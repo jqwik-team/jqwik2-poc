@@ -1,11 +1,10 @@
-
-timestamp = [Date1], jqwik2.PropertyValidationTests#verifyFailsAndParameterIsShrunk (FAILED) =
+jqwik2.PropertyValidationTests#verifyFailsAndParameterIsShrunk (FAILED) =
   java.lang.AssertionError:
-
     Expecting actual:
       42
     to be less than:
       42
+
 
 |--result--|
   status | FAILED

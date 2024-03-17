@@ -10,6 +10,7 @@ import jqwik2.api.recording.*;
 import jqwik2.api.validation.*;
 import jqwik2.internal.*;
 import jqwik2.internal.growing.*;
+import jqwik2.internal.reporting.*;
 
 import static jqwik2.api.validation.PropertyValidationStrategy.GenerationMode.*;
 
@@ -27,15 +28,15 @@ class RunConfigurationBuilder {
 		this.generators = generators;
 	}
 
-	PropertyRunConfiguration build(Reporter reporter) {
+	PropertyRunConfiguration build(ReportSection parametersReport) {
 		if (database.hasFailed(id)) {
-			reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "after failure", strategy.afterFailure().name());
+			parametersReport.append("after failure", strategy.afterFailure().name());
 			return switch (strategy.afterFailure()) {
-				case REPLAY -> replayLastRun(generators, reporter);
+				case REPLAY -> replayLastRun(generators, parametersReport);
 				case SAMPLES_ONLY -> {
 					List<SampleRecording> samples = new ArrayList<>(database.loadFailingSamples(id));
 					if (samples.isEmpty()) {
-						yield replayLastRun(generators, reporter);
+						yield replayLastRun(generators, parametersReport);
 					}
 					Collections.sort(samples); // Sorts from smallest to largest
 					yield PropertyRunConfiguration.samples(
@@ -48,24 +49,24 @@ class RunConfigurationBuilder {
 				case null -> throw new IllegalStateException("Property has failed before: " + id);
 			};
 		}
-		return buildDefaultConfiguration(generators, strategy.seedSupplier(), reporter);
+		return buildDefaultConfiguration(generators, strategy.seedSupplier(), parametersReport);
 	}
 
-	private PropertyRunConfiguration replayLastRun(List<Generator<?>> generators, Reporter reporter) {
+	private PropertyRunConfiguration replayLastRun(List<Generator<?>> generators, ReportSection parametersReport) {
 		Supplier<String> seedSupplier = database.loadSeed(id)
 												.map(s -> (Supplier<String>) () -> s)
 												.orElseGet(strategy::seedSupplier);
-		return buildDefaultConfiguration(generators, seedSupplier, reporter);
+		return buildDefaultConfiguration(generators, seedSupplier, parametersReport);
 	}
 
 	private PropertyRunConfiguration buildDefaultConfiguration(
 		List<Generator<?>> generators,
 		Supplier<String> seedSupplier,
-		Reporter reporter
+		ReportSection parametersReport
 	) {
 		return switch (strategy.generation()) {
 			case RANDOMIZED -> {
-				reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "generation", RANDOMIZED.name());
+				parametersReport.append("generation", RANDOMIZED.name());
 				yield PropertyRunConfiguration.randomized(
 					seedSupplier.get(),
 					strategy.maxTries(),
@@ -75,7 +76,7 @@ class RunConfigurationBuilder {
 				);
 			}
 			case EXHAUSTIVE -> {
-				reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "generation", EXHAUSTIVE.name());
+				parametersReport.append("generation", EXHAUSTIVE.name());
 				yield PropertyRunConfiguration.exhaustive(
 					strategy.maxTries(),
 					strategy.maxRuntime(),
@@ -91,10 +92,10 @@ class RunConfigurationBuilder {
 				strategy.filterOutDuplicateSamples(),
 				serviceSupplier(),
 				generators,
-				reporter
+				parametersReport
 			);
 			case SAMPLES -> {
-				reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "generation", EXHAUSTIVE.name());
+				parametersReport.append("generation", EXHAUSTIVE.name());
 				yield PropertyRunConfiguration.samples(
 					strategy.maxRuntime(),
 					isShrinkingEnabled(),
@@ -103,7 +104,7 @@ class RunConfigurationBuilder {
 				);
 			}
 			case GROWING -> {
-				reporter.appendToReport(Reporter.CATEGORY_PARAMETER, "generation", EXHAUSTIVE.name());
+				parametersReport.append("generation", EXHAUSTIVE.name());
 				yield PropertyRunConfiguration.guided(
 					GrowingSampleSource::new,
 					strategy.maxTries(), strategy.maxRuntime(),

@@ -1,7 +1,7 @@
-
-timestamp = [Date1], cp (FAILED) =
+cp (FAILED) =
   java.lang.AssertionError:
     failed
+
 
 |--result--|
   status | FAILED

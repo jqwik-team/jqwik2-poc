@@ -58,8 +58,8 @@ public class JqwikDefaults {
 		return 3.0;
 	}
 
-	public static Publisher defaultPublisher() {
-		return Publisher.NULL;
+	public static PlatformPublisher defaultPlatformPublisher() {
+		return PlatformPublisher.NULL;
 	}
 
 	public static boolean defaultPublishSuccessfulResults() {

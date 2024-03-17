@@ -6,7 +6,6 @@
       - shrinking steps
       - run time
       - Do proper formatting in reports according to example-report.txt 
-      - Make publisher interface feasible for use with JUnitPlatform reporting
     - Make afterFailure attribute multi value, e.g List.of(SAMPLES, REPLAY |
       RANDOMIZED)
         - PropertyAnalyzer: Find as many failing samples as possible and analyze

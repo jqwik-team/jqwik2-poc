@@ -20,6 +20,7 @@ import org.mockito.*;
 import org.opentest4j.*;
 
 import net.jqwik.api.*;
+import net.jqwik.api.Reporter;
 import net.jqwik.api.lifecycle.*;
 
 import static jqwik2.api.description.Classifier.*;
@@ -31,6 +32,8 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 class PropertyValidationTests {
+
+	private final StringPublisher stringPublisher = new StringPublisher();
 
 	@BeforeProperty
 	void resetFailureDatabase() {
@@ -150,26 +153,33 @@ class PropertyValidationTests {
 																		.withEdgeCases(PropertyValidationStrategy.EdgeCasesMode.OFF)
 																		.withShrinking(PropertyValidationStrategy.ShrinkingMode.FULL)
 																		.build();
-		StringPublisher publisher = new StringPublisher();
 		PropertyValidationResult result = PropertyValidator
 											  .forProperty(property)
-											  .publisher(publisher)
+											  .publisher(stringPublisher)
 											  .validate(strategy);
 
 		assertThat(result.isFailed()).isTrue();
-
 		assertThat(result.falsifiedSamples()).hasSizeGreaterThanOrEqualTo(1);
-
-		Approvals.verify(publisher.contents(), validationReportApprovalTestsOptions());
+		Approvals.verify(stringPublisher.contents(), validationReportApprovalTestsOptions());
 	}
 
 	private static Options validationReportApprovalTestsOptions() {
 		var trimWhitespaceScrubber = new TrimWhitespaceScrubber();
-		var timeStampScrubber = DateScrubber.getScrubberFor("2020-09-10T01:23:45.678Z");
 		var seedScrubber = new RegExScrubber("seed(\\s+)\\|(\\s+)\\d{1,14}", "seed | [seed]");
 		var countTriesScrubber = new RegExScrubber("# tries(\\s+)\\|(\\s+)\\d{1,10}", "# tries | [tries]");
 		var countChecksScrubber = new RegExScrubber("# checks(\\s+)\\|(\\s+)\\d{1,10}", "# checks | [checks]");
-		var scrubbers = Scrubbers.scrubAll(trimWhitespaceScrubber, timeStampScrubber, seedScrubber, countTriesScrubber, countChecksScrubber);
+		var countsScrubber = new RegExScrubber("\\(\\d{1,10}\\)", "([count%d])"::formatted);
+		var ratioScrubber = new RegExScrubber("\\(\\d{1,10}\\/\\d{1,10}\\)", "(ratio)"::formatted);
+		var percentageScrubber = new RegExScrubber("\\d{1,2}.\\d{2}%", "[percentage%d]"::formatted);
+		var scrubbers = Scrubbers.scrubAll(
+			trimWhitespaceScrubber,
+			seedScrubber,
+			countTriesScrubber,
+			countChecksScrubber,
+			countsScrubber,
+			ratioScrubber,
+			percentageScrubber
+		);
 		return new Options(scrubbers);
 	}
 
@@ -363,9 +373,10 @@ class PropertyValidationTests {
 								   .check(i -> true);
 
 			PropertyValidationResult result = PropertyValidator.forProperty(property)
-															   .publisher(Publisher.STDOUT)
+															   .publisher(stringPublisher)
 															   .validate(strategy);
 			assertThat(result.isSuccessful()).isTrue();
+			Approvals.verify(stringPublisher.contents(), validationReportApprovalTestsOptions());
 		}
 
 		@Example
@@ -384,9 +395,10 @@ class PropertyValidationTests {
 								   .check(i -> true);
 
 			PropertyValidationResult result = PropertyValidator.forProperty(property)
-															   .publisher(Publisher.STDOUT)
+															   .publisher(stringPublisher)
 															   .validate(strategy);
 			assertThat(result.isFailed()).isTrue();
+			Approvals.verify(stringPublisher.contents(), validationReportApprovalTestsOptions());
 		}
 
 		@Example
@@ -406,7 +418,6 @@ class PropertyValidationTests {
 								   .check(i -> true);
 
 			PropertyValidationResult result = PropertyValidator.forProperty(property)
-															   .publisher(Publisher.STDOUT)
 															   .validate(strategy);
 			assertThat(result.isSuccessful()).isTrue();
 			assertThat(result.countChecks()).isEqualTo(999);
