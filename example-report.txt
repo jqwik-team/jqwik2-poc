@@ -32,21 +32,16 @@ my.project.Experiments:myFirstProperty =
   shrinking    | FULL
   edge cases   | MIXIN
 
+
 Original Falsified Sample
 -------------------------
-  i: 8498
-
-  Original Failure
-  ----------------
-  java.lang.AssertionError:
-    Expecting actual:
-      8498
-    to be less than:
-      100
+  i1: 8498
+  i2: 11
 
 Smallest Falsified Sample (4 steps)
 -----------------------------------
-  i: 100
+  i1: 100
+  i2: 0
 
 
 java.lang.AssertionError:
