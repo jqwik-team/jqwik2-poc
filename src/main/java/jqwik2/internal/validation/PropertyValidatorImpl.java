@@ -48,9 +48,37 @@ public class PropertyValidatorImpl implements PropertyValidator {
 			publishRunReport(validationResult);
 		}
 
-		// TODO: Report falsified samples
-
 		return validationResult;
+	}
+
+	private void publishFalsifiedSamples(SortedSet<FalsifiedSample> falsifiedSamples, StringBuilder report) {
+		if (falsifiedSamples.isEmpty()) {
+			return;
+		}
+		report.append("%n".formatted());
+		report.append("%n".formatted());
+
+		FalsifiedSample firstFalsifiedSample = falsifiedSamples.last();
+		publishSample("Original Falsified Sample", firstFalsifiedSample, report);
+
+		if (falsifiedSamples.size() == 1) {
+			return;
+		}
+		report.append("%n".formatted());
+		FalsifiedSample smallestFalsifiedSample = falsifiedSamples.first();
+		publishSample("Smallest Falsified Sample", smallestFalsifiedSample, report);
+	}
+
+	private void publishSample(String label, FalsifiedSample sample, StringBuilder report) {
+		report.append("%s%n".formatted(label));
+		new LineReporter(report::append).appendUnderline(0, label.length());
+		var argsReport = new LineReporter(report::append, 1);
+		var values = sample.sample().regenerateValues();
+		// TODO: Report differences between original and regenerated sample values
+		for (int index = 0; index < values.size(); index++) {
+			var arg = values.get(index);
+			argsReport.appendLn(0, "arg-%d: %s".formatted(index, arg));
+		}
 	}
 
 	private PropertyRunResult run(PropertyValidationStrategy strategy, Set<ClassifyingCollector<List<Object>>> collectors) {
@@ -63,7 +91,6 @@ public class PropertyValidatorImpl implements PropertyValidator {
 	}
 
 	private void publishRunReport(PropertyValidationResult result) {
-
 		fillInResultReport(result);
 
 		StringBuilder report = new StringBuilder();
@@ -71,6 +98,7 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		result.failure().ifPresent(failure -> publishFailure(failure, report));
 		resultReport.publish(report);
 		parametersReport.publish(report);
+		publishFalsifiedSamples(result.falsifiedSamples(), report);
 
 		String reportKey = "%s (%s)".formatted(property.id(), result.status().name());
 		platformPublisher.publish(reportKey, report.toString());

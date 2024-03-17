@@ -26,6 +26,10 @@ public interface PropertyValidationStrategy {
 
 		Builder withSeedSupplier(Supplier<String> seedSupplier);
 
+		default Builder withSeed(String seed) {
+			return withSeedSupplier(() -> seed);
+		}
+
 		Builder withEdgeCases(EdgeCasesMode edgeCases);
 
 		Builder withShrinking(ShrinkingMode shrinking);

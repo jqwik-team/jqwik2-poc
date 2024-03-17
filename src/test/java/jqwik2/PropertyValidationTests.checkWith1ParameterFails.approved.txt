@@ -1,11 +1,11 @@
 cp (FAILED) =
-  java.lang.AssertionError:
-    failed
+  org.opentest4j.AssertionFailedError:
+    Property check failed with sample {[0]}
 
 
 |--result--|
   status | FAILED
-  failure | java.lang.AssertionError
+  failure | org.opentest4j.AssertionFailedError
   # tries | [tries]
   # checks | [checks]
 

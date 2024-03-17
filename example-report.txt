@@ -35,13 +35,13 @@ my.project.Experiments:myFirstProperty =
 
 Original Falsified Sample
 -------------------------
-  i1: 8498
-  i2: 11
+  arg-0: 8498
+  arg-1: 11
 
 Smallest Falsified Sample (4 steps)
 -----------------------------------
-  i1: 100
-  i2: 0
+  arg-0: 100
+  arg-1: 0
 
 
 java.lang.AssertionError:

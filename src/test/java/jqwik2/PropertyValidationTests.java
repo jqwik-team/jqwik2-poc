@@ -20,7 +20,6 @@ import org.mockito.*;
 import org.opentest4j.*;
 
 import net.jqwik.api.*;
-import net.jqwik.api.Reporter;
 import net.jqwik.api.lifecycle.*;
 
 import static jqwik2.api.description.Classifier.*;
@@ -102,7 +101,14 @@ class PropertyValidationTests {
 		var property = PropertyDescription.property("cp")
 										  .forAll(Numbers.integers()).check(i -> false);
 
-		PropertyValidationResult result = PropertyValidator.forProperty(property).validate();
+		PropertyValidationStrategy strategy = PropertyValidationStrategy.builder()
+																		.withSeed("42")
+																		.build();
+
+		StringPublisher publisher = new StringPublisher();
+		PropertyValidationResult result = PropertyValidator.forProperty(property)
+														   .publisher(publisher)
+														   .validate(strategy);
 
 		assertThat(result.isFailed()).isTrue();
 		assertThat(result.failure()).isPresent();
@@ -112,6 +118,8 @@ class PropertyValidationTests {
 
 		// Shrinking usually reduces the initial falsified sample to a minimal falsified sample
 		assertThat(result.falsifiedSamples()).hasSizeGreaterThanOrEqualTo(1);
+
+		Approvals.verify(publisher.contents(), validationReportApprovalTestsOptions());
 	}
 
 	@Example
@@ -123,11 +131,14 @@ class PropertyValidationTests {
 											  throw failure;
 										  });
 
+		PropertyValidationStrategy strategy = PropertyValidationStrategy.builder()
+																		.withSeed("42")
+																		.build();
 		StringPublisher publisher = new StringPublisher();
 		PropertyValidationResult result = PropertyValidator
 											  .forProperty(property)
 											  .publisher(publisher)
-											  .validate();
+											  .validate(strategy);
 
 		assertThat(result.isFailed()).isTrue();
 		assertThat(result.failure()).hasValue(failure);
@@ -150,6 +161,7 @@ class PropertyValidationTests {
 
 		PropertyValidationStrategy strategy = PropertyValidationStrategy.builder()
 																		.withGeneration(RANDOMIZED)
+																		.withSeed("42")
 																		.withEdgeCases(PropertyValidationStrategy.EdgeCasesMode.OFF)
 																		.withShrinking(PropertyValidationStrategy.ShrinkingMode.FULL)
 																		.build();

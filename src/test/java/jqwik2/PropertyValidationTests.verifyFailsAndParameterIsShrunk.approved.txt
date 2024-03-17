@@ -20,3 +20,12 @@ jqwik2.PropertyValidationTests#verifyFailsAndParameterIsShrunk (FAILED) =
   shrinking | FULL
   edge cases | OFF
   concurrency | SINGLE_THREAD
+
+
+Original Falsified Sample
+-------------------------
+  arg-0: 1054
+
+Smallest Falsified Sample
+-------------------------
+  arg-0: 42

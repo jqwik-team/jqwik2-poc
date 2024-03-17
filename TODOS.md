@@ -1,11 +1,10 @@
 - New Core API
     - PropertyValidator.validateStatistically(minPercentage, standardDeviation)
     - Reporting
-      - Use approval tests for reporting
-      - falsified samples
-      - shrinking steps
-      - run time
+      - shrinking steps for smallest falsified sample
+      - duration in result section
       - Do proper formatting in reports according to example-report.txt 
+      - Report differences between sample values and regenerated values
     - Make afterFailure attribute multi value, e.g List.of(SAMPLES, REPLAY |
       RANDOMIZED)
         - PropertyAnalyzer: Find as many failing samples as possible and analyze
