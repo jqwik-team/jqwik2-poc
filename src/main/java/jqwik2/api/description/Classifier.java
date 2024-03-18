@@ -25,5 +25,13 @@ public interface Classifier {
 	List<Case> cases();
 
 	record Case<C extends PropertyDescription.Check<C>>(Condition condition, String label, double minPercentage) {
+		public Case(Condition condition, String label, double minPercentage) {
+			if (label.isBlank()) {
+				throw new IllegalArgumentException("Label must not be blank");
+			}
+			this.condition = condition;
+			this.label = label.trim();
+			this.minPercentage = minPercentage;
+		}
 	}
 }

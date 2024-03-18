@@ -33,6 +33,7 @@ final class PropertyVerifier1<T1> extends AbstractPropertyVerifier
 		var genericCases = cases.stream()
 								.map(c -> (Classifier.Case) c)
 								.toList();
+		ensureValidCases(genericCases);
 		PropertyClassifier classifier = new PropertyClassifier(genericCases);
 		var newClassifiers = new ArrayList<>(classifiers);
 		newClassifiers.add(classifier);

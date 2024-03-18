@@ -17,6 +17,15 @@ abstract class AbstractPropertyVerifier {
 		this.classifiers = classifiers;
 	}
 
+	protected static void ensureValidCases(List<Classifier.Case> cases) {
+		if (cases.isEmpty()) {
+			throw new IllegalArgumentException("At least one case is required");
+		}
+		if (cases.stream().map(Classifier.Case::label).distinct().count() < cases.size()) {
+			throw new IllegalArgumentException("All case labels must be unique");
+		}
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) return true;
