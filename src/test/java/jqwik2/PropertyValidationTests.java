@@ -392,6 +392,31 @@ class PropertyValidationTests {
 		}
 
 		@Example
+		void classificationWithTwoParameters() {
+			var strategy = PropertyValidationStrategy.builder()
+													 .withMaxTries(0)
+													 .withMaxRuntime(Duration.ofSeconds(1))
+													 .build();
+			PropertyDescription property =
+				PropertyDescription.property()
+								   .forAll(
+									   Numbers.integers().between(0, 10),
+									   Strings.strings().alpha().ofMaxLength(10)
+								   )
+								   .classify(List.of(
+									   caseOf((i, s) -> i <= s.length(), "valid length", 50.0)
+								   ))
+								   .check((i, s) -> true);
+
+			PropertyValidationResult result = PropertyValidator.forProperty(property)
+															   .publisher(stringPublisher)
+															   .validate(strategy);
+
+			assertThat(result.isSuccessful()).isTrue();
+			Approvals.verify(stringPublisher.contents(), validationReportApprovalTestsOptions());
+		}
+
+		@Example
 		void classificationRejected() {
 			var strategy = PropertyValidationStrategy.builder()
 													 .withMaxTries(0)
