@@ -5,12 +5,18 @@ import java.util.*;
 import jqwik2.api.*;
 import jqwik2.api.description.*;
 
-record PropertyVerifier1<T1>(
-	String propertyId,
-	List<Classifier> classifiers,
-	Arbitrary<T1> a1
-)
-	implements PropertyDescription.Verifier1<T1> {
+final class PropertyVerifier1<T1> extends AbstractPropertyVerifier
+		implements PropertyDescription.Verifier1<T1> {
+	private final Arbitrary<T1> a1;
+
+	PropertyVerifier1(
+			String propertyId,
+			List<Classifier> classifiers,
+			Arbitrary<T1> a1
+	) {
+		super(propertyId, classifiers);
+		this.a1 = a1;
+	}
 
 	@Override
 	public PropertyDescription check(PropertyDescription.C1<T1> checker) {
@@ -27,9 +33,22 @@ record PropertyVerifier1<T1>(
 		var genericCases = cases.stream()
 								.map(c -> (Classifier.Case) c)
 								.toList();
+		PropertyClassifier classifier = new PropertyClassifier(genericCases);
 		var newClassifiers = new ArrayList<>(classifiers);
-		newClassifiers.add(new PropertyClassifier(genericCases));
+		newClassifiers.add(classifier);
 		return new PropertyVerifier1<>(propertyId, newClassifiers, a1);
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) return true;
+		if (obj == null || obj.getClass() != this.getClass()) return false;
+		var that = (PropertyVerifier1) obj;
+		return super.equals(that) && Objects.equals(this.a1, that.a1);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), a1);
+	}
 }
