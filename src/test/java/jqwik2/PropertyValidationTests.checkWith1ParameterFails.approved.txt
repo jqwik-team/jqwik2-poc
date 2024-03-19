@@ -10,6 +10,7 @@ cp (FAILED) =
   # checks | [checks]
 
 |--parameters--|
+  validation | STRICT
   generation | SMART (RANDOMIZED)
   seed | [seed]
   max tries | 100

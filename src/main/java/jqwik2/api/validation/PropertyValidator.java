@@ -15,11 +15,17 @@ public interface PropertyValidator {
 		return validate(PropertyValidationStrategy.DEFAULT);
 	}
 
+	PropertyValidationResult validate(PropertyValidationStrategy strategy);
+
+	default PropertyValidationResult validateStatistically(double minPercentage, double maxStandardDeviationFactor) {
+		return validateStatistically(minPercentage, maxStandardDeviationFactor, PropertyValidationStrategy.DEFAULT);
+	}
+
+	PropertyValidationResult validateStatistically(double minPercentage, double maxStandardDeviationFactor, PropertyValidationStrategy strategy);
+
 	PropertyValidator failureDatabase(FailureDatabase database);
 
 	PropertyValidator publisher(PlatformPublisher publisher);
 
 	PropertyValidator publishSuccessfulResults(boolean publishSuccessfulResults);
-
-	PropertyValidationResult validate(PropertyValidationStrategy strategy);
 }

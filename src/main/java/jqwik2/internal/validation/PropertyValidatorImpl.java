@@ -37,18 +37,95 @@ public class PropertyValidatorImpl implements PropertyValidator {
 	public PropertyValidationResult validate(PropertyValidationStrategy strategy) {
 		Set<ClassifyingCollector<List<Object>>> collectors = asClassifyingCollectors(property.classifiers());
 
-		PropertyRunResult result = run(strategy, collectors);
-		executeResultCallbacks(result);
+		PropertyRunResult result = runStrictValidation(strategy, collectors);
+		updateFailureDatabase(result);
 
 		PropertyValidationResult validationResult = new PropertyValidationResultFacade(result);
 
 		publishClassifyingReports(collectors);
 
 		if (shouldPublishResult(validationResult.status())) {
-			publishRunReport(validationResult);
+			publishRunReport(validationResult, true);
 		}
 
 		return validationResult;
+	}
+
+	@Override
+	public PropertyValidationResult validateStatistically(
+		double minPercentage,
+		double maxStandardDeviationFactor,
+		PropertyValidationStrategy strategy
+	) {
+		if (!property.classifiers().isEmpty()) {
+			throw new IllegalStateException("Statistical validation cannot be combined with classifiers");
+		}
+
+		PropertyRunResult result = runStatisticalValidation(minPercentage, maxStandardDeviationFactor, strategy);
+		updateFailureDatabaseForStatisticalValidation(result);
+
+		PropertyValidationResult validationResult = new PropertyValidationResultFacade(result, true);
+
+		if (shouldPublishResult(validationResult.status())) {
+			publishRunReport(validationResult, false);
+		}
+
+		return validationResult;
+	}
+
+	private void updateFailureDatabaseForStatisticalValidation(PropertyRunResult result) {
+		if (result.status() == PropertyValidationStatus.SUCCESSFUL) {
+			database.deleteProperty(property.id());
+		} else if (result.status() == PropertyValidationStatus.FAILED) {
+			database.saveFailure(property.id(), result.effectiveSeed().orElse(null), Set.of());
+		}
+	}
+
+	private PropertyRunResult runStatisticalValidation(
+		double minPercentage,
+		double maxStandardDeviationFactor,
+		PropertyValidationStrategy strategy
+	) {
+		List<Generator<?>> generators = generators(strategy.edgeCases());
+		Tryable tryable = safeTryable(property.condition(), Set.of());
+		PropertyRun propertyRun = new PropertyRun(generators, tryable);
+
+		PropertyRunConfiguration statisticalRunConfiguration = buildStatisticalRunConfiguration(minPercentage, maxStandardDeviationFactor, strategy, generators);
+		return propertyRun.run(statisticalRunConfiguration);
+	}
+
+	private PropertyRunConfiguration buildStatisticalRunConfiguration(
+		double minPercentage,
+		double maxStandardDeviationFactor,
+		PropertyValidationStrategy strategy,
+		List<Generator<?>> generators
+	) {
+		String validationLabel = "STATISTICAL(%s, %s)".formatted(minPercentage, maxStandardDeviationFactor);
+		parametersReport.append("validation", validationLabel);
+
+		PropertyRunConfiguration runConfiguration = new RunConfigurationBuilder(property.id(), generators, strategy, database)
+														.forStatisticalCheck()
+														.build(parametersReport);
+
+		runConfiguration.effectiveSeed().ifPresent(seed -> parametersReport.append("seed", seed));
+		parametersReport.append("max tries", runConfiguration.maxTries());
+		parametersReport.append("max runtime", runConfiguration.maxRuntime());
+		parametersReport.append("shrinking", PropertyValidationStrategy.ShrinkingMode.OFF);
+		parametersReport.append("edge cases", strategy.edgeCases());
+		parametersReport.append("concurrency", strategy.concurrency());
+
+		return wrapWithStatisticalCheck(runConfiguration, minPercentage, maxStandardDeviationFactor);
+	}
+
+	private PropertyRunConfiguration wrapWithStatisticalCheck(
+		PropertyRunConfiguration plainConfiguration,
+		double minPercentage,
+		double maxStandardDeviationFactor
+	) {
+		return wrapSource(
+			plainConfiguration,
+			source -> new StatisticalPropertySource(source, minPercentage, maxStandardDeviationFactor)
+		);
 	}
 
 	private void publishFalsifiedSamples(SortedSet<FalsifiedSample> falsifiedSamples, StringBuilder report) {
@@ -81,8 +158,8 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		}
 	}
 
-	private PropertyRunResult run(PropertyValidationStrategy strategy, Set<ClassifyingCollector<List<Object>>> collectors) {
-		List<Generator<?>> generators = generators(strategy);
+	private PropertyRunResult runStrictValidation(PropertyValidationStrategy strategy, Set<ClassifyingCollector<List<Object>>> collectors) {
+		List<Generator<?>> generators = generators(strategy.edgeCases());
 		Tryable tryable = safeTryable(property.condition(), collectors);
 		PropertyRun propertyRun = new PropertyRun(generators, tryable);
 
@@ -90,7 +167,7 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		return propertyRun.run(runConfiguration);
 	}
 
-	private void publishRunReport(PropertyValidationResult result) {
+	private void publishRunReport(PropertyValidationResult result, boolean publishFalsifiedSamples) {
 		fillInResultReport(result);
 
 		StringBuilder report = new StringBuilder();
@@ -98,7 +175,10 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		result.failure().ifPresent(failure -> publishFailure(failure, report));
 		resultReport.publish(report);
 		parametersReport.publish(report);
-		publishFalsifiedSamples(result.falsifiedSamples(), report);
+
+		if (publishFalsifiedSamples) {
+			publishFalsifiedSamples(result.falsifiedSamples(), report);
+		}
 
 		String reportKey = "%s (%s)".formatted(property.id(), result.status().name());
 		platformPublisher.publish(reportKey, report.toString());
@@ -131,9 +211,8 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		return status != PropertyValidationStatus.SUCCESSFUL || publishSuccessfulResults;
 	}
 
-	private List<Generator<?>> generators(PropertyValidationStrategy strategy) {
+	private List<Generator<?>> generators(PropertyValidationStrategy.EdgeCasesMode edgeCasesMode) {
 		List<Generator<?>> generators = new ArrayList<>();
-		var edgeCasesMode = strategy.edgeCases();
 		Optional<Generator.DecoratorFunction> edgeCasesDecorator = edgeCasesDecorator(edgeCasesMode);
 		for (Arbitrary<?> a : property.arbitraries()) {
 			Generator<?> toDecorate = a.generator();
@@ -171,6 +250,9 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		Set<ClassifyingCollector<List<Object>>> collectors,
 		PropertyValidationStrategy strategy
 	) {
+		String validationLabel = "STRICT";
+		parametersReport.append("validation", validationLabel);
+
 		var plainRunConfiguration = new RunConfigurationBuilder(property.id(), generators, strategy, database).build(parametersReport);
 
 		plainRunConfiguration.effectiveSeed()
@@ -242,25 +324,12 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		};
 	}
 
-	private void executeResultCallbacks(PropertyRunResult result) {
-		switch (result.status()) {
-			case SUCCESSFUL:
-				onSuccessful();
-				break;
-			case FAILED:
-				onFailed(result);
-				break;
-			case ABORTED:
-				break;
+	private void updateFailureDatabase(PropertyRunResult result) {
+		if (result.status() == PropertyValidationStatus.SUCCESSFUL) {
+			database.deleteProperty(property.id());
+		} else if (result.status() == PropertyValidationStatus.FAILED) {
+			saveFailureToDatabase(result);
 		}
-	}
-
-	private void onSuccessful() {
-		database.deleteProperty(property.id());
-	}
-
-	private void onFailed(PropertyRunResult result) {
-		saveFailureToDatabase(result);
 	}
 
 	private void saveFailureToDatabase(PropertyRunResult result) {

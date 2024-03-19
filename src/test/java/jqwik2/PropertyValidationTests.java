@@ -105,9 +105,8 @@ class PropertyValidationTests {
 																		.withSeed("42")
 																		.build();
 
-		StringPublisher publisher = new StringPublisher();
 		PropertyValidationResult result = PropertyValidator.forProperty(property)
-														   .publisher(publisher)
+														   .publisher(stringPublisher)
 														   .validate(strategy);
 
 		assertThat(result.isFailed()).isTrue();
@@ -119,7 +118,7 @@ class PropertyValidationTests {
 		// Shrinking usually reduces the initial falsified sample to a minimal falsified sample
 		assertThat(result.falsifiedSamples()).hasSizeGreaterThanOrEqualTo(1);
 
-		Approvals.verify(publisher.contents(), validationReportApprovalTestsOptions());
+		Approvals.verify(stringPublisher.contents(), validationReportApprovalTestsOptions());
 	}
 
 	@Example
@@ -134,10 +133,9 @@ class PropertyValidationTests {
 		PropertyValidationStrategy strategy = PropertyValidationStrategy.builder()
 																		.withSeed("42")
 																		.build();
-		StringPublisher publisher = new StringPublisher();
 		PropertyValidationResult result = PropertyValidator
 											  .forProperty(property)
-											  .publisher(publisher)
+											  .publisher(stringPublisher)
 											  .validate(strategy);
 
 		assertThat(result.isFailed()).isTrue();
@@ -148,7 +146,7 @@ class PropertyValidationTests {
 		// Shrinking usually reduces the initial falsified sample to a minimal falsified sample
 		assertThat(result.falsifiedSamples()).hasSizeGreaterThanOrEqualTo(1);
 
-		Approvals.verify(publisher.contents(), validationReportApprovalTestsOptions());
+		Approvals.verify(stringPublisher.contents(), validationReportApprovalTestsOptions());
 	}
 
 	@Example
@@ -686,6 +684,47 @@ class PropertyValidationTests {
 			assertThat(result.countTries()).isEqualTo(100);
 			assertThat(result.countChecks()).isEqualTo(100);
 		}
+	}
+
+	@Group
+	class StatisticalValidation {
+
+		@Example
+		void succeedWithMinPercentage() {
+
+			var property = PropertyDescription.property().forAll(
+				Numbers.integers().between(0, 100)
+			).check(i -> i < 95);
+
+			var validator = PropertyValidator.forProperty(property);
+			// .publisher(PlatformPublisher.STDOUT)
+			// .publishSuccessfulResults(true);
+
+			var result = validator.validateStatistically(93.0, 2.0);
+			assertThat(result.isSuccessful()).isTrue();
+			assertThat(result.countChecks()).isGreaterThanOrEqualTo(100);
+			assertThat(result.falsifiedSamples()).isEmpty();
+		}
+
+		@Example
+		void failWithMinPercentage() {
+
+			var property = PropertyDescription.property().forAll(
+				Numbers.integers().between(0, 100)
+			).check(i -> i < 88);
+
+			var validator = PropertyValidator.forProperty(property)
+											 .publisher(stringPublisher);
+
+			var result = validator.validateStatistically(93.0, 2.0);
+			assertThat(result.status().isFailed()).isTrue();
+			assertThat(result.countChecks()).isGreaterThanOrEqualTo(100);
+			assertThat(result.falsifiedSamples()).isEmpty();
+
+			Approvals.verify(stringPublisher.contents(), validationReportApprovalTestsOptions());
+		}
+
 
 	}
+
 }

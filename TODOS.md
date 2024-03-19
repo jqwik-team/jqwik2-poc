@@ -1,6 +1,6 @@
 - New Core API
-    - PropertyValidator.validateStatistically(minPercentage, standardDeviation)
     - Reporting
+      - BUG: seed must always be recorded even if not provided (see RunConfigurationBuilder.randomized())
       - shrinking steps for smallest falsified sample
       - duration in result section
       - Do proper formatting in reports according to example-report.txt 

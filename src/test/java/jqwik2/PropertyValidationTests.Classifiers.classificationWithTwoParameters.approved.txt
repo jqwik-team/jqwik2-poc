@@ -9,6 +9,7 @@ jqwik2.PropertyValidationTests$Classifiers#classificationWithTwoParameters (SUCC
   # checks | [checks]
 
 |--parameters--|
+  validation | STRICT
   generation | SMART (RANDOMIZED)
   seed | [seed]
   max tries | 0

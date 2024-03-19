@@ -1,5 +1,6 @@
 package jqwik2.internal.validation;
 
+import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
@@ -20,12 +21,18 @@ class RunConfigurationBuilder {
 	private final String id;
 	private final FailureDatabase database;
 	private final List<Generator<?>> generators;
+	private int maxTries;
+	private Duration maxRuntime;
+	private PropertyValidationStrategy.ShrinkingMode shrinking;
 
 	RunConfigurationBuilder(String id, List<Generator<?>> generators, PropertyValidationStrategy strategy, FailureDatabase database) {
 		this.id = id;
 		this.strategy = strategy;
 		this.database = database;
 		this.generators = generators;
+		this.maxTries = strategy.maxTries();
+		this.maxRuntime = strategy.maxRuntime();
+		this.shrinking = strategy.shrinking();
 	}
 
 	PropertyRunConfiguration build(ReportSection parametersReport) {
@@ -40,7 +47,7 @@ class RunConfigurationBuilder {
 					}
 					Collections.sort(samples); // Sorts from smallest to largest
 					yield PropertyRunConfiguration.samples(
-						strategy.maxRuntime(),
+						maxRuntime,
 						isShrinkingEnabled(),
 						samples,
 						serviceSupplier()
@@ -69,8 +76,8 @@ class RunConfigurationBuilder {
 				parametersReport.append("generation", RANDOMIZED.name());
 				yield PropertyRunConfiguration.randomized(
 					seedSupplier.get(),
-					strategy.maxTries(),
-					strategy.maxRuntime(), isShrinkingEnabled(),
+					maxTries,
+					maxRuntime, isShrinkingEnabled(),
 					strategy.filterOutDuplicateSamples(),
 					serviceSupplier()
 				);
@@ -78,16 +85,16 @@ class RunConfigurationBuilder {
 			case EXHAUSTIVE -> {
 				parametersReport.append("generation", EXHAUSTIVE.name());
 				yield PropertyRunConfiguration.exhaustive(
-					strategy.maxTries(),
-					strategy.maxRuntime(),
+					maxTries,
+					maxRuntime,
 					serviceSupplier(),
 					generators
 				);
 			}
 			case SMART -> PropertyRunConfiguration.smart(
 				seedSupplier.get(),
-				strategy.maxTries(),
-				strategy.maxRuntime(),
+				maxTries,
+				maxRuntime,
 				isShrinkingEnabled(),
 				strategy.filterOutDuplicateSamples(),
 				serviceSupplier(),
@@ -97,7 +104,7 @@ class RunConfigurationBuilder {
 			case SAMPLES -> {
 				parametersReport.append("generation", EXHAUSTIVE.name());
 				yield PropertyRunConfiguration.samples(
-					strategy.maxRuntime(),
+					maxRuntime,
 					isShrinkingEnabled(),
 					strategy.samples(),
 					serviceSupplier()
@@ -107,7 +114,7 @@ class RunConfigurationBuilder {
 				parametersReport.append("generation", EXHAUSTIVE.name());
 				yield PropertyRunConfiguration.guided(
 					GrowingSampleSource::new,
-					strategy.maxTries(), strategy.maxRuntime(),
+					maxTries, maxRuntime,
 					false, true,
 					serviceSupplier()
 				);
@@ -127,6 +134,13 @@ class RunConfigurationBuilder {
 	}
 
 	private boolean isShrinkingEnabled() {
-		return strategy.shrinking() == PropertyValidationStrategy.ShrinkingMode.FULL;
+		return shrinking == PropertyValidationStrategy.ShrinkingMode.FULL;
+	}
+
+	RunConfigurationBuilder forStatisticalCheck() {
+		this.maxTries = Integer.MAX_VALUE;
+		this.maxRuntime = Duration.ZERO;
+		this.shrinking = PropertyValidationStrategy.ShrinkingMode.OFF;
+		return this;
 	}
 }

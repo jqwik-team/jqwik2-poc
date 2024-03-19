@@ -10,9 +10,15 @@ import org.opentest4j.*;
 
 public class PropertyValidationResultFacade implements PropertyValidationResult {
 	private final PropertyRunResult runResult;
+	private final boolean statisticalValidation;
 
 	public PropertyValidationResultFacade(PropertyRunResult runResult) {
+		this(runResult, false);
+	}
+
+	public PropertyValidationResultFacade(PropertyRunResult runResult, boolean statisticalValidation) {
 		this.runResult = runResult;
+		this.statisticalValidation = statisticalValidation;
 	}
 
 	@Override
@@ -67,11 +73,11 @@ public class PropertyValidationResultFacade implements PropertyValidationResult 
 		if (runResult.failureReason().isPresent()) {
 			return runResult.failureReason().get();
 		}
-		if (runResult.falsifiedSamples().isEmpty()) {
+		if (falsifiedSamples().isEmpty()) {
 			return new AssertionFailedError("Property failed for unknown reason");
 		}
 
-		var smallestFalsifiedSample = runResult.falsifiedSamples().first();
+		var smallestFalsifiedSample = falsifiedSamples().first();
 		if (smallestFalsifiedSample.thrown().isPresent()) {
 			return smallestFalsifiedSample.thrown().get();
 		}
@@ -82,6 +88,9 @@ public class PropertyValidationResultFacade implements PropertyValidationResult 
 
 	@Override
 	public SortedSet<FalsifiedSample> falsifiedSamples() {
+		if (statisticalValidation) {
+			return Collections.emptySortedSet();
+		}
 		return runResult.falsifiedSamples();
 	}
 
