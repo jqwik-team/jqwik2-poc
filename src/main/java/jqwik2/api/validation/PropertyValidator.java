@@ -21,6 +21,10 @@ public interface PropertyValidator {
 		return validateStatistically(minPercentage, maxStandardDeviationFactor, PropertyValidationStrategy.DEFAULT);
 	}
 
+	default PropertyValidationResult validateStatistically(double minPercentage) {
+		return validateStatistically(minPercentage, JqwikDefaults.defaultStandardDeviationThreshold(), PropertyValidationStrategy.DEFAULT);
+	}
+
 	PropertyValidationResult validateStatistically(double minPercentage, double maxStandardDeviationFactor, PropertyValidationStrategy strategy);
 
 	PropertyValidator failureDatabase(FailureDatabase database);

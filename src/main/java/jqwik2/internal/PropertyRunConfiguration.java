@@ -63,7 +63,7 @@ public interface PropertyRunConfiguration {
 			maxRuntime, shrinkingEnabled,
 			filterOutDuplicateSamples,
 			supplyExecutorService,
-			() -> randomSource(seed)
+			() -> new RandomGenSource(seed)
 		);
 	}
 
@@ -104,13 +104,6 @@ public interface PropertyRunConfiguration {
 			Executors::newSingleThreadExecutor,
 			IterableGrowingSource::new
 		);
-	}
-
-
-	private static IterableSampleSource randomSource(String seed) {
-		return seed == null
-				   ? new RandomGenSource()
-				   : new RandomGenSource(seed);
 	}
 
 	static PropertyRunConfiguration exhaustive(
@@ -179,7 +172,6 @@ public interface PropertyRunConfiguration {
 			() -> sampleSource
 		);
 	}
-
 
 }
 

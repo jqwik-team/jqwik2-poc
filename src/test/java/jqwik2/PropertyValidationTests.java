@@ -700,7 +700,7 @@ class PropertyValidationTests {
 			// .publisher(PlatformPublisher.STDOUT)
 			// .publishSuccessfulResults(true);
 
-			var result = validator.validateStatistically(93.0, 2.0);
+			var result = validator.validateStatistically(93.0);
 			assertThat(result.isSuccessful()).isTrue();
 			assertThat(result.countChecks()).isGreaterThanOrEqualTo(100);
 			assertThat(result.falsifiedSamples()).isEmpty();
@@ -708,7 +708,6 @@ class PropertyValidationTests {
 
 		@Example
 		void failWithMinPercentage() {
-
 			var property = PropertyDescription.property().forAll(
 				Numbers.integers().between(0, 100)
 			).check(i -> i < 88);
@@ -716,7 +715,10 @@ class PropertyValidationTests {
 			var validator = PropertyValidator.forProperty(property)
 											 .publisher(stringPublisher);
 
-			var result = validator.validateStatistically(93.0, 2.0);
+			PropertyValidationStrategy strategy = PropertyValidationStrategy.builder()
+																			.withGeneration(RANDOMIZED)
+																			.build();
+			var result = validator.validateStatistically(93.0, 2.0, strategy);
 			assertThat(result.status().isFailed()).isTrue();
 			assertThat(result.countChecks()).isGreaterThanOrEqualTo(100);
 			assertThat(result.falsifiedSamples()).isEmpty();
