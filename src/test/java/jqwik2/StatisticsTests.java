@@ -107,7 +107,7 @@ class StatisticsTests {
 			Generator<Integer> die = BaseGenerators.choose(List.of(1, 2, 3, 4, 5, 6));
 			GenSource source = new RandomGenSource();
 
-			while (classifier.checkCoverage(2.0) == ClassifyingCollector.CoverageCheck.UNSTABLE) {
+			while (classifier.checkCoverage(3.0) == ClassifyingCollector.CoverageCheck.UNSTABLE) {
 				classifier.classify(die.generate(source));
 			}
 
@@ -117,7 +117,7 @@ class StatisticsTests {
 			// System.out.println(classifier.checkCoverage(1.0));
 			// System.out.println(classifier.rejections());
 
-			assertThat(classifier.checkCoverage(2.0)).isEqualTo(ClassifyingCollector.CoverageCheck.ACCEPT);
+			assertThat(classifier.checkCoverage(3.0)).isEqualTo(ClassifyingCollector.CoverageCheck.ACCEPT);
 			assertThat(classifier.rejections()).isEmpty();
 		}
 

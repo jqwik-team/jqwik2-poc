@@ -183,7 +183,7 @@ public class ClassifyingCollector<C> {
 										.orElse(0.0);
 			if (minPercentage > 0.0) {
 				int averageTriesFor10Hits = (int) (100.0 / minPercentage) * 10;
-				minTries = Math.max(MIN_TRIES_LOWER_BOUND, averageTriesFor10Hits);
+				minTries = Math.max(MIN_TRIES_LOWER_BOUND, averageTriesFor10Hits  * cases.size());
 			} else {
 				minTries = MIN_TRIES_LOWER_BOUND;
 			}
