@@ -37,7 +37,7 @@ public interface PropertyRunConfiguration {
 
 	static PropertyRunConfiguration randomized(String seed, int maxTries) {
 		return randomized(
-			seed, maxTries, Duration.ofMinutes(10),
+			seed, maxTries, JqwikDefaults.defaultMaxDuration(),
 			true, false,
 			DEFAULT_EXECUTOR_SERVICE_SUPPLIER
 		);
@@ -47,7 +47,7 @@ public interface PropertyRunConfiguration {
 		String seed, int maxTries, boolean shrinkingEnabled, boolean filterOutDuplicateSamples
 	) {
 		return randomized(
-			seed, maxTries, Duration.ofSeconds(10),
+			seed, maxTries, JqwikDefaults.defaultMaxDuration(),
 			shrinkingEnabled, filterOutDuplicateSamples,
 			Executors::newSingleThreadExecutor
 		);
@@ -125,6 +125,24 @@ public interface PropertyRunConfiguration {
 			() -> sampleSources
 		);
 	}
+	static PropertyRunConfiguration exhaustive(
+		Supplier<ExecutorService> supplyExecutorService,
+		List<Generator<?>> generators
+	) {
+		var sampleSources =
+			IterableExhaustiveSource.from(generators)
+									.orElseThrow(() -> {
+										var message = "Exhaustive generation is not possible for given generators";
+										return new IllegalArgumentException(message);
+									});
+		return new RunConfigurationRecord(
+			null, Integer.MAX_VALUE,
+			JqwikDefaults.defaultMaxDuration(), false,
+			false,
+			supplyExecutorService,
+			() -> sampleSources
+		);
+	}
 
 	static PropertyRunConfiguration smart(
 		String seed, int maxTries, Duration maxRuntime,
@@ -155,6 +173,17 @@ public interface PropertyRunConfiguration {
 	private static void addSmartGenerationReport(PropertyValidationStrategy.GenerationMode randomized, ReportSection parametersReport) {
 		var generationParameter = "%s (%s)".formatted(SMART.name(), randomized.name());
 		parametersReport.append("generation", generationParameter);
+	}
+
+	static PropertyRunConfiguration samples(
+		List<SampleRecording> samples,
+		Supplier<ExecutorService> defaultExecutorServiceSupplier
+	) {
+		return samples(
+			JqwikDefaults.defaultMaxDuration(),
+			false, samples,
+			defaultExecutorServiceSupplier
+		);
 	}
 
 	static PropertyRunConfiguration samples(

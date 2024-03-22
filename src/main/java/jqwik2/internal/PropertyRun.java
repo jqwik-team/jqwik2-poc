@@ -28,6 +28,26 @@ public class PropertyRun {
 		this.onSatisfied = onSuccessful;
 	}
 
+	/**
+	 * Run a property with one configuration after the other until one fails or all succeed.
+	 * @param configurations list of configurations, at least one must be provided
+	 * @return list of results, one for each started configuration
+	 */
+	public List<PropertyRunResult> run(List<PropertyRunConfiguration> configurations) {
+		if (configurations.isEmpty()) {
+			throw new IllegalArgumentException("At least one configuration must be provided");
+		}
+		List<PropertyRunResult> results = new ArrayList<>();
+		for (PropertyRunConfiguration configuration : configurations) {
+			var result = run(configuration);
+			results.add(result);
+			if (!result.isSuccessful()) {
+				break;
+			}
+		}
+		return results;
+	}
+
 	public PropertyRunResult run(PropertyRunConfiguration configuration) {
 		IterableSampleSource iterableGenSource = randomSource(configuration);
 
