@@ -216,7 +216,7 @@ public class PropertyRun {
 			countChecks.incrementAndGet();
 		}
 		if (tryResult.status() == TryExecutionResult.Status.FALSIFIED) {
-			FalsifiedSample originalSample = new FalsifiedSample(sample, tryResult.throwable());
+			FalsifiedSample originalSample = FalsifiedSample.original(sample, tryResult.throwable());
 			onFalsified.accept(originalSample);
 			if (stopWhenFalsified) {
 				shutdownAndStop.shutdown();

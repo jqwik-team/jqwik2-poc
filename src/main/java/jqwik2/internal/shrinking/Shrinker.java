@@ -1,6 +1,7 @@
 package jqwik2.internal.shrinking;
 
 import java.util.*;
+import java.util.concurrent.atomic.*;
 
 import jqwik2.api.*;
 import jqwik2.internal.*;
@@ -25,6 +26,7 @@ public class Shrinker {
 		Set<Sample> triedFilteredSamples = new HashSet<>();
 		SortedSet<Sample> invalidSamples = new TreeSet<>();
 		Sample shrinkBase = best.sample();
+		AtomicInteger shrinkingSteps = new AtomicInteger(0);
 		while (true) {
 			// System.out.println("shrinkBase: " + shrinkBase);
 			Optional<Pair<Sample, TryExecutionResult>> shrinkingResult =
@@ -45,9 +47,10 @@ public class Shrinker {
 						  .findAny();
 
 			if (shrinkingResult.isPresent()) {
+				int steps = shrinkingSteps.incrementAndGet();
 				Sample sample = shrinkingResult.get().first();
 				TryExecutionResult result = shrinkingResult.get().second();
-				best = new FalsifiedSample(sample, result.throwable());
+				best = new FalsifiedSample(sample, result.throwable(), steps);
 				return Optional.of(best);
 			}
 

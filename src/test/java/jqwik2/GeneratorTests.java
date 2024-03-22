@@ -504,7 +504,7 @@ class GeneratorTests {
 			GenSource source = RecordedSource.of(recording);
 
 			Shrinkable<Object> shrinkable = new ShrinkableGenerator<>(listOfInts).generate(source).asGeneric();
-			FalsifiedSample falsifiedSample = new FalsifiedSample(new Sample(List.of(shrinkable)), null);
+			FalsifiedSample falsifiedSample = FalsifiedSample.original(new Sample(List.of(shrinkable)), null);
 
 			Tryable tryable = Tryable.from(args -> {
 				List<Integer> list = (List<Integer>) args.getFirst();
