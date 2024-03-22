@@ -1,7 +1,6 @@
 - New Core API
     - Reporting
-      - shrinking steps for smallest falsified sample
-      - duration in result section
+      - run time in result section
       - Do proper formatting in reports according to example-report.txt 
       - Report differences between sample values and regenerated values
     - Make afterFailure attribute multi value, e.g List.of(SAMPLES, REPLAY |

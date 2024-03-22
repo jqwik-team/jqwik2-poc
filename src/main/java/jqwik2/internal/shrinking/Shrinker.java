@@ -22,13 +22,13 @@ public class Shrinker {
 	}
 
 	@SuppressWarnings("OverlyLongMethod")
-	public Optional<FalsifiedSample> next() {
+	public Optional<FalsifiedSample> next(int shrinkingStep) {
 		Set<Sample> triedFilteredSamples = new HashSet<>();
 		SortedSet<Sample> invalidSamples = new TreeSet<>();
 		Sample shrinkBase = best.sample();
-		AtomicInteger shrinkingSteps = new AtomicInteger(0);
 		while (true) {
 			// System.out.println("shrinkBase: " + shrinkBase);
+			// TODO: Also cache falsified and satisfied samples
 			Optional<Pair<Sample, TryExecutionResult>> shrinkingResult =
 				shrinkBase.shrink()
 						  .map(sample -> {
@@ -47,10 +47,9 @@ public class Shrinker {
 						  .findAny();
 
 			if (shrinkingResult.isPresent()) {
-				int steps = shrinkingSteps.incrementAndGet();
 				Sample sample = shrinkingResult.get().first();
 				TryExecutionResult result = shrinkingResult.get().second();
-				best = new FalsifiedSample(sample, result.throwable(), steps);
+				best = new FalsifiedSample(sample, result.throwable(), shrinkingStep);
 				return Optional.of(best);
 			}
 

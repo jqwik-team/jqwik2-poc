@@ -1,6 +1,7 @@
 package jqwik2.internal.shrinking;
 
 import java.util.*;
+import java.util.concurrent.atomic.*;
 import java.util.function.*;
 
 import jqwik2.api.*;
@@ -18,8 +19,9 @@ public class FullShrinker {
 
 	public FalsifiedSample shrinkToEnd(Consumer<FalsifiedSample> eachShrinkStep) {
 		Shrinker shrinker = new Shrinker(falsifiedSample, tryable);
+		AtomicInteger countShrinkingSteps = new AtomicInteger(0);
 		while (true) {
-			Optional<FalsifiedSample> next = shrinker.next();
+			Optional<FalsifiedSample> next = shrinker.next(countShrinkingSteps.incrementAndGet());
 			if (next.isEmpty()) {
 				return shrinker.best();
 			}

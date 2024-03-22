@@ -513,8 +513,9 @@ class GeneratorTests {
 			Shrinker shrinker = new Shrinker(falsifiedSample, tryable);
 
 			FalsifiedSample best = falsifiedSample;
+			int countShrinkingSteps = 0;
 			while (true) {
-				Optional<FalsifiedSample> next = shrinker.next();
+				Optional<FalsifiedSample> next = shrinker.next(++countShrinkingSteps);
 				if (next.isEmpty()) {
 					break;
 				}

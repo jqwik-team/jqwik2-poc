@@ -27,6 +27,6 @@ Original Falsified Sample
 -------------------------
   arg-0: 1054
 
-Smallest Falsified Sample
--------------------------
+Smallest Falsified Sample (1012 steps)
+--------------------------------------
   arg-0: 42

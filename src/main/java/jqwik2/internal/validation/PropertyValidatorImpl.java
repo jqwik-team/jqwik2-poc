@@ -135,15 +135,23 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		report.append("%n".formatted());
 		report.append("%n".formatted());
 
-		FalsifiedSample firstFalsifiedSample = falsifiedSamples.last();
-		publishSample("Original Falsified Sample", firstFalsifiedSample, report);
-
+		publishOriginalSample(falsifiedSamples, report);
 		if (falsifiedSamples.size() == 1) {
 			return;
 		}
 		report.append("%n".formatted());
+		publishSmallestSample(falsifiedSamples, report);
+	}
+
+	private void publishSmallestSample(SortedSet<FalsifiedSample> falsifiedSamples, StringBuilder report) {
 		FalsifiedSample smallestFalsifiedSample = falsifiedSamples.first();
-		publishSample("Smallest Falsified Sample", smallestFalsifiedSample, report);
+		var label = "Smallest Falsified Sample (%d steps)".formatted(smallestFalsifiedSample.countShrinkingSteps());
+		publishSample(label, smallestFalsifiedSample, report);
+	}
+
+	private void publishOriginalSample(SortedSet<FalsifiedSample> falsifiedSamples, StringBuilder report) {
+		FalsifiedSample originalFalsifiedSample = falsifiedSamples.last();
+		publishSample("Original Falsified Sample", originalFalsifiedSample, report);
 	}
 
 	private void publishSample(String label, FalsifiedSample sample, StringBuilder report) {
