@@ -13,7 +13,7 @@ jqwik2.PropertyValidationTests$Classifiers#classificationAccepted (SUCCESSFUL) =
 |--parameters--|
   validation | STRICT
   generation | SMART (RANDOMIZED)
-  seed | [seed]
+  seed | [seed1]
   max tries | 0
   max runtime | PT1S
   shrinking | FULL

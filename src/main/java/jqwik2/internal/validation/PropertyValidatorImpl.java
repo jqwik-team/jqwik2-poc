@@ -38,7 +38,6 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		Set<ClassifyingCollector<List<Object>>> collectors = asClassifyingCollectors(property.classifiers());
 
 		PropertyRunResult result = runStrictValidation(strategy, collectors);
-		updateFailureDatabase(result);
 
 		PropertyValidationResult validationResult = new PropertyValidationResultFacade(result);
 
@@ -62,8 +61,6 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		}
 
 		PropertyRunResult result = runStatisticalValidation(minPercentage, maxStandardDeviationFactor, strategy);
-		updateFailureDatabaseForStatisticalValidation(result);
-
 		PropertyValidationResult validationResult = new PropertyValidationResultFacade(result, true);
 
 		if (shouldPublishResult(validationResult.status())) {
@@ -73,11 +70,11 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		return validationResult;
 	}
 
-	private void updateFailureDatabaseForStatisticalValidation(PropertyRunResult result) {
+	private void updateFailureDatabaseForStatisticalValidation(PropertyRunResult result, Optional<String> effectiveSeed) {
 		if (result.status() == PropertyValidationStatus.SUCCESSFUL) {
 			database.deleteProperty(property.id());
 		} else if (result.status() == PropertyValidationStatus.FAILED) {
-			database.saveFailure(property.id(), result.effectiveSeed().orElse(null), Set.of());
+			database.saveFailure(property.id(), effectiveSeed.orElse(null), Set.of());
 		}
 	}
 
@@ -91,7 +88,9 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		PropertyRunner runner = new PropertyRunner(generators, tryable);
 
 		PropertyRunConfiguration statisticalRunConfiguration = buildStatisticalRunConfiguration(minPercentage, maxStandardDeviationFactor, strategy, generators);
-		return runner.run(statisticalRunConfiguration);
+		var result = runner.run(statisticalRunConfiguration);
+		updateFailureDatabaseForStatisticalValidation(result, statisticalRunConfiguration.effectiveSeed());
+		return result;
 	}
 
 	private PropertyRunConfiguration buildStatisticalRunConfiguration(
@@ -172,7 +171,10 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		PropertyRunner runner = new PropertyRunner(generators, tryable);
 
 		PropertyRunConfiguration runConfiguration = buildRunConfiguration(generators, collectors, strategy);
-		return runner.run(runConfiguration);
+		var propertyRunResult = runner.run(runConfiguration);
+		updateFailureDatabase(propertyRunResult, runConfiguration.effectiveSeed());
+
+		return propertyRunResult;
 	}
 
 	private void publishRunReport(PropertyValidationResult result, boolean publishFalsifiedSamples) {
@@ -332,19 +334,19 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		};
 	}
 
-	private void updateFailureDatabase(PropertyRunResult result) {
+	private void updateFailureDatabase(PropertyRunResult result, Optional<String> effectiveSeed) {
 		if (result.status() == PropertyValidationStatus.SUCCESSFUL) {
 			database.deleteProperty(property.id());
 		} else if (result.status() == PropertyValidationStatus.FAILED) {
-			saveFailureToDatabase(result);
+			saveFailureToDatabase(result, effectiveSeed);
 		}
 	}
 
-	private void saveFailureToDatabase(PropertyRunResult result) {
+	private void saveFailureToDatabase(PropertyRunResult result, Optional<String> effectiveSeed) {
 		Set<SampleRecording> sampleRecordings = result.falsifiedSamples().stream()
 													  .map(s -> s.sample().recording())
 													  .collect(Collectors.toSet());
-		database.saveFailure(property.id(), result.effectiveSeed().orElse(null), sampleRecordings);
+		database.saveFailure(property.id(), effectiveSeed.orElse(null), sampleRecordings);
 	}
 
 	@Override

@@ -1,6 +1,6 @@
 jqwik2.PropertyValidationTests$StatisticalValidation#failWithMinPercentage (FAILED) =
   org.opentest4j.AssertionFailedError:
-    Satisfaction percentage expected to be at least [percentage1] but was only [percentage2] (ratio)
+    Satisfaction percentage expected to be at least [percentage1] but was only [percentage2] (ratio1)
 
 
 |--result--|
@@ -12,7 +12,7 @@ jqwik2.PropertyValidationTests$StatisticalValidation#failWithMinPercentage (FAIL
 |--parameters--|
   validation | STATISTICAL(93.0, 2.0)
   generation | RANDOMIZED
-  seed | [seed]
+  seed | [seed1]
   max tries | 2147483647
   max runtime | PT0S
   shrinking | OFF

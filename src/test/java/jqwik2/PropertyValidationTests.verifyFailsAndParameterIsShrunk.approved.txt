@@ -15,7 +15,7 @@ jqwik2.PropertyValidationTests#verifyFailsAndParameterIsShrunk (FAILED) =
 |--parameters--|
   validation | STRICT
   generation | RANDOMIZED
-  seed | [seed]
+  seed | [seed1]
   max tries | 100
   max runtime | PT10M
   shrinking | FULL

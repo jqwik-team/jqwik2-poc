@@ -4,7 +4,7 @@ jqwik2.PropertyValidationTests$Classifiers#classificationRejected: classifier ([
 
 jqwik2.PropertyValidationTests$Classifiers#classificationRejected (FAILED) =
   org.opentest4j.AssertionFailedError:
-    Coverage of case 'positive' expected to be at least [percentage3] but was only [percentage4] (ratio)
+    Coverage of case 'positive' expected to be at least [percentage3] but was only [percentage4] (ratio1)
 
 
 |--result--|
@@ -16,7 +16,7 @@ jqwik2.PropertyValidationTests$Classifiers#classificationRejected (FAILED) =
 |--parameters--|
   validation | STRICT
   generation | SMART (RANDOMIZED)
-  seed | [seed]
+  seed | [seed1]
   max tries | 0
   max runtime | PT1S
   shrinking | FULL

@@ -175,11 +175,11 @@ class PropertyValidationTests {
 
 	private static Options validationReportApprovalTestsOptions() {
 		var trimWhitespaceScrubber = new TrimWhitespaceScrubber();
-		var seedScrubber = new RegExScrubber("seed(\\s+)\\|(\\s+)\\d{1,14}", "seed | [seed]");
+		var seedScrubber = new RegExScrubber("seed(\\s+)\\|(\\s+)\\d{1,14}", "seed | [seed%d]"::formatted);
 		var countTriesScrubber = new RegExScrubber("# tries(\\s+)\\|(\\s+)\\d{1,10}", "# tries | [tries]");
 		var countChecksScrubber = new RegExScrubber("# checks(\\s+)\\|(\\s+)\\d{1,10}", "# checks | [checks]");
 		var countsScrubber = new RegExScrubber("\\(\\d{1,10}\\)", "([count%d])"::formatted);
-		var ratioScrubber = new RegExScrubber("\\(\\d{1,10}\\/\\d{1,10}\\)", "(ratio)"::formatted);
+		var ratioScrubber = new RegExScrubber("\\(\\d{1,10}\\/\\d{1,10}\\)", "(ratio%d)"::formatted);
 		var percentageScrubber = new RegExScrubber("\\d{1,2}.\\d{2}%", "[percentage%d]"::formatted);
 		var scrubbers = Scrubbers.scrubAll(
 			trimWhitespaceScrubber,
