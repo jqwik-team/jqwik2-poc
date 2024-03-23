@@ -88,10 +88,10 @@ public class PropertyValidatorImpl implements PropertyValidator {
 	) {
 		List<Generator<?>> generators = generators(strategy.edgeCases());
 		Tryable tryable = safeTryable(property.condition(), Set.of());
-		PropertyRun propertyRun = new PropertyRun(generators, tryable);
+		PropertyRunner runner = new PropertyRunner(generators, tryable);
 
 		PropertyRunConfiguration statisticalRunConfiguration = buildStatisticalRunConfiguration(minPercentage, maxStandardDeviationFactor, strategy, generators);
-		return propertyRun.run(statisticalRunConfiguration);
+		return runner.run(statisticalRunConfiguration);
 	}
 
 	private PropertyRunConfiguration buildStatisticalRunConfiguration(
@@ -169,10 +169,10 @@ public class PropertyValidatorImpl implements PropertyValidator {
 	private PropertyRunResult runStrictValidation(PropertyValidationStrategy strategy, Set<ClassifyingCollector<List<Object>>> collectors) {
 		List<Generator<?>> generators = generators(strategy.edgeCases());
 		Tryable tryable = safeTryable(property.condition(), collectors);
-		PropertyRun propertyRun = new PropertyRun(generators, tryable);
+		PropertyRunner runner = new PropertyRunner(generators, tryable);
 
 		PropertyRunConfiguration runConfiguration = buildRunConfiguration(generators, collectors, strategy);
-		return propertyRun.run(runConfiguration);
+		return runner.run(runConfiguration);
 	}
 
 	private void publishRunReport(PropertyValidationResult result, boolean publishFalsifiedSamples) {

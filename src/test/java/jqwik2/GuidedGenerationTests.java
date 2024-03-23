@@ -45,7 +45,7 @@ class GuidedGenerationTests {
 			// System.out.println("args = " + args);
 		});
 
-		PropertyRun propertyCase = new PropertyRun(generators, tryable);
+		PropertyRunner runner = new PropertyRunner(generators, tryable);
 
 		GuidedGeneration generate42Values = new SequentialGuidedGeneration() {
 			volatile int count = 0;
@@ -73,7 +73,7 @@ class GuidedGenerationTests {
 			}
 		};
 
-		PropertyRunResult result = propertyCase.run(
+		PropertyRunResult result = runner.run(
 			guided(
 				() -> generate42Values,
 				1000, Duration.ofSeconds(5),
@@ -98,7 +98,7 @@ class GuidedGenerationTests {
 			return anInt <= 90;
 		});
 
-		PropertyRun propertyCase = new PropertyRun(generators, tryable);
+		PropertyRunner runner = new PropertyRunner(generators, tryable);
 
 		AtomicInteger countNextSourceCalls = new AtomicInteger(0);
 
@@ -135,7 +135,7 @@ class GuidedGenerationTests {
 			}
 		};
 
-		PropertyRunResult result = propertyCase.run(
+		PropertyRunResult result = runner.run(
 			guided(
 				() -> generateUntil91isGenerated,
 				1000, Duration.ofSeconds(5),
@@ -159,7 +159,7 @@ class GuidedGenerationTests {
 			// System.out.println("args = " + args);
 		});
 
-		PropertyRun propertyCase = new PropertyRun(generators, tryable);
+		PropertyRunner runner = new PropertyRunner(generators, tryable);
 
 		GuidedGeneration generate42Values = new SequentialGuidedGeneration() {
 			volatile int count = 0;
@@ -193,7 +193,7 @@ class GuidedGenerationTests {
 			}
 		};
 
-		PropertyRunResult result = propertyCase.run(
+		PropertyRunResult result = runner.run(
 			guided(
 				() -> generate42Values,
 				1000, Duration.ofSeconds(5),

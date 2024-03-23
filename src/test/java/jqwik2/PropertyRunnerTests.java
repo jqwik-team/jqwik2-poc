@@ -21,7 +21,7 @@ import static jqwik2.api.validation.PropertyValidationStatus.*;
 import static jqwik2.internal.PropertyRunConfiguration.*;
 import static org.assertj.core.api.Assertions.*;
 
-class PropertyRunTests {
+class PropertyRunnerTests {
 
 	@Provide
 	Arbitrary<Supplier<ExecutorService>> serviceSuppliers() {
@@ -40,9 +40,9 @@ class PropertyRunTests {
 		);
 		Tryable tryable = Tryable.from(args -> true);
 
-		PropertyRun propertyRun = new PropertyRun(generators, tryable);
+		PropertyRunner runner = new PropertyRunner(generators, tryable);
 
-		PropertyRunResult result = propertyRun.run(
+		PropertyRunResult result = runner.run(
 			randomized(
 				"42", 10,
 				Duration.ofSeconds(10), false,
@@ -67,9 +67,9 @@ class PropertyRunTests {
 			return first > second;
 		});
 
-		PropertyRun propertyRun = new PropertyRun(generators, tryable);
+		PropertyRunner runner = new PropertyRunner(generators, tryable);
 
-		PropertyRunResult result = propertyRun.run(
+		PropertyRunResult result = runner.run(
 			randomized("42", 10, false, false)
 		);
 		assertThat(result.status()).isEqualTo(PropertyValidationStatus.SUCCESSFUL);
@@ -88,9 +88,9 @@ class PropertyRunTests {
 			return true;
 		});
 
-		PropertyRun propertyRun = new PropertyRun(generators, tryable);
+		PropertyRunner runner = new PropertyRunner(generators, tryable);
 
-		PropertyRunResult result = propertyRun.run(
+		PropertyRunResult result = runner.run(
 			randomized(
 				"42", 10,
 				Duration.ofSeconds(10), false,
@@ -115,9 +115,9 @@ class PropertyRunTests {
 			return false;
 		});
 
-		PropertyRun propertyRun = new PropertyRun(generators, tryable);
+		PropertyRunner runner = new PropertyRunner(generators, tryable);
 
-		PropertyRunResult result = propertyRun.run(
+		PropertyRunResult result = runner.run(
 			randomized(
 				"42", 10,
 				Duration.ofSeconds(10), false,
@@ -143,9 +143,9 @@ class PropertyRunTests {
 			throw assertionError;
 		});
 
-		PropertyRun propertyRun = new PropertyRun(generators, tryable);
+		PropertyRunner runner = new PropertyRunner(generators, tryable);
 
-		PropertyRunResult result = propertyRun.run(
+		PropertyRunResult result = runner.run(
 			randomized(
 				"42", 10,
 				Duration.ofSeconds(10), true,
@@ -172,9 +172,9 @@ class PropertyRunTests {
 			fail("I failed!");
 		});
 
-		PropertyRun propertyRun = new PropertyRun(generators, tryable);
+		PropertyRunner runner = new PropertyRunner(generators, tryable);
 
-		PropertyRunResult result = propertyRun.run(
+		PropertyRunResult result = runner.run(
 			randomized("42", 10, false, false)
 		);
 		assertThat(result.status()).isEqualTo(PropertyValidationStatus.FAILED);
@@ -198,9 +198,9 @@ class PropertyRunTests {
 			return anInt < 45;
 		});
 
-		PropertyRun propertyRun = new PropertyRun(generators, tryable);
+		PropertyRunner runner = new PropertyRunner(generators, tryable);
 
-		PropertyRunResult result = propertyRun.run(
+		PropertyRunResult result = runner.run(
 			randomized(
 				"4242", 100,
 				Duration.ofSeconds(10), true,
@@ -236,9 +236,9 @@ class PropertyRunTests {
 			return true;
 		});
 
-		PropertyRun propertyRun = new PropertyRun(generators, tryable);
+		PropertyRunner runner = new PropertyRunner(generators, tryable);
 
-		PropertyRunResult result = propertyRun.run(
+		PropertyRunResult result = runner.run(
 			randomized(
 				"42", 1000, Duration.ofSeconds(1), false,
 				false,
@@ -263,9 +263,9 @@ class PropertyRunTests {
 		});
 
 		Generator<?> anyGenerator = new IntegerGenerator(0, 100);
-		PropertyRun propertyRun = new PropertyRun(List.of(anyGenerator), tryable);
+		PropertyRunner runner = new PropertyRunner(List.of(anyGenerator), tryable);
 
-		PropertyRunResult result = propertyRun.run(
+		PropertyRunResult result = runner.run(
 			randomized(
 				"42", 100, Duration.ofMillis(200), false,
 				false,
@@ -290,10 +290,10 @@ class PropertyRunTests {
 			throw abortion;
 		};
 
-		PropertyRun propertyRun = new PropertyRun(List.of(aFailingGenerator), tryable);
+		PropertyRunner runner = new PropertyRunner(List.of(aFailingGenerator), tryable);
 
 		String seed = RandomChoice.generateRandomSeed();
-		PropertyRunResult result = propertyRun.run(
+		PropertyRunResult result = runner.run(
 			randomized(
 				seed, 100, Duration.ofMinutes(10), true,
 				false,
@@ -342,10 +342,10 @@ class PropertyRunTests {
 		);
 		Tryable tryable = Tryable.from(args -> true);
 
-		PropertyRun propertyRun = new PropertyRun(generators, tryable);
+		PropertyRunner runner = new PropertyRunner(generators, tryable);
 
 		final Set<Sample> samples1 = Collections.synchronizedSet(new HashSet<>());
-		propertyRun.onSuccessful(samples1::add);
+		runner.onSuccessful(samples1::add);
 
 		PropertyRunConfiguration runConfiguration = randomized(
 			Long.toString(seed), 10, Duration.ofSeconds(10), false,
@@ -353,12 +353,12 @@ class PropertyRunTests {
 			serviceSupplier
 		);
 
-		assertThat(propertyRun.run(runConfiguration).status())
+		assertThat(runner.run(runConfiguration).status())
 			.isEqualTo(PropertyValidationStatus.SUCCESSFUL);
 
 		final Set<Sample> samples2 = Collections.synchronizedSet(new HashSet<>());
-		propertyRun.onSuccessful(samples2::add);
-		assertThat(propertyRun.run(runConfiguration).status())
+		runner.onSuccessful(samples2::add);
+		assertThat(runner.run(runConfiguration).status())
 			.isEqualTo(PropertyValidationStatus.SUCCESSFUL);
 
 		assertThat(samples1).hasSameElementsAs(samples2);
@@ -375,7 +375,7 @@ class PropertyRunTests {
 			);
 			Tryable tryable = Tryable.from(args -> true);
 
-			PropertyRun propertyRun = new PropertyRun(generators, tryable);
+			PropertyRunner runner = new PropertyRunner(generators, tryable);
 
 			var run1 = randomized(
 				"42", 10,
@@ -385,7 +385,7 @@ class PropertyRunTests {
 			);
 
 			var run2 = exhaustive(serviceSupplier, generators);
-			List<PropertyRunResult> results = propertyRun.run(List.of(run1, run2, run1));
+			List<PropertyRunResult> results = runner.run(List.of(run1, run2, run1));
 
 			assertThat(results).hasSize(3);
 			assertThat(results.stream().map(PropertyRunResult::status)).containsExactly(SUCCESSFUL, SUCCESSFUL, SUCCESSFUL);
@@ -399,11 +399,10 @@ class PropertyRunTests {
 			);
 			Tryable tryable = Tryable.from(args -> {
 				int anInt = (int) args.get(0);
-				System.out.println(anInt);
 				return anInt < 42;
 			});
 
-			PropertyRun propertyRun = new PropertyRun(generators, tryable);
+			PropertyRunner runner = new PropertyRunner(generators, tryable);
 
 			List<SampleRecording> samples = List.of(
 				new SampleRecording(Recording.choice(10)),
@@ -414,7 +413,7 @@ class PropertyRunTests {
 
 			var run2 = exhaustive(serviceSupplier, generators);
 
-			List<PropertyRunResult> results = propertyRun.run(List.of(run1, run2, run1));
+			List<PropertyRunResult> results = runner.run(List.of(run1, run2, run1));
 
 			assertThat(results).hasSize(2);
 			assertThat(results.stream().map(PropertyRunResult::status)).containsExactly(SUCCESSFUL, FAILED);
@@ -441,9 +440,9 @@ class PropertyRunTests {
 				return anInt < 95;
 			});
 
-			PropertyRun propertyRun = new PropertyRun(generators, tryable);
+			PropertyRunner runner = new PropertyRunner(generators, tryable);
 
-			PropertyRunResult result = propertyRun.run(
+			PropertyRunResult result = runner.run(
 				wrapSource(
 					randomized(
 						"42", 0, Duration.ZERO,
@@ -469,9 +468,9 @@ class PropertyRunTests {
 				return anInt < 88;
 			});
 
-			PropertyRun propertyRun = new PropertyRun(generators, tryable);
+			PropertyRunner runner = new PropertyRunner(generators, tryable);
 
-			PropertyRunResult result = propertyRun.run(
+			PropertyRunResult result = runner.run(
 				wrapSource(
 					randomized(
 						"42", 0, Duration.ZERO,
@@ -504,9 +503,9 @@ class PropertyRunTests {
 
 			Tryable tryable = Tryable.from(classifier::classify);
 
-			PropertyRun propertyRun = new PropertyRun(generators, tryable);
+			PropertyRunner runner = new PropertyRunner(generators, tryable);
 
-			PropertyRunResult result = propertyRun.run(
+			PropertyRunResult result = runner.run(
 				wrapSource(
 					randomized(
 						"42", 0, Duration.ZERO,
@@ -535,9 +534,9 @@ class PropertyRunTests {
 
 			Tryable tryable = Tryable.from(classifier::classify);
 
-			PropertyRun propertyRun = new PropertyRun(generators, tryable);
+			PropertyRunner runner = new PropertyRunner(generators, tryable);
 
-			PropertyRunResult result = propertyRun.run(
+			PropertyRunResult result = runner.run(
 				wrapSource(
 					randomized(
 						"42", 0, Duration.ZERO,
@@ -576,9 +575,9 @@ class PropertyRunTests {
 				return classifier.total() < 100;
 			});
 
-			PropertyRun propertyRun = new PropertyRun(generators, tryable);
+			PropertyRunner runner = new PropertyRunner(generators, tryable);
 
-			PropertyRunResult result = propertyRun.run(
+			PropertyRunResult result = runner.run(
 				wrapSource(
 					randomized(
 						"42", 0, Duration.ZERO,
@@ -611,9 +610,9 @@ class PropertyRunTests {
 				return classifier.total() < 100;
 			});
 
-			PropertyRun propertyRun = new PropertyRun(generators, tryable);
+			PropertyRunner runner = new PropertyRunner(generators, tryable);
 
-			PropertyRunResult result = propertyRun.run(
+			PropertyRunResult result = runner.run(
 				wrapSource(
 					randomized(
 						"42", 100, Duration.ZERO,
@@ -644,9 +643,9 @@ class PropertyRunTests {
 				return anInt < 30;
 			});
 
-			PropertyRun propertyRun = new PropertyRun(generators, tryable);
+			PropertyRunner runner = new PropertyRunner(generators, tryable);
 
-			PropertyRunResult result = propertyRun.run(
+			PropertyRunResult result = runner.run(
 				wrapSource(
 					randomized(
 						"42", 0, Duration.ZERO,
