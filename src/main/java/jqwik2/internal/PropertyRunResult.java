@@ -9,7 +9,6 @@ import org.opentest4j.*;
 
 public record PropertyRunResult(
 	PropertyValidationStatus status, int countTries, int countChecks,
-	Optional<String> effectiveSeed,
 	SortedSet<FalsifiedSample> falsifiedSamples,
 	Optional<Throwable> failureReason, // Can be overridden e.g. by guided generation
 	Optional<Throwable> abortionReason,
@@ -20,10 +19,9 @@ public record PropertyRunResult(
 		PropertyValidationStatus status,
 		int countTries,
 		int countChecks,
-		Optional<String> effectiveSeed,
 		boolean timedOut
 	) {
-		this(status, countTries, countChecks, effectiveSeed, new TreeSet<>(), Optional.empty(), Optional.empty(), timedOut);
+		this(status, countTries, countChecks, new TreeSet<>(), Optional.empty(), Optional.empty(), timedOut);
 	}
 
 	public boolean isSuccessful() {
@@ -65,7 +63,7 @@ public record PropertyRunResult(
 
 	public PropertyRunResult withStatus(PropertyValidationStatus changedStatus) {
 		return new PropertyRunResult(
-			changedStatus, countTries, countChecks, effectiveSeed,
+			changedStatus, countTries, countChecks,
 			falsifiedSamples, failureReason, abortionReason, timedOut
 		);
 	}
@@ -75,7 +73,7 @@ public record PropertyRunResult(
 										? Optional.of(changedFailureReason)
 										: failureReason;
 		return new PropertyRunResult(
-			status, countTries, countChecks, effectiveSeed,
+			status, countTries, countChecks,
 			falsifiedSamples, modifiedFailureReason, abortionReason, timedOut
 		);
 	}

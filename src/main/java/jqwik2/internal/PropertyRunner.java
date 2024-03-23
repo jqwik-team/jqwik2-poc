@@ -53,7 +53,7 @@ public class PropertyRunner {
 
 		return runAndShrink(
 			iterableGenSource,
-			configuration.effectiveSeed(), configuration.maxTries(), configuration.maxRuntime(),
+			configuration.maxTries(), configuration.maxRuntime(),
 			configuration.shrinkingEnabled(), configuration.filterOutDuplicateSamples(),
 			configuration.executorService()
 		);
@@ -62,7 +62,7 @@ public class PropertyRunner {
 	@SuppressWarnings("OverlyLongMethod")
 	private PropertyRunResult runAndShrink(
 		IterableSampleSource iterableGenSource,
-		Optional<String> effectiveSeed, int maxTries, Duration maxDuration,
+		int maxTries, Duration maxDuration,
 		boolean shrinkingEnabled, boolean filterOutDuplicateSamples,
 		Optional<ExecutorService> optionalExecutorService
 	) {
@@ -85,7 +85,7 @@ public class PropertyRunner {
 			Guidance guidance = collectedRunResults.third();
 
 			PropertyRunResult runResult = createRunResult(
-				countChecks, countTries, effectiveSeed, maxDuration,
+				countChecks, countTries, maxDuration,
 				falsifiedSamples, shrinkingEnabled, timedOut
 			);
 
@@ -94,66 +94,62 @@ public class PropertyRunner {
 			// return guidance.overridePropertyResult(runResult);
 		} catch (Throwable t) {
 			ExceptionSupport.rethrowIfBlacklisted(t);
-			return abortion(effectiveSeed, t, countTries, countChecks);
+			return abortion(t, countTries, countChecks);
 		}
 	}
 
 	private PropertyRunResult createRunResult(
-		AtomicInteger countChecks, AtomicInteger countTries, Optional<String> effectiveSeed,
+		AtomicInteger countChecks, AtomicInteger countTries,
 		Duration maxDuration, SortedSet<FalsifiedSample> falsifiedSamples, boolean shrinkingEnabled,
 		boolean timedOut
 	) {
 		if (falsifiedSamples.isEmpty()) {
 			if (hasTimedOutWithoutCheck(timedOut, countChecks)) {
-				return timeOutAbortion(effectiveSeed, maxDuration, countTries, countChecks);
+				return timeOutAbortion(maxDuration, countTries, countChecks);
 			}
-			return success(effectiveSeed, countTries, countChecks, timedOut);
+			return success(countTries, countChecks, timedOut);
 		} else {
 			FalsifiedSample originalSample = falsifiedSamples.first();
 			if (shrinkingEnabled) {
 				shrink(originalSample, falsifiedSamples);
 			}
-			return failure(effectiveSeed, countTries, countChecks, falsifiedSamples, timedOut);
+			return failure(countTries, countChecks, falsifiedSamples, timedOut);
 		}
 	}
 
 	private static PropertyRunResult abortion(
-		Optional<String> effectiveSeed,
 		Throwable t,
 		AtomicInteger countTries,
 		AtomicInteger countChecks
 	) {
 		return new PropertyRunResult(
-			ABORTED, countTries.get(), countChecks.get(), effectiveSeed,
+			ABORTED, countTries.get(), countChecks.get(),
 			new TreeSet<>(), Optional.empty(), Optional.of(t),
 			false
 		);
 	}
 
 	private static PropertyRunResult failure(
-		Optional<String> effectiveSeed,
 		AtomicInteger countTries,
 		AtomicInteger countChecks,
 		SortedSet<FalsifiedSample> falsifiedSamples,
 		boolean timedOut
 	) {
 		return new PropertyRunResult(
-			FAILED, countTries.get(), countChecks.get(), effectiveSeed,
+			FAILED, countTries.get(), countChecks.get(),
 			falsifiedSamples, Optional.empty(), Optional.empty(), timedOut
 		);
 	}
 
 	private static PropertyRunResult success(
-		Optional<String> effectiveSeed,
 		AtomicInteger countTries,
 		AtomicInteger countChecks,
 		boolean timedOut
 	) {
-		return new PropertyRunResult(SUCCESSFUL, countTries.get(), countChecks.get(), effectiveSeed, timedOut);
+		return new PropertyRunResult(SUCCESSFUL, countTries.get(), countChecks.get(), timedOut);
 	}
 
 	private static PropertyRunResult timeOutAbortion(
-		Optional<String> effectiveSeed,
 		Duration maxDuration,
 		AtomicInteger countTries,
 		AtomicInteger countChecks
@@ -161,7 +157,7 @@ public class PropertyRunner {
 		String timedOutMessage = "Timeout after " + maxDuration + " without any check being executed.";
 		Exception abortionReason = new TimeoutException(timedOutMessage);
 		return new PropertyRunResult(
-			ABORTED, countTries.get(), countChecks.get(), effectiveSeed,
+			ABORTED, countTries.get(), countChecks.get(),
 			new TreeSet<>(), Optional.empty(), Optional.of(abortionReason),
 			true
 		);
