@@ -16,20 +16,31 @@ import static jqwik2.api.validation.PropertyValidationStatus.*;
 public class PropertyRunner {
 	private final List<Generator<?>> generators;
 	private final Tryable tryable;
-
-	private Consumer<Sample> onSatisfied = ignore -> {};
+	private final List<BiConsumer<TryExecutionResult,Sample>> tryExecutionListeners = new ArrayList<>();
 
 	public PropertyRunner(List<Generator<?>> generators, Tryable tryable) {
 		this.generators = generators;
 		this.tryable = tryable;
 	}
 
-	public void onSuccessful(Consumer<Sample> onSuccessful) {
-		this.onSatisfied = onSuccessful;
+	/**
+	 * Register a listener that will be called after each try execution.
+	 * @param listener
+	 */
+	public void onTryExecution(BiConsumer<TryExecutionResult, Sample> listener) {
+		if (listener == null || tryExecutionListeners.contains(listener)) {
+			return;
+		}
+		tryExecutionListeners.add(listener);
+	}
+
+	private void sampleExecuted(TryExecutionResult result, Sample sample) {
+		tryExecutionListeners.forEach(listener -> listener.accept(result, sample));
 	}
 
 	/**
 	 * Run a property with one configuration after the other until one fails or all succeed.
+	 *
 	 * @param configurations list of configurations, at least one must be provided
 	 * @return list of results, one for each started configuration
 	 */
@@ -205,7 +216,7 @@ public class PropertyRunner {
 			(sample, shutdown) -> executeTry(
 				sample, countChecks,
 				iterableGenSource.stopWhenFalsified(),
-				onFalsified, onSatisfied, guide, shutdown
+				onFalsified, guide, shutdown
 			)
 		);
 
@@ -222,7 +233,6 @@ public class PropertyRunner {
 		Sample sample, AtomicInteger countChecks,
 		boolean stopWhenFalsified,
 		Consumer<FalsifiedSample> onFalsified,
-		Consumer<Sample> onSatisfied,
 		BiConsumer<TryExecutionResult, Sample> guide,
 		TaskRunner.Shutdown shutdownAndStop
 	) {
@@ -238,9 +248,7 @@ public class PropertyRunner {
 				shutdownAndStop.shutdown();
 			}
 		}
-		if (tryResult.status() == TryExecutionResult.Status.SATISFIED) {
-			onSatisfied.accept(sample);
-		}
+		sampleExecuted(tryResult, sample);
 	}
 
 	private static IterableSampleSource randomSource(PropertyRunConfiguration configuration) {
@@ -266,7 +274,6 @@ public class PropertyRunner {
 		private final Lock generationLock;
 		private final BiConsumer<Sample, TaskRunner.Shutdown> task;
 
-		private volatile int count = 0;
 		private volatile boolean stopped = false;
 
 		private ConcurrentTaskIterator(

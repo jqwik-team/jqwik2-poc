@@ -344,8 +344,8 @@ class PropertyRunnerTests {
 
 		PropertyRunner runner = new PropertyRunner(generators, tryable);
 
-		final Set<Sample> samples1 = Collections.synchronizedSet(new HashSet<>());
-		runner.onSuccessful(samples1::add);
+		final Set<Sample> collectedSamples = Collections.synchronizedSet(new HashSet<>());
+		runner.onTryExecution((result, sample) -> collectedSamples.add(sample));
 
 		PropertyRunConfiguration runConfiguration = randomized(
 			Long.toString(seed), 10, Duration.ofSeconds(10), false,
@@ -356,17 +356,17 @@ class PropertyRunnerTests {
 		assertThat(runner.run(runConfiguration).status())
 			.isEqualTo(PropertyValidationStatus.SUCCESSFUL);
 
-		final Set<Sample> samples2 = Collections.synchronizedSet(new HashSet<>());
-		runner.onSuccessful(samples2::add);
+		Set<Sample> samplesFirstRun = new HashSet<>(collectedSamples);
+		collectedSamples.clear();
+
 		assertThat(runner.run(runConfiguration).status())
 			.isEqualTo(PropertyValidationStatus.SUCCESSFUL);
 
-		assertThat(samples1).hasSameElementsAs(samples2);
+		assertThat(samplesFirstRun).hasSameElementsAs(collectedSamples);
 	}
 
 	@Group
 	class SequentialRuns {
-
 
 		@Property(generation = GenerationMode.EXHAUSTIVE)
 		void threeSuccessfulRuns(@ForAll("serviceSuppliers") Supplier<ExecutorService> serviceSupplier) {
