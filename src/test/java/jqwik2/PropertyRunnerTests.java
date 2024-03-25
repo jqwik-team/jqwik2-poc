@@ -366,6 +366,56 @@ class PropertyRunnerTests {
 	}
 
 	@Group
+	class OnTryExecutionHandlers {
+
+		@Example
+		void allTriesAreAnnounced() {
+			List<Generator<?>> generators = List.of(
+				new IntegerGenerator(1, 100)
+			);
+			Tryable tryable = Tryable.from(args -> {
+				int first = (int) args.get(0);
+				Assume.that(first % 2 == 0);
+				return first < 50;
+			});
+
+			PropertyRunner runner = new PropertyRunner(generators, tryable);
+
+			AtomicInteger countSatisfied = new AtomicInteger(0);
+			AtomicInteger countInvalid = new AtomicInteger(0);
+			AtomicInteger countFalsified = new AtomicInteger(0);
+			runner.onTryExecution((result, sample) -> {
+				switch(result.status()) {
+					case SATISFIED:
+						countSatisfied.incrementAndGet();
+						break;
+					case INVALID:
+						countInvalid.incrementAndGet();
+						break;
+					case FALSIFIED:
+						countFalsified.incrementAndGet();
+						break;
+				}
+			});
+
+			PropertyRunResult result = runner.run(
+				exhaustive(
+					1000, Duration.ofSeconds(10),
+					null, generators
+				)
+			);
+			assertThat(result.isFailed()).isTrue();
+			assertThat(result.countTries()).isEqualTo(50);
+			assertThat(result.countChecks()).isEqualTo(25);
+
+			assertThat(countSatisfied.get()).isEqualTo(24);
+			assertThat(countFalsified.get()).isEqualTo(1);
+			assertThat(countInvalid.get()).isEqualTo(25);
+		}
+
+	}
+
+	@Group
 	class SequentialRuns {
 
 		@Property(generation = GenerationMode.EXHAUSTIVE)
