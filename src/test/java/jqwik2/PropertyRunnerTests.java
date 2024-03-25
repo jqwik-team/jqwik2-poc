@@ -369,7 +369,7 @@ class PropertyRunnerTests {
 	class OnTryExecutionHandlers {
 
 		@Example
-		void allTriesAreAnnounced() {
+		void allTryExecutionsAreAnnounced() {
 			List<Generator<?>> generators = List.of(
 				new IntegerGenerator(1, 100)
 			);
@@ -411,6 +411,52 @@ class PropertyRunnerTests {
 			assertThat(countSatisfied.get()).isEqualTo(24);
 			assertThat(countFalsified.get()).isEqualTo(1);
 			assertThat(countInvalid.get()).isEqualTo(25);
+		}
+
+		@Example
+		void tryExecutionsDuringShrinkingAreAnnounced() {
+			List<Generator<?>> generators = List.of(
+				new IntegerGenerator(0, 100)
+			);
+			Tryable tryable = Tryable.from(args -> {
+				int first = (int) args.get(0);
+				Assume.that(first % 2 == 0);
+				return first < 50;
+			});
+
+			PropertyRunner runner = new PropertyRunner(generators, tryable);
+
+			AtomicInteger countSatisfied = new AtomicInteger(0);
+			AtomicInteger countInvalid = new AtomicInteger(0);
+			AtomicInteger countFalsified = new AtomicInteger(0);
+			runner.onTryExecution((result, sample) -> {
+				switch(result.status()) {
+					case SATISFIED:
+						countSatisfied.incrementAndGet();
+						break;
+					case INVALID:
+						countInvalid.incrementAndGet();
+						break;
+					case FALSIFIED:
+						countFalsified.incrementAndGet();
+						break;
+				}
+			});
+
+			List<SampleRecording> samples = List.of(new SampleRecording(Recording.choice(80)));
+
+			PropertyRunResult result = runner.run(
+				samples(
+					 Duration.ofSeconds(10), true,
+					samples, null
+				)
+			);
+			assertThat(result.status()).isEqualTo(PropertyValidationStatus.FAILED);
+			assertThat(result.falsifiedSamples().getFirst().values()).isEqualTo(List.of(50));
+
+			assertThat(countFalsified.get()).isGreaterThan(1);
+			assertThat(countSatisfied.get()).isGreaterThan(0);
+			assertThat(countInvalid.get()).isGreaterThan(0);
 		}
 
 	}

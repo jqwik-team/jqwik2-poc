@@ -1,7 +1,7 @@
 package jqwik2.internal.shrinking;
 
 import java.util.*;
-import java.util.concurrent.atomic.*;
+import java.util.function.*;
 
 import jqwik2.api.*;
 import jqwik2.internal.*;
@@ -9,12 +9,18 @@ import jqwik2.internal.*;
 public class Shrinker {
 	private final Tryable tryable;
 	private final Throwable originalThrowable;
+	private final BiConsumer<TryExecutionResult, Sample> onTry;
 	private FalsifiedSample best;
 
 	public Shrinker(FalsifiedSample falsifiedSample, Tryable tryable) {
+		this(falsifiedSample, tryable, (result, sample) -> {});
+	}
+
+	public Shrinker(FalsifiedSample falsifiedSample, Tryable tryable, BiConsumer<TryExecutionResult, Sample> onTry) {
 		this.tryable = tryable;
-		best = falsifiedSample;
-		originalThrowable = falsifiedSample.throwable();
+		this.best = falsifiedSample;
+		this.originalThrowable = falsifiedSample.throwable();
+		this.onTry = onTry;
 	}
 
 	public FalsifiedSample best() {
@@ -28,13 +34,9 @@ public class Shrinker {
 		Sample shrinkBase = best.sample();
 		while (true) {
 			// System.out.println("shrinkBase: " + shrinkBase);
-			// TODO: Also cache falsified and satisfied samples
 			Optional<Pair<Sample, TryExecutionResult>> shrinkingResult =
 				shrinkBase.shrink()
-						  .map(sample -> {
-							  TryExecutionResult executionResult = tryable.apply(sample);
-							  return new Pair<>(sample, executionResult);
-						  })
+						  .map(sample -> executeTry(sample))
 						  .filter(pair -> pair.second().status() != TryExecutionResult.Status.SATISFIED)
 						  .filter(pair -> pair.first().compareTo(best.sample()) < 0)
 						  .peek(pair -> {
@@ -66,6 +68,13 @@ public class Shrinker {
 			}
 
 		}
+	}
+
+	private Pair<Sample, TryExecutionResult> executeTry(Sample sample) {
+		// TODO: Cache all results and take from cache if available
+		TryExecutionResult executionResult = tryable.apply(sample);
+		onTry.accept(executionResult, sample);
+		return new Pair<>(sample, executionResult);
 	}
 
 	private boolean isFalsified(TryExecutionResult tryExecutionResult) {

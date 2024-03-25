@@ -62,7 +62,7 @@ public class PropertyRunner {
 	public PropertyRunResult run(PropertyRunConfiguration configuration) {
 		IterableSampleSource iterableGenSource = randomSource(configuration);
 
-		return runAndShrink(
+		return runWithGenSource(
 			iterableGenSource,
 			configuration.maxTries(), configuration.maxRuntime(),
 			configuration.shrinkingEnabled(), configuration.filterOutDuplicateSamples(),
@@ -71,7 +71,7 @@ public class PropertyRunner {
 	}
 
 	@SuppressWarnings("OverlyLongMethod")
-	private PropertyRunResult runAndShrink(
+	private PropertyRunResult runWithGenSource(
 		IterableSampleSource iterableGenSource,
 		int maxTries, Duration maxDuration,
 		boolean shrinkingEnabled, boolean filterOutDuplicateSamples,
@@ -85,19 +85,18 @@ public class PropertyRunner {
 		AtomicInteger countChecks = new AtomicInteger(0);
 
 		try {
-			Triple<SortedSet<FalsifiedSample>, Boolean, Guidance> collectedRunResults = runAndCollectFalsifiedSamples(
+			Triple<SortedSet<FalsifiedSample>, Boolean, Guidance> collectedRunResults = runWithoutShrinking(
 				iterableGenSource, maxTries, sampleGenerator,
 				countTries, countChecks,
 				maxDuration, optionalExecutorService
 			);
 
-			SortedSet<FalsifiedSample> falsifiedSamples = collectedRunResults.first();
 			boolean timedOut = collectedRunResults.second();
 			Guidance guidance = collectedRunResults.third();
 
-			PropertyRunResult runResult = createRunResult(
-				countChecks, countTries, maxDuration,
-				falsifiedSamples, shrinkingEnabled, timedOut
+			PropertyRunResult runResult = shrinkAndCreateResult(
+					countChecks, countTries, maxDuration,
+					collectedRunResults.first(), shrinkingEnabled, timedOut
 			);
 
 			return runResult.withGuidance(guidance);
@@ -109,9 +108,9 @@ public class PropertyRunner {
 		}
 	}
 
-	private PropertyRunResult createRunResult(
-		AtomicInteger countChecks, AtomicInteger countTries,
-		Duration maxDuration, SortedSet<FalsifiedSample> falsifiedSamples, boolean shrinkingEnabled,
+	private PropertyRunResult shrinkAndCreateResult(
+		AtomicInteger countChecks, AtomicInteger countTries, Duration maxDuration,
+		SortedSet<FalsifiedSample> falsifiedSamples, boolean shrinkingEnabled,
 		boolean timedOut
 	) {
 		if (falsifiedSamples.isEmpty()) {
@@ -178,7 +177,7 @@ public class PropertyRunner {
 		return timedOut && countChecks.get() < 1;
 	}
 
-	private Triple<SortedSet<FalsifiedSample>, Boolean, Guidance> runAndCollectFalsifiedSamples(
+	private Triple<SortedSet<FalsifiedSample>, Boolean, Guidance> runWithoutShrinking(
 		IterableSampleSource iterableGenSource,
 		int maxTries,
 		SampleGenerator sampleGenerator,
@@ -256,13 +255,9 @@ public class PropertyRunner {
 	}
 
 	private void shrink(FalsifiedSample originalSample, Collection<FalsifiedSample> falsifiedSamples) {
-		FalsifiedSample best = new FullShrinker(originalSample, tryable).shrinkToEnd(ignore -> {});
+		FullShrinker fullShrinker = new FullShrinker(originalSample, tryable, this::sampleExecuted);
+		FalsifiedSample best = fullShrinker.shrinkToEnd(ignore -> {});
 		falsifiedSamples.add(best);
-
-		// TODO: Should all shrunk examples be recorded?
-		// new FullShrinker(originalSample, tryable).shrinkToEnd(
-		// 	falsifiedSamples::add
-		// );
 	}
 
 	private static class ConcurrentTaskIterator implements Iterator<ConcurrentRunner.Task> {

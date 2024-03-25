@@ -11,14 +11,20 @@ public class FullShrinker {
 
 	private final FalsifiedSample falsifiedSample;
 	private final Tryable tryable;
+	private final BiConsumer<TryExecutionResult, Sample> onTry;
 
 	public FullShrinker(FalsifiedSample falsifiedSample, Tryable tryable) {
+		this(falsifiedSample, tryable, (result, sample) -> {});
+	}
+
+	public FullShrinker(FalsifiedSample falsifiedSample, Tryable tryable, BiConsumer<TryExecutionResult, Sample> onTry) {
 		this.falsifiedSample = falsifiedSample;
 		this.tryable = tryable;
+		this.onTry = onTry;
 	}
 
 	public FalsifiedSample shrinkToEnd(Consumer<FalsifiedSample> eachShrinkStep) {
-		Shrinker shrinker = new Shrinker(falsifiedSample, tryable);
+		Shrinker shrinker = new Shrinker(falsifiedSample, tryable, onTry);
 		AtomicInteger countShrinkingSteps = new AtomicInteger(0);
 		while (true) {
 			Optional<FalsifiedSample> next = shrinker.next(countShrinkingSteps.incrementAndGet());
