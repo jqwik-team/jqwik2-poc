@@ -21,10 +21,15 @@ class TestDrivingTests {
 									// 	  .otherwise(i -> assertThat(s).isEqualTo(Integer.toString(i)));
 								   if (i % 3 == 0) {
 									   TDD.label("Divisible by 3");
-									   assertThat(s).isEqualTo("Fizz");
+									   assertThat(s).startsWith("Fizz");
 									   TDD.done();
 								   }
-								   if (i % 3 != 0) {
+								   if (i % 5 == 0) {
+									   TDD.label("Divisible by 5");
+									   assertThat(s).endsWith("Buzz");
+									   TDD.done();
+								   }
+								   if (i % 3 != 0 && i % 5 != 0) {
 									   TDD.label("Not divisible");
 									   assertThat(s).isEqualTo(Integer.toString(i));
 									   TDD.done();
@@ -39,9 +44,16 @@ class TestDrivingTests {
 	}
 
 	private String fizzBuzz(int i) {
-		if (i == 3) {
-			return "Fizz";
+		String result = "";
+		if (i % 3 == 0) {
+			result += "Fizz";
 		}
-		return "" + i;
+		if (i % 5 == 0) {
+			result += "Buzz";
+		}
+		if (result.isEmpty()) {
+			result = Integer.toString(i);
+		}
+		return result;
 	}
 }
