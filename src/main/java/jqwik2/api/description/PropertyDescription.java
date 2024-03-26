@@ -11,7 +11,7 @@ public interface PropertyDescription {
 		return new PropertyBuilder(propertyId);
 	}
 
-	static PropertyBuilder property() {
+	static Builder property() {
 		return new PropertyBuilder();
 	}
 
