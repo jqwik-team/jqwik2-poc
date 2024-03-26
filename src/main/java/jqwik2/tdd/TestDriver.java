@@ -43,11 +43,41 @@ public class TestDriver {
 
 	}
 
-	@SuppressWarnings("OverlyLongMethod")
 	private void publishResult(PropertyRunResult result) {
 		PlatformPublisher publisher = PlatformPublisher.STDOUT;
 		StringBuilder report = new StringBuilder();
 
+		appendTriesReport(report);
+		appendStatus(result, report);
+		appendAbortionReason(result, report);
+		appendFailureReason(result, report);
+
+		publisher.publish(property.id(), report.toString());
+	}
+
+	private static void appendStatus(PropertyRunResult result, StringBuilder report) {
+		report.append("%n%nStatus: %s%n".formatted(result.status()));
+	}
+
+	private static void appendFailureReason(PropertyRunResult result, StringBuilder report) {
+		if (result.status() == PropertyValidationStatus.FAILED && !result.falsifiedSamples().isEmpty()) {
+			report.append(
+				"  Sample <%s> failed:%n    %s%n".formatted(
+					result.falsifiedSamples().first().values(),
+					result.falsifiedSamples().first().throwable()
+				)
+			);
+		}
+	}
+
+	private static void appendAbortionReason(PropertyRunResult result, StringBuilder report) {
+		if (result.status() == PropertyValidationStatus.ABORTED) {
+			String reason = result.abortionReason().map(Throwable::getMessage).orElseGet(() -> "Unknown abort reason");
+			report.append("  Aborted: %s%n".formatted(reason));
+		}
+	}
+
+	private void appendTriesReport(StringBuilder report) {
 		for (var labelListOfPairs : tries.entrySet()) {
 			var label = labelListOfPairs.getKey();
 			var samples = labelListOfPairs.getValue();
@@ -66,25 +96,6 @@ public class TestDriver {
 				report.append("%n  %s: %s".formatted(sample.values(), status));
 			}
 		}
-
-		report.append("%n%nStatus: %s%n".formatted(result.status()));
-		if (result.status() == PropertyValidationStatus.ABORTED) {
-			String reason = result.abortionReason().map(Throwable::getMessage).orElseGet(() -> "Unknown abort reason");
-			report.append("  Aborted: %s%n".formatted(reason));
-			result.falsifiedSamples().forEach(sample -> {
-				report.append("    %s%n".formatted(sample.values()));
-			});
-		}
-		if (result.status() == PropertyValidationStatus.FAILED && !result.falsifiedSamples().isEmpty()) {
-			report.append(
-				"  Sample <%s> failed:%n    %s%n".formatted(
-					result.falsifiedSamples().first().values(),
-					result.falsifiedSamples().first().throwable()
-				)
-			);
-		}
-		"Falsified: %s%n".formatted(result.status(), result.falsifiedSamples());
-		publisher.publish(property.id(), report.toString());
 	}
 
 	private PropertyRunConfiguration buildRunConfiguration() {

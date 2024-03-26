@@ -17,8 +17,6 @@ class TestDrivingTests {
 							   .forAll(Numbers.integers().between(1, Integer.MAX_VALUE))
 							   .verify(i -> {
 								   var s = fizzBuzz(i);
-								   // TDD.caseOf(i == 3, i->assertThat(s).isEqualTo("Fizz"))
-									// 	  .otherwise(i -> assertThat(s).isEqualTo(Integer.toString(i)));
 								   if (i % 3 == 0) {
 									   TDD.label("Divisible by 3");
 									   assertThat(s).startsWith("Fizz");
@@ -38,9 +36,7 @@ class TestDrivingTests {
 
 		TestDriver testDriver = TestDriver.forProperty(property);
 		// .tddDatabase(new TddDatabase("./src/test/java/jqwik2/tdd/fizzBuzz.tdd"));
-
 		testDriver.drive();
-
 	}
 
 	private String fizzBuzz(int i) {
