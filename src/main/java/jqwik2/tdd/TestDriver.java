@@ -11,12 +11,15 @@ import jqwik2.api.validation.*;
 import jqwik2.internal.*;
 
 public class TestDriver {
+	private static final String DEFAULT_CASE = "_";
+	private TDD lastTDD = null;
+
 	public static TestDriver forProperty(PropertyDescription property) {
 		return new TestDriver(property);
 	}
 
 	private final PropertyDescription property;
-	private final List<String> tddSteps = new ArrayList<>();
+	private final Map<String, List<Pair<TryExecutionResult, Sample>>> tries = new HashMap<>();
 
 	public TestDriver(PropertyDescription property) {
 		this.property = property;
@@ -26,6 +29,11 @@ public class TestDriver {
 		List<Generator<?>> generators = generators();
 		Tryable tryable = safeTryable(property.condition());
 		PropertyRunner runner = new PropertyRunner(generators, tryable);
+		runner.onTryExecution((r, s) -> {
+			if (lastTDD != null) {
+				collectTddStep(lastTDD, s, r);
+			}
+		});
 
 		PropertyRunConfiguration statisticalRunConfiguration = buildRunConfiguration();
 		var result = runner.run(statisticalRunConfiguration);
@@ -35,17 +43,38 @@ public class TestDriver {
 
 	}
 
+	@SuppressWarnings("OverlyLongMethod")
 	private void publishResult(PropertyRunResult result) {
 		PlatformPublisher publisher = PlatformPublisher.STDOUT;
 		StringBuilder report = new StringBuilder();
 
-		if (!tddSteps.isEmpty()) {
-			report.append("%n  TDD Steps:%n");
-			tddSteps.forEach(step -> report.append("  %s%n".formatted(step)));
+		for (var labelListOfPairs : tries.entrySet()) {
+			var label = labelListOfPairs.getKey();
+			var samples = labelListOfPairs.getValue();
+			report.append("%n%s:".formatted(label));
+
+			for (int i = 0; i < samples.size(); i++) {
+				var pair = samples.get(i);
+				var status = pair.first().status();
+				var sample = pair.second();
+				if (status == TryExecutionResult.Status.INVALID) {
+					continue;
+				}
+				if (i > 0 && i < samples.size() - 1 && status == TryExecutionResult.Status.SATISFIED) {
+					continue;
+				}
+				report.append("%n  %s: %s".formatted(sample.values(), status));
+			}
 		}
 
-
-		report.append("%n  Status: %s%n".formatted(result.status()));
+		report.append("%n%nStatus: %s%n".formatted(result.status()));
+		if (result.status() == PropertyValidationStatus.ABORTED) {
+			String reason = result.abortionReason().map(Throwable::getMessage).orElseGet(() -> "Unknown abort reason");
+			report.append("  Aborted: %s%n".formatted(reason));
+			result.falsifiedSamples().forEach(sample -> {
+				report.append("    %s%n".formatted(sample.values()));
+			});
+		}
 		if (result.status() == PropertyValidationStatus.FAILED && !result.falsifiedSamples().isEmpty()) {
 			report.append(
 				"  Sample <%s> failed:%n    %s%n".formatted(
@@ -70,9 +99,9 @@ public class TestDriver {
 		return Tryable.from(args -> {
 			try {
 				var tdd = TDD.start(property);
+				lastTDD = tdd;
 				try {
 					var check = condition.check(args);
-					collectTddStep(args, tdd, check);
 					tdd.checkCovered();
 					return check;
 				} finally {
@@ -85,15 +114,17 @@ public class TestDriver {
 		});
 	}
 
-	private void collectTddStep(List<Object> args, TDD tdd, boolean check) {
-		Optional<String> label = tdd.label();
-		String step = label
-						  .map(l -> "[%s] %s: ".formatted(l, args))
-						  .orElse("%s: ".formatted(args));
-		if (check) {
-			tddSteps.add(step + "Success");
-		} else {
-			tddSteps.add(step + "Failed");
+	private void collectTddStep(TDD tdd, Sample sample, TryExecutionResult check) {
+		Set<String> labels = tdd.labels();
+		if (labels.isEmpty()) {
+			var list = tries.computeIfAbsent(DEFAULT_CASE, k -> new ArrayList<>());
+			list.add(Pair.of(check, sample));
+			return;
+		}
+		for (String label : labels) {
+			var list = tries.computeIfAbsent(label, k -> new ArrayList<>());
+			list.add(Pair.of(check, sample));
+			return;
 		}
 	}
 

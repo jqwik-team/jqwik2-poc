@@ -9,7 +9,7 @@ public class TDD {
 
 	private static TDD current = null;
 
-	private static TDD current() {
+	static TDD current() {
 		if (current == null) {
 			throw new IllegalStateException("No TDD instance available");
 		}
@@ -29,13 +29,13 @@ public class TDD {
 	}
 
 	static void label(String label) {
-		current().startLabel(label);
+		current().useLabel(label);
 	}
 
 	private final PropertyDescription property;
 
 	private boolean covered = false;
-	private String label;
+	private final Set<String> labels = new HashSet<>();
 
 	public TDD(PropertyDescription property) {
 		this.property = property;
@@ -45,8 +45,8 @@ public class TDD {
 		this.covered = true;
 	}
 
-	private void startLabel(String label) {
-		this.label = label;
+	private void useLabel(String label) {
+		labels.add(label);
 	}
 
 	public void finish() {
@@ -63,7 +63,7 @@ public class TDD {
 		}
 	}
 
-	public Optional<String> label() {
-		return Optional.ofNullable(label);
+	public Set<String> labels() {
+		return labels;
 	}
 }
