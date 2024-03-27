@@ -12,7 +12,7 @@ import jqwik2.internal.*;
 
 public class TestDriver {
 	private static final String DEFAULT_CASE = "_";
-	private TDD lastTDD = null;
+	private TddTry lastTDD = null;
 
 	public static TestDriver forProperty(PropertyDescription property) {
 		return new TestDriver(property);
@@ -109,7 +109,7 @@ public class TestDriver {
 	private Tryable safeTryable(Condition condition) {
 		return Tryable.from(args -> {
 			try {
-				var tdd = TDD.start(property);
+				var tdd = TddTry.start(property);
 				lastTDD = tdd;
 				try {
 					var check = condition.check(args);
@@ -125,7 +125,7 @@ public class TestDriver {
 		});
 	}
 
-	private void collectTddStep(TDD tdd, Sample sample, TryExecutionResult check) {
+	private void collectTddStep(TddTry tdd, Sample sample, TryExecutionResult check) {
 		Set<String> labels = tdd.labels();
 		if (labels.isEmpty()) {
 			var list = tries.computeIfAbsent(DEFAULT_CASE, k -> new ArrayList<>());

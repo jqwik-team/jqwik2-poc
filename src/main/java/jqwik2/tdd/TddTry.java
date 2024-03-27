@@ -5,22 +5,22 @@ import java.util.*;
 import jqwik2.api.description.*;
 import org.opentest4j.*;
 
-public class TDD {
+public class TddTry {
 
-	private static TDD current = null;
+	private static TddTry current = null;
 
-	static TDD current() {
+	static TddTry current() {
 		if (current == null) {
 			throw new IllegalStateException("No TDD instance available");
 		}
 		return current;
 	}
 
-	public static TDD start(PropertyDescription property) {
+	public static TddTry start(PropertyDescription property) {
 		if (current != null) {
 			throw new IllegalStateException("TDD cycle running already for property " + current.property.id());
 		}
-		current = new TDD(property);
+		current = new TddTry(property);
 		return current;
 	}
 
@@ -37,7 +37,7 @@ public class TDD {
 	private boolean covered = false;
 	private final Set<String> labels = new HashSet<>();
 
-	public TDD(PropertyDescription property) {
+	public TddTry(PropertyDescription property) {
 		this.property = property;
 	}
 

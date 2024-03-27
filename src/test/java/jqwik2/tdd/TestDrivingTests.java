@@ -17,19 +17,19 @@ class TestDrivingTests {
 							   .verify(i -> {
 								   var s = fizzBuzz(i);
 								   if (i % 3 == 0) {
-									   TDD.label("Divisible by 3");
+									   TddTry.label("Divisible by 3");
 									   assertThat(s).startsWith("Fizz");
-									   TDD.done();
+									   TddTry.done();
 								   }
 								   if (i % 5 == 0) {
-									   TDD.label("Divisible by 5");
+									   TddTry.label("Divisible by 5");
 									   assertThat(s).endsWith("Buzz");
-									   TDD.done();
+									   TddTry.done();
 								   }
 								   if (i % 3 != 0 && i % 5 != 0) {
-									   TDD.label("Not divisible");
+									   TddTry.label("Not divisible");
 									   assertThat(s).isEqualTo(Integer.toString(i));
-									   TDD.done();
+									   TddTry.done();
 								   }
 							   });
 
@@ -39,7 +39,7 @@ class TestDrivingTests {
 	}
 
 	@Example
-	@Disabled("Not yet implemented")
+	// @Disabled("Not yet implemented")
 	void fizzBuzz2() {
 		var tddProperty =
 			TddProperty.id("myId")

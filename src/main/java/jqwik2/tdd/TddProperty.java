@@ -7,7 +7,7 @@ import jqwik2.api.description.*;
 
 public interface TddProperty {
 	static Builder id(String id) {
-		return null;
+		return new TddPropertyBuilder(id);
 	}
 
 	interface Builder {
