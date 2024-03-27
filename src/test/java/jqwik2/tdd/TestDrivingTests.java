@@ -39,17 +39,18 @@ class TestDrivingTests {
 	}
 
 	@Example
-	// @Disabled("Not yet implemented")
+		// @Disabled("Not yet implemented")
 	void fizzBuzz2() {
-		var tddProperty =
-			TddProperty.id("myId")
-					   .forAll(Numbers.integers().between(1, Integer.MAX_VALUE));
-		// .verifyCase("normal number", i -> true,
-		// 		 i -> {
-		// 			 var s = fizzBuzz(i);
-		// 			 assertThat(s).equals(Integer.toString(i));
-		// 		 }
-		// );
+		TddProperty.P1<Integer> tddProperty =
+			TDD.id("myId")
+			   .forAll(Numbers.integers().between(1, Integer.MAX_VALUE))
+			   .verifyCase(
+				   "normal number", i -> true,
+				   i -> {
+					   var s = fizzBuzz(i);
+					   assertThat(s).isEqualTo(Integer.toString(i));
+				   }
+			   );
 
 		TddResult result = tddProperty.drive();
 		assertThat(result.status()).isEqualTo(TddResult.Status.NOT_COVERED);
