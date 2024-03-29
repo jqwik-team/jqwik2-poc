@@ -4,11 +4,5 @@ import java.util.*;
 
 import jqwik2.api.validation.*;
 
-public record TddResult(Status status, List<PropertyValidationResult> caseResults) {
-	public enum Status {
-		SUCCESSFUL,
-		FAILED,
-		ABORTED,
-		NOT_COVERED
-	}
+public record TddResult(PropertyValidationStatus status, List<PropertyValidationResult> caseResults, boolean everythingCovered) {
 }

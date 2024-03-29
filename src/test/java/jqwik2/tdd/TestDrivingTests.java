@@ -5,6 +5,7 @@ import java.util.function.*;
 import jqwik2.api.arbitraries.*;
 import jqwik2.api.description.*;
 import jqwik2.api.functions.*;
+import jqwik2.api.validation.*;
 
 import net.jqwik.api.*;
 
@@ -58,8 +59,8 @@ class TestDrivingTests {
 
 		TddResult result = tddProperty.drive();
 
-		assertThat(result.status())
-			.isEqualTo(TddResult.Status.NOT_COVERED);
+		assertThat(result.status()).isEqualTo(PropertyValidationStatus.SUCCESSFUL);
+		assertThat(result.everythingCovered()).isFalse();
 		assertThat(result.caseResults()).hasSize(1);
 	}
 

@@ -1,6 +1,7 @@
 package jqwik2.tdd;
 
 import java.util.*;
+import java.util.function.*;
 
 import jqwik2.api.*;
 import jqwik2.api.description.*;
@@ -32,15 +33,33 @@ class TddPropertyBuilder implements TddProperty.Builder {
 			List<PropertyValidationResult> caseResults = new ArrayList<>();
 			for (var tddCase : cases) {
 				var validator = PropertyValidator.forProperty(tddCase);
+				// validator.publisher(PlatformPublisher.STDOUT);
 				var result = validator.validate(buildRunConfiguration());
 				caseResults.add(result);
 			}
-			TddResult.Status status = TddResult.Status.SUCCESSFUL;
+			PropertyValidationStatus status = PropertyValidationStatus.SUCCESSFUL;
 			if (caseResults.stream().anyMatch(r -> !r.isSuccessful())) {
-				status = TddResult.Status.FAILED;
+				status = PropertyValidationStatus.FAILED;
 			}
-			// TODO: Discover Status.NOT_COVERED
-			return new TddResult(status, caseResults);
+
+			PropertyValidationResult everythingCovered = validateEverythingCovered();
+			return new TddResult(status, caseResults, everythingCovered.isSuccessful());
+		}
+
+		private PropertyValidationResult validateEverythingCovered() {
+			String everythingCoveredId = propertyId + ":everythingCovered";
+			Predicate<T1> everythingCovered = t1 -> cases.stream().anyMatch(c -> {
+				try {
+					return c.condition().check(List.of(t1));
+				} catch (Throwable e) {
+					return false;
+				}
+			});
+			PropertyDescription property = PropertyDescription.property(everythingCoveredId)
+															  .forAll(a1)
+															  .check(everythingCovered::test);
+			var validator = PropertyValidator.forProperty(property).publisher(PlatformPublisher.NULL);
+			return validator.validate(buildRunConfiguration());
 		}
 
 		private PropertyValidationStrategy buildRunConfiguration() {
