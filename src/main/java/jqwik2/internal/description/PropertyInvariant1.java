@@ -7,13 +7,13 @@ import jqwik2.api.description.*;
 import jqwik2.api.functions.*;
 
 final class PropertyInvariant1<T1> extends AbstractPropertyInvariant
-		implements PropertyDescription.Invariant1<T1> {
+	implements PropertyDescription.Invariant1<T1> {
 	private final Arbitrary<T1> a1;
 
 	PropertyInvariant1(
-			String propertyId,
-			List<Classifier> classifiers,
-			Arbitrary<T1> a1
+		String propertyId,
+		List<Classifier> classifiers,
+		Arbitrary<T1> a1
 	) {
 		super(propertyId, classifiers);
 		this.a1 = a1;
@@ -31,13 +31,7 @@ final class PropertyInvariant1<T1> extends AbstractPropertyInvariant
 
 	@Override
 	public PropertyDescription.Invariant1<T1> classify(List<Classifier.Case<Check.C1<T1>>> cases) {
-		var genericCases = cases.stream()
-								.map(c -> (Classifier.Case) c)
-								.toList();
-		ensureValidCases(genericCases);
-		PropertyClassifier classifier = new PropertyClassifier(genericCases);
-		var newClassifiers = new ArrayList<>(classifiers);
-		newClassifiers.add(classifier);
+		List<Classifier> newClassifiers = addClassifierFromCases(cases);
 		return new PropertyInvariant1<>(propertyId, newClassifiers, a1);
 	}
 

@@ -4,5 +4,5 @@ import java.util.*;
 
 import jqwik2.api.description.*;
 
-record PropertyClassifier(List<Case> cases) implements Classifier {
+record PropertyClassifier(List<Case<?>> cases) implements Classifier {
 }

@@ -22,7 +22,7 @@ public interface Classifier {
 		return caseOf(classify, label, 0.0);
 	}
 
-	List<Case> cases();
+	List<Case<?>> cases();
 
 	record Case<C extends Check<C>>(Condition condition, String label, double minPercentage) {
 		public Case(Condition condition, String label, double minPercentage) {

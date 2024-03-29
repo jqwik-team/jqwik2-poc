@@ -9,14 +9,22 @@ abstract class AbstractPropertyInvariant {
 	protected final List<Classifier> classifiers;
 
 	protected AbstractPropertyInvariant(
-			String propertyId,
-			List<Classifier> classifiers
+		String propertyId,
+		List<Classifier> classifiers
 	) {
 		this.propertyId = propertyId;
 		this.classifiers = classifiers;
 	}
 
-	protected static void ensureValidCases(List<Classifier.Case> cases) {
+	protected List<Classifier> addClassifierFromCases(List<? extends Classifier.Case<?>> cases) {
+		List<Classifier.Case<?>> genericCases = new ArrayList<>(cases);
+		ensureValidCases(genericCases);
+		List<Classifier> newClassifiers = new ArrayList<>(classifiers);
+		newClassifiers.add(new PropertyClassifier(genericCases));
+		return newClassifiers;
+	}
+
+	private static void ensureValidCases(List<Classifier.Case<?>> cases) {
 		if (cases.isEmpty()) {
 			throw new IllegalArgumentException("At least one case is required");
 		}
@@ -31,7 +39,7 @@ abstract class AbstractPropertyInvariant {
 		if (obj == null || obj.getClass() != this.getClass()) return false;
 		var that = (AbstractPropertyInvariant) obj;
 		return Objects.equals(this.propertyId, that.propertyId) &&
-				Objects.equals(this.classifiers, that.classifiers);
+				   Objects.equals(this.classifiers, that.classifiers);
 	}
 
 	@Override

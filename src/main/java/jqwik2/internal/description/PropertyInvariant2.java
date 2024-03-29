@@ -33,12 +33,7 @@ final class PropertyInvariant2<T1, T2> extends AbstractPropertyInvariant
 
 	@Override
 	public PropertyDescription.Invariant2<T1, T2> classify(List<Classifier.Case<Check.C2<T1, T2>>> cases) {
-		var genericCases = cases.stream()
-								.map(c -> (Classifier.Case) c)
-								.toList();
-		ensureValidCases(genericCases);
-		var newClassifiers = new ArrayList<>(classifiers);
-		newClassifiers.add(new PropertyClassifier(genericCases));
+		List<Classifier> newClassifiers = addClassifierFromCases(cases);
 		return new PropertyInvariant2<>(propertyId, newClassifiers, a1, a2);
 	}
 
