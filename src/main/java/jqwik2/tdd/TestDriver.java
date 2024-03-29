@@ -6,6 +6,7 @@ import java.util.stream.*;
 
 import jqwik2.api.*;
 import jqwik2.api.description.*;
+import jqwik2.api.functions.*;
 import jqwik2.api.support.*;
 import jqwik2.api.validation.*;
 import jqwik2.internal.*;

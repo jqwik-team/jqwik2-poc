@@ -4,6 +4,7 @@ import java.util.*;
 
 import jqwik2.api.*;
 import jqwik2.api.description.*;
+import jqwik2.api.functions.*;
 
 final class PropertyVerifier2<T1, T2> extends AbstractPropertyVerifier
 		implements PropertyDescription.Verifier2<T1, T2> {
@@ -21,17 +22,17 @@ final class PropertyVerifier2<T1, T2> extends AbstractPropertyVerifier
 	}
 
 	@Override
-	public PropertyDescription check(PropertyDescription.C2<T1, T2> checker) {
+	public PropertyDescription check(Check.C2<T1, T2> checker) {
 		return new GenericPropertyDescription(propertyId, List.of(a1, a2), checker.asCondition(), classifiers);
 	}
 
 	@Override
-	public PropertyDescription verify(PropertyDescription.V2<T1, T2> verifier) {
+	public PropertyDescription verify(Verify.V2<T1, T2> verifier) {
 		return check(verifier.asCheck());
 	}
 
 	@Override
-	public PropertyDescription.Verifier2<T1, T2> classify(List<Classifier.Case<PropertyDescription.C2<T1, T2>>> cases) {
+	public PropertyDescription.Verifier2<T1, T2> classify(List<Classifier.Case<Check.C2<T1, T2>>> cases) {
 		var genericCases = cases.stream()
 								.map(c -> (Classifier.Case) c)
 								.toList();
@@ -45,7 +46,7 @@ final class PropertyVerifier2<T1, T2> extends AbstractPropertyVerifier
 	public boolean equals(Object obj) {
 		if (obj == this) return true;
 		if (obj == null || obj.getClass() != this.getClass()) return false;
-		var that = (PropertyVerifier2) obj;
+		var that = (PropertyVerifier2<?, ?>) obj;
 		return super.equals(that) &&
 				Objects.equals(this.a1, that.a1) &&
 				Objects.equals(this.a2, that.a2);

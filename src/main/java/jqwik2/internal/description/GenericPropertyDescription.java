@@ -4,6 +4,7 @@ import java.util.*;
 
 import jqwik2.api.*;
 import jqwik2.api.description.*;
+import jqwik2.api.functions.*;
 
 class GenericPropertyDescription implements PropertyDescription {
 	private final String propertyId;

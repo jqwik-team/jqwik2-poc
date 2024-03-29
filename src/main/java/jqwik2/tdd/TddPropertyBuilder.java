@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.function.*;
 
 import jqwik2.api.*;
-import jqwik2.api.description.*;
+import jqwik2.api.functions.*;
 
 class TddPropertyBuilder implements TddProperty.Builder {
 	private final String propertyId;
@@ -32,7 +32,7 @@ class TddPropertyBuilder implements TddProperty.Builder {
 		}
 
 		@Override
-		public P1<T1> verifyCase(String label, PropertyDescription.C1<T1> check1, PropertyDescription.V1<T1> v1) {
+		public P1<T1> verifyCase(String label, Check.C1<T1> check1, Verify.V1<T1> v1) {
 
 			Condition condition = check1.asCondition();
 			Consumer<List<Object>> verifier = params -> {
