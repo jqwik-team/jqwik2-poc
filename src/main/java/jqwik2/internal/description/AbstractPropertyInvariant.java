@@ -2,14 +2,13 @@ package jqwik2.internal.description;
 
 import java.util.*;
 
-import jqwik2.api.*;
 import jqwik2.api.description.*;
 
-abstract class AbstractPropertyVerifier {
+abstract class AbstractPropertyInvariant {
 	protected final String propertyId;
 	protected final List<Classifier> classifiers;
 
-	protected AbstractPropertyVerifier(
+	protected AbstractPropertyInvariant(
 			String propertyId,
 			List<Classifier> classifiers
 	) {
@@ -30,7 +29,7 @@ abstract class AbstractPropertyVerifier {
 	public boolean equals(Object obj) {
 		if (obj == this) return true;
 		if (obj == null || obj.getClass() != this.getClass()) return false;
-		var that = (AbstractPropertyVerifier) obj;
+		var that = (AbstractPropertyInvariant) obj;
 		return Objects.equals(this.propertyId, that.propertyId) &&
 				Objects.equals(this.classifiers, that.classifiers);
 	}

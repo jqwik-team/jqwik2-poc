@@ -17,31 +17,31 @@ public interface PropertyDescription {
 	}
 
 	interface Builder {
-		<T1> Verifier1<T1> forAll(Arbitrary<T1> arbitrary);
+		<T1> Invariant1<T1> forAll(Arbitrary<T1> arbitrary);
 
-		<T1, T2> Verifier2<T1, T2> forAll(Arbitrary<T1> a1, Arbitrary<T2> a2);
+		<T1, T2> Invariant2<T1, T2> forAll(Arbitrary<T1> a1, Arbitrary<T2> a2);
 	}
 
-	interface Verifier1<T1> {
+	interface Invariant1<T1> {
 		PropertyDescription check(Check.C1<T1> checker);
 
 		PropertyDescription verify(Verify.V1<T1> verifier);
 
-		Verifier1<T1> classify(List<Classifier.Case<Check.C1<T1>>> cases);
+		Invariant1<T1> classify(List<Classifier.Case<Check.C1<T1>>> cases);
 
 		// TODO: Provide convenience methods for classify, eg
-		// Verifier1<T1> classify(
+		// Invariant1<T1> classify(
 		// C1<T1> c1, String l1, double mp1,
 		// C1<T1> c2, String l2, double mp2
 		// );
 	}
 
-	interface Verifier2<T1, T2> {
+	interface Invariant2<T1, T2> {
 		PropertyDescription check(Check.C2<T1, T2> checker);
 
 		PropertyDescription verify(Verify.V2<T1, T2> verifier);
 
-		Verifier2<T1, T2> classify(List<Classifier.Case<Check.C2<T1, T2>>> cases);
+		Invariant2<T1, T2> classify(List<Classifier.Case<Check.C2<T1, T2>>> cases);
 	}
 
 	String id();

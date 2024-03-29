@@ -18,8 +18,8 @@ class PropertyDescriptionTests {
 	@Example
 	void buildPropertyWithId() throws Throwable {
 		PropertyDescription.Builder builder = PropertyDescription.property("myId");
-		PropertyDescription.Verifier1<Integer> verifier = builder.forAll(Numbers.integers());
-		PropertyDescription property = verifier.check(i -> i == 42);
+		PropertyDescription.Invariant1<Integer> invariant = builder.forAll(Numbers.integers());
+		PropertyDescription property = invariant.check(i -> i == 42);
 
 		assertThat(property.id()).isEqualTo("myId");
 		assertThat(property.arity()).isEqualTo(1);
@@ -62,11 +62,11 @@ class PropertyDescriptionTests {
 	@Example
 	void buildPropertyWithTwoParameters() throws Throwable {
 		PropertyDescription.Builder builder = PropertyDescription.property("myId2");
-		PropertyDescription.Verifier2<Integer, String> verifier = builder.forAll(
+		PropertyDescription.Invariant2<Integer, String> invariant = builder.forAll(
 			Numbers.integers(),
 			Strings.strings()
 		);
-		PropertyDescription property = verifier.check((i, s) -> s.length() == i);
+		PropertyDescription property = invariant.check((i, s) -> s.length() == i);
 
 		assertThat(property.arity()).isEqualTo(2);
 		assertThat(property.arbitraries()).containsExactly(Numbers.integers(), Strings.strings());

@@ -31,13 +31,13 @@ public class PropertyBuilder implements PropertyDescription.Builder {
 	}
 
 	@Override
-	public <T1> PropertyDescription.Verifier1<T1> forAll(Arbitrary<T1> arbitrary) {
-		return new PropertyVerifier1<>(propertyId, List.of(), arbitrary);
+	public <T1> PropertyDescription.Invariant1<T1> forAll(Arbitrary<T1> arbitrary) {
+		return new PropertyInvariant1<>(propertyId, List.of(), arbitrary);
 	}
 
 	@Override
-	public <T1, T2> PropertyDescription.Verifier2<T1, T2> forAll(Arbitrary<T1> a1, Arbitrary<T2> a2) {
-		return new PropertyVerifier2<>(propertyId, List.of(), a1, a2);
+	public <T1, T2> PropertyDescription.Invariant2<T1, T2> forAll(Arbitrary<T1> a1, Arbitrary<T2> a2) {
+		return new PropertyInvariant2<>(propertyId, List.of(), a1, a2);
 	}
 
 }

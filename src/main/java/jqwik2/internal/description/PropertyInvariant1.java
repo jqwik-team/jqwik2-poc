@@ -6,11 +6,11 @@ import jqwik2.api.*;
 import jqwik2.api.description.*;
 import jqwik2.api.functions.*;
 
-final class PropertyVerifier1<T1> extends AbstractPropertyVerifier
-		implements PropertyDescription.Verifier1<T1> {
+final class PropertyInvariant1<T1> extends AbstractPropertyInvariant
+		implements PropertyDescription.Invariant1<T1> {
 	private final Arbitrary<T1> a1;
 
-	PropertyVerifier1(
+	PropertyInvariant1(
 			String propertyId,
 			List<Classifier> classifiers,
 			Arbitrary<T1> a1
@@ -30,7 +30,7 @@ final class PropertyVerifier1<T1> extends AbstractPropertyVerifier
 	}
 
 	@Override
-	public PropertyDescription.Verifier1<T1> classify(List<Classifier.Case<Check.C1<T1>>> cases) {
+	public PropertyDescription.Invariant1<T1> classify(List<Classifier.Case<Check.C1<T1>>> cases) {
 		var genericCases = cases.stream()
 								.map(c -> (Classifier.Case) c)
 								.toList();
@@ -38,14 +38,14 @@ final class PropertyVerifier1<T1> extends AbstractPropertyVerifier
 		PropertyClassifier classifier = new PropertyClassifier(genericCases);
 		var newClassifiers = new ArrayList<>(classifiers);
 		newClassifiers.add(classifier);
-		return new PropertyVerifier1<>(propertyId, newClassifiers, a1);
+		return new PropertyInvariant1<>(propertyId, newClassifiers, a1);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) return true;
 		if (obj == null || obj.getClass() != this.getClass()) return false;
-		var that = (PropertyVerifier1<?>) obj;
+		var that = (PropertyInvariant1<?>) obj;
 		return super.equals(that) && Objects.equals(this.a1, that.a1);
 	}
 
