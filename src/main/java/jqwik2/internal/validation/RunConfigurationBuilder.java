@@ -102,7 +102,7 @@ class RunConfigurationBuilder {
 				parametersReport
 			);
 			case SAMPLES -> {
-				parametersReport.append("generation", EXHAUSTIVE.name());
+				parametersReport.append("generation", SAMPLES.name());
 				yield PropertyRunConfiguration.samples(
 					maxRuntime,
 					isShrinkingEnabled(),
@@ -111,7 +111,7 @@ class RunConfigurationBuilder {
 				);
 			}
 			case GROWING -> {
-				parametersReport.append("generation", EXHAUSTIVE.name());
+				parametersReport.append("generation", GROWING.name());
 				yield PropertyRunConfiguration.guided(
 					GrowingSampleSource::new,
 					maxTries, maxRuntime,
