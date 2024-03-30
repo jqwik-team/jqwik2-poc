@@ -7,6 +7,7 @@ import jqwik2.api.*;
 import jqwik2.api.description.*;
 import jqwik2.api.functions.*;
 import jqwik2.api.validation.*;
+import jqwik2.internal.*;
 
 class TddPropertyBuilder implements TddProperty.Builder {
 	private final String propertyId;
@@ -22,7 +23,8 @@ class TddPropertyBuilder implements TddProperty.Builder {
 
 	private class TddP1<T1> implements TddProperty.P1<T1> {
 		private final Arbitrary<T1> a1;
-		private final List<PropertyDescription> cases = new ArrayList<>();
+		private final List<Pair<String, PropertyDescription>> cases = new ArrayList<>();
+		private final Map<String, TddRecord> records = new LinkedHashMap<>();
 
 		public TddP1(Arbitrary<T1> a1) {
 			this.a1 = a1;
@@ -32,25 +34,62 @@ class TddPropertyBuilder implements TddProperty.Builder {
 		public TddResult drive() {
 			List<PropertyValidationResult> caseResults = new ArrayList<>();
 			for (var tddCase : cases) {
-				var validator = PropertyValidator.forProperty(tddCase);
-				// validator.publisher(PlatformPublisher.STDOUT);
+				var validator =
+					PropertyValidator.forProperty(tddCase.second())
+									 .publisher(PlatformPublisher.NULL)
+									 .registerTryExecutionListener((r, s) -> collectTddStep(tddCase, r, s));
 				var result = validator.validate(buildRunConfiguration());
 				caseResults.add(result);
+				publishRecord(tddCase);
 			}
 			PropertyValidationStatus status = PropertyValidationStatus.SUCCESSFUL;
 			if (caseResults.stream().anyMatch(r -> !r.isSuccessful())) {
 				status = PropertyValidationStatus.FAILED;
 			}
 
-			PropertyValidationResult everythingCovered = validateEverythingCovered();
-			return new TddResult(status, caseResults, everythingCovered.isSuccessful());
+			PropertyValidationResult everythingCoveredResult = validateEverythingCovered();
+			boolean isEverythingCovered = everythingCoveredResult.isSuccessful();
+
+			if (!isEverythingCovered) {
+				System.out.println("NOT ALL VALUES COVERED:");
+				everythingCoveredResult.falsifiedSamples().forEach(
+					s -> System.out.printf("  %s%n", s.sample().regenerateValues())
+				);
+			}
+
+			return new TddResult(status, caseResults, isEverythingCovered);
+		}
+
+		private void publishRecord(Pair<String, PropertyDescription> tddCase) {
+			var record = records.get(tddCase.first());
+			var report = new StringBuilder();
+			if (record != null) {
+				record.publish(report);
+			}
+			PlatformPublisher.STDOUT.publish(tddCase.second().id(), report.toString());
+		}
+
+		private void collectTddStep(Pair<String, PropertyDescription> tddCase, TryExecutionResult r, Sample s) {
+			if (r.status() == TryExecutionResult.Status.INVALID) {
+				return;
+			}
+			updateRecord(tddCase, r, s);
+		}
+
+		private void updateRecord(
+			Pair<String, PropertyDescription> tddCase,
+			TryExecutionResult result,
+			Sample sample
+		) {
+			var record = records.computeIfAbsent(tddCase.first(), TddRecord::new);
+			record.update(result, sample);
 		}
 
 		private PropertyValidationResult validateEverythingCovered() {
-			String everythingCoveredId = propertyId + ":everythingCovered";
+			String everythingCoveredId = propertyId + ":everythingCoveredResult";
 			Predicate<T1> everythingCovered = t1 -> cases.stream().anyMatch(c -> {
 				try {
-					return c.condition().check(List.of(t1));
+					return c.second().condition().check(List.of(t1));
 				} catch (Throwable e) {
 					return false;
 				}
@@ -58,7 +97,8 @@ class TddPropertyBuilder implements TddProperty.Builder {
 			PropertyDescription property = PropertyDescription.property(everythingCoveredId)
 															  .forAll(a1)
 															  .check(everythingCovered::test);
-			var validator = PropertyValidator.forProperty(property).publisher(PlatformPublisher.NULL);
+			var validator = PropertyValidator.forProperty(property)
+											 .publisher(PlatformPublisher.NULL);
 			return validator.validate(buildRunConfiguration());
 		}
 
@@ -76,7 +116,7 @@ class TddPropertyBuilder implements TddProperty.Builder {
 			var property = PropertyDescription.property(caseId)
 											  .forAll(a1)
 											  .verify(verifier(v1, check1));
-			cases.add(property);
+			cases.add(Pair.of(label, property));
 			return this;
 		}
 
