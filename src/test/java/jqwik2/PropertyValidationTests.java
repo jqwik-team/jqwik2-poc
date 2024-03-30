@@ -3,15 +3,18 @@ package jqwik2;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
+import java.util.function.*;
 
 import jqwik2.api.Arbitrary;
 import jqwik2.api.Assume;
+import jqwik2.api.TryExecutionResult;
 import jqwik2.api.*;
 import jqwik2.api.arbitraries.*;
 import jqwik2.api.database.*;
 import jqwik2.api.description.*;
 import jqwik2.api.recording.*;
 import jqwik2.api.validation.*;
+import jqwik2.api.validation.PropertyValidationStrategy.*;
 import jqwik2.internal.*;
 import org.approvaltests.*;
 import org.approvaltests.core.*;
@@ -26,6 +29,7 @@ import static jqwik2.api.description.Classifier.*;
 import static jqwik2.api.recording.Recording.list;
 import static jqwik2.api.recording.Recording.*;
 import static jqwik2.api.validation.PropertyValidationStrategy.GenerationMode.*;
+import static jqwik2.api.validation.PropertyValidationStrategy.ShrinkingMode.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -161,7 +165,7 @@ class PropertyValidationTests {
 																		.withGeneration(RANDOMIZED)
 																		.withSeed("42")
 																		.withEdgeCases(PropertyValidationStrategy.EdgeCasesMode.OFF)
-																		.withShrinking(PropertyValidationStrategy.ShrinkingMode.FULL)
+																		.withShrinking(FULL)
 																		.build();
 		PropertyValidationResult result = PropertyValidator
 											  .forProperty(property)
@@ -266,11 +270,11 @@ class PropertyValidationTests {
 									  .withMaxRuntime(Duration.ofMinutes(10))
 									  .withFilterOutDuplicateSamples(false)
 									  .withSeedSupplier(RandomChoice::generateRandomSeed)
-									  .withShrinking(PropertyValidationStrategy.ShrinkingMode.OFF)
+									  .withShrinking(OFF)
 									  .withGeneration(RANDOMIZED)
 									  .withEdgeCases(PropertyValidationStrategy.EdgeCasesMode.MIXIN)
 									  .withAfterFailure(PropertyValidationStrategy.AfterFailureMode.SAMPLES_ONLY)
-									  .withConcurrency(PropertyValidationStrategy.ConcurrencyMode.SINGLE_THREAD)
+									  .withConcurrency(ConcurrencyMode.SINGLE_THREAD)
 									  .build();
 
 		List<Integer> values = Collections.synchronizedList(new ArrayList<>());
@@ -286,7 +290,7 @@ class PropertyValidationTests {
 	@Example
 	void concurrencyMode_CACHED_THREAD_POOL() {
 		var strategy = PropertyValidationStrategy.builder()
-												 .withConcurrency(PropertyValidationStrategy.ConcurrencyMode.CACHED_THREAD_POOL)
+												 .withConcurrency(ConcurrencyMode.CACHED_THREAD_POOL)
 												 .withMaxTries(1000)
 												 .build();
 
@@ -361,6 +365,39 @@ class PropertyValidationTests {
 		assertThat(checkingResult.isFailed()).isTrue();
 		assertThat(checkingResult.countTries()).isEqualTo(100);
 		assertThat(checkingResult.countChecks()).isEqualTo(checkingResult.countTries());
+	}
+
+	@Example
+	void registeredTryExecutionListenerIsCalled() {
+		var property = PropertyDescription.property("cp")
+										  .forAll(Numbers.integers().between(1, 100))
+										  .verify(i -> {
+											  assertThat(i).isLessThan(42);
+										  });
+
+		PropertyValidationStrategy strategy = PropertyValidationStrategy.builder()
+																		.withGeneration(GROWING)
+																		.build();
+
+		AtomicInteger countSatisfied = new AtomicInteger();
+		AtomicInteger countFalsified = new AtomicInteger();
+		BiConsumer<TryExecutionResult, Sample> listener = (result, sample) -> {
+			if (result.status() == TryExecutionResult.Status.SATISFIED) {
+				countSatisfied.incrementAndGet();
+			} else if (result.status() == TryExecutionResult.Status.FALSIFIED) {
+				countFalsified.incrementAndGet();
+			}
+		};
+
+		PropertyValidationResult result = PropertyValidator
+											  .forProperty(property)
+											  .publisher(PlatformPublisher.STDOUT)
+											  .registerTryExecutionListener(listener)
+											  .validate(strategy);
+
+		assertThat(result.isFailed()).isTrue();
+		assertThat(countSatisfied.get()).isEqualTo(41);
+		assertThat(countFalsified.get()).isEqualTo(1);
 	}
 
 	@Group
@@ -556,7 +593,7 @@ class PropertyValidationTests {
 										  .withMaxTries(100)
 										  .withMaxRuntime(Duration.ofMinutes(10))
 										  .withGeneration(PropertyValidationStrategy.GenerationMode.EXHAUSTIVE)
-										  .withConcurrency(PropertyValidationStrategy.ConcurrencyMode.SINGLE_THREAD)
+										  .withConcurrency(ConcurrencyMode.SINGLE_THREAD)
 										  .build();
 
 			var property = PropertyDescription.property().forAll(
@@ -582,7 +619,7 @@ class PropertyValidationTests {
 										  .withFilterOutDuplicateSamples(false)
 										  .withSeedSupplier(RandomChoice::generateRandomSeed)
 										  .withGeneration(PropertyValidationStrategy.GenerationMode.SMART)
-										  .withConcurrency(PropertyValidationStrategy.ConcurrencyMode.SINGLE_THREAD)
+										  .withConcurrency(ConcurrencyMode.SINGLE_THREAD)
 										  .build();
 
 			var exhaustiveProperty = PropertyDescription.property().forAll(
@@ -607,7 +644,7 @@ class PropertyValidationTests {
 										  .withFilterOutDuplicateSamples(false)
 										  .withSeedSupplier(RandomChoice::generateRandomSeed)
 										  .withGeneration(PropertyValidationStrategy.GenerationMode.SMART)
-										  .withConcurrency(PropertyValidationStrategy.ConcurrencyMode.SINGLE_THREAD)
+										  .withConcurrency(ConcurrencyMode.SINGLE_THREAD)
 										  .build();
 
 			var randomizedProperty = PropertyDescription.property().forAll(
@@ -643,9 +680,9 @@ class PropertyValidationTests {
 										  .withMaxRuntime(Duration.ofMinutes(10))
 										  .withFilterOutDuplicateSamples(true)
 										  .withSamples(sampleRecordings)
-										  .withShrinking(PropertyValidationStrategy.ShrinkingMode.OFF)
+										  .withShrinking(OFF)
 										  .withGeneration(PropertyValidationStrategy.GenerationMode.SAMPLES)
-										  .withConcurrency(PropertyValidationStrategy.ConcurrencyMode.SINGLE_THREAD)
+										  .withConcurrency(ConcurrencyMode.SINGLE_THREAD)
 										  .build();
 
 			List<Integer> values = Collections.synchronizedList(new ArrayList<>());
@@ -667,7 +704,7 @@ class PropertyValidationTests {
 										  .withMaxRuntime(Duration.ZERO)
 										  .withFilterOutDuplicateSamples(false)
 										  .withGeneration(PropertyValidationStrategy.GenerationMode.GROWING)
-										  .withConcurrency(PropertyValidationStrategy.ConcurrencyMode.SINGLE_THREAD)
+										  .withConcurrency(ConcurrencyMode.SINGLE_THREAD)
 										  .build();
 
 
@@ -725,7 +762,6 @@ class PropertyValidationTests {
 
 			Approvals.verify(stringPublisher.contents(), validationReportApprovalTestsOptions());
 		}
-
 
 	}
 

@@ -27,7 +27,7 @@ public class PropertyRunner {
 	 * Register a listener that will be called after each try execution.
 	 * @param listener
 	 */
-	public void onTryExecution(BiConsumer<TryExecutionResult, Sample> listener) {
+	public void registerTryExecutionListener(BiConsumer<TryExecutionResult, Sample> listener) {
 		if (listener == null || tryExecutionListeners.contains(listener)) {
 			return;
 		}

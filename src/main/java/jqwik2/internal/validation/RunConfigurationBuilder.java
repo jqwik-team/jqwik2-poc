@@ -13,7 +13,9 @@ import jqwik2.internal.*;
 import jqwik2.internal.growing.*;
 import jqwik2.internal.reporting.*;
 
+import static jqwik2.api.validation.PropertyValidationStrategy.EdgeCasesMode.OFF;
 import static jqwik2.api.validation.PropertyValidationStrategy.GenerationMode.*;
+import static jqwik2.api.validation.PropertyValidationStrategy.ShrinkingMode.*;
 
 class RunConfigurationBuilder {
 
@@ -112,12 +114,7 @@ class RunConfigurationBuilder {
 			}
 			case GROWING -> {
 				parametersReport.append("generation", GROWING.name());
-				yield PropertyRunConfiguration.guided(
-					GrowingSampleSource::new,
-					maxTries, maxRuntime,
-					false, true,
-					serviceSupplier()
-				);
+				yield PropertyRunConfiguration.growing(maxTries, false, maxRuntime);
 			}
 			case null -> throw new IllegalArgumentException("Unsupported generation strategy: " + strategy.generation());
 		};

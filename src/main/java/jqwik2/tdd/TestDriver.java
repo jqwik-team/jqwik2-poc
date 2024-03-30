@@ -30,7 +30,7 @@ public class TestDriver {
 		List<Generator<?>> generators = generators();
 		Tryable tryable = safeTryable(property.condition());
 		PropertyRunner runner = new PropertyRunner(generators, tryable);
-		runner.onTryExecution((r, s) -> {
+		runner.registerTryExecutionListener((r, s) -> {
 			if (lastTDD != null) {
 				collectTddStep(lastTDD, s, r);
 			}

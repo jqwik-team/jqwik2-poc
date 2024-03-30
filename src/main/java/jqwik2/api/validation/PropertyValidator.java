@@ -1,5 +1,7 @@
 package jqwik2.api.validation;
 
+import java.util.function.*;
+
 import jqwik2.api.*;
 import jqwik2.api.database.*;
 import jqwik2.api.description.*;
@@ -32,4 +34,6 @@ public interface PropertyValidator {
 	PropertyValidator publisher(PlatformPublisher publisher);
 
 	PropertyValidator publishSuccessfulResults(boolean publishSuccessfulResults);
+
+	PropertyValidator registerTryExecutionListener(BiConsumer<TryExecutionResult, Sample> tryExecutionListener);
 }

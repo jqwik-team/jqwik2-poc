@@ -345,7 +345,7 @@ class PropertyRunnerTests {
 		PropertyRunner runner = new PropertyRunner(generators, tryable);
 
 		final Set<Sample> collectedSamples = Collections.synchronizedSet(new HashSet<>());
-		runner.onTryExecution((result, sample) -> collectedSamples.add(sample));
+		runner.registerTryExecutionListener((result, sample) -> collectedSamples.add(sample));
 
 		PropertyRunConfiguration runConfiguration = randomized(
 			Long.toString(seed), 10, Duration.ofSeconds(10), false,
@@ -384,7 +384,7 @@ class PropertyRunnerTests {
 			AtomicInteger countSatisfied = new AtomicInteger(0);
 			AtomicInteger countInvalid = new AtomicInteger(0);
 			AtomicInteger countFalsified = new AtomicInteger(0);
-			runner.onTryExecution((result, sample) -> {
+			runner.registerTryExecutionListener((result, sample) -> {
 				switch(result.status()) {
 					case SATISFIED:
 						countSatisfied.incrementAndGet();
@@ -429,7 +429,7 @@ class PropertyRunnerTests {
 			AtomicInteger countSatisfied = new AtomicInteger(0);
 			AtomicInteger countInvalid = new AtomicInteger(0);
 			AtomicInteger countFalsified = new AtomicInteger(0);
-			runner.onTryExecution((result, sample) -> {
+			runner.registerTryExecutionListener((result, sample) -> {
 				switch(result.status()) {
 					case SATISFIED:
 						countSatisfied.incrementAndGet();

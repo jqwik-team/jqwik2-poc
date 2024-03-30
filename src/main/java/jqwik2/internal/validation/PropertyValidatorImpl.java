@@ -1,5 +1,6 @@
 package jqwik2.internal.validation;
 
+import java.io.*;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
@@ -22,6 +23,7 @@ public class PropertyValidatorImpl implements PropertyValidator {
 	private final PropertyDescription property;
 	private final ReportSection parametersReport = new ReportSection("parameters");
 	private final ReportSection resultReport = new ReportSection("result");
+	private final List<BiConsumer<TryExecutionResult, Sample>> tryExecutionListeners = new ArrayList<>();
 
 	private FailureDatabase database;
 	private PlatformPublisher platformPublisher;
@@ -86,7 +88,7 @@ public class PropertyValidatorImpl implements PropertyValidator {
 	) {
 		List<Generator<?>> generators = generators(strategy.edgeCases());
 		Tryable tryable = safeTryable(property.condition(), Set.of());
-		PropertyRunner runner = new PropertyRunner(generators, tryable);
+		PropertyRunner runner = createRunner(generators, tryable);
 
 		PropertyRunConfiguration statisticalRunConfiguration = buildStatisticalRunConfiguration(minPercentage, maxStandardDeviationFactor, strategy, generators);
 		var result = runner.run(statisticalRunConfiguration);
@@ -169,13 +171,19 @@ public class PropertyValidatorImpl implements PropertyValidator {
 	private PropertyRunResult runStrictValidation(PropertyValidationStrategy strategy, Set<ClassifyingCollector<List<Object>>> collectors) {
 		List<Generator<?>> generators = generators(strategy.edgeCases());
 		Tryable tryable = safeTryable(property.condition(), collectors);
-		PropertyRunner runner = new PropertyRunner(generators, tryable);
+		PropertyRunner runner = createRunner(generators, tryable);
 
 		PropertyRunConfiguration runConfiguration = buildRunConfiguration(generators, collectors, strategy);
 		var propertyRunResult = runner.run(runConfiguration);
 		updateFailureDatabase(propertyRunResult, runConfiguration.effectiveSeed());
 
 		return propertyRunResult;
+	}
+
+	private PropertyRunner createRunner(List<Generator<?>> generators, Tryable tryable) {
+		PropertyRunner propertyRunner = new PropertyRunner(generators, tryable);
+		tryExecutionListeners.forEach(propertyRunner::registerTryExecutionListener);
+		return propertyRunner;
 	}
 
 	private void publishRunReport(PropertyValidationResult result, boolean publishFalsifiedSamples) {
@@ -365,6 +373,12 @@ public class PropertyValidatorImpl implements PropertyValidator {
 	@Override
 	public PropertyValidator publishSuccessfulResults(boolean publishSuccessfulResults) {
 		this.publishSuccessfulResults = publishSuccessfulResults;
+		return this;
+	}
+
+	@Override
+	public PropertyValidator registerTryExecutionListener(BiConsumer<TryExecutionResult, Sample> tryExecutionListener) {
+		tryExecutionListeners.add(tryExecutionListener);
 		return this;
 	}
 }
