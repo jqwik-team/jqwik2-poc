@@ -3,7 +3,6 @@
       - run time in result section
       - Do proper formatting in reports according to example-report.txt 
       - Report differences between sample values and regenerated values
-      - Reported parameters are not always the effective ones, eg. in generation mode GROWING
     - Make afterFailure attribute multi value, e.g List.of(SAMPLES, REPLAY |
       RANDOMIZED)
         - PropertyAnalyzer: Find as many failing samples as possible and analyze

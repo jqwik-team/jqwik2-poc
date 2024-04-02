@@ -17,6 +17,7 @@ jqwik2.PropertyValidationTests#verifyFailsAndParameterIsShrunk (FAILED) =
   generation | RANDOMIZED
   max tries | 100
   max runtime | PT10M
+  filter duplicates | false
   shrinking | FULL
   edge cases | OFF
   concurrency | SINGLE_THREAD

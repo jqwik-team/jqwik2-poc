@@ -13,6 +13,7 @@ jqwik2.PropertyValidationTests$Classifiers#classificationWithTwoParameters (SUCC
   generation | SMART (RANDOMIZED)
   max tries | 0
   max runtime | PT1S
+  filter duplicates | false
   shrinking | FULL
   edge cases | MIXIN
   concurrency | SINGLE_THREAD

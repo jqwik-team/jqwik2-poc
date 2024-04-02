@@ -58,12 +58,30 @@ public interface PropertyRunConfiguration {
 		boolean shrinkingEnabled, boolean filterOutDuplicateSamples,
 		Supplier<ExecutorService> supplyExecutorService
 	) {
-		return new RunConfigurationRecord(
+		return record(
 			seed, maxTries,
 			maxRuntime, shrinkingEnabled,
 			filterOutDuplicateSamples,
 			supplyExecutorService,
 			() -> new RandomGenSource(seed)
+		);
+	}
+
+	static RunConfigurationRecord record(
+		String seed,
+		int maxTries,
+		Duration maxRuntime,
+		boolean shrinkingEnabled,
+		boolean filterOutDuplicateSamples,
+		Supplier<ExecutorService> supplyExecutorService,
+		Supplier<IterableSampleSource> supplySource
+	) {
+		return new RunConfigurationRecord(
+			seed, maxTries,
+			maxRuntime, shrinkingEnabled,
+			filterOutDuplicateSamples,
+			supplyExecutorService,
+			supplySource
 		);
 	}
 

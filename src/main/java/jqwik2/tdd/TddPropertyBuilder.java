@@ -37,6 +37,7 @@ class TddPropertyBuilder implements TddProperty.Builder {
 				var validator =
 					PropertyValidator.forProperty(tddCase.second())
 									 .publisher(PlatformPublisher.NULL)
+									 // .publisher(PlatformPublisher.STDOUT)
 									 .registerTryExecutionListener((r, s) -> collectTddStep(tddCase, r, s));
 				var result = validator.validate(buildRunConfiguration());
 				caseResults.add(result);

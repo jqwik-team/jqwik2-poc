@@ -14,6 +14,7 @@ cp (FAILED) =
   generation | SMART (RANDOMIZED)
   max tries | 100
   max runtime | PT10M
+  filter duplicates | false
   shrinking | FULL
   edge cases | MIXIN
   concurrency | SINGLE_THREAD

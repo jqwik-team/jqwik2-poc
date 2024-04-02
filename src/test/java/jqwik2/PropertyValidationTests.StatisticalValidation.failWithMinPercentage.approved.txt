@@ -14,6 +14,7 @@ jqwik2.PropertyValidationTests$StatisticalValidation#failWithMinPercentage (FAIL
   generation | RANDOMIZED
   max tries | 2147483647
   max runtime | PT0S
+  filter duplicates | false
   shrinking | OFF
   edge cases | MIXIN
   concurrency | SINGLE_THREAD
