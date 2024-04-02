@@ -122,7 +122,7 @@ class RunConfigurationBuilder {
 	private PropertyRunConfiguration growingConfiguration() {
 		this.shrinking = ShrinkingMode.OFF;
 		this.concurrency = ConcurrencyMode.SINGLE_THREAD;
-		this.filterOutDuplicateSamples = false;
+		this.filterOutDuplicateSamples = true;
 		this.edgeCases = EdgeCasesMode.OFF;
 		return PropertyRunConfiguration.record(
 			null, maxTries,
