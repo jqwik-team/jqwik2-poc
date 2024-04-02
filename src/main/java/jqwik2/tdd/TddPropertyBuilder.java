@@ -25,8 +25,8 @@ class TddPropertyBuilder implements TddProperty.Builder {
 
 	private class TddP1<T1> implements TddProperty.P1<T1> {
 		private final Arbitrary<T1> a1;
-		private final List<Pair<String, PropertyDescription>> cases = new ArrayList<>();
-		private final Map<String, TddRecord> records = new LinkedHashMap<>();
+		private final List<TddCase> cases = new ArrayList<>();
+		private final Map<TddCase, TddRecord> records = new LinkedHashMap<>();
 
 		public TddP1(Arbitrary<T1> a1) {
 			this.a1 = a1;
@@ -37,7 +37,7 @@ class TddPropertyBuilder implements TddProperty.Builder {
 			List<PropertyValidationResult> caseResults = new ArrayList<>();
 			for (var tddCase : cases) {
 				var validator =
-					PropertyValidator.forProperty(tddCase.second())
+					PropertyValidator.forProperty(tddCase.property())
 									 .failureDatabase(FailureDatabase.NULL)
 									 .publisher(PlatformPublisher.NULL)
 									 // .publisher(PlatformPublisher.STDOUT)
@@ -64,16 +64,16 @@ class TddPropertyBuilder implements TddProperty.Builder {
 			return new TddResult(status, caseResults, isEverythingCovered);
 		}
 
-		private void publishRecord(Pair<String, PropertyDescription> tddCase) {
-			var record = records.get(tddCase.first());
+		private void publishRecord(TddCase tddCase) {
+			var record = records.get(tddCase);
 			var report = new StringBuilder();
 			if (record != null) {
 				record.publish(report);
 			}
-			PlatformPublisher.STDOUT.publish(tddCase.second().id(), report.toString());
+			PlatformPublisher.STDOUT.publish(tddCase.property().id(), report.toString());
 		}
 
-		private void collectTddStep(Pair<String, PropertyDescription> tddCase, TryExecutionResult r, Sample s) {
+		private void collectTddStep(TddCase tddCase, TryExecutionResult r, Sample s) {
 			if (r.status() == TryExecutionResult.Status.INVALID) {
 				return;
 			}
@@ -81,11 +81,11 @@ class TddPropertyBuilder implements TddProperty.Builder {
 		}
 
 		private void updateRecord(
-			Pair<String, PropertyDescription> tddCase,
+			TddCase tddCase,
 			TryExecutionResult result,
 			Sample sample
 		) {
-			var record = records.computeIfAbsent(tddCase.first(), TddRecord::new);
+			var record = records.computeIfAbsent(tddCase, tddC -> new TddRecord(tddC.label()));
 			record.update(result, sample);
 		}
 
@@ -93,7 +93,7 @@ class TddPropertyBuilder implements TddProperty.Builder {
 			String everythingCoveredId = propertyId + ":everythingCoveredResult";
 			Predicate<T1> everythingCovered = t1 -> cases.stream().anyMatch(c -> {
 				try {
-					return c.second().condition().check(List.of(t1));
+					return c.property().condition().check(List.of(t1));
 				} catch (Throwable e) {
 					return false;
 				}
@@ -120,7 +120,7 @@ class TddPropertyBuilder implements TddProperty.Builder {
 			var property = PropertyDescription.property(caseId)
 											  .forAll(a1)
 											  .verify(verifier(v1, check1));
-			cases.add(Pair.of(label, property));
+			cases.add(new TddCase(label, property));
 			return this;
 		}
 
