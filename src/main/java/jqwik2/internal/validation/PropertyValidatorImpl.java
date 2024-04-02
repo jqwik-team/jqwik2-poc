@@ -109,13 +109,6 @@ public class PropertyValidatorImpl implements PropertyValidator {
 														.forStatisticalCheck()
 														.build(parametersReport);
 
-		runConfiguration.effectiveSeed().ifPresent(seed -> parametersReport.append("seed", seed));
-		parametersReport.append("max tries", runConfiguration.maxTries());
-		parametersReport.append("max runtime", runConfiguration.maxRuntime());
-		parametersReport.append("shrinking", PropertyValidationStrategy.ShrinkingMode.OFF);
-		parametersReport.append("edge cases", strategy.edgeCases());
-		parametersReport.append("concurrency", strategy.concurrency());
-
 		return wrapWithStatisticalCheck(runConfiguration, minPercentage, maxStandardDeviationFactor);
 	}
 
@@ -273,15 +266,6 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		parametersReport.append("validation", validationLabel);
 
 		var plainRunConfiguration = new RunConfigurationBuilder(property.id(), generators, strategy, database).build(parametersReport);
-
-		plainRunConfiguration.effectiveSeed()
-							 .ifPresent(seed -> parametersReport.append("seed", seed)
-							 );
-		parametersReport.append("max tries", strategy.maxTries());
-		parametersReport.append("max runtime", strategy.maxRuntime());
-		parametersReport.append("shrinking", strategy.shrinking());
-		parametersReport.append("edge cases", strategy.edgeCases());
-		parametersReport.append("concurrency", strategy.concurrency());
 
 		if (!isCoverageCheckPresent(collectors)) {
 			return plainRunConfiguration;

@@ -38,27 +38,45 @@ class RunConfigurationBuilder {
 	}
 
 	PropertyRunConfiguration build(ReportSection parametersReport) {
+		PropertyRunConfiguration runConfiguration = buildConfiguration(parametersReport);
+		parametersReport.append("max tries", runConfiguration.maxTries());
+		parametersReport.append("max runtime", runConfiguration.maxRuntime());
+		parametersReport.append("shrinking", this.shrinking);
+		parametersReport.append("edge cases", strategy.edgeCases());
+		parametersReport.append("concurrency", strategy.concurrency());
+		runConfiguration.effectiveSeed().ifPresent(
+			seed -> parametersReport.append("seed", seed)
+		);
+
+		return runConfiguration;
+	}
+
+	private PropertyRunConfiguration buildConfiguration(ReportSection parametersReport) {
 		if (database.hasFailed(id)) {
-			parametersReport.append("after failure", strategy.afterFailure().name());
-			return switch (strategy.afterFailure()) {
-				case REPLAY -> replayLastRun(generators, parametersReport);
-				case SAMPLES_ONLY -> {
-					List<SampleRecording> samples = new ArrayList<>(database.loadFailingSamples(id));
-					if (samples.isEmpty()) {
-						yield replayLastRun(generators, parametersReport);
-					}
-					Collections.sort(samples); // Sorts from smallest to largest
-					yield PropertyRunConfiguration.samples(
-						maxRuntime,
-						isShrinkingEnabled(),
-						samples,
-						serviceSupplier()
-					);
-				}
-				case null -> throw new IllegalStateException("Property has failed before: " + id);
-			};
+			return buildAfterFailureConfiguration(parametersReport);
 		}
 		return buildDefaultConfiguration(generators, strategy.seedSupplier(), parametersReport);
+	}
+
+	private PropertyRunConfiguration buildAfterFailureConfiguration(ReportSection parametersReport) {
+		parametersReport.append("after failure", strategy.afterFailure().name());
+		return switch (strategy.afterFailure()) {
+			case REPLAY -> replayLastRun(generators, parametersReport);
+			case SAMPLES_ONLY -> {
+				List<SampleRecording> samples = new ArrayList<>(database.loadFailingSamples(id));
+				if (samples.isEmpty()) {
+					yield replayLastRun(generators, parametersReport);
+				}
+				Collections.sort(samples); // Sorts from smallest to largest
+				yield PropertyRunConfiguration.samples(
+					maxRuntime,
+					isShrinkingEnabled(),
+					samples,
+					serviceSupplier()
+				);
+			}
+			case null -> throw new IllegalStateException("Property has failed before: " + id);
+		};
 	}
 
 	private PropertyRunConfiguration replayLastRun(List<Generator<?>> generators, ReportSection parametersReport) {

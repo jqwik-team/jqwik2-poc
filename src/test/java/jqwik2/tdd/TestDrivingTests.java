@@ -1,11 +1,7 @@
 package jqwik2.tdd;
 
-import java.util.function.*;
-
 import jqwik2.api.arbitraries.*;
 import jqwik2.api.description.*;
-import jqwik2.api.functions.*;
-import jqwik2.api.validation.*;
 
 import net.jqwik.api.*;
 

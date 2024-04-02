@@ -12,12 +12,12 @@ cp (FAILED) =
 |--parameters--|
   validation | STRICT
   generation | SMART (RANDOMIZED)
-  seed | [seed1]
   max tries | 100
   max runtime | PT10M
   shrinking | FULL
   edge cases | MIXIN
   concurrency | SINGLE_THREAD
+  seed | [seed1]
 
 
 Original Falsified Sample

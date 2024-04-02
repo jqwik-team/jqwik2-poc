@@ -12,9 +12,9 @@ jqwik2.PropertyValidationTests$StatisticalValidation#failWithMinPercentage (FAIL
 |--parameters--|
   validation | STATISTICAL(93.0, 2.0)
   generation | RANDOMIZED
-  seed | [seed1]
   max tries | 2147483647
   max runtime | PT0S
   shrinking | OFF
   edge cases | MIXIN
   concurrency | SINGLE_THREAD
+  seed | [seed1]
