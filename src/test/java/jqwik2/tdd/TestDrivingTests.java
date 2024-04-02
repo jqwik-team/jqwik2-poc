@@ -10,41 +10,12 @@ import static org.assertj.core.api.Assertions.*;
 class TestDrivingTests {
 
 	@Example
-	void fizzBuzz() {
-		var property =
-			PropertyDescription.property()
-							   .forAll(Numbers.integers().between(1, Integer.MAX_VALUE))
-							   .verify(i -> {
-								   var s = fizzBuzz(i);
-								   if (i % 3 == 0) {
-									   TddTry.label("Divisible by 3");
-									   assertThat(s).startsWith("Fizz");
-									   TddTry.done();
-								   }
-								   if (i % 5 == 0) {
-									   TddTry.label("Divisible by 5");
-									   assertThat(s).endsWith("Buzz");
-									   TddTry.done();
-								   }
-								   if (i % 3 != 0 && i % 5 != 0) {
-									   TddTry.label("Not divisible");
-									   assertThat(s).isEqualTo(Integer.toString(i));
-									   TddTry.done();
-								   }
-							   });
-
-		TestDriver testDriver = TestDriver.forProperty(property);
-		// .tddDatabase(new TddDatabase("./src/test/java/jqwik2/tdd/fizzBuzz.tdd"));
-		testDriver.drive();
-	}
-
-	@Example
 		// @Disabled("Not yet implemented")
 	void fizzBuzz2() {
 
 		TddProperty.P1<Integer> tddProperty =
 			TDD.id("myId")
-			   .forAll(Numbers.integers().between(1, Integer.MAX_VALUE))
+			   .forAll(Numbers.integers().between(1, 1_000_000))
 			   .verifyCase(
 				   "normal number", i -> i % 3 != 0 && i % 5 != 0,
 				   i -> {
@@ -52,10 +23,16 @@ class TestDrivingTests {
 					   assertThat(s).isEqualTo(Integer.toString(i));
 				   }
 			   ).verifyCase(
-				   "divisible by 4", i -> i % 4 == 0,
+				   "divisible by 3", i -> i % 3 == 0,
 				   i -> {
 					   var s = fizzBuzz(i);
-					   assertThat(s).isEqualTo("PotzBlitz");
+					   assertThat(s).startsWith("Fizz");
+				   }
+			   ).verifyCase(
+				   "divisible by 5", i -> i % 5 == 0,
+				   i -> {
+					   var s = fizzBuzz(i);
+					   assertThat(s).endsWith("Buzz");
 				   }
 			   );
 
@@ -68,6 +45,7 @@ class TestDrivingTests {
 
 	private String fizzBuzz(int i) {
 		String result = "";
+		// if (i == 3) {
 		if (i % 3 == 0) {
 			result += "Fizz";
 		}

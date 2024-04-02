@@ -4,9 +4,11 @@ import java.util.*;
 import java.util.function.*;
 
 import jqwik2.api.*;
+import jqwik2.api.database.*;
 import jqwik2.api.description.*;
 import jqwik2.api.functions.*;
 import jqwik2.api.validation.*;
+import jqwik2.api.validation.PropertyValidationStrategy.*;
 import jqwik2.internal.*;
 
 class TddPropertyBuilder implements TddProperty.Builder {
@@ -36,6 +38,7 @@ class TddPropertyBuilder implements TddProperty.Builder {
 			for (var tddCase : cases) {
 				var validator =
 					PropertyValidator.forProperty(tddCase.second())
+									 .failureDatabase(FailureDatabase.NULL)
 									 .publisher(PlatformPublisher.NULL)
 									 // .publisher(PlatformPublisher.STDOUT)
 									 .registerTryExecutionListener((r, s) -> collectTddStep(tddCase, r, s));
@@ -99,15 +102,15 @@ class TddPropertyBuilder implements TddProperty.Builder {
 															  .forAll(a1)
 															  .check(everythingCovered::test);
 			var validator = PropertyValidator.forProperty(property)
+											 .failureDatabase(FailureDatabase.NULL)
 											 .publisher(PlatformPublisher.NULL);
 			return validator.validate(buildRunConfiguration());
 		}
 
 		private PropertyValidationStrategy buildRunConfiguration() {
 			return PropertyValidationStrategy.builder()
-											 .withGeneration(PropertyValidationStrategy.GenerationMode.GROWING)
+											 .withGeneration(GenerationMode.GROWING)
 											 .withMaxTries(1000)
-											 .withShrinking(PropertyValidationStrategy.ShrinkingMode.OFF)
 											 .build();
 		}
 
