@@ -40,7 +40,7 @@ public interface PropertyValidationStrategy {
 	PropertyValidationStrategy DEFAULT = builder().build();
 
 	static Builder builder() {
-		return new StrategyBuilder();
+		return new ValidationStrategyBuilder();
 	}
 
 	int maxTries();
@@ -95,7 +95,7 @@ public interface PropertyValidationStrategy {
 
 }
 
-record DefaultStrategy(
+record DefaultValidationStrategy(
 	int maxTries, Duration maxRuntime,
 	boolean filterOutDuplicateSamples,
 	Supplier<String> seedSupplier,
@@ -107,7 +107,7 @@ record DefaultStrategy(
 	ConcurrencyMode concurrency
 ) implements PropertyValidationStrategy {}
 
-class StrategyBuilder implements PropertyValidationStrategy.Builder, Cloneable {
+class ValidationStrategyBuilder implements PropertyValidationStrategy.Builder, Cloneable {
 
 	private int maxTries = JqwikDefaults.defaultMaxTries();
 	private Duration maxRuntime = JqwikDefaults.defaultMaxDuration();
@@ -121,8 +121,8 @@ class StrategyBuilder implements PropertyValidationStrategy.Builder, Cloneable {
 	private PropertyValidationStrategy.ConcurrencyMode concurrency = JqwikDefaults.defaultConcurrencyMode();
 
 	@Override
-	protected StrategyBuilder clone() {
-		var strategyBuilder = new StrategyBuilder();
+	protected ValidationStrategyBuilder clone() {
+		var strategyBuilder = new ValidationStrategyBuilder();
 		strategyBuilder.maxTries = maxTries;
 		strategyBuilder.maxRuntime = maxRuntime;
 		strategyBuilder.filterOutDuplicateSamples = filterOutDuplicateSamples;
@@ -138,7 +138,7 @@ class StrategyBuilder implements PropertyValidationStrategy.Builder, Cloneable {
 
 	@Override
 	public PropertyValidationStrategy build() {
-		return new DefaultStrategy(
+		return new DefaultValidationStrategy(
 			maxTries, maxRuntime, filterOutDuplicateSamples,
 			seedSupplier, samples,
 			shrinking, generation,
@@ -148,70 +148,70 @@ class StrategyBuilder implements PropertyValidationStrategy.Builder, Cloneable {
 
 	@Override
 	public PropertyValidationStrategy.Builder withMaxTries(int maxTries) {
-		StrategyBuilder clone = clone();
+		ValidationStrategyBuilder clone = clone();
 		clone.maxTries = maxTries;
 		return clone;
 	}
 
 	@Override
 	public PropertyValidationStrategy.Builder withMaxRuntime(Duration maxRuntime) {
-		StrategyBuilder clone = clone();
+		ValidationStrategyBuilder clone = clone();
 		clone.maxRuntime = maxRuntime;
 		return clone;
 	}
 
 	@Override
 	public PropertyValidationStrategy.Builder withFilterOutDuplicateSamples(boolean filterOutDuplicateSamples) {
-		StrategyBuilder clone = clone();
+		ValidationStrategyBuilder clone = clone();
 		clone.filterOutDuplicateSamples = filterOutDuplicateSamples;
 		return clone;
 	}
 
 	@Override
 	public PropertyValidationStrategy.Builder withGeneration(PropertyValidationStrategy.GenerationMode generation) {
-		StrategyBuilder clone = clone();
+		ValidationStrategyBuilder clone = clone();
 		clone.generation = generation;
 		return clone;
 	}
 
 	@Override
 	public PropertyValidationStrategy.Builder withAfterFailure(PropertyValidationStrategy.AfterFailureMode afterFailure) {
-		StrategyBuilder clone = clone();
+		ValidationStrategyBuilder clone = clone();
 		clone.afterFailure = afterFailure;
 		return clone;
 	}
 
 	@Override
 	public PropertyValidationStrategy.Builder withConcurrency(PropertyValidationStrategy.ConcurrencyMode concurrency) {
-		StrategyBuilder clone = clone();
+		ValidationStrategyBuilder clone = clone();
 		clone.concurrency = concurrency;
 		return clone;
 	}
 
 	@Override
 	public PropertyValidationStrategy.Builder withSeedSupplier(Supplier<String> seedSupplier) {
-		StrategyBuilder clone = clone();
+		ValidationStrategyBuilder clone = clone();
 		clone.seedSupplier = seedSupplier;
 		return clone;
 	}
 
 	@Override
 	public PropertyValidationStrategy.Builder withEdgeCases(PropertyValidationStrategy.EdgeCasesMode edgeCases) {
-		StrategyBuilder clone = clone();
+		ValidationStrategyBuilder clone = clone();
 		clone.edgeCases = edgeCases;
 		return clone;
 	}
 
 	@Override
 	public PropertyValidationStrategy.Builder withShrinking(PropertyValidationStrategy.ShrinkingMode shrinking) {
-		StrategyBuilder clone = clone();
+		ValidationStrategyBuilder clone = clone();
 		clone.shrinking = shrinking;
 		return clone;
 	}
 
 	@Override
 	public PropertyValidationStrategy.Builder withSamples(List<SampleRecording> samples) {
-		StrategyBuilder clone = clone();
+		ValidationStrategyBuilder clone = clone();
 		clone.samples = samples;
 		return clone;
 	}
