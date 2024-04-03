@@ -1,7 +1,7 @@
 package jqwik2.tdd;
 
 import jqwik2.api.arbitraries.*;
-import jqwik2.api.description.*;
+import jqwik2.api.validation.*;
 
 import net.jqwik.api.*;
 
@@ -13,7 +13,7 @@ class TestDrivingTests {
 		// @Disabled("Not yet implemented")
 	void fizzBuzz2() {
 
-		TddProperty.P1<Integer> tddProperty =
+		var tddProperty =
 			TDD.id("myId")
 			   .forAll(Numbers.integers().between(1, 1_000_000))
 			   .verifyCase(
@@ -36,11 +36,11 @@ class TestDrivingTests {
 				   }
 			   );
 
-		TddResult result = tddProperty.drive();
+		TddDrivingResult result = tddProperty.drive();
 
-		// assertThat(result.status()).isEqualTo(PropertyValidationStatus.SUCCESSFUL);
-		// assertThat(result.everythingCovered()).isFalse();
-		// assertThat(result.caseResults()).hasSize(1);
+		assertThat(result.status()).isEqualTo(PropertyValidationStatus.SUCCESSFUL);
+		assertThat(result.everythingCovered()).isTrue();
+		assertThat(result.caseResults()).hasSize(3);
 	}
 
 	private String fizzBuzz(int i) {

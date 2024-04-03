@@ -9,7 +9,6 @@ import jqwik2.api.description.*;
 import jqwik2.api.functions.*;
 import jqwik2.api.validation.*;
 import jqwik2.api.validation.PropertyValidationStrategy.*;
-import jqwik2.internal.*;
 
 class TddPropertyBuilder implements TddProperty.Builder {
 	private final String propertyId;
@@ -33,7 +32,7 @@ class TddPropertyBuilder implements TddProperty.Builder {
 		}
 
 		@Override
-		public TddResult drive() {
+		public TddDrivingResult drive(TddDrivingStrategy strategy) {
 			List<PropertyValidationResult> caseResults = new ArrayList<>();
 			for (var tddCase : cases) {
 				var validator =
@@ -42,7 +41,7 @@ class TddPropertyBuilder implements TddProperty.Builder {
 									 .publisher(PlatformPublisher.NULL)
 									 // .publisher(PlatformPublisher.STDOUT)
 									 .registerTryExecutionListener((r, s) -> collectTddStep(tddCase, r, s));
-				var result = validator.validate(buildRunConfiguration());
+				var result = validator.validate(buildRunConfiguration(strategy));
 				caseResults.add(result);
 				publishRecord(tddCase);
 			}
@@ -51,7 +50,7 @@ class TddPropertyBuilder implements TddProperty.Builder {
 				status = PropertyValidationStatus.FAILED;
 			}
 
-			PropertyValidationResult everythingCoveredResult = validateEverythingCovered();
+			PropertyValidationResult everythingCoveredResult = validateEverythingCovered(strategy);
 			boolean isEverythingCovered = everythingCoveredResult.isSuccessful();
 
 			if (!isEverythingCovered) {
@@ -61,7 +60,7 @@ class TddPropertyBuilder implements TddProperty.Builder {
 				);
 			}
 
-			return new TddResult(status, caseResults, isEverythingCovered);
+			return new TddDrivingResult(status, caseResults, isEverythingCovered);
 		}
 
 		private void publishRecord(TddCase tddCase) {
@@ -80,16 +79,12 @@ class TddPropertyBuilder implements TddProperty.Builder {
 			updateRecord(tddCase, r, s);
 		}
 
-		private void updateRecord(
-			TddCase tddCase,
-			TryExecutionResult result,
-			Sample sample
-		) {
+		private void updateRecord(TddCase tddCase, TryExecutionResult result, Sample sample) {
 			var record = records.computeIfAbsent(tddCase, tddC -> new TddRecord(tddC.label()));
 			record.update(result, sample);
 		}
 
-		private PropertyValidationResult validateEverythingCovered() {
+		private PropertyValidationResult validateEverythingCovered(TddDrivingStrategy strategy) {
 			String everythingCoveredId = propertyId + ":everythingCoveredResult";
 			Predicate<T1> everythingCovered = t1 -> cases.stream().anyMatch(c -> {
 				try {
@@ -104,13 +99,14 @@ class TddPropertyBuilder implements TddProperty.Builder {
 			var validator = PropertyValidator.forProperty(property)
 											 .failureDatabase(FailureDatabase.NULL)
 											 .publisher(PlatformPublisher.NULL);
-			return validator.validate(buildRunConfiguration());
+			return validator.validate(buildRunConfiguration(strategy));
 		}
 
-		private PropertyValidationStrategy buildRunConfiguration() {
+		private PropertyValidationStrategy buildRunConfiguration(TddDrivingStrategy strategy) {
 			return PropertyValidationStrategy.builder()
 											 .withGeneration(GenerationMode.GROWING)
-											 .withMaxTries(1000)
+											 .withMaxTries(strategy.maxTries())
+											 .withMaxRuntime(strategy.maxRuntime())
 											 .build();
 		}
 

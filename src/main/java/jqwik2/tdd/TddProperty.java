@@ -3,6 +3,8 @@ package jqwik2.tdd;
 import jqwik2.api.*;
 import jqwik2.api.functions.*;
 
+import static jqwik2.tdd.TddDrivingStrategy.*;
+
 public interface TddProperty {
 	interface Builder {
 		<T1> P1<T1> forAll(Arbitrary<T1> arbitrary);
@@ -15,5 +17,9 @@ public interface TddProperty {
 		// PropertyDescription verify(PropertyDescription.V1<T1> verifier);
 	}
 
-	TddResult drive();
+	TddDrivingResult drive(TddDrivingStrategy strategy);
+
+	default TddDrivingResult drive() {
+		return drive(TddDrivingStrategy.DEFAULT);
+	}
 }
