@@ -58,4 +58,18 @@ class TestDrivingTests {
 		}
 		return result;
 	}
+
+	@Example
+	@Disabled("Not yet implemented")
+	void stringContains() {
+		var longStrings = Strings.strings().alpha().ofLength(10);
+		var shortStrings = Strings.strings().alpha().ofLength(2);
+
+		var tddProperty =
+			TDD.forAll(longStrings, shortStrings)
+			   .publisher(PlatformPublisher.STDOUT);
+
+		TddDrivingResult result = tddProperty.drive();
+
+	}
 }
