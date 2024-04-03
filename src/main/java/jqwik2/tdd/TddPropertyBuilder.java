@@ -9,6 +9,7 @@ import jqwik2.api.description.*;
 import jqwik2.api.functions.*;
 import jqwik2.api.validation.*;
 import jqwik2.api.validation.PropertyValidationStrategy.*;
+import jqwik2.internal.reporting.*;
 
 class TddPropertyBuilder implements TddProperty.Builder {
 	private final String propertyId;
@@ -26,9 +27,16 @@ class TddPropertyBuilder implements TddProperty.Builder {
 		private final Arbitrary<T1> a1;
 		private final List<TddCase> cases = new ArrayList<>();
 		private final Map<TddCase, TddRecord> records = new LinkedHashMap<>();
+		private PlatformPublisher publisher = JqwikDefaults.defaultPlatformPublisher();
 
 		public TddP1(Arbitrary<T1> a1) {
 			this.a1 = a1;
+		}
+
+		@Override
+		public P1<T1> publisher(PlatformPublisher publisher) {
+			this.publisher = publisher;
+			return this;
 		}
 
 		@Override
@@ -54,13 +62,29 @@ class TddPropertyBuilder implements TddProperty.Builder {
 			boolean isEverythingCovered = everythingCoveredResult.isSuccessful();
 
 			if (!isEverythingCovered) {
-				System.out.println("NOT ALL VALUES COVERED:");
+				StringBuilder report = new StringBuilder();
+				report.append("%nSOME VALUES NOT COVERED:%n".formatted());
 				everythingCoveredResult.falsifiedSamples().forEach(
-					s -> System.out.printf("  %s%n", s.sample().regenerateValues())
+					s -> report.append("  %s%n".formatted(s.sample().regenerateValues()))
 				);
+				publisher.publish(propertyId, report.toString());
 			}
 
-			return new TddDrivingResult(status, caseResults, isEverythingCovered);
+			var drivingResult = new TddDrivingResult(status, caseResults, isEverythingCovered);
+			if (JqwikDefaults.defaultPublishSuccessfulResults() || status != PropertyValidationStatus.SUCCESSFUL) {
+				publishDrivingResult(drivingResult);
+			}
+			return drivingResult;
+		}
+
+		private void publishDrivingResult(TddDrivingResult drivingResult) {
+			var resultReport = new ReportSection("result");
+			resultReport.append("status", drivingResult.status());
+			resultReport.append("cases", drivingResult.caseResults().size());
+			// drivingResult.caseResults().forEach(caseResult -> resultReport.append(caseResult., caseResult.status()
+
+			resultReport.append("all values covered", drivingResult.everythingCovered());
+			resultReport.publish(propertyId, publisher);
 		}
 
 		private void publishRecord(TddCase tddCase) {
@@ -69,7 +93,7 @@ class TddPropertyBuilder implements TddProperty.Builder {
 			if (record != null) {
 				record.publish(report);
 			}
-			PlatformPublisher.STDOUT.publish(tddCase.property().id(), report.toString());
+			publisher.publish(tddCase.property().id(), report.toString());
 		}
 
 		private void collectTddStep(TddCase tddCase, TryExecutionResult r, Sample s) {

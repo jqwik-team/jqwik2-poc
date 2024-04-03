@@ -1,5 +1,6 @@
 package jqwik2.tdd;
 
+import jqwik2.api.*;
 import jqwik2.api.arbitraries.*;
 import jqwik2.api.validation.*;
 
@@ -10,12 +11,12 @@ import static org.assertj.core.api.Assertions.*;
 class TestDrivingTests {
 
 	@Example
-		// @Disabled("Not yet implemented")
 	void fizzBuzz2() {
 
 		var tddProperty =
 			TDD.id("myId")
 			   .forAll(Numbers.integers().between(1, 1_000_000))
+			   .publisher(PlatformPublisher.STDOUT)
 			   .verifyCase(
 				   "normal number", i -> i % 3 != 0 && i % 5 != 0,
 				   i -> {
