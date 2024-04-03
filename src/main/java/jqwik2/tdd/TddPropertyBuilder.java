@@ -1,8 +1,6 @@
 package jqwik2.tdd;
 
 import jqwik2.api.*;
-import jqwik2.api.description.*;
-import jqwik2.internal.description.*;
 
 class TddPropertyBuilder implements TddProperty.Builder {
 	private final String propertyId;
@@ -32,6 +30,12 @@ class TddPropertyBuilder implements TddProperty.Builder {
 	@Override
 	public <T1> TddProperty.P1<T1> forAll(Arbitrary<T1> arbitrary) {
 		return new TddP1<>(propertyId, arbitrary);
+	}
+
+	@Override
+	public <T1, T2> TddProperty.P2<T1, T2> forAll(Arbitrary<T1> a1, Arbitrary<T2> a2) {
+		throw new UnsupportedOperationException("Not implemented yet");
+		// return new TddP2<>(propertyId, a1, a2);
 	}
 
 }
