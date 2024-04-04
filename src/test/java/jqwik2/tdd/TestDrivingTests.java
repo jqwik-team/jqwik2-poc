@@ -60,7 +60,7 @@ class TestDrivingTests {
 	}
 
 	@Example
-	@Disabled("Not yet implemented")
+	// @Disabled("Not yet implemented")
 	void stringContains() {
 		var longStrings = Strings.strings().alpha().ofLength(10);
 		var shortStrings = Strings.strings().alpha().ofLength(2);

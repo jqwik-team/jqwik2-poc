@@ -34,8 +34,7 @@ class TddPropertyBuilder implements TddProperty.Builder {
 
 	@Override
 	public <T1, T2> TddProperty.P2<T1, T2> forAll(Arbitrary<T1> a1, Arbitrary<T2> a2) {
-		throw new UnsupportedOperationException("Not implemented yet");
-		// return new TddP2<>(propertyId, a1, a2);
+		return new TddP2<>(propertyId, a1, a2);
 	}
 
 }
