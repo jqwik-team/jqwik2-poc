@@ -8,6 +8,11 @@
         - PropertyAnalyzer: Find as many failing samples as possible and analyze
           their commonalities
 
+- Auto Test-Driving
+  - Adapt next-gen-pbt.md#Automated-Test-Driven-Development to actual behaviour of jqwik2
+  - Record failed examples to display them in the report
+  - Generate test cases beyond just growing, e.g. edge cases, random values, provided ones
+
 - Additional generators and arbitraries
     - StringArbitrary: withChar(char... chars), withChar(CharSet chars),
       withCharRange(from, to)

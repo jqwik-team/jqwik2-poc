@@ -1,5 +1,7 @@
 package jqwik2.tdd;
 
+import java.time.*;
+
 import jqwik2.api.*;
 import jqwik2.api.arbitraries.*;
 import jqwik2.api.validation.*;
@@ -60,16 +62,28 @@ class TestDrivingTests {
 	}
 
 	@Example
-	// @Disabled("Not yet implemented")
 	void stringContains() {
 		var longStrings = Strings.strings().alpha().ofLength(10);
 		var shortStrings = Strings.strings().alpha().ofLength(2);
 
 		var tddProperty =
 			TDD.forAll(longStrings, shortStrings)
-			   .publisher(PlatformPublisher.STDOUT);
+			   .publisher(PlatformPublisher.STDOUT)
+			   .verifyCase(
+				   "contained",
+				   (longString, shortString) -> longString.indexOf(shortString) >= 0,
+				   (longString, shortString) -> assertThat(longString).contains(shortString)
+			   )
+			   .verifyCase(
+				   "not contained",
+				   (longString, shortString) -> longString.indexOf(shortString) < 0,
+				   (longString, shortString) -> assertThat(longString).doesNotContain(shortString)
+			   );
 
-		TddDrivingResult result = tddProperty.drive();
-
+		TddDrivingStrategy strategy = TddDrivingStrategy.builder()
+														.withMaxTries(0)
+														.withMaxRuntime(Duration.ofSeconds(1))
+														.build();
+		TddDrivingResult result = tddProperty.drive(strategy);
 	}
 }
