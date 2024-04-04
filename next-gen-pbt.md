@@ -36,49 +36,67 @@ _TODO_
 
 ```java
 @TestDrive
-void fizzBuss(@ForAll @IntRange(min = 1) number) {
+class FizzBuzzTests {
+    @ForAll @IntRange(min = 1, max = 1000) number;
 }
 ```
 
-Result: "Input: 1 -> not covered"
+### Result
+
+Coverage
+  [1] NOT COVERED
 
 ```java
 @TestDrive
-void fizzBuss(@ForAll @IntRange(min = 1) number) {
-    var result = fizzBuzz(number);
-    if (number == 1) {
+class FizzBuzzTests {
+    @ForAll @IntRange(min = 1) number;
+
+
+    @Case
+    void one() {
+        Assume.that(number == 1);
+        var result = fizzBuzz(number);
         assertThat(result).isEqualTo("1");
-        done();
     }
-}
 
-String fizzBuzz(int number) {
-    return "1";
+    String fizzBuzz(int number) {
+        return "1";
+    }
 }
 ```
 
-Result: 
-- "Input: 1 -> Success"
-- "Input: 2 -> not covered"
+### Result
+
+One
+  [1] SATISFIED
+
+Coverage
+  [2] NOT COVERED
+
 
 ```java
 @TestDrive
-void fizzBuss(@ForAll @IntRange(min = 1) number) {
-    var result = fizzBuzz(number);
-    if (number >= 1) {
+class FizzBuzzTests {
+    @ForAll @IntRange(min = 1) number;
+
+
+    @Case
+    void normal_numbers() {
+        var result = fizzBuzz(number);
         assertThat(result).isEqualTo(Integer.toString(number));
     }
-    done();
-}
 
-String fizzBuzz(int number) {
-    return "1";
+    String fizzBuzz(int number) {
+        return "1";
+    }
 }
 ```
 
-Result:
-- "Input: 1 -> Success"
-- "Input: 2 -> failed: expected 2 but was 1"
+### Result
+
+normal numbers
+  [1] SATISFIED
+  [2] FAILED: expected 2 but was 1
 
 ```java
 String fizzBuzz(int number) {
@@ -86,32 +104,50 @@ String fizzBuzz(int number) {
 }
 ```
 
-Result:
-- "Input: 1 -> Success"
-- "Input: 2 -> Success"
-- "Rest -> Success"
+### Result
+
+normal numbers
+  [1] SATISFIED
+  [2] SATISFIED
+  [1000] SATISFIED
+
 
 ```java
 @TestDrive
-void fizzBuss(@ForAll @IntRange(min = 1) number) {
-    var result = fizzBuzz(number);
-    if (number == 3) {
+class FizzBuzzTests {
+    @ForAll @IntRange(min = 1) number;
+
+
+    @Case
+    void normal_numbers() {
+        Assume.that(number % 3 != 0);
+        var result = fizzBuzz(number);
+        assertThat(result).isEqualTo(Integer.toString(number));
+    }
+
+    @Case
+    void three() {
+        Assume.that(number == 3);
+        var result = fizzBuzz(number);
         assertThat(result).isEqualTo("Fizz");
-    } else {
-        assertThat(result).isEqualTo(Integer.toString(number));
     }
-    done();
-}
 
-String fizzBuzz(int number) {
-    return "" + number;
+    String fizzBuzz(int number) {
+        return "" + number;
+    }
 }
 ```
 
-Result:
-- "Input: 1 -> Success"
-- "Input: 2 -> Success"
-- "Input: 3 -> Failed: expected Fizz but was 3"
+### Result
+
+normal numbers
+  [1] SATISFIED
+  [2] SATISFIED
+  [1000] SATISFIED
+
+three
+  [3] FAILED: expected Fizz but was 3
+
 
 ```java
 String fizzBuzz(int number) {
@@ -122,31 +158,59 @@ String fizzBuzz(int number) {
 }
 ```
 
-Result:
-- "Input: 1 -> Success"
-- "Input: 2 -> Success"
-- "Input: 3 -> Success"
-- "Input: 6 -> Failed: expected 6 but was Fizz"
+### Result
+
+normal numbers
+  [1] SATISFIED
+  [2] SATISFIED
+  [6] FAILED: expected Fizz but was 3
+
+three
+  [3] SATISFIED
+
 
 ```java
 @TestDrive
-void fizzBuss(@ForAll @IntRange(min = 1) number) {
-    var result = fizzBuzz(number);
-    if (number % 3 == 0) {
-        assertThat(result).isEqualTo("Fizz");
-    } else {
+class FizzBuzzTests {
+    @ForAll @IntRange(min = 1) number;
+
+
+    @Case
+    void normal_numbers() {
+        Assume.that(number % 3 != 0);
+        var result = fizzBuzz(number);
         assertThat(result).isEqualTo(Integer.toString(number));
     }
-    done();
+
+    @Case
+    void divisible_by_3() {
+        Assume.that(number % 3 == 0);
+        var result = fizzBuzz(number);
+        assertThat(result).isEqualTo("Fizz");
+    }
+
+    String fizzBuzz(int number) {
+        if (number % 3 == 0) {
+            return "Fizz";
+        }
+        return "" + number;
+    }
 }
 ```
 
-Result:
-- "Input: 1 -> Success"
-- "Input: 2 -> Success"
-- "Input: 3 -> Success"
-- "Input: 6 -> Success"
-- "Rest -> Success"
+### Result
+
+normal numbers
+  [1] SATISFIED
+  [2] SATISFIED
+  [1000] SATISFIED
+
+divisible by 3
+  [3] SATISFIED
+  [6] SATISFIED
+  [999] SATISFIED
+
+########################
 
 ```java
 @TestDrive
