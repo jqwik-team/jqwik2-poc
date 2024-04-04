@@ -52,7 +52,7 @@ abstract class AbstractTddProperty<P extends TddProperty<P>> implements TddPrope
 
 	private void publishNotEverythingCoveredReport(PropertyValidationResult everythingCoveredResult) {
 		StringBuilder report = new StringBuilder();
-		report.append("%nSOME VALUES NOT COVERED:%n".formatted());
+		report.append("%nNOT COVERED:%n".formatted());
 		everythingCoveredResult.falsifiedSamples().forEach(
 			s -> report.append("  %s%n".formatted(s.sample().regenerateValues()))
 		);
