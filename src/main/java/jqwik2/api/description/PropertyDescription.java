@@ -48,7 +48,7 @@ public interface PropertyDescription {
 
 	List<Arbitrary<?>> arbitraries();
 
-	Condition condition();
+	Condition invariant();
 
 	int arity();
 

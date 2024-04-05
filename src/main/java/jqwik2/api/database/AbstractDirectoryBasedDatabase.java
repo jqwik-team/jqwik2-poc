@@ -9,6 +9,8 @@ import jqwik2.api.recording.*;
 import jqwik2.api.support.*;
 
 public class AbstractDirectoryBasedDatabase {
+	public static final String ID_FILE_NAME = "ID";
+
 	protected final Path databasePath;
 
 	public AbstractDirectoryBasedDatabase(Path databasePath) {
@@ -49,6 +51,25 @@ public class AbstractDirectoryBasedDatabase {
 					 ExceptionSupport.throwAsUnchecked(e);
 				 }
 			 });
+	}
+
+	protected Path propertyDirectory(String id, boolean createIfNecessary) throws IOException {
+		var idBasedFileName = toFileName(id);
+		Path propertyDirectory = databasePath.resolve(idBasedFileName);
+		if (createIfNecessary && Files.notExists(propertyDirectory)) {
+			Files.createDirectories(propertyDirectory);
+			createIdFile(id, propertyDirectory);
+		}
+		return propertyDirectory;
+	}
+
+	private static void createIdFile(String id, Path propertyDirectory) throws IOException {
+		var idFile = propertyDirectory.resolve(ID_FILE_NAME);
+		Files.write(idFile, id.getBytes());
+	}
+
+	protected void deleteAllDirectoriesAndFiles() {
+		ExceptionSupport.runUnchecked(() -> deleteAllIn(databasePath));
 	}
 
 }

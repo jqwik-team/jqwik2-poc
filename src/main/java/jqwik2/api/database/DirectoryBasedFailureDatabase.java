@@ -10,7 +10,6 @@ import jqwik2.api.support.*;
 
 public class DirectoryBasedFailureDatabase extends AbstractDirectoryBasedDatabase implements FailureDatabase {
 	public static final String SAMPLEFILE_PREFIX = "sample#";
-	public static final String ID_FILE_NAME = "ID";
 	public static final String SEED_FILE_NAME = "seed";
 
 	public DirectoryBasedFailureDatabase(Path databasePath) {
@@ -28,21 +27,6 @@ public class DirectoryBasedFailureDatabase extends AbstractDirectoryBasedDatabas
 	private static Path samplePath(SampleRecording recording, Path propertyDirectory) {
 		var sampleId = recording.hashCode();
 		return propertyDirectory.resolve(SAMPLEFILE_PREFIX + sampleId);
-	}
-
-	private Path propertyDirectory(String id, boolean createIfNecessary) throws IOException {
-		var idBasedFileName = toFileName(id);
-		Path propertyDirectory = databasePath.resolve(idBasedFileName);
-		if (createIfNecessary && Files.notExists(propertyDirectory)) {
-			Files.createDirectories(propertyDirectory);
-			createIdFile(id, propertyDirectory);
-		}
-		return propertyDirectory;
-	}
-
-	private static void createIdFile(String id, Path propertyDirectory) throws IOException {
-		var idFile = propertyDirectory.resolve(ID_FILE_NAME);
-		Files.write(idFile, id.getBytes());
 	}
 
 	private static String propertyId(Path propertyDirectory) {
@@ -151,7 +135,7 @@ public class DirectoryBasedFailureDatabase extends AbstractDirectoryBasedDatabas
 
 	@Override
 	public void clear() {
-		ExceptionSupport.runUnchecked(() -> deleteAllIn(databasePath));
+		deleteAllDirectoriesAndFiles();
 	}
 
 	@Override

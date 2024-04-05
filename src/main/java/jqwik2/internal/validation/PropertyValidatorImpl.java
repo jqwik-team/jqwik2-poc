@@ -1,6 +1,5 @@
 package jqwik2.internal.validation;
 
-import java.io.*;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
@@ -87,7 +86,7 @@ public class PropertyValidatorImpl implements PropertyValidator {
 		PropertyValidationStrategy strategy
 	) {
 		List<Generator<?>> generators = generators(strategy.edgeCases());
-		Tryable tryable = safeTryable(property.condition(), Set.of());
+		Tryable tryable = safeTryable(property.invariant(), Set.of());
 		PropertyRunner runner = createRunner(generators, tryable);
 
 		PropertyRunConfiguration statisticalRunConfiguration = buildStatisticalRunConfiguration(minPercentage, maxStandardDeviationFactor, strategy, generators);
@@ -163,7 +162,7 @@ public class PropertyValidatorImpl implements PropertyValidator {
 
 	private PropertyRunResult runStrictValidation(PropertyValidationStrategy strategy, Set<ClassifyingCollector<List<Object>>> collectors) {
 		List<Generator<?>> generators = generators(strategy.edgeCases());
-		Tryable tryable = safeTryable(property.condition(), collectors);
+		Tryable tryable = safeTryable(property.invariant(), collectors);
 		PropertyRunner runner = createRunner(generators, tryable);
 
 		PropertyRunConfiguration runConfiguration = buildRunConfiguration(generators, collectors, strategy);

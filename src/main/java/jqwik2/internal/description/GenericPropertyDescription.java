@@ -9,13 +9,13 @@ import jqwik2.api.functions.*;
 class GenericPropertyDescription implements PropertyDescription {
 	private final String propertyId;
 	private final List<Arbitrary<?>> arbitraries;
-	private final Condition condition;
+	private final Condition invariant;
 	private final List<Classifier> classifiers;
 
-	GenericPropertyDescription(String propertyId, List<Arbitrary<?>> arbitraries, Condition condition, List<Classifier> classifiers) {
+	GenericPropertyDescription(String propertyId, List<Arbitrary<?>> arbitraries, Condition invariant, List<Classifier> classifiers) {
 		this.propertyId = propertyId;
 		this.arbitraries = arbitraries;
-		this.condition = condition;
+		this.invariant = invariant;
 		this.classifiers = classifiers;
 	}
 
@@ -30,8 +30,8 @@ class GenericPropertyDescription implements PropertyDescription {
 	}
 
 	@Override
-	public Condition condition() {
-		return condition;
+	public Condition invariant() {
+		return invariant;
 	}
 
 	@Override

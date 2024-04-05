@@ -25,7 +25,7 @@ class PropertyDescriptionTests {
 		assertThat(property.arity()).isEqualTo(1);
 		assertThat(property.arbitraries()).containsExactly(Numbers.integers());
 
-		var condition = property.condition();
+		var condition = property.invariant();
 		assertThat(condition.check(List.of(42))).isTrue();
 		assertThat(condition.check(List.of(41))).isFalse();
 	}
@@ -40,7 +40,7 @@ class PropertyDescriptionTests {
 		assertThat(property.arity()).isEqualTo(1);
 		assertThat(property.arbitraries()).containsExactly(Numbers.integers());
 
-		var condition = property.condition();
+		var condition = property.invariant();
 		assertThat(condition.check(List.of(42))).isTrue();
 		assertThatThrownBy(
 			() -> condition.check(List.of(41))
@@ -71,7 +71,7 @@ class PropertyDescriptionTests {
 		assertThat(property.arity()).isEqualTo(2);
 		assertThat(property.arbitraries()).containsExactly(Numbers.integers(), Strings.strings());
 
-		var condition = property.condition();
+		var condition = property.invariant();
 		assertThat(condition.check(List.of(3, "abc"))).isTrue();
 		assertThat(condition.check(List.of(4, "abc"))).isFalse();
 	}
