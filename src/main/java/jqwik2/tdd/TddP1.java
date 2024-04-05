@@ -21,7 +21,7 @@ class TddP1<T1> extends AbstractTddProperty<P1<T1>> implements P1<T1> {
 		var property = PropertyDescription.property(testCaseId(label))
 										  .forAll(a1)
 										  .verify(verifier(v1, check1));
-		addTestCase(label, property);
+		addTestCase(label, property, check1.asCondition());
 		return this;
 	}
 

@@ -8,27 +8,27 @@ public interface TddDatabase {
 
 	TddDatabase NULL = new NullTddDatabase();
 
-	void saveSample(String caseId, SampleRecording recording);
+	void saveSample(String propertyId, String caseLabel, SampleRecording recording);
 
-	void deleteCase(String caseId);
+	Set<SampleRecording> loadSamples(String propertyId, String caseLabel);
 
-	Set<SampleRecording> loadSamples(String caseId);
+	/**
+	 * Override for optimized implementation
+	 */
+	default boolean isSamplePresent(String propertyId, String caseLabel, SampleRecording recording) {
+		return loadSamples(propertyId, caseLabel).contains(recording);
+	}
 
 	void clear();
 
 	class NullTddDatabase implements TddDatabase {
 		@Override
-		public void saveSample(String caseId, SampleRecording recording) {
+		public void saveSample(String propertyId, String caseLabel, SampleRecording recording) {
 
 		}
 
 		@Override
-		public void deleteCase(String caseId) {
-
-		}
-
-		@Override
-		public Set<SampleRecording> loadSamples(String caseId) {
+		public Set<SampleRecording> loadSamples(String propertyId, String caseLabel) {
 			return Set.of();
 		}
 

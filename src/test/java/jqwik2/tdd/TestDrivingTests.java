@@ -1,10 +1,13 @@
 package jqwik2.tdd;
 
+import java.nio.file.*;
 import java.time.*;
 
 import jqwik2.api.*;
 import jqwik2.api.arbitraries.*;
+import jqwik2.api.recording.*;
 import jqwik2.api.validation.*;
+import org.junit.jupiter.api.*;
 
 import net.jqwik.api.*;
 
@@ -13,10 +16,26 @@ import static org.assertj.core.api.Assertions.*;
 class TestDrivingTests {
 
 	@Example
-	void fizzBuzz2() {
+	void tddDatabase() {
+		Path localPath = Paths.get("src", "test", "java", "jqwik2", "tdd", ".tdd");
+		var database = new DirectoryBasedTddDatabase(localPath);
+		database.clear();
+
+		var recording = new SampleRecording(Recording.choice(42));
+		var recording2 = new SampleRecording(Recording.choice(41));
+		database.saveSample("myId", "case1", recording);
+		var samples = database.loadSamples("myId", "case1");
+		assertThat(samples).hasSize(1);
+		assertThat(samples).contains(recording);
+		assertThat(database.isSamplePresent("myId", "case1", recording)).isTrue();
+		assertThat(database.isSamplePresent("myId", "case1", recording2)).isFalse();
+	}
+
+	@Example
+	void fizzBuzz() {
 
 		var tddProperty =
-			TDD.id("myId")
+			TDD.id("fizzBuzz")
 			   .forAll(Numbers.integers().between(1, 1_000_000))
 			   .publisher(PlatformPublisher.STDOUT)
 			   .verifyCase(
@@ -48,8 +67,8 @@ class TestDrivingTests {
 
 	private String fizzBuzz(int i) {
 		String result = "";
-		// if (i == 3) {
-		if (i % 3 == 0) {
+		if (i == 3 || i == 6) {
+		// if (i % 3 == 0) {
 			result += "Fizz";
 		}
 		if (i % 5 == 0) {

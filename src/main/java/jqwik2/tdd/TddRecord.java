@@ -1,6 +1,7 @@
 package jqwik2.tdd;
 
 import java.util.*;
+import java.util.function.*;
 
 import jqwik2.api.*;
 
@@ -24,11 +25,11 @@ class TddRecord {
 		}
 	}
 
-	void publish(StringBuilder report) {
+	void publish(StringBuilder report, Predicate<Sample> shouldSampleBeReported) {
 		report.append("%n%s:".formatted(label));
 		for (int i = 0; i < satisfiedSamples.size(); i++) {
 			Sample sample = satisfiedSamples.get(i);
-			if (shouldBeReported(sample, i)) {
+			if (shouldBeReported(sample, i, shouldSampleBeReported)) {
 				report.append("%n  %s: SATISFIED".formatted(sample.values()));
 			}
 		}
@@ -39,7 +40,7 @@ class TddRecord {
 		report.append("%n".formatted());
 	}
 
-	private boolean shouldBeReported(Sample sample, int index) {
-		return index == 0 || index == satisfiedSamples.size() - 1;
+	private boolean shouldBeReported(Sample sample, int index, Predicate<Sample> shouldSampleBeReported) {
+		return index == 0 || index == satisfiedSamples.size() - 1 || shouldSampleBeReported.test(sample);
 	}
 }

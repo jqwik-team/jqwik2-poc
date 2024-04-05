@@ -23,7 +23,7 @@ class TddP2<T1, T2> extends AbstractTddProperty<P2<T1, T2>> implements P2<T1, T2
 		var property = PropertyDescription.property(testCaseId(label))
 										  .forAll(a1, a2)
 										  .verify(verifier(v2, check2));
-		addTestCase(label, property);
+		addTestCase(label, property, check2.asCondition());
 		return this;
 	}
 

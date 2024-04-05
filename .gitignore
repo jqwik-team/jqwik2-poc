@@ -1,6 +1,7 @@
 # Jqwik
 .jqwik-*
 /.jqwik/
+.tdd
 
 # Gradle
 .gradle

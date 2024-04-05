@@ -206,7 +206,8 @@ public class PropertyValidatorImpl implements PropertyValidator {
 	private void publishFailure(Throwable throwable, StringBuilder report) {
 		String assertionClass = throwable.getClass().getName();
 		report.append("%n  %s".formatted(assertionClass));
-		List<String> assertionMessageLines = throwable.getMessage().lines().toList();
+		var message = throwable.getMessage();
+		List<String> assertionMessageLines = message == null ? List.of() : message.lines().toList();
 		if (assertionMessageLines.isEmpty()) {
 			return;
 		}

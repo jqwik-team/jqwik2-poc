@@ -1,7 +1,7 @@
 package jqwik2.tdd;
 
 import java.util.*;
-import java.util.stream.*;
+import java.util.function.*;
 
 import jqwik2.api.*;
 import jqwik2.api.database.*;
@@ -15,6 +15,7 @@ abstract class AbstractTddProperty<P extends TddProperty<P>> implements TddPrope
 	private final List<TddCase> cases = new ArrayList<>();
 	private final Map<TddCase, TddRecord> records = new LinkedHashMap<>();
 	private PlatformPublisher publisher = JqwikDefaults.defaultPlatformPublisher();
+	private TddDatabase database = JqwikDefaults.defaultTddDatabase();
 
 	AbstractTddProperty(String id) {
 		this.id = id;
@@ -70,7 +71,7 @@ abstract class AbstractTddProperty<P extends TddProperty<P>> implements TddPrope
 								 .registerTryExecutionListener((r, s) -> collectTddStep(tddCase, r, s));
 			var result = validator.validate(buildRunConfiguration(strategy));
 			caseResults.add(result);
-			publishRecord(tddCase);
+			publishCaseRecord(tddCase);
 		}
 		return caseResults;
 	}
@@ -84,8 +85,8 @@ abstract class AbstractTddProperty<P extends TddProperty<P>> implements TddPrope
 		return "%s:%s".formatted(id, label.trim());
 	}
 
-	protected void addTestCase(String label, PropertyDescription property) {
-		cases.add(new TddCase(label, property));
+	protected void addTestCase(String label, PropertyDescription property, Condition condition) {
+		cases.add(new TddCase(label, property, condition));
 	}
 
 	private void publishDrivingResult(TddDrivingResult drivingResult) {
@@ -98,20 +99,25 @@ abstract class AbstractTddProperty<P extends TddProperty<P>> implements TddPrope
 		resultReport.publish(id, publisher);
 	}
 
-	private void publishRecord(TddCase tddCase) {
+	private void publishCaseRecord(TddCase tddCase) {
 		var record = records.get(tddCase);
-		var report = new StringBuilder();
-		if (record != null) {
-			record.publish(report);
+		if (record == null) {
+			return;
 		}
+		var report = new StringBuilder();
+		Predicate<Sample> shouldSampleBeReported = sample -> database.isSamplePresent(id, tddCase.label(), sample.recording());
+		record.publish(report, shouldSampleBeReported);
 		publisher.publish(tddCase.property().id(), report.toString());
 	}
 
-	private void collectTddStep(TddCase tddCase, TryExecutionResult r, Sample s) {
-		if (r.status() == TryExecutionResult.Status.INVALID) {
+	private void collectTddStep(TddCase tddCase, TryExecutionResult result, Sample sample) {
+		if (result.status() == TryExecutionResult.Status.INVALID) {
 			return;
 		}
-		updateRecord(tddCase, r, s);
+		if (result.status() == TryExecutionResult.Status.FALSIFIED) {
+			database.saveSample(id, tddCase.label(), sample.recording());
+		}
+		updateRecord(tddCase, result, sample);
 	}
 
 	private void updateRecord(TddCase tddCase, TryExecutionResult result, Sample sample) {
@@ -121,7 +127,7 @@ abstract class AbstractTddProperty<P extends TddProperty<P>> implements TddPrope
 
 	private PropertyValidationResult validateEverythingCovered(TddDrivingStrategy strategy) {
 		String everythingCoveredId = id + ":everythingCoveredResult";
-		var allCaseConditions = cases.stream().map(c -> c.property().condition()).toList();
+		var allCaseConditions = cases.stream().map(TddCase::condition).toList();
 		var property = everythingCoveredProperty(everythingCoveredId, allCaseConditions);
 		var validator = PropertyValidator.forProperty(property)
 										 .failureDatabase(FailureDatabase.NULL)

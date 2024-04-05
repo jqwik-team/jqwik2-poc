@@ -5,10 +5,13 @@ import java.time.*;
 
 import jqwik2.api.database.*;
 import jqwik2.api.validation.*;
+import jqwik2.tdd.*;
 
 public class JqwikDefaults {
 
 	private static FailureDatabase defaultFailureDatabase;
+
+	private static TddDatabase tddDatabase;
 
 	public static int defaultMaxTries() {
 		return 100;
@@ -65,4 +68,17 @@ public class JqwikDefaults {
 	public static boolean defaultPublishSuccessfulResults() {
 		return true;
 	}
+
+	public static TddDatabase defaultTddDatabase() {
+		if (tddDatabase == null) {
+			try {
+				tddDatabase = new DirectoryBasedTddDatabase(Path.of(".jqwik", "tdd"));
+			} catch (Exception e) {
+				System.err.printf("Could not create tdd database: %s%n", e.getMessage());
+				tddDatabase = TddDatabase.NULL;
+			}
+		}
+		return tddDatabase;
+	}
+
 }
