@@ -67,8 +67,8 @@ class TestDrivingTests {
 
 	private String fizzBuzz(int i) {
 		String result = "";
-		if (i == 3 || i == 6) {
-		// if (i % 3 == 0) {
+		// if (i == 3 || i == 6) {
+		if (i % 3 == 0) {
 			result += "Fizz";
 		}
 		if (i % 5 == 0) {

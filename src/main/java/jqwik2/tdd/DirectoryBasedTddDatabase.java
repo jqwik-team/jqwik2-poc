@@ -57,16 +57,12 @@ public class DirectoryBasedTddDatabase extends AbstractDirectoryBasedDatabase im
 		});
 	}
 
-	private static Set<SampleRecording> readSampleRecordings(Path caseFile) {
-		// TODO: Throws java.nio.channels.ClosedByInterruptException when tests are run together
-		try (var lines = Files.lines(caseFile)) {
-			return lines
-					   .filter(line -> !line.isBlank())
-					   .map(SampleRecording::deserialize)
-					   .collect(Collectors.toSet());
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
-		}
+	private static Set<SampleRecording> readSampleRecordings(Path caseFile) throws IOException {
+		return Files.readAllLines(caseFile)
+			 .stream()
+			 .filter(line -> !line.isBlank())
+			 .map(SampleRecording::deserialize)
+			 .collect(Collectors.toSet());
 	}
 
 	@Override
