@@ -29,6 +29,26 @@ public interface PlatformPublisher {
 		}
 	};
 
+	PlatformPublisher STDOUT_PLAIN = new PlatformPublisher() {
+
+		@Override
+		public void publish(String key, Map<String, String> reportEntry) {
+			List<String> values = new ArrayList<>();
+			for (Map.Entry<String, String> entry : reportEntry.entrySet()) {
+				if (entry.getKey() == null || entry.getKey().isBlank()) {
+					throw new IllegalArgumentException("Key must not be null or blank");
+				}
+				values.add("%s = %s".formatted(entry.getKey(), entry.getValue()));
+			}
+			System.out.println(String.join(", ", values));
+		}
+
+		@Override
+		public boolean supportsAnsiCodes() {
+			return true;
+		}
+	};
+
 	default void publish(String key, String value) {
 		publish(key, Map.of(key, value));
 	}

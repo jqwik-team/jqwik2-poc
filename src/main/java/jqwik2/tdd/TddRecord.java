@@ -35,10 +35,29 @@ class TddRecord {
 		}
 		if (falsifiedSample != null) {
 			report.append("%n  %s: FALSIFIED".formatted(falsifiedSample.values()));
-			report.append("%n    %s".formatted(falsificationCause));
+			publishException(falsificationCause, report);
+			// report.append("%n    %s".formatted(falsificationCause));
 		}
 		report.append("%n".formatted());
 	}
+
+	private void publishException(Throwable throwable, StringBuilder report) {
+		// TODO: Duplicate code from PropertyValidatorImpl
+		String assertionClass = throwable.getClass().getName();
+		report.append("%n    %s".formatted(assertionClass));
+		var message = throwable.getMessage();
+		List<String> assertionMessageLines = message == null ? List.of() : message.lines().toList();
+		if (assertionMessageLines.isEmpty()) {
+			return;
+		}
+		report.append(":%n".formatted());
+		for (String line : assertionMessageLines) {
+			if (line.isBlank()) continue;
+			report.append("      %s%n".formatted(line));
+		}
+		report.append("%n".formatted());
+	}
+
 
 	private boolean shouldBeReported(Sample sample, int index, Predicate<Sample> shouldSampleBeReported) {
 		return index == 0 || index == satisfiedSamples.size() - 1 || shouldSampleBeReported.test(sample);

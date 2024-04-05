@@ -7,7 +7,6 @@ import jqwik2.api.*;
 import jqwik2.api.arbitraries.*;
 import jqwik2.api.recording.*;
 import jqwik2.api.validation.*;
-import org.junit.jupiter.api.*;
 
 import net.jqwik.api.*;
 
@@ -41,19 +40,19 @@ class TestDrivingTests {
 			   .verifyCase(
 				   "normal number", i -> i % 3 != 0 && i % 5 != 0,
 				   i -> {
-					   var s = fizzBuzz(i);
+					   var s = fizzBuzzDone(i);
 					   assertThat(s).isEqualTo(Integer.toString(i));
 				   }
 			   ).verifyCase(
 				   "divisible by 3", i -> i % 3 == 0,
 				   i -> {
-					   var s = fizzBuzz(i);
+					   var s = fizzBuzzDone(i);
 					   assertThat(s).startsWith("Fizz");
 				   }
 			   ).verifyCase(
 				   "divisible by 5", i -> i % 5 == 0,
 				   i -> {
-					   var s = fizzBuzz(i);
+					   var s = fizzBuzzDone(i);
 					   assertThat(s).endsWith("Buzz");
 				   }
 			   );
@@ -65,7 +64,7 @@ class TestDrivingTests {
 		assertThat(result.caseResults()).hasSize(3);
 	}
 
-	private String fizzBuzz(int i) {
+	private String fizzBuzzDone(int i) {
 		String result = "";
 		// if (i == 3 || i == 6) {
 		if (i % 3 == 0) {
@@ -104,5 +103,24 @@ class TestDrivingTests {
 														.withMaxRuntime(Duration.ofSeconds(1))
 														.build();
 		TddDrivingResult result = tddProperty.drive(strategy);
+	}
+
+	@Example
+	void nextGenPbtExample() {
+		TDD.forAll(Numbers.integers().between(1, 1_000_000))
+		   .publisher(PlatformPublisher.STDOUT_PLAIN)
+		   .verifyCase(
+			   "normal numbers",
+			   number -> true,
+			   number -> {
+				   var result = fizzBuzz(number);
+				   assertThat(result).isEqualTo(Integer.toString(number));
+			   }
+		   )
+		   .drive();
+	}
+
+	String fizzBuzz(int number) {
+		return "" + number;
 	}
 }

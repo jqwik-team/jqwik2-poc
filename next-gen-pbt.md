@@ -34,69 +34,97 @@ _TODO_
 
 ## Automated Test-Driven Development
 
+### Step 1
+
 ```java
-@TestDrive
-class FizzBuzzTests {
-    @ForAll @IntRange(min = 1, max = 1000) number;
-}
+TDD.forAll(Numbers.integers().between(1, 1_000_000))
+   .drive();
 ```
 
-### Result
+_Result:_
 
-Coverage
-  [1] NOT COVERED
+```
+NOT COVERED:
+  [1]
+```
+
+### Step 2
 
 ```java
-@TestDrive
-class FizzBuzzTests {
-    @ForAll @IntRange(min = 1) number;
-
-
-    @Case
-    void one() {
-        Assume.that(number == 1);
+TDD.forAll(Numbers.integers().between(1, 1_000_000))
+   .verifyCase(
+      "one", 
+      number -> number == 1,
+      number -> {
         var result = fizzBuzz(number);
         assertThat(result).isEqualTo("1");
-    }
-
-    String fizzBuzz(int number) {
-        return "1";
-    }
-}
+      }
+    )
+   .drive();
 ```
-
-### Result
-
-One
-  [1] SATISFIED
-
-Coverage
-  [2] NOT COVERED
-
 
 ```java
-@TestDrive
-class FizzBuzzTests {
-    @ForAll @IntRange(min = 1) number;
-
-
-    @Case
-    void normal_numbers() {
-        var result = fizzBuzz(number);
-        assertThat(result).isEqualTo(Integer.toString(number));
-    }
-
-    String fizzBuzz(int number) {
-        return "1";
-    }
+String fizzBuzz(int number) {
+  return null;
 }
 ```
 
-### Result
+_Result:_
 
-normal numbers
-  [1] SATISFIED
-  [2] FAILED: expected 2 but was 1
+```
+one:
+  [1]: FALSIFIED
+    org.opentest4j.AssertionFailedError:
+      expected: "1"
+       but was: null
+```
+
+### Step 3
+
+```java
+String fizzBuzz(int number) {
+  return "1";
+}
+```
+
+
+_Result:_
+
+```
+one:
+  [1]: SATISFIED
+
+NOT COVERED:
+  [2]
+```
+
+### Step 4
+
+```java
+TDD.forAll(Numbers.integers().between(1, 1_000_000))
+   .verifyCase(
+     "normal numbers", 
+     number -> true,
+     number -> {
+       var result = fizzBuzz(number);
+       assertThat(result).isEqualTo(Integer.toString(number));
+     }
+   ) 
+   .drive();
+```
+
+_Result:_
+
+```
+normal numbers:
+  [1]: SATISFIED
+  [2]: FALSIFIED
+    org.opentest4j.AssertionFailedError:
+      expected: "2"
+       but was: "1"
+```
+
+### Step 5
 
 ```java
 String fizzBuzz(int number) {
@@ -104,13 +132,16 @@ String fizzBuzz(int number) {
 }
 ```
 
-### Result
+_Result:_
 
-normal numbers
-  [1] SATISFIED
-  [2] SATISFIED
-  [1000] SATISFIED
+```
+normal numbers:
+  [1]: SATISFIED
+  [2]: SATISFIED
+  [100]: SATISFIED
+```
 
+### Step 6
 
 ```java
 @TestDrive
