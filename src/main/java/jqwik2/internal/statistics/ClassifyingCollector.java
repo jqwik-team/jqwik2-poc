@@ -31,8 +31,25 @@ public class ClassifyingCollector<C> {
 	private final AtomicInteger total = new AtomicInteger(0);
 	private int minTries = 0;
 
+	private double alpha = 0.01;
+	private double beta = 0.0001;
+	private double lowerBound = Math.log10(beta / (1.0 - alpha));
+	private double upperBound = Math.log10((1.0 - beta) / alpha);
+	private double minLog = Math.log10(alpha);
+	private double maxLog = Math.log10(1.0/alpha);
+	private final Map<ClassifyingCollector.Case<C>, Double> log10Alphas = new HashMap<>();
+	private final Map<ClassifyingCollector.Case<C>, Integer> caseHitCounts = new HashMap<>();
+
+
 	public ClassifyingCollector() {
 		initializeCase(defaultCase());
+		System.out.println("alpha=" + alpha);
+		System.out.println("beta=" + beta);
+		System.out.println("lowerBound=" + lowerBound);
+		System.out.println("upperBound=" + upperBound);
+		System.out.println("minLog=" + minLog);
+		System.out.println("maxLog=" + maxLog);
+
 	}
 
 	public List<String> labels() {
@@ -58,6 +75,13 @@ public class ClassifyingCollector<C> {
 
 	public synchronized void classify(C args) {
 		total.incrementAndGet();
+
+		// Parallel implementation of Sequential probability ratio test (SPRT)
+		System.out.printf("%ntotal=%d%n", total.get());
+		for (ClassifyingCollector.Case<C> c : cases) {
+			updateLog10Alpha(c);
+		}
+
 		for (ClassifyingCollector.Case<C> c : cases) {
 			if (c.condition().test(args)) {
 				classifyCase(c);
@@ -71,6 +95,34 @@ public class ClassifyingCollector<C> {
 		counts.put(c, counts.get(c) + 1);
 		updateSums();
 		updateSquares();
+	}
+
+	private void updateLog10Alpha(Case<C> c) {
+		var percentage = percentage(c);
+		var caseHitCount = caseHitCounts.computeIfAbsent(c, ignore -> 0);
+		if (percentage >= c.minPercentage()) {
+			caseHitCount += 1;
+			caseHitCounts.put(c, caseHitCount);
+		}
+		var caseHitRatio = caseHitCount / (total.get() - caseHitCount);
+		double nextLog10 = caseHitCount == 0 ? minLog
+			: caseHitRatio == 0.0 ? maxLog
+			: Math.log10(caseHitRatio);
+		double log10Alpha = log10Alphas.getOrDefault(c, 0.0);
+		log10Alpha += nextLog10;
+		log10Alphas.put(c, log10Alpha);
+
+		// System.out.printf("%s: caseHitCounts=%s%n", c.label, caseHitCounts.get(c));
+		// System.out.printf("%s: caseHitRatio=%s%n", c.label, caseHitRatio);
+		// System.out.printf("%s: nextLog10=%s%n", c.label, nextLog10);
+		System.out.printf("%s: log10Alpha=%s%n", c.label, log10Alpha);
+		if (log10Alpha < lowerBound) {
+			System.out.printf("%s: REJECT%n", c.label);
+		} else if (log10Alpha > upperBound) {
+			System.out.printf("%s: ACCEPT%n", c.label);
+		} else {
+			System.out.printf("%s: UNSTABLE%n", c.label);
+		}
 	}
 
 	private void updateSquares() {
