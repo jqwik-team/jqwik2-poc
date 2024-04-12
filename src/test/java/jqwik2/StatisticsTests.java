@@ -51,22 +51,22 @@ class StatisticsTests {
 
 		@Example
 		void classifierAccept() {
-			var classifier = new ClassifyingCollector<List<Object>>();
-			classifier.addCase("Case 1", 40.0, args -> (int) args.get(0) >= 10);
-			classifier.addCase("Case 2", 40.0, args -> (int) args.get(0) <= -10);
-			classifier.addCase("Default", 5.0, args -> true);
+			var classifier = new ClassifyingCollector<Integer>();
+			classifier.addCase("Case 1", 40.0, anInt -> anInt >= 10);
+			classifier.addCase("Case 2", 40.0, anInt -> anInt <= -10);
+			classifier.addCase("Default", 5.0, anInt -> true);
 
 			Generator<Integer> integers = BaseGenerators.integers(-100, 100);
 			GenSource source = new RandomGenSource();
 
 			while (classifier.checkCoverage(1.0) == ClassifyingCollector.CoverageCheck.UNSTABLE) {
-				classifier.classify(List.of(integers.generate(source)));
+				classifier.classify(integers.generate(source));
 			}
 
 			// System.out.println();
 			// System.out.println(classifier.total());
 			// System.out.println(classifier.percentages());
-			// System.out.println(classifier.checkCoverage(1.0));
+			// System.out.println(classifier.rejections());
 
 			assertThat(classifier.checkCoverage(1.0)).isEqualTo(ClassifyingCollector.CoverageCheck.ACCEPT);
 			assertThat(classifier.rejections()).isEmpty();
@@ -87,7 +87,7 @@ class StatisticsTests {
 			// System.out.println();
 			// System.out.println(classifier.total());
 			// System.out.println(classifier.percentages());
-			// System.out.println(classifier.checkCoverage(1.0));
+			// System.out.println(classifier.rejections());
 
 			assertThat(classifier.checkCoverage(1.0)).isEqualTo(ClassifyingCollector.CoverageCheck.ACCEPT);
 			assertThat(classifier.rejections()).isEmpty();
@@ -114,7 +114,6 @@ class StatisticsTests {
 			// System.out.println();
 			// System.out.println(classifier.total());
 			// System.out.println(classifier.percentages());
-			// System.out.println(classifier.checkCoverage(1.0));
 			// System.out.println(classifier.rejections());
 
 			assertThat(classifier.checkCoverage(3.0)).isEqualTo(ClassifyingCollector.CoverageCheck.ACCEPT);
@@ -123,24 +122,22 @@ class StatisticsTests {
 
 		@Example
 		void classifierReject() {
-			var classifier = new ClassifyingCollector<List<Object>>();
-			classifier.addCase("Case 1", 35.0, args -> (int) args.get(0) >= 10);
-			classifier.addCase("Case 2", 35.0, args -> (int) args.get(0) <= -10);
-			classifier.addCase("Default", 12.0, args -> true);
+			var classifier = new ClassifyingCollector<Integer>();
+			classifier.addCase("Case 1", 35.0, anInt-> anInt >= 10);
+			classifier.addCase("Case 2", 35.0, anInt-> anInt <= -10);
+			classifier.addCase("Default", 12.0,anInt -> true);
 
 			Generator<Integer> integers = BaseGenerators.integers(-100, 100);
 			GenSource source = new RandomGenSource();
 
 			while (classifier.checkCoverage(1.0) == ClassifyingCollector.CoverageCheck.UNSTABLE) {
-				classifier.classify(List.of(integers.generate(source)));
+				classifier.classify(integers.generate(source));
 			}
 
 			// System.out.println();
 			// System.out.println(classifier.total());
-			// System.out.println(classifier.counts());
 			// System.out.println(classifier.percentages());
-			// System.out.println(classifier.deviations());
-			// System.out.println(classifier.checkCoverage(1.0));
+			// System.out.println(classifier.rejections());
 
 			assertThat(classifier.checkCoverage(1.0)).isEqualTo(ClassifyingCollector.CoverageCheck.REJECT);
 			assertThat(classifier.rejections()).hasSize(1);
@@ -152,44 +149,42 @@ class StatisticsTests {
 
 		@Example
 		void tightAccept() {
-			var classifier = new ClassifyingCollector<List<Object>>();
-			classifier.addCase("even", 49.5, args -> (int) args.get(0) % 2 == 0);
-			classifier.addCase("odd", 49.5, args -> (int) args.get(0) % 2 != 0);
+			var classifier = new ClassifyingCollector<Integer>();
+			classifier.addCase("even", 49.5, anInt -> anInt % 2 == 0);
+			classifier.addCase("odd", 49.5,  anInt -> anInt % 2 != 0);
 
 			Generator<Integer> integers = BaseGenerators.integers(1, 100);
 			GenSource source = new RandomGenSource();
 
 			while (classifier.checkCoverage(3.0) == ClassifyingCollector.CoverageCheck.UNSTABLE) {
-				classifier.classify(List.of(integers.generate(source)));
+				classifier.classify(integers.generate(source));
 			}
 
 			// System.out.println();
 			// System.out.println(classifier.total());
 			// System.out.println(classifier.percentages());
-			// System.out.println(classifier.deviations());
-			// System.out.println(classifier.checkCoverage(3.0));
+			// System.out.println(classifier.rejections());
 
 			assertThat(classifier.checkCoverage(3.0)).isEqualTo(ClassifyingCollector.CoverageCheck.ACCEPT);
 		}
 
 		@Example
 		void tightReject() {
-			var classifier = new ClassifyingCollector<List<Object>>();
-			classifier.addCase("even", 50.5, args -> (int) args.get(0) % 2 == 0);
-			classifier.addCase("odd", 49.5, args -> (int) args.get(0) % 2 != 0);
+			var classifier = new ClassifyingCollector<Integer>();
+			classifier.addCase("even", 50.5, anInt -> anInt % 2 == 0);
+			classifier.addCase("odd", 49.5,  anInt -> anInt % 2 != 0);
 
 			Generator<Integer> integers = BaseGenerators.integers(1, 100);
 			GenSource source = new RandomGenSource();
 
 			while (classifier.checkCoverage(3.0) == ClassifyingCollector.CoverageCheck.UNSTABLE) {
-				classifier.classify(List.of(integers.generate(source)));
+				classifier.classify(integers.generate(source));
 			}
 
 			// System.out.println();
 			// System.out.println(classifier.total());
 			// System.out.println(classifier.percentages());
-			// System.out.println(classifier.deviations());
-			// System.out.println(classifier.checkCoverage(3.0));
+			// System.out.println(classifier.rejections());
 
 			assertThat(classifier.checkCoverage(3.0)).isEqualTo(ClassifyingCollector.CoverageCheck.REJECT);
 		}

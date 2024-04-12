@@ -10,7 +10,7 @@ import jqwik2.internal.*;
 
 public class ClassifyingCollector<C> {
 
-	private final static Case<?> DEFAULT_CASE = new Case<>("_", 0.0, ignore -> true);
+	private final static Case<?> FALLTHROUGH_CASE = new Case<>("_", 0.0, ignore -> true);
 
 	public record Case<C>(String label, double minPercentage, Predicate<C> condition) {
 	}
@@ -32,24 +32,23 @@ public class ClassifyingCollector<C> {
 	private int minTries = 0;
 
 	private double alpha = 0.01;
-	private double beta = 0.0001;
+	private double beta = 10e-6;
 	private double lowerBound = Math.log10(beta / (1.0 - alpha));
 	private double upperBound = Math.log10((1.0 - beta) / alpha);
-	private double minLog = Math.log10(alpha);
-	private double maxLog = Math.log10(1.0/alpha);
+	private double minLog = lowerBound / 10;
+	private double maxLog = upperBound / 10;
 	private final Map<ClassifyingCollector.Case<C>, Double> log10Alphas = new HashMap<>();
 	private final Map<ClassifyingCollector.Case<C>, Integer> caseHitCounts = new HashMap<>();
 
 
 	public ClassifyingCollector() {
-		initializeCase(defaultCase());
+		initializeCase(fallThroughCase());
 		System.out.println("alpha=" + alpha);
 		System.out.println("beta=" + beta);
 		System.out.println("lowerBound=" + lowerBound);
 		System.out.println("upperBound=" + upperBound);
 		System.out.println("minLog=" + minLog);
 		System.out.println("maxLog=" + maxLog);
-
 	}
 
 	public List<String> labels() {
@@ -57,8 +56,8 @@ public class ClassifyingCollector<C> {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <C> Case<C> defaultCase() {
-		return (Case<C>) DEFAULT_CASE;
+	private static <C> Case<C> fallThroughCase() {
+		return (Case<C>) FALLTHROUGH_CASE;
 	}
 
 	public void addCase(String label, double minPercentage, Predicate<C> condition) {
@@ -75,20 +74,26 @@ public class ClassifyingCollector<C> {
 
 	public synchronized void classify(C args) {
 		total.incrementAndGet();
+		updateCaseCounts(args);
+		updateSPRTValues();
+	}
 
+	private void updateSPRTValues() {
 		// Parallel implementation of Sequential probability ratio test (SPRT)
-		System.out.printf("%ntotal=%d%n", total.get());
-		for (ClassifyingCollector.Case<C> c : cases) {
+		// System.out.printf("%ntotal=%d%n", total.get());
+		for (Case<C> c : cases) {
 			updateLog10Alpha(c);
 		}
+	}
 
-		for (ClassifyingCollector.Case<C> c : cases) {
+	private void updateCaseCounts(C args) {
+		for (Case<C> c : cases) {
 			if (c.condition().test(args)) {
 				classifyCase(c);
 				return;
 			}
 		}
-		classifyCase(defaultCase());
+		classifyCase(fallThroughCase());
 	}
 
 	private void classifyCase(Case<C> c) {
@@ -98,31 +103,41 @@ public class ClassifyingCollector<C> {
 	}
 
 	private void updateLog10Alpha(Case<C> c) {
-		var percentage = percentage(c);
-		var caseHitCount = caseHitCounts.computeIfAbsent(c, ignore -> 0);
-		if (percentage >= c.minPercentage()) {
-			caseHitCount += 1;
-			caseHitCounts.put(c, caseHitCount);
+		var caseHits = caseHitCounts.computeIfAbsent(c, ignore -> 0);
+
+		var caseConditionHolds = isCaseConditionHit(c);
+		if (caseConditionHolds) {
+			caseHits += 1;
+			caseHitCounts.put(c, caseHits);
 		}
-		var caseHitRatio = caseHitCount / (total.get() - caseHitCount);
-		double nextLog10 = caseHitCount == 0 ? minLog
-			: caseHitRatio == 0.0 ? maxLog
+
+		var caseMisses = total.get() - caseHits;
+		var caseHitRatio = caseMisses == 0 ? 0.0 : (double) caseHits / caseMisses;
+		double nextLog10 = caseHits == 0 ? minLog
+			: caseMisses == 0 ? maxLog
 			: Math.log10(caseHitRatio);
 		double log10Alpha = log10Alphas.getOrDefault(c, 0.0);
 		log10Alpha += nextLog10;
 		log10Alphas.put(c, log10Alpha);
 
-		// System.out.printf("%s: caseHitCounts=%s%n", c.label, caseHitCounts.get(c));
+		// System.out.printf("%s: counts=%s%n", c.label, counts.get(c));
+		// System.out.printf("%s: caseConditionHolds=%s%n", c.label, caseConditionHolds);
+		// System.out.printf("%s: caseHits=%s%n", c.label, caseHits);
+		// System.out.printf("%s: caseMisses=%s%n", c.label, caseMisses);
 		// System.out.printf("%s: caseHitRatio=%s%n", c.label, caseHitRatio);
 		// System.out.printf("%s: nextLog10=%s%n", c.label, nextLog10);
-		System.out.printf("%s: log10Alpha=%s%n", c.label, log10Alpha);
-		if (log10Alpha < lowerBound) {
-			System.out.printf("%s: REJECT%n", c.label);
-		} else if (log10Alpha > upperBound) {
-			System.out.printf("%s: ACCEPT%n", c.label);
-		} else {
-			System.out.printf("%s: UNSTABLE%n", c.label);
-		}
+		// System.out.printf("%s: log10Alpha=%s%n", c.label, log10Alpha);
+		// if (log10Alpha < lowerBound) {
+		// 	System.out.printf("%s: REJECT%n", c.label);
+		// } else if (log10Alpha > upperBound) {
+		// 	System.out.printf("%s: ACCEPT%n", c.label);
+		// } else {
+		// 	System.out.printf("%s: UNSTABLE%n", c.label);
+		// }
+	}
+
+	private boolean isCaseConditionHit(Case<C> c) {
+		return percentage(c) >= c.minPercentage();
 	}
 
 	private void updateSquares() {
@@ -145,7 +160,7 @@ public class ClassifyingCollector<C> {
 		if (total.get() == 0) {
 			return 0.0;
 		}
-		return counts.get(c) / (double) total.get() * 100.0;
+		return Math.round(counts.get(c) / (double) total.get() * 10000.0) / 100.0;
 	}
 
 	public Map<String, Integer> counts() {
@@ -228,22 +243,35 @@ public class ClassifyingCollector<C> {
 
 	private int minTries() {
 		if (minTries == 0) {
-			double minPercentage = cases.stream()
-										.mapToDouble(Case::minPercentage)
-										.filter(p -> p > 0.0)
-										.min()
-										.orElse(0.0);
-			if (minPercentage > 0.0) {
-				int averageTriesFor10Hits = (int) (100.0 / minPercentage) * 10;
-				minTries = Math.max(MIN_TRIES_LOWER_BOUND, averageTriesFor10Hits  * cases.size());
-			} else {
-				minTries = MIN_TRIES_LOWER_BOUND;
-			}
+			int minFromAlpha = (int) Math.ceil(1.0 / alpha);
+			int minFromBeta = (int) Math.ceil(1.0 / beta);
+			minTries = Math.max(MIN_TRIES_LOWER_BOUND, Math.max(minFromAlpha, minFromBeta));
+			// double minPercentage = cases.stream()
+			// 							.mapToDouble(Case::minPercentage)
+			// 							.filter(p -> p > 0.0)
+			// 							.min()
+			// 							.orElse(0.0);
+			// if (minPercentage > 0.0) {
+			// 	int averageTriesFor10Hits = (int) (100.0 / minPercentage) * 10;
+			// 	minTries = Math.max(MIN_TRIES_LOWER_BOUND, averageTriesFor10Hits  * cases.size());
+			// } else {
+			// 	minTries = MIN_TRIES_LOWER_BOUND;
+			// }
 		}
 		return minTries;
 	}
 
 	private ClassifyingCollector.CoverageCheck checkCoverage(ClassifyingCollector.Case<C> c, double maxStandardDeviationFactor) {
+		var log10Alpha = log10Alphas.get(c);
+		if (log10Alpha < lowerBound && !isCaseConditionHit(c)){
+			return ClassifyingCollector.CoverageCheck.REJECT;
+		} else if (log10Alpha > upperBound && isCaseConditionHit(c)) {
+			return ClassifyingCollector.CoverageCheck.ACCEPT;
+		}
+		return ClassifyingCollector.CoverageCheck.UNSTABLE;
+	}
+
+	private ClassifyingCollector.CoverageCheck checkCoverage_OLD(ClassifyingCollector.Case<C> c, double maxStandardDeviationFactor) {
 		var percentage = percentage(c);
 		var minPercentage = c.minPercentage();
 		var maxDeviation = deviation(c) * maxStandardDeviationFactor;
