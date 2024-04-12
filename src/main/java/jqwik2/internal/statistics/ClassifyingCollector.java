@@ -27,7 +27,7 @@ public class ClassifyingCollector<C> {
 	private final List<ClassifyingCollector.Case<C>> cases = new ArrayList<>();
 	private final Map<ClassifyingCollector.Case<C>, Integer> counts = new HashMap<>();
 	private final AtomicInteger total = new AtomicInteger(0);
-	private final Map<ClassifyingCollector.Case<C>, Double> log10Alphas = new HashMap<>();
+	private final Map<ClassifyingCollector.Case<C>, Double> logAlphaSums = new HashMap<>();
 	private final Map<ClassifyingCollector.Case<C>, Integer> caseHitCounts = new HashMap<>();
 
 	private final double alpha;
@@ -73,7 +73,7 @@ public class ClassifyingCollector<C> {
 
 	private void initializeCase(Case<C> newCase) {
 		counts.put(newCase, 0);
-		log10Alphas.put(newCase, 0.0);
+		logAlphaSums.put(newCase, 0.0);
 		caseHitCounts.put(newCase, 0);
 	}
 
@@ -103,25 +103,30 @@ public class ClassifyingCollector<C> {
 		counts.put(c, counts.get(c) + 1);
 	}
 
+	/**
+	 * This method contains the SPRT magic, as described e.g. in https://en.wikipedia.org/wiki/Sequential_probability_ratio_test
+	 * Hypothesis H0: The case condition is not met
+	 * Hypothesis H1: The case condition is met, ie the percentage of the case is at least minPercentage
+	 */
 	private void updateSPRT(Case<C> c) {
-		// TODO: Clean up this method
-
 		int caseHits = caseHitCounts.get(c);
 
-		var caseConditionHolds = isCaseConditionHit(c);
-		if (caseConditionHolds) {
+		var isCaseConditionHit = isCaseConditionHit(c);
+		if (isCaseConditionHit) {
 			caseHits += 1;
 			caseHitCounts.put(c, caseHits);
 		}
 
-		var caseMisses = total.get() - caseHits;
+		var caseMisses = total() - caseHits;
+
+		// logAlpha calculation requires special handling when there are no hits or misses
 		var caseHitRatio = caseMisses == 0 ? 0.0 : (double) caseHits / caseMisses;
-		double nextLog10 = caseHits == 0 ? minLog
+		double logAlpha = caseHits == 0 ? minLog
 			: caseMisses == 0 ? maxLog
 			: Math.log10(caseHitRatio);
-		double log10Alpha = log10Alphas.get(c);
-		log10Alpha += nextLog10;
-		log10Alphas.put(c, log10Alpha);
+
+		double logAlphaSum = logAlphaSums.get(c) + logAlpha;
+		logAlphaSums.put(c, logAlphaSum);
 	}
 
 	private boolean isCaseConditionHit(Case<C> c) {
@@ -197,6 +202,12 @@ public class ClassifyingCollector<C> {
 		return ClassifyingCollector.CoverageCheck.ACCEPT;
 	}
 
+	/**
+	 * The minimum number of tries needed to make a decision.
+	 * This depends on alpha and beta and an absolute minimum of MIN_TRIES_LOWER_BOUND.
+	 *
+	 * If the minimum is too low the statistical test is not reliable.
+	 */
 	private int minTries() {
 		if (minTries == 0) {
 			int minFromAlpha = (int) Math.ceil(1.0 / alpha);
@@ -207,7 +218,7 @@ public class ClassifyingCollector<C> {
 	}
 
 	private ClassifyingCollector.CoverageCheck checkCoverage(ClassifyingCollector.Case<C> c) {
-		var log10Alpha = log10Alphas.get(c);
+		var log10Alpha = logAlphaSums.get(c);
 		if (log10Alpha < lowerBound && !isCaseConditionHit(c)){
 			return ClassifyingCollector.CoverageCheck.REJECT;
 		} else if (log10Alpha > upperBound && isCaseConditionHit(c)) {
