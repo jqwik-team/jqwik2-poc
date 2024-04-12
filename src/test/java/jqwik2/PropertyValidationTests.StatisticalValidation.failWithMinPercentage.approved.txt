@@ -10,7 +10,7 @@ jqwik2.PropertyValidationTests$StatisticalValidation#failWithMinPercentage (FAIL
   # checks | [checks]
 
 |--parameters--|
-  validation | STATISTICAL(93.0, 2.0)
+  validation | STATISTICAL(93.0, (alpha=0.01, beta=1.0E-4))
   generation | RANDOMIZED
   max tries | 2147483647
   max runtime | PT0S

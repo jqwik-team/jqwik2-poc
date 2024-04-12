@@ -9,6 +9,7 @@ import jqwik2.api.database.*;
 import jqwik2.api.description.*;
 import jqwik2.api.functions.*;
 import jqwik2.api.recording.*;
+import jqwik2.api.statistics.*;
 import jqwik2.api.support.*;
 import jqwik2.api.validation.*;
 import jqwik2.internal.*;
@@ -55,14 +56,14 @@ public class PropertyValidatorImpl implements PropertyValidator {
 	@Override
 	public PropertyValidationResult validateStatistically(
 		double minPercentage,
-		double maxStandardDeviationFactor,
+		StatisticalError allowedError,
 		PropertyValidationStrategy strategy
 	) {
 		if (!property.classifiers().isEmpty()) {
 			throw new IllegalStateException("Statistical validation cannot be combined with classifiers");
 		}
 
-		PropertyRunResult result = runStatisticalValidation(minPercentage, maxStandardDeviationFactor, strategy);
+		PropertyRunResult result = runStatisticalValidation(minPercentage, allowedError, strategy);
 		PropertyValidationResult validationResult = new PropertyValidationResultFacade(result, true);
 
 		if (shouldPublishResult(validationResult.status())) {
@@ -82,14 +83,14 @@ public class PropertyValidatorImpl implements PropertyValidator {
 
 	private PropertyRunResult runStatisticalValidation(
 		double minPercentage,
-		double maxStandardDeviationFactor,
+		StatisticalError allowedError,
 		PropertyValidationStrategy strategy
 	) {
 		List<Generator<?>> generators = generators(strategy.edgeCases());
 		Tryable tryable = safeTryable(property.invariant(), Set.of());
 		PropertyRunner runner = createRunner(generators, tryable);
 
-		PropertyRunConfiguration statisticalRunConfiguration = buildStatisticalRunConfiguration(minPercentage, maxStandardDeviationFactor, strategy, generators);
+		PropertyRunConfiguration statisticalRunConfiguration = buildStatisticalRunConfiguration(minPercentage, allowedError, strategy, generators);
 		var result = runner.run(statisticalRunConfiguration);
 		updateFailureDatabaseForStatisticalValidation(result, statisticalRunConfiguration.effectiveSeed());
 		return result;
@@ -97,28 +98,28 @@ public class PropertyValidatorImpl implements PropertyValidator {
 
 	private PropertyRunConfiguration buildStatisticalRunConfiguration(
 		double minPercentage,
-		double maxStandardDeviationFactor,
+		StatisticalError allowedError,
 		PropertyValidationStrategy strategy,
 		List<Generator<?>> generators
 	) {
-		String validationLabel = "STATISTICAL(%s, %s)".formatted(minPercentage, maxStandardDeviationFactor);
+		String validationLabel = "STATISTICAL(%s, %s)".formatted(minPercentage, allowedError);
 		parametersReport.append("validation", validationLabel);
 
 		PropertyRunConfiguration runConfiguration = new RunConfigurationBuilder(property.id(), generators, strategy, database)
 														.forStatisticalCheck()
 														.build(parametersReport);
 
-		return wrapWithStatisticalCheck(runConfiguration, minPercentage, maxStandardDeviationFactor);
+		return wrapWithStatisticalCheck(runConfiguration, minPercentage, allowedError);
 	}
 
 	private PropertyRunConfiguration wrapWithStatisticalCheck(
 		PropertyRunConfiguration plainConfiguration,
 		double minPercentage,
-		double maxStandardDeviationFactor
+		StatisticalError allowedError
 	) {
 		return wrapSource(
 			plainConfiguration,
-			source -> new StatisticalPropertySource(source, minPercentage, maxStandardDeviationFactor)
+			source -> new StatisticalPropertySource(source, minPercentage, allowedError)
 		);
 	}
 
@@ -283,7 +284,7 @@ public class PropertyValidatorImpl implements PropertyValidator {
 	) {
 		return wrapSource(
 			plainRunConfiguration,
-			source -> new StatisticallyGuidedGenerationSource(source, collectors, JqwikDefaults.defaultStandardDeviationThreshold())
+			source -> new StatisticallyGuidedGenerationSource(source, collectors)
 		);
 	}
 
@@ -310,7 +311,7 @@ public class PropertyValidatorImpl implements PropertyValidator {
 	}
 
 	private ClassifyingCollector<List<Object>> asClassifyingCollector(Classifier classifier) {
-		var collector = new ClassifyingCollector<List<Object>>();
+		var collector = new ClassifyingCollector<List<Object>>(JqwikDefaults.defaultAllowedStatisticalError());
 		for (Classifier.Case<?> aCase : classifier.cases()) {
 			collector.addCase(aCase.label(), aCase.minPercentage(), asPredicate(aCase));
 		}

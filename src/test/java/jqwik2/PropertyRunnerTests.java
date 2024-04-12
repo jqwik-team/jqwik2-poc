@@ -545,7 +545,7 @@ class PropertyRunnerTests {
 						false, false,
 						serviceSupplier
 					),
-					source -> new StatisticalPropertySource(source, 93.0, 2.0)
+					source -> new StatisticalPropertySource(source, 93.0, JqwikDefaults.defaultAllowedStatisticalError())
 				)
 			);
 			// System.out.println(result.countChecks());
@@ -573,7 +573,7 @@ class PropertyRunnerTests {
 						false, false,
 						serviceSupplier
 					),
-					source -> new StatisticalPropertySource(source, 90.0, 2.0)
+					source -> new StatisticalPropertySource(source, 90.0, JqwikDefaults.defaultAllowedStatisticalError())
 				)
 			);
 			// System.out.println(result.countChecks());
@@ -608,7 +608,7 @@ class PropertyRunnerTests {
 						false, false,
 						serviceSupplier
 					),
-					source -> new StatisticallyGuidedGenerationSource(source, Set.of(classifier), 2.0)
+					source -> new StatisticallyGuidedGenerationSource(source, Set.of(classifier))
 				)
 			);
 			assertThat(result.status()).isEqualTo(PropertyValidationStatus.SUCCESSFUL);
@@ -639,7 +639,7 @@ class PropertyRunnerTests {
 						false, false,
 						serviceSupplier
 					),
-					source -> new StatisticallyGuidedGenerationSource(source, Set.of(classifier), 2.0)
+					source -> new StatisticallyGuidedGenerationSource(source, Set.of(classifier))
 				)
 			);
 			assertThat(result.status()).isEqualTo(PropertyValidationStatus.FAILED);
@@ -680,7 +680,7 @@ class PropertyRunnerTests {
 						false, false,
 						serviceSupplier
 					),
-					source -> new StatisticallyGuidedGenerationSource(source, Set.of(classifier), 2.0)
+					source -> new StatisticallyGuidedGenerationSource(source, Set.of(classifier))
 				)
 			);
 			assertThat(result.status()).isEqualTo(PropertyValidationStatus.FAILED);
@@ -715,7 +715,7 @@ class PropertyRunnerTests {
 						false, false,
 						serviceSupplier
 					),
-					source -> new StatisticallyGuidedGenerationSource(source, Set.of(classifier), 2.0)
+					source -> new StatisticallyGuidedGenerationSource(source, Set.of(classifier))
 				)
 			);
 			assertThat(result.status()).isEqualTo(PropertyValidationStatus.FAILED);
@@ -748,7 +748,7 @@ class PropertyRunnerTests {
 						true, false,
 						serviceSupplier
 					),
-					source -> new StatisticallyGuidedGenerationSource(source, Set.of(classifier), 2.0)
+					source -> new StatisticallyGuidedGenerationSource(source, Set.of(classifier))
 				)
 			);
 

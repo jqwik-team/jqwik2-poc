@@ -11,25 +11,18 @@ public class StatisticallyGuidedGenerationSource implements IterableSampleSource
 
 	private final IterableSampleSource randomSource;
 	private final Set<ClassifyingCollector<List<Object>>> classifiers;
-	private final double maxStandardDeviationFactor;
 
 	public StatisticallyGuidedGenerationSource(
 		IterableSampleSource randomSource,
-		Set<ClassifyingCollector<List<Object>>> classifiers,
-		double maxStandardDeviationFactor
+		Set<ClassifyingCollector<List<Object>>> classifiers
 	) {
 		this.randomSource = randomSource;
 		this.classifiers = classifiers;
-		this.maxStandardDeviationFactor = maxStandardDeviationFactor;
 	}
 
 	@Override
 	public Iterator<SampleSource> iterator() {
 		return new ClassifiedIterator();
-	}
-
-	public Set<ClassifyingCollector<List<Object>>> classifyingCollectors() {
-		return classifiers;
 	}
 
 	private class ClassifiedIterator implements Iterator<SampleSource>, Guidance {
@@ -47,7 +40,7 @@ public class StatisticallyGuidedGenerationSource implements IterableSampleSource
 
 		private boolean isCoverageUnstable() {
 			for (var classifier : classifiers) {
-				if (classifier.checkCoverage(maxStandardDeviationFactor) == ClassifyingCollector.CoverageCheck.UNSTABLE) {
+				if (classifier.checkCoverage() == ClassifyingCollector.CoverageCheck.UNSTABLE) {
 					return true;
 				}
 			}

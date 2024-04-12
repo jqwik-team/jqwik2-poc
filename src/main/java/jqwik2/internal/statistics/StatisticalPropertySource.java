@@ -3,6 +3,7 @@ package jqwik2.internal.statistics;
 import java.util.*;
 
 import jqwik2.api.*;
+import jqwik2.api.statistics.*;
 import jqwik2.api.validation.*;
 import jqwik2.internal.*;
 import org.opentest4j.*;
@@ -13,16 +14,16 @@ public class StatisticalPropertySource implements IterableSampleSource {
 
 	private final IterableSampleSource randomSource;
 	private final double minSatisfiedPercentage;
-	private final double maxStandardDeviationFactor;
+	private final StatisticalError allowedError;
 
 	public StatisticalPropertySource(
 		IterableSampleSource randomSource,
 		double minSatisfiedPercentage,
-		double maxStandardDeviationFactor
+		StatisticalError allowedError
 	) {
 		this.randomSource = randomSource;
 		this.minSatisfiedPercentage = minSatisfiedPercentage;
-		this.maxStandardDeviationFactor = maxStandardDeviationFactor;
+		this.allowedError = allowedError;
 	}
 
 	@Override
@@ -42,7 +43,7 @@ public class StatisticalPropertySource implements IterableSampleSource {
 		private volatile boolean stopped = false;
 
 		private StatisticalPropertyIterator() {
-			classifier = new ClassifyingCollector<>();
+			classifier = new ClassifyingCollector<>(allowedError);
 			classifier.addCase(
 				SATISFIED_TRIES, minSatisfiedPercentage,
 				tryResult -> tryResult.status() == TryExecutionResult.Status.SATISFIED
@@ -58,7 +59,7 @@ public class StatisticalPropertySource implements IterableSampleSource {
 		}
 
 		private boolean isCoverageUnstable() {
-			return classifier.checkCoverage(maxStandardDeviationFactor) == ClassifyingCollector.CoverageCheck.UNSTABLE;
+			return classifier.checkCoverage() == ClassifyingCollector.CoverageCheck.UNSTABLE;
 		}
 
 		@Override

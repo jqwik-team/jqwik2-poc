@@ -2,7 +2,6 @@ package jqwik2;
 
 import java.time.*;
 import java.util.*;
-import java.util.concurrent.atomic.*;
 
 import jqwik2.api.*;
 import jqwik2.api.arbitraries.*;
@@ -59,7 +58,10 @@ class StatisticsTests {
 			Generator<Integer> integers = BaseGenerators.integers(-100, 100);
 			GenSource source = new RandomGenSource();
 
-			while (classifier.checkCoverage(1.0) == ClassifyingCollector.CoverageCheck.UNSTABLE) {
+			while (true) {
+				ClassifyingCollector.CoverageCheck result;
+				synchronized (classifier) {result = classifier.checkCoverage();}
+				if (!(result == ClassifyingCollector.CoverageCheck.UNSTABLE)) break;
 				classifier.classify(integers.generate(source));
 			}
 
@@ -68,7 +70,9 @@ class StatisticsTests {
 			// System.out.println(classifier.percentages());
 			// System.out.println(classifier.rejections());
 
-			assertThat(classifier.checkCoverage(1.0)).isEqualTo(ClassifyingCollector.CoverageCheck.ACCEPT);
+			ClassifyingCollector.CoverageCheck result;
+			synchronized (classifier) {result = classifier.checkCoverage();}
+			assertThat(result).isEqualTo(ClassifyingCollector.CoverageCheck.ACCEPT);
 			assertThat(classifier.rejections()).isEmpty();
 		}
 
@@ -80,7 +84,10 @@ class StatisticsTests {
 			Generator<Integer> integers = BaseGenerators.integers(-100, 100);
 			GenSource source = new RandomGenSource("42");
 
-			while (classifier.checkCoverage(1.0) == ClassifyingCollector.CoverageCheck.UNSTABLE) {
+			while (true) {
+				ClassifyingCollector.CoverageCheck result;
+				synchronized (classifier) {result = classifier.checkCoverage();}
+				if (!(result == ClassifyingCollector.CoverageCheck.UNSTABLE)) break;
 				classifier.classify(integers.generate(source));
 			}
 
@@ -89,13 +96,16 @@ class StatisticsTests {
 			// System.out.println(classifier.percentages());
 			// System.out.println(classifier.rejections());
 
-			assertThat(classifier.checkCoverage(1.0)).isEqualTo(ClassifyingCollector.CoverageCheck.ACCEPT);
+			ClassifyingCollector.CoverageCheck result;
+			synchronized (classifier) {result = classifier.checkCoverage();}
+			assertThat(result).isEqualTo(ClassifyingCollector.CoverageCheck.ACCEPT);
 			assertThat(classifier.rejections()).isEmpty();
 		}
 
 		@Example
 		void classifierAcceptUniformDie() {
-			var classifier = new ClassifyingCollector<Integer>();
+			var classifier = new ClassifyingCollector<Integer>(new StatisticalError(0.01, 1e-6));
+
 			// Actual rolling dice here does not seem to be very uniform
 			classifier.addCase("1", 13.0, dieThrow -> dieThrow == 1);
 			classifier.addCase("2", 13.0, dieThrow -> dieThrow == 2);
@@ -107,7 +117,10 @@ class StatisticsTests {
 			Generator<Integer> die = BaseGenerators.choose(List.of(1, 2, 3, 4, 5, 6));
 			GenSource source = new RandomGenSource();
 
-			while (classifier.checkCoverage(3.0) == ClassifyingCollector.CoverageCheck.UNSTABLE) {
+			while (true) {
+				ClassifyingCollector.CoverageCheck result;
+				synchronized (classifier) {result = classifier.checkCoverage();}
+				if (!(result == ClassifyingCollector.CoverageCheck.UNSTABLE)) break;
 				classifier.classify(die.generate(source));
 			}
 
@@ -116,7 +129,9 @@ class StatisticsTests {
 			// System.out.println(classifier.percentages());
 			// System.out.println(classifier.rejections());
 
-			assertThat(classifier.checkCoverage(3.0)).isEqualTo(ClassifyingCollector.CoverageCheck.ACCEPT);
+			ClassifyingCollector.CoverageCheck result;
+			synchronized (classifier) {result = classifier.checkCoverage();}
+			assertThat(result).isEqualTo(ClassifyingCollector.CoverageCheck.ACCEPT);
 			assertThat(classifier.rejections()).isEmpty();
 		}
 
@@ -130,7 +145,10 @@ class StatisticsTests {
 			Generator<Integer> integers = BaseGenerators.integers(-100, 100);
 			GenSource source = new RandomGenSource();
 
-			while (classifier.checkCoverage(1.0) == ClassifyingCollector.CoverageCheck.UNSTABLE) {
+			while (true) {
+				ClassifyingCollector.CoverageCheck result;
+				synchronized (classifier) {result = classifier.checkCoverage();}
+				if (!(result == ClassifyingCollector.CoverageCheck.UNSTABLE)) break;
 				classifier.classify(integers.generate(source));
 			}
 
@@ -139,7 +157,9 @@ class StatisticsTests {
 			// System.out.println(classifier.percentages());
 			// System.out.println(classifier.rejections());
 
-			assertThat(classifier.checkCoverage(1.0)).isEqualTo(ClassifyingCollector.CoverageCheck.REJECT);
+			ClassifyingCollector.CoverageCheck result;
+			synchronized (classifier) {result = classifier.checkCoverage();}
+			assertThat(result).isEqualTo(ClassifyingCollector.CoverageCheck.REJECT);
 			assertThat(classifier.rejections()).hasSize(1);
 
 			String rejection = classifier.rejections().iterator().next();
@@ -149,14 +169,17 @@ class StatisticsTests {
 
 		@Example
 		void tightAccept() {
-			var classifier = new ClassifyingCollector<Integer>();
+			var classifier = new ClassifyingCollector<Integer>(new StatisticalError(0.01, 1e-6));
 			classifier.addCase("even", 49.5, anInt -> anInt % 2 == 0);
 			classifier.addCase("odd", 49.5,  anInt -> anInt % 2 != 0);
 
 			Generator<Integer> integers = BaseGenerators.integers(1, 100);
 			GenSource source = new RandomGenSource();
 
-			while (classifier.checkCoverage(3.0) == ClassifyingCollector.CoverageCheck.UNSTABLE) {
+			while (true) {
+				ClassifyingCollector.CoverageCheck result;
+				synchronized (classifier) {result = classifier.checkCoverage();}
+				if (!(result == ClassifyingCollector.CoverageCheck.UNSTABLE)) break;
 				classifier.classify(integers.generate(source));
 			}
 
@@ -165,7 +188,9 @@ class StatisticsTests {
 			// System.out.println(classifier.percentages());
 			// System.out.println(classifier.rejections());
 
-			assertThat(classifier.checkCoverage(3.0)).isEqualTo(ClassifyingCollector.CoverageCheck.ACCEPT);
+			ClassifyingCollector.CoverageCheck result;
+			synchronized (classifier) {result = classifier.checkCoverage();}
+			assertThat(result).isEqualTo(ClassifyingCollector.CoverageCheck.ACCEPT);
 		}
 
 		@Example
@@ -177,7 +202,10 @@ class StatisticsTests {
 			Generator<Integer> integers = BaseGenerators.integers(1, 100);
 			GenSource source = new RandomGenSource();
 
-			while (classifier.checkCoverage(3.0) == ClassifyingCollector.CoverageCheck.UNSTABLE) {
+			while (true) {
+				ClassifyingCollector.CoverageCheck result;
+				synchronized (classifier) {result = classifier.checkCoverage();}
+				if (!(result == ClassifyingCollector.CoverageCheck.UNSTABLE)) break;
 				classifier.classify(integers.generate(source));
 			}
 
@@ -186,7 +214,9 @@ class StatisticsTests {
 			// System.out.println(classifier.percentages());
 			// System.out.println(classifier.rejections());
 
-			assertThat(classifier.checkCoverage(3.0)).isEqualTo(ClassifyingCollector.CoverageCheck.REJECT);
+			ClassifyingCollector.CoverageCheck result;
+			synchronized (classifier) {result = classifier.checkCoverage();}
+			assertThat(result).isEqualTo(ClassifyingCollector.CoverageCheck.REJECT);
 		}
 	}
 }

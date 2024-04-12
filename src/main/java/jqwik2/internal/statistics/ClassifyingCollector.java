@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.*;
 import java.util.function.*;
 import java.util.stream.*;
 
+import jqwik2.api.statistics.*;
 import jqwik2.internal.*;
 
 public class ClassifyingCollector<C> {
@@ -39,27 +40,20 @@ public class ClassifyingCollector<C> {
 	private int minTries = 0;
 
 	public ClassifyingCollector() {
-		this(0.01, 1e-6);
+		this(new StatisticalError(0.01, 1e-3));
 	}
 
-	// TODO: Hand in alpha and beta as parameters (StatisticalError object?)
-	public ClassifyingCollector(double alpha, double beta) {
+	public ClassifyingCollector(StatisticalError allowedError) {
 
 		// Initialize SPRT parameters
-		this.alpha = alpha;
-		this.beta = beta;
+		this.alpha = allowedError.alpha();
+		this.beta = allowedError.beta();
 		this.lowerBound = Math.log10(beta / (1.0 - alpha));
 		this.upperBound = Math.log10((1.0 - beta) / alpha);
 		this.minLog = lowerBound / 10;
 		this.maxLog = upperBound / 10;
 
 		initializeCase(fallThroughCase());
-		// System.out.println("alpha=" + alpha);
-		// System.out.println("beta=" + beta);
-		// System.out.println("lowerBound=" + lowerBound);
-		// System.out.println("upperBound=" + upperBound);
-		// System.out.println("minLog=" + minLog);
-		// System.out.println("maxLog=" + maxLog);
 	}
 
 	public List<String> labels() {
@@ -185,8 +179,7 @@ public class ClassifyingCollector<C> {
 					 );
 	}
 
-	// TODO: Get rid of maxStandardDeviationFactor
-	public synchronized ClassifyingCollector.CoverageCheck checkCoverage(double maxStandardDeviationFactor) {
+	public synchronized ClassifyingCollector.CoverageCheck checkCoverage() {
 		if (total.get() < minTries()) {
 			return ClassifyingCollector.CoverageCheck.UNSTABLE;
 		}

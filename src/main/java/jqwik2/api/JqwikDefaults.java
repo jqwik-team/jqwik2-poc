@@ -4,6 +4,7 @@ import java.nio.file.*;
 import java.time.*;
 
 import jqwik2.api.database.*;
+import jqwik2.api.statistics.*;
 import jqwik2.api.validation.*;
 import jqwik2.tdd.*;
 
@@ -57,8 +58,8 @@ public class JqwikDefaults {
 		return PropertyValidationStrategy.ConcurrencyMode.SINGLE_THREAD;
 	}
 
-	public static double defaultStandardDeviationThreshold() {
-		return 3.0;
+	public static StatisticalError defaultAllowedStatisticalError() {
+		return new StatisticalError(0.01, 1e-3);
 	}
 
 	public static PlatformPublisher defaultPlatformPublisher() {

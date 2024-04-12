@@ -13,6 +13,7 @@ import jqwik2.api.arbitraries.*;
 import jqwik2.api.database.*;
 import jqwik2.api.description.*;
 import jqwik2.api.recording.*;
+import jqwik2.api.statistics.*;
 import jqwik2.api.validation.*;
 import jqwik2.api.validation.PropertyValidationStrategy.*;
 import jqwik2.internal.*;
@@ -755,7 +756,7 @@ class PropertyValidationTests {
 			PropertyValidationStrategy strategy = PropertyValidationStrategy.builder()
 																			.withGeneration(RANDOMIZED)
 																			.build();
-			var result = validator.validateStatistically(93.0, 2.0, strategy);
+			var result = validator.validateStatistically(93.0, new StatisticalError(0.01, 0.0001), strategy);
 			assertThat(result.status().isFailed()).isTrue();
 			assertThat(result.countChecks()).isGreaterThanOrEqualTo(100);
 			assertThat(result.falsifiedSamples()).isEmpty();
