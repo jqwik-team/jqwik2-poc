@@ -6,9 +6,19 @@ import java.util.concurrent.atomic.*;
 import java.util.function.*;
 import java.util.stream.*;
 
+import jqwik2.api.*;
 import jqwik2.api.statistics.*;
 import jqwik2.internal.*;
 
+/**
+ * This class is used to collect statistics about the distribution of generated values
+ * and to check if the percentage of hit cases is beyond a minimum probability.
+ *
+ * It uses the Sequential Probability Ratio Test (SPRT) to check if the percentage of hit cases
+ * is beyond a minimum probability.
+ * See e.g. https://en.wikipedia.org/wiki/Sequential_probability_ratio_test
+ * or http://www.ist.tugraz.at/aichernig/publications/papers/icst17_smc.pdf
+ */
 public class ClassifyingCollector<C> {
 
 	private final static Case<?> FALLTHROUGH_CASE = new Case<>("_", 0.0, ignore -> true);
@@ -20,38 +30,24 @@ public class ClassifyingCollector<C> {
 		ACCEPT, REJECT, UNSTABLE
 	}
 
-	private static final int MIN_TRIES_LOWER_BOUND = 100;
-
 	static final DecimalFormat PERCENTAGE_FORMAT = new DecimalFormat("#.00", new DecimalFormatSymbols(Locale.US));
 
 	private final List<ClassifyingCollector.Case<C>> cases = new ArrayList<>();
 	private final Map<ClassifyingCollector.Case<C>, Integer> counts = new HashMap<>();
 	private final AtomicInteger total = new AtomicInteger(0);
 	private final Map<ClassifyingCollector.Case<C>, Double> logAlphaSums = new HashMap<>();
-	private final Map<ClassifyingCollector.Case<C>, Integer> caseHitCounts = new HashMap<>();
 
-	private final double alpha;
-	private final double beta;
-	private final double lowerBound;
-	private final double upperBound;
-	private final double minLog;
-	private final double maxLog;
-
-	private int minTries = 0;
+	private final double rejectH1Bound;
+	private final double acceptH1Bound;
 
 	public ClassifyingCollector() {
-		this(new StatisticalError(0.01, 1e-3));
+		this(JqwikDefaults.defaultAllowedStatisticalError());
 	}
 
 	public ClassifyingCollector(StatisticalError allowedError) {
-
-		// Initialize SPRT parameters
-		this.alpha = allowedError.alpha();
-		this.beta = allowedError.beta();
-		this.lowerBound = Math.log10(beta / (1.0 - alpha));
-		this.upperBound = Math.log10((1.0 - beta) / alpha);
-		this.minLog = lowerBound / 10;
-		this.maxLog = upperBound / 10;
+		// Initialize SPRT accept / reject bounds
+		this.rejectH1Bound = Math.log(allowedError.beta() / (1.0 - allowedError.alpha()));
+		this.acceptH1Bound = Math.log((1.0 - allowedError.beta()) / allowedError.alpha());
 
 		initializeCase(fallThroughCase());
 	}
@@ -74,29 +70,31 @@ public class ClassifyingCollector<C> {
 	private void initializeCase(Case<C> newCase) {
 		counts.put(newCase, 0);
 		logAlphaSums.put(newCase, 0.0);
-		caseHitCounts.put(newCase, 0);
 	}
 
 	public synchronized void classify(C args) {
 		total.incrementAndGet();
-		updateCaseCounts(args);
-		updateSPRTValues();
+		Case<C> hitCase = findHitCase(args);
+		updateCounts(hitCase);
+		updateSPRTValues(hitCase);
 	}
 
-	private void updateSPRTValues() {
-		for (Case<C> c : cases) {
-			updateSPRT(c);
-		}
-	}
-
-	private void updateCaseCounts(C args) {
+	private Case<C> findHitCase(C args) {
 		for (Case<C> c : cases) {
 			if (c.condition().test(args)) {
-				updateCounts(c);
-				return;
+				return c;
 			}
 		}
-		updateCounts(fallThroughCase());
+		return fallThroughCase();
+	}
+
+	private void updateSPRTValues(Case<C> hitCase) {
+		for (Case<C> c : cases) {
+			if (c == hitCase)
+				updateSPRT(c, true);
+			else
+				updateSPRT(c, false);
+		}
 	}
 
 	private void updateCounts(Case<C> c) {
@@ -104,29 +102,38 @@ public class ClassifyingCollector<C> {
 	}
 
 	/**
-	 * This method contains the SPRT magic, as described e.g. in https://en.wikipedia.org/wiki/Sequential_probability_ratio_test
-	 * Hypothesis H0: The case condition is not met
-	 * Hypothesis H1: The case condition is met, ie the percentage of the case is at least minPercentage
+	 * This method contains the SPRT magic
+	 * Hypothesis H0: The case is hit with minPercentage - hypothesisDelta
+	 * Hypothesis H1: The case is hit with minPercentage + hypothesisDelta
 	 */
-	private void updateSPRT(Case<C> c) {
-		int caseHits = caseHitCounts.get(c);
+	private void updateSPRT(Case<C> c, boolean caseHit) {
 
-		var isCaseConditionHit = isCaseConditionHit(c);
-		if (isCaseConditionHit) {
-			caseHits += 1;
-			caseHitCounts.put(c, caseHits);
-		}
+		// Most of these values could be cached per case since they never change
+		var hypothesisDelta = hypothesisDelta(c.minPercentage());
+		double h0HitProbability = (c.minPercentage() - hypothesisDelta) / 100.0;
+		double h1HitProbability = (c.minPercentage() + hypothesisDelta) / 100.0;
 
-		var caseMisses = total() - caseHits;
-
-		// logAlpha calculation requires special handling when there are no hits or misses
-		var caseHitRatio = caseMisses == 0 ? 0.0 : (double) caseHits / caseMisses;
-		double logAlpha = caseHits == 0 ? minLog
-			: caseMisses == 0 ? maxLog
-			: Math.log10(caseHitRatio);
+		var caseHitRatio = caseHit
+							   ? h1HitProbability / h0HitProbability
+							   : (1 - h1HitProbability) / (1 - h0HitProbability);
+		double logAlpha = Math.log(caseHitRatio);
 
 		double logAlphaSum = logAlphaSums.get(c) + logAlpha;
 		logAlphaSums.put(c, logAlphaSum);
+	}
+
+	/**
+	 * The hypothesisDelta is a function of the minPercentage.
+	 * It is chosen such that the SPRT is most sensitive at the edges of the minPercentage range.
+	 */
+	private static double hypothesisDelta(double minPercentage) {
+		if (minPercentage < 1.5) {
+			return minPercentage / 2;
+		}
+		if (minPercentage > 98.5) {
+			return (100 - minPercentage) / 2;
+		}
+		return 1.0;
 	}
 
 	private boolean isCaseConditionHit(Case<C> c) {
@@ -184,47 +191,31 @@ public class ClassifyingCollector<C> {
 					 );
 	}
 
-	public synchronized ClassifyingCollector.CoverageCheck checkCoverage() {
-		if (total.get() < minTries()) {
-			return ClassifyingCollector.CoverageCheck.UNSTABLE;
-		}
-
+	public synchronized CoverageCheck checkCoverage() {
 		var checks = cases.stream()
 						  .map(this::checkCoverage)
 						  .toList();
 
-		if (checks.stream().anyMatch(c -> c == ClassifyingCollector.CoverageCheck.REJECT)) {
-			return ClassifyingCollector.CoverageCheck.REJECT;
+		if (checks.stream().anyMatch(c -> c == CoverageCheck.REJECT)) {
+			return CoverageCheck.REJECT;
 		}
-		if (checks.stream().anyMatch(c -> c == ClassifyingCollector.CoverageCheck.UNSTABLE)) {
-			return ClassifyingCollector.CoverageCheck.UNSTABLE;
+		if (checks.stream().anyMatch(c -> c == CoverageCheck.UNSTABLE)) {
+			return CoverageCheck.UNSTABLE;
 		}
-		return ClassifyingCollector.CoverageCheck.ACCEPT;
+		return CoverageCheck.ACCEPT;
 	}
 
-	/**
-	 * The minimum number of tries needed to make a decision.
-	 * This depends on alpha and beta and an absolute minimum of MIN_TRIES_LOWER_BOUND.
-	 *
-	 * If the minimum is too low the statistical test is not reliable.
-	 */
-	private int minTries() {
-		if (minTries == 0) {
-			int minFromAlpha = (int) Math.ceil(1.0 / alpha);
-			int minFromBeta = (int) Math.ceil(1.0 / beta);
-			minTries = Math.max(MIN_TRIES_LOWER_BOUND, Math.max(minFromAlpha, minFromBeta));
+	private CoverageCheck checkCoverage(ClassifyingCollector.Case<C> c) {
+		if (c.minPercentage() <= 0.0) {
+			return CoverageCheck.ACCEPT;
 		}
-		return minTries;
-	}
-
-	private ClassifyingCollector.CoverageCheck checkCoverage(ClassifyingCollector.Case<C> c) {
 		var log10Alpha = logAlphaSums.get(c);
-		if (log10Alpha < lowerBound && !isCaseConditionHit(c)){
-			return ClassifyingCollector.CoverageCheck.REJECT;
-		} else if (log10Alpha > upperBound && isCaseConditionHit(c)) {
-			return ClassifyingCollector.CoverageCheck.ACCEPT;
+		if (log10Alpha < rejectH1Bound && !isCaseConditionHit(c)) {
+			return CoverageCheck.REJECT;
+		} else if (log10Alpha > acceptH1Bound && isCaseConditionHit(c)) {
+			return CoverageCheck.ACCEPT;
 		}
-		return ClassifyingCollector.CoverageCheck.UNSTABLE;
+		return CoverageCheck.UNSTABLE;
 	}
 
 	public int total() {
