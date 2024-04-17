@@ -1,5 +1,5 @@
 jqwik2.PropertyValidationTests$Classifiers#classificationRejected: classifier ([count1]) =
-|--classifier ([count1])--|
+|----------classifier ([count1])----------|
   positive ([count2]) | [percentage1] (>= [percentage2])
 
 jqwik2.PropertyValidationTests$Classifiers#classificationRejected (FAILED) =
@@ -7,19 +7,19 @@ jqwik2.PropertyValidationTests$Classifiers#classificationRejected (FAILED) =
     Coverage of case 'positive' expected to be at least [percentage3] but was only [percentage4] (ratio1)
 
 
-|--result--|
-  status | FAILED
-  failure | org.opentest4j.AssertionFailedError
+|---------------------result---------------------|
+  status   | FAILED
+  failure  | org.opentest4j.AssertionFailedError
   # tries | [tries]
   # checks | [checks]
 
-|--parameters--|
-  validation | STRICT
-  generation | SMART (RANDOMIZED)
-  max tries | 0
-  max runtime | PT1S
+|---------------parameters---------------|
+  validation        | STRICT
+  generation        | SMART (RANDOMIZED)
+  max tries         | 0
+  max runtime       | PT1S
   filter duplicates | false
-  shrinking | FULL
-  edge cases | MIXIN
-  concurrency | SINGLE_THREAD
+  shrinking         | FULL
+  edge cases        | MIXIN
+  concurrency       | SINGLE_THREAD
   seed | [seed1]

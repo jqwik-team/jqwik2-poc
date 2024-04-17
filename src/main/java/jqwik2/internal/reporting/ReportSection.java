@@ -18,14 +18,20 @@ public class ReportSection {
 	}
 
 	public void publish(StringBuilder publisher) {
-		// TODO: Publish nicely formatted according to example-report.txt
 		if (entries.isEmpty()) {
 			return;
 		}
 
-		publisher.append("%n|--%s--|%n".formatted(header));
+		int maxKeyLength = entries.keySet().stream().mapToInt(String::length).max().orElse(0);
+		int maxValueLength = entries.values().stream().mapToInt(value -> value.toString().length()).max().orElse(0);
+		int lineLength = maxKeyLength + maxValueLength + 7;
+		int numberOfDashes = Math.max(2, lineLength - header.length() - 2) / 2;
+		String dashes = ReportingSupport.repeat('-', numberOfDashes);
+
+		publisher.append("%n|%s%s%s|%n".formatted(dashes, header, dashes));
 		entries.forEach((key, value) -> {
-			publisher.append("  %s | %s%n".formatted(key, value));
+			var paddedKey = ReportingSupport.padRight(key, maxKeyLength);
+			publisher.append("  %s | %s%n".formatted(paddedKey, value));
 		});
 	}
 

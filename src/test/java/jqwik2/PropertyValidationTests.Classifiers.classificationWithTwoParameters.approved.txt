@@ -1,20 +1,20 @@
 jqwik2.PropertyValidationTests$Classifiers#classificationWithTwoParameters: classifier ([count1]) =
-|--classifier ([count1])--|
+|------------classifier ([count1])------------|
   valid length ([count2]) | [percentage1] (>= [percentage2])
 
 jqwik2.PropertyValidationTests$Classifiers#classificationWithTwoParameters (SUCCESSFUL) =
-|--result--|
-  status | SUCCESSFUL
+|--------result--------|
+  status   | SUCCESSFUL
   # tries | [tries]
   # checks | [checks]
 
-|--parameters--|
-  validation | STRICT
-  generation | SMART (RANDOMIZED)
-  max tries | 0
-  max runtime | PT1S
+|---------------parameters---------------|
+  validation        | STRICT
+  generation        | SMART (RANDOMIZED)
+  max tries         | 0
+  max runtime       | PT1S
   filter duplicates | false
-  shrinking | FULL
-  edge cases | MIXIN
-  concurrency | SINGLE_THREAD
+  shrinking         | FULL
+  edge cases        | MIXIN
+  concurrency       | SINGLE_THREAD
   seed | [seed1]

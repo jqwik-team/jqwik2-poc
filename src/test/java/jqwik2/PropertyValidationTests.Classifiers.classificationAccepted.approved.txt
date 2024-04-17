@@ -1,22 +1,22 @@
 jqwik2.PropertyValidationTests$Classifiers#classificationAccepted: classifier ([count1]) =
-|--classifier ([count1])--|
+|----------classifier ([count1])----------|
   positive ([count2]) | [percentage1] (>= [percentage2])
   negative ([count3]) | [percentage3] (>= [percentage2])
-  zero ([count4]) | [percentage4]
+  zero ([count4])      | [percentage4]
 
 jqwik2.PropertyValidationTests$Classifiers#classificationAccepted (SUCCESSFUL) =
-|--result--|
-  status | SUCCESSFUL
+|--------result--------|
+  status   | SUCCESSFUL
   # tries | [tries]
   # checks | [checks]
 
-|--parameters--|
-  validation | STRICT
-  generation | SMART (RANDOMIZED)
-  max tries | 0
-  max runtime | PT1S
+|---------------parameters---------------|
+  validation        | STRICT
+  generation        | SMART (RANDOMIZED)
+  max tries         | 0
+  max runtime       | PT1S
   filter duplicates | false
-  shrinking | FULL
-  edge cases | MIXIN
-  concurrency | SINGLE_THREAD
+  shrinking         | FULL
+  edge cases        | MIXIN
+  concurrency       | SINGLE_THREAD
   seed | [seed1]

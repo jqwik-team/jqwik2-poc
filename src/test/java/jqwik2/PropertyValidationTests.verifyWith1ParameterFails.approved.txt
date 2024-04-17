@@ -3,21 +3,21 @@ cp (FAILED) =
     failed
 
 
-|--result--|
-  status | FAILED
-  failure | java.lang.AssertionError
+|---------------result---------------|
+  status   | FAILED
+  failure  | java.lang.AssertionError
   # tries | [tries]
   # checks | [checks]
 
-|--parameters--|
-  validation | STRICT
-  generation | SMART (RANDOMIZED)
-  max tries | 100
-  max runtime | PT10M
+|---------------parameters---------------|
+  validation        | STRICT
+  generation        | SMART (RANDOMIZED)
+  max tries         | 100
+  max runtime       | PT10M
   filter duplicates | false
-  shrinking | FULL
-  edge cases | MIXIN
-  concurrency | SINGLE_THREAD
+  shrinking         | FULL
+  edge cases        | MIXIN
+  concurrency       | SINGLE_THREAD
   seed | [seed1]
 
 

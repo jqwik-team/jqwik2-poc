@@ -3,21 +3,21 @@ cp (FAILED) =
     Property check failed with sample {[0]}
 
 
-|--result--|
-  status | FAILED
-  failure | org.opentest4j.AssertionFailedError
+|---------------------result---------------------|
+  status   | FAILED
+  failure  | org.opentest4j.AssertionFailedError
   # tries | [tries]
   # checks | [checks]
 
-|--parameters--|
-  validation | STRICT
-  generation | SMART (RANDOMIZED)
-  max tries | 100
-  max runtime | PT10M
+|---------------parameters---------------|
+  validation        | STRICT
+  generation        | SMART (RANDOMIZED)
+  max tries         | 100
+  max runtime       | PT10M
   filter duplicates | false
-  shrinking | FULL
-  edge cases | MIXIN
-  concurrency | SINGLE_THREAD
+  shrinking         | FULL
+  edge cases        | MIXIN
+  concurrency       | SINGLE_THREAD
   seed | [seed1]
 
 

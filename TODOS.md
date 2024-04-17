@@ -1,16 +1,18 @@
-- New Core API
-    - Reporting
-      - run time in result section
-      - Do proper formatting in reports according to example-report.txt 
-      - Report differences between sample values and regenerated values
-    - Make afterFailure attribute multi value, e.g List.of(SAMPLES, REPLAY |
-      RANDOMIZED)
-        - PropertyAnalyzer: Find as many failing samples as possible and analyze
-          their commonalities
+- Reporting
+    - run time in result section
+    - Report differences between sample values and regenerated values
+
+- Make afterFailure attribute multi value, e.g List.of(SAMPLES, REPLAY |
+  RANDOMIZED)
+
+- PropertyAnalyzer: Find as many failing samples as possible and analyze
+  their commonalities
 
 - Auto Test-Driving
-  - Adapt next-gen-pbt.md#Automated-Test-Driven-Development to actual behaviour of jqwik2
-  - Generate test cases beyond just growing, e.g. edge cases, random values, provided ones
+    - Adapt next-gen-pbt.md#Automated-Test-Driven-Development to actual
+      behaviour of jqwik2
+    - Generate test cases beyond just growing, e.g. edge cases, random values,
+      provided ones
 
 - Additional generators and arbitraries
     - StringArbitrary: withChar(char... chars), withChar(CharSet chars),
@@ -23,8 +25,9 @@
     - see http://proper.softlab.ntua.gr/Publications.html
 
 - Allow JqwikDefaults to be changed programmatically
-    - Maybe Introduce Jqwik class and then Jqwik.defaults() and Jqwik.defaults(new JqwikDefaults())
-  
+    - Maybe Introduce Jqwik class and then Jqwik.defaults() and Jqwik.defaults(
+      new JqwikDefaults())
+
 - Add descriptions to generators
     - Can target type of map / flatMap be inferred for description?
       E.g. by generating a single sample and using its type?
@@ -57,5 +60,6 @@
 - Jupiter Extension
 
 - Misc
-    - Loading samples that provide wrong number of gen sources -> IllegalArgumentException
+    - Loading samples that provide wrong number of gen sources ->
+      IllegalArgumentException
       Should be ignored and sample be deleted

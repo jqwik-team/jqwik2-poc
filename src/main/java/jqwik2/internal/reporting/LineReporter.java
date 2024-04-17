@@ -16,22 +16,14 @@ public class LineReporter {
 		this.baseIndent = baseIndent;
 	}
 
-	private String multiply(char c, int times) {
-		StringBuilder builder = new StringBuilder();
-		for (int j = 0; j < times; j++) {
-			builder.append(c);
-		}
-		return builder.toString();
-	}
-
 	public void appendUnderline(int indentLevel, int length) {
-		String underline = multiply('-', length);
+		String underline = ReportingSupport.repeat('-', length);
 		appendLn(indentLevel, underline);
 	}
 
 	public void appendLn(int indentLevel, String line) {
 		int effectiveIndent = indentLevel + baseIndent;
-		String indentation = multiply(' ', effectiveIndent * 2);
+		String indentation = ReportingSupport.repeat(' ', effectiveIndent * 2);
 		builder.accept(String.format("%s%s%n", indentation, line));
 	}
 
