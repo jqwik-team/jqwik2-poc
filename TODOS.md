@@ -36,8 +36,18 @@
     - Fail if ratio checks/tries is too low
 
 - Stateful generators
+    - Model-based testing: Pre-create model chain on model, then compare to behaviour in real system
+    - Concurrent execution of Chains:
+        1. Create n (small n) chains of length l. Make key collisions likely! 
+        2. Run chains concurrently. Collect final result.
+        3. Expectations:
+            - No invariant of single transaction should be violated.
+            - One of all combinatorically possible interleaving results should be found.
+              For this the system can be its own sequential model.
+            According to https://www.youtube.com/watch?v=r5i_OiZw6Sw only 10 repetitions (also during shrinking) are needed to detect most bugs.
+        4. Insert sleep operations to simulate real-world timing issues.
+        5. Also see https://www.youtube.com/watch?v=zi0rHwfiX1Q (John Hughes "Testing the hard stuff and staying sane")
     - ActionChain?
-    - Model-based testing?
 
 - Statistics
     - Collect and report statistics
