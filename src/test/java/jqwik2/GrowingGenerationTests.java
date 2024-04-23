@@ -99,6 +99,30 @@ class GrowingGenerationTests {
 	}
 
 	@Example
+	void stopOnMaximumDepth() {
+		SampleGenerator sampleGenerator = SampleGenerator.from(
+			Numbers.integers().between(0, 100).generator(),
+			Numbers.integers().between(0, 4).generator()
+		);
+
+		final int maxDepth = 7;
+		AtomicInteger counter = new AtomicInteger(0);
+		GuidedGeneration iterator = (GuidedGeneration) new IterableGrowingSource(maxDepth).iterator();
+		while (iterator.hasNext()) {
+			SampleSource sampleSource = iterator.next();
+			sampleGenerator.generate(sampleSource).ifPresentOrElse(
+				sample -> {
+					counter.incrementAndGet();
+					// System.out.println(sample);
+					iterator.guide(null, null);
+				},
+				() -> iterator.onEmptyGeneration(sampleSource)
+			);
+		}
+		assertThat(counter.get()).isEqualTo(30);
+	}
+
+	@Example
 	void sampleWithThreeParameters() {
 		SampleGenerator sampleGenerator = SampleGenerator.from(
 			BaseGenerators.integers(0, 2),

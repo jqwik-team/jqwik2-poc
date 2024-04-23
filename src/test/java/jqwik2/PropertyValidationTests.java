@@ -180,7 +180,7 @@ class PropertyValidationTests {
 
 	private static Options validationReportApprovalTestsOptions() {
 		var trimWhitespaceScrubber = new TrimWhitespaceScrubber();
-		var seedScrubber = new RegExScrubber("seed(\\s+)\\|(\\s+)\\d{1,14}", "seed | [seed%d]"::formatted);
+		var seedScrubber = new RegExScrubber("seed(\\s+)\\|(\\s+)\\d{1,15}", "seed | [seed%d]"::formatted);
 		var countTriesScrubber = new RegExScrubber("# tries(\\s+)\\|(\\s+)\\d{1,10}", "# tries | [tries]");
 		var countChecksScrubber = new RegExScrubber("# checks(\\s+)\\|(\\s+)\\d{1,10}", "# checks | [checks]");
 		var countsScrubber = new RegExScrubber("\\(\\d{1,10}\\)", "([count%d])"::formatted);

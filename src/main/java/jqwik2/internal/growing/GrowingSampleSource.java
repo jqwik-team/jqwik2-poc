@@ -20,11 +20,14 @@ public class GrowingSampleSource extends SequentialGuidedGeneration implements S
 	private Iterator<GrowingTuple> previousSizeIterator;
 	private Iterator<GrowingTuple> currentBatchIterator;
 	private GrowingTuple current;
+	private int currentDepth = 0;
+	private final int maxDepth;
 
-	public GrowingSampleSource() {
+	public GrowingSampleSource(int maxDepth) {
 		previousSizeIterator = Collections.emptyIterator();
 		currentBatchIterator = Collections.emptyIterator();
 		current = new GrowingTuple();
+		this.maxDepth = maxDepth;
 	}
 
 	@Override
@@ -60,6 +63,7 @@ public class GrowingSampleSource extends SequentialGuidedGeneration implements S
 		return grow();
 	}
 
+	@SuppressWarnings("OverlyLongMethod")
 	private boolean grow() {
 		while (currentBatchIterator.hasNext()) {
 			var next = currentBatchIterator.next();
@@ -75,6 +79,12 @@ public class GrowingSampleSource extends SequentialGuidedGeneration implements S
 				return grow();
 			}
 		}
+
+		// We have exhausted all sources of the maximum allowed depth size
+		if (++currentDepth > maxDepth) {
+			return false;
+		}
+
 		previousSizeIterator = new ArrayList<>(currentSizeSources).iterator();
 		currentSizeSources.clear();
 		currentBatchIterator = Collections.emptyIterator();

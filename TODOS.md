@@ -9,10 +9,11 @@
   their commonalities
 
 - Auto Test-Driving
-    - Adapt next-gen-pbt.md#Automated-Test-Driven-Development to actual
-      behaviour of jqwik2
+    - Stop growing when configurable maxDepth is reached
     - Generate test cases beyond just growing, e.g. edge cases, random values,
       provided ones
+    - Adapt next-gen-pbt.md#Automated-Test-Driven-Development to actual
+      behaviour of jqwik2
 
 - Additional generators and arbitraries
     - StringArbitrary: withChar(char... chars), withChar(CharSet chars),
