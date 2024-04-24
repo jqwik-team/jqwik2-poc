@@ -108,6 +108,13 @@ public final class CoreTutorialTests {
 
 		// Here we execute our test target class through its Runnable interface:
 		final Runnable targetInstance = (Runnable) targetClass.newInstance();
+
+		// Casting to TestTarget does not work because the class loader is different
+		// If you need a test target instance, you probably have to create a proxy through
+		// byte code creation since Java proxys only work for interfaces
+		// Using ByteBuddy could work: https://www.javacodegeeks.com/2022/02/using-byte-buddy-for-proxy-creation.html
+		// Using ASM would probably also work but is more low level: https://asm.ow2.io/
+
 		targetInstance.run();
 
 		// At the end of test execution we collect execution data and shutdown
