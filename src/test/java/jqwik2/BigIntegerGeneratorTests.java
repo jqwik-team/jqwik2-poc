@@ -13,6 +13,67 @@ import static org.assertj.core.api.Assertions.*;
 
 class BigIntegerGeneratorTests {
 
+	@Example
+	void experimentWithBigIntegerConstruction() {
+
+		GenSource source = new RandomGenSource();
+		var max = BigInteger.valueOf(1_000_000_000_000L);
+		System.out.println("max=" + max);
+
+		Map<Character, Integer> countDigits = new HashMap<>();
+		Map<Integer, Integer> countLength = new HashMap<>();
+		for (int i = 0; i < 10000; i++) {
+			BigInteger value = randomBigInt(max, source);
+			// var lastDigit = value.mod(BigInteger.TEN).intValue();
+			// var firstDigit = value.divide(BigInteger.TEN.pow(value.toString().length() - 1)).intValue();
+			// System.out.println("value=" + value);
+			// iterate over all digits of value
+			for (char c : value.toString().toCharArray()) {
+				int count = countDigits.getOrDefault(c, 0);
+				countDigits.put(c, count + 1);
+			}
+			// count length of value
+			int length = value.toString().length();
+			int count = countLength.getOrDefault(length, 0);
+			countLength.put(length, count + 1);
+		}
+		System.out.println("count digits=" + countDigits);
+		System.out.println("count length=" + countLength);
+	}
+
+	private BigInteger randomBigInt(BigInteger max, GenSource source) {
+		var bits = max.bitLength();
+
+		int bytes = (int) (((long) bits + 7) / 8);
+		// System.out.println("max=" + max);
+		// System.out.println("bits=" + bits);
+		// System.out.println("bytes=" + bytes);
+
+		byte[] magnitude = new byte[bytes];
+		while(true) {
+			// Generate random bytes and mask out any excess bits
+			if (bytes > 0) {
+				nextBytes(magnitude, source);
+				int excessBits = 8 * bytes - bits;
+				magnitude[0] &= (byte) ((1 << (8 - excessBits)) - 1);
+			}
+			int signum = 1;
+			BigInteger value = new BigInteger(signum, magnitude);
+			if (value.compareTo(max) <= 0) {
+				return value;
+			}
+		}
+	}
+
+	private void nextBytes(byte[] bytes, GenSource source) {
+		var tuple = source.tuple();
+		for (int i = 0; i < bytes.length; i++) {
+			byte b = (byte) tuple.nextValue().choice().choose(256);
+			// System.out.println("b=" + b);
+			bytes[i] = b;
+		}
+	}
+
 	@Group
 	class WithinIntegerRange {
 
@@ -64,7 +125,6 @@ class BigIntegerGeneratorTests {
 	@Group
 	@Disabled
 	class UniformDistribution {
-
 
 		@Example
 		void fromRandomGenSource() {

@@ -16,7 +16,8 @@ public class BigIntegerGenerator implements Generator<BigInteger> {
 		this(min, max, RandomChoice.Distribution.UNIFORM);
 	}
 
-	public BigIntegerGenerator(BigInteger min, BigInteger max, RandomChoice.Distribution distribution) {
+	// Currently only uniform distribution is supported
+	private BigIntegerGenerator(BigInteger min, BigInteger max, RandomChoice.Distribution distribution) {
 		if (min.compareTo(max) > 0) {
 			throw new IllegalArgumentException("min must be smaller than or equal to max");
 		}
