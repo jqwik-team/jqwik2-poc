@@ -6,6 +6,7 @@ import java.util.*;
 import jqwik2.api.*;
 import jqwik2.internal.*;
 import jqwik2.internal.generators.*;
+import jqwik2.internal.recording.*;
 
 import net.jqwik.api.*;
 
@@ -13,65 +14,91 @@ import static org.assertj.core.api.Assertions.*;
 
 class BigIntegerGeneratorTests {
 
-	@Example
-	void experimentWithBigIntegerConstruction() {
+	@Group
+	class DevelopAlgorithm {
 
-		GenSource source = new RandomGenSource();
-		var max = BigInteger.valueOf(1_000_000_000_000L);
-		System.out.println("max=" + max);
+		@Example
+		void statisticalDistributionOfGeneratedBigDecimals() {
 
-		Map<Character, Integer> countDigits = new HashMap<>();
-		Map<Integer, Integer> countLength = new HashMap<>();
-		for (int i = 0; i < 10000; i++) {
-			BigInteger value = randomBigInt(max, source);
-			// var lastDigit = value.mod(BigInteger.TEN).intValue();
-			// var firstDigit = value.divide(BigInteger.TEN.pow(value.toString().length() - 1)).intValue();
-			// System.out.println("value=" + value);
-			// iterate over all digits of value
-			for (char c : value.toString().toCharArray()) {
-				int count = countDigits.getOrDefault(c, 0);
-				countDigits.put(c, count + 1);
+			GenSource source = new RandomGenSource();
+			var max = BigInteger.valueOf(1_000_000_000_000L);
+			System.out.println("max=" + max);
+
+			Map<Character, Integer> countLastDigits = new HashMap<>();
+			Map<Character, Integer> countDigits = new HashMap<>();
+			Map<Integer, Integer> countLength = new HashMap<>();
+
+			for (int i = 0; i < 10000; i++) {
+				BigInteger value = randomBigInt(max, source);
+
+				// count all digits
+				for (char c : value.toString().toCharArray()) {
+					int count = countDigits.getOrDefault(c, 0);
+					countDigits.put(c, count + 1);
+				}
+
+				// count last digit
+				var lastDigit = value.mod(BigInteger.TEN).intValue();
+				int countLD = countLastDigits.getOrDefault((char) ('0' + lastDigit), 0);
+				countLastDigits.put((char) ('0' + lastDigit), countLD + 1);
+
+				// count length of value
+				int length = value.toString().length();
+				int count = countLength.getOrDefault(length, 0);
+				countLength.put(length, count + 1);
 			}
-			// count length of value
-			int length = value.toString().length();
-			int count = countLength.getOrDefault(length, 0);
-			countLength.put(length, count + 1);
+			System.out.println("count last digits=" + countLastDigits);
+			System.out.println("count digits=" + countDigits);
+			System.out.println("count length=" + countLength);
 		}
-		System.out.println("count digits=" + countDigits);
-		System.out.println("count length=" + countLength);
-	}
 
-	private BigInteger randomBigInt(BigInteger max, GenSource source) {
-		var bits = max.bitLength();
+		@Example
+		void generateSmallBigDecimals() {
 
-		int bytes = (int) (((long) bits + 7) / 8);
-		// System.out.println("max=" + max);
-		// System.out.println("bits=" + bits);
-		// System.out.println("bytes=" + bytes);
+			GenSource source = new RandomGenSource();
+			var max = BigInteger.valueOf(10);
 
-		byte[] magnitude = new byte[bytes];
-		while(true) {
-			// Generate random bytes and mask out any excess bits
-			if (bytes > 0) {
-				nextBytes(magnitude, source);
-				int excessBits = 8 * bytes - bits;
-				magnitude[0] &= (byte) ((1 << (8 - excessBits)) - 1);
-			}
-			int signum = 1;
-			BigInteger value = new BigInteger(signum, magnitude);
-			if (value.compareTo(max) <= 0) {
-				return value;
+			for (int i = 0; i < 10; i++) {
+				var recorder = new GenRecorder(source);
+
+				BigInteger value = randomBigInt(max, recorder);
+
+				System.out.println("value=" + value);
+
+				// assert that value can be regenerated
+				var regenerated = randomBigInt(max, RecordedSource.of(recorder.recording()));
+				assertThat(value).isEqualTo(regenerated);
 			}
 		}
-	}
 
-	private void nextBytes(byte[] bytes, GenSource source) {
-		var tuple = source.tuple();
-		for (int i = 0; i < bytes.length; i++) {
-			byte b = (byte) tuple.nextValue().choice().choose(256);
-			// System.out.println("b=" + b);
-			bytes[i] = b;
+		private BigInteger randomBigInt(BigInteger max, GenSource source) {
+			var numBits = max.bitLength();
+
+			int bytes = (int) (((long) numBits + 7) / 8);
+			byte[] magnitude = new byte[bytes];
+
+			while (true) {
+				var tuple = source.tuple();
+				fillBits(magnitude, numBits, tuple);
+				int signum = 1;
+				BigInteger value = new BigInteger(signum, magnitude);
+				if (value.compareTo(max) <= 0) {
+					return value;
+				}
+			}
 		}
+
+		private void fillBits(byte[] bytes, int bits, GenSource.Tuple tuple) {
+			var remainingBits = bits;
+			for (int i = 0; remainingBits > 0; i++) {
+				short bitsToFill = remainingBits >= 8 ? 8 : (short) remainingBits;
+				var maxExcluded = 2 << (bitsToFill - 1);
+				byte b = (byte) tuple.nextValue().choice().choose(maxExcluded);
+				bytes[i] = b;
+				remainingBits -= bitsToFill;
+			}
+		}
+
 	}
 
 	@Group
