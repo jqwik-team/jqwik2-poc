@@ -15,9 +15,9 @@ import static org.assertj.core.api.Assertions.*;
 class BigIntegerGeneratorTests {
 
 	@Group
-	class DevelopAlgorithm {
+	class UniformPositiveBigIntegers {
 
-		@Example
+		// @Example
 		void statisticalDistributionOfGeneratedBigDecimals() {
 
 			GenSource source = new RandomGenSource();
@@ -63,11 +63,28 @@ class BigIntegerGeneratorTests {
 
 				BigInteger value = randomBigInt(max, recorder);
 
-				System.out.println("value=" + value);
+				// System.out.println("value=" + value);
 
 				// assert that value can be regenerated
 				var regenerated = randomBigInt(max, RecordedSource.of(recorder.recording()));
 				assertThat(value).isEqualTo(regenerated);
+			}
+		}
+
+		@Example
+		void shrinkBigDecimals() {
+
+			for (int i = 0; i < 10; i++) {
+				GenRecorder recorder = new GenRecorder(new RandomGenSource());
+				BigInteger value = randomBigInt(BigInteger.valueOf(1_000_000_000_000L), recorder);
+				// System.out.println("value=" + value);
+
+				recorder.recording().shrink().forEach(shrunk -> {
+					// System.out.println(shrunk);
+					var x = randomBigInt(BigInteger.valueOf(1_000_000_000_000L), RecordedSource.of(shrunk));
+					assertThat(x).isLessThan(value);
+					// System.out.println(x);
+				});
 			}
 		}
 
