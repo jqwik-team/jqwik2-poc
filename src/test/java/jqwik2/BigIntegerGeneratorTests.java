@@ -29,7 +29,7 @@ class BigIntegerGeneratorTests {
 			Map<Integer, Integer> countLength = new HashMap<>();
 
 			for (int i = 0; i < 10000; i++) {
-				BigInteger value = randomBigInt(max, source);
+				BigInteger value = new BigIntegerGenerationSupport(source).choosePositiveBigInteger(max);
 
 				// count all digits
 				for (char c : value.toString().toCharArray()) {
@@ -61,12 +61,13 @@ class BigIntegerGeneratorTests {
 			for (int i = 0; i < 10; i++) {
 				var recorder = new GenRecorder(source);
 
-				BigInteger value = randomBigInt(max, recorder);
+				BigInteger value = new BigIntegerGenerationSupport(recorder).choosePositiveBigInteger(max);
 
 				// System.out.println("value=" + value);
 
 				// assert that value can be regenerated
-				var regenerated = randomBigInt(max, RecordedSource.of(recorder.recording()));
+				GenSource source1 = RecordedSource.of(recorder.recording());
+				var regenerated = new BigIntegerGenerationSupport(source1).choosePositiveBigInteger(max);
 				assertThat(value).isEqualTo(regenerated);
 			}
 		}
@@ -74,45 +75,20 @@ class BigIntegerGeneratorTests {
 		@Example
 		void shrinkBigDecimals() {
 
+			var max = BigInteger.valueOf(1_000_000_000_000L);
+
 			for (int i = 0; i < 10; i++) {
 				GenRecorder recorder = new GenRecorder(new RandomGenSource());
-				BigInteger value = randomBigInt(BigInteger.valueOf(1_000_000_000_000L), recorder);
+				BigInteger value = new BigIntegerGenerationSupport(recorder).choosePositiveBigInteger(max);
 				// System.out.println("value=" + value);
 
 				recorder.recording().shrink().forEach(shrunk -> {
 					// System.out.println(shrunk);
-					var x = randomBigInt(BigInteger.valueOf(1_000_000_000_000L), RecordedSource.of(shrunk));
+					GenSource source = RecordedSource.of(shrunk);
+					var x = new BigIntegerGenerationSupport(source).choosePositiveBigInteger(max);
 					assertThat(x).isLessThan(value);
 					// System.out.println(x);
 				});
-			}
-		}
-
-		private BigInteger randomBigInt(BigInteger max, GenSource source) {
-			var numBits = max.bitLength();
-
-			int bytes = (int) (((long) numBits + 7) / 8);
-			byte[] magnitude = new byte[bytes];
-
-			while (true) {
-				var tuple = source.tuple();
-				fillBits(magnitude, numBits, tuple);
-				int signum = 1;
-				BigInteger value = new BigInteger(signum, magnitude);
-				if (value.compareTo(max) <= 0) {
-					return value;
-				}
-			}
-		}
-
-		private void fillBits(byte[] bytes, int bits, GenSource.Tuple tuple) {
-			var remainingBits = bits;
-			for (int i = 0; remainingBits > 0; i++) {
-				short bitsToFill = remainingBits >= 8 ? 8 : (short) remainingBits;
-				var maxExcluded = 2 << (bitsToFill - 1);
-				byte b = (byte) tuple.nextValue().choice().choose(maxExcluded);
-				bytes[i] = b;
-				remainingBits -= bitsToFill;
 			}
 		}
 
