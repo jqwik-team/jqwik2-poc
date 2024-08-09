@@ -45,6 +45,10 @@ public interface Arbitrary<T> {
 		return () -> Arbitrary.this.generator().map(mapper);
 	}
 
+	default <T> Arbitrary<T> filter(Predicate<T> filter) {
+		throw new UnsupportedOperationException("Not yet implemented");
+	}
+
 	default <R> Arbitrary<R> flatMap(Function<T, Arbitrary<R>> mapper) {
 		return () -> Arbitrary.this.generator().flatMap(t -> mapper.apply(t).generator());
 	}

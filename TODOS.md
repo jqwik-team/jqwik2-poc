@@ -1,3 +1,5 @@
+- Arbitrary.filter()
+
 - Reporting
     - run time in result section
     - Report differences between sample values and regenerated values
